@@ -1,0 +1,75 @@
+{
+  "piece": {
+    "title": "Light on Still Water",
+    "theme": "Open Sky",
+    "tempo": 60,
+    "notes": "F Lydian companion piece to Still Cove. Slower and more luminous. The raised 4th (I-II Lydian shimmer) is the signature. Counterpoint only in rise section. Not yet tested in Logic — try Still Cove instrument palette first as a starting point.",
+    "logic_session": null,
+    "logic_instruments": {
+      "suggested_track_1_harmony": {
+        "plugin": "JUP-8000 V or Pigments",
+        "notes": "F Lydian wants something brighter than D Dorian. Try Juno-106 V or Solina V for shimmer."
+      },
+      "suggested_track_2_melody": {
+        "plugin": "Pigments or CMI V",
+        "notes": "Vibraphone or mallet patch suits the floating Lydian character. A Place to Rest also worth trying."
+      },
+      "suggested_track_3_bass": {
+        "plugin": "Mini Moog V4 or JUP-8000 V",
+        "notes": "Softer than Trance Bass. Walking bass in peak section needs clear note definition."
+      },
+      "suggested_track_4_counterpoint": {
+        "plugin": "Solina V or String Studio",
+        "notes": "Strings for rise section counterpoint only (bars 9-20). Sits below melody."
+      }
+    },
+    "sections": [
+      {
+        "name": "dawn",
+        "bars": 8,
+        "progression": ["I", "II", "I", "II"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "notes": "Pure Lydian shimmer. I-II establishes the raised 4th floating quality immediately."
+      },
+      {
+        "name": "rise",
+        "bars": 12,
+        "progression": ["I", "II", "VII", "I"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 55
+        },
+        "notes": "Emotional center. Counterpoint strings enter here."
+      },
+      {
+        "name": "peak",
+        "bars": 10,
+        "progression": ["I", "V", "II", "VII", "I"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "notes": "Most harmonic motion. Walking bass + develop melody + full voicings."
+      },
+      {
+        "name": "dissolve",
+        "bars": 8,
+        "progression": ["I", "II", "I"],
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "notes": "Returns to opening shimmer. Generative melody wanders over Lydian I-II drone."
+      }
+    ]
+  }
+}

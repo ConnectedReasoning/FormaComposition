@@ -1,0 +1,74 @@
+{
+  "piece": {
+    "title": "Still Cove",
+    "theme": "Evening Water",
+    "tempo": 68,
+    "notes": "First successful Intervals Engine piece. Unexpectedly cinematic and techno-futuristic rather than pure ambient — emerged from instrument choices against the D Dorian MIDI skeleton. A keeper.",
+    "logic_session": "still_cove_v1.logicx",
+    "logic_instruments": {
+      "track_1_harmony": {
+        "plugin": "JUP-8000 V",
+        "preset": "Trance Bass",
+        "channel": 1,
+        "notes": "Sawtooth OSC1 into resonant filter. Filter envelope gives unexpected techno pulse on the pedal bass. Do NOT fix — this is the sound. Pull cutoff down slightly if too aggressive."
+      },
+      "track_2_melody": {
+        "plugin": "Pigments",
+        "preset": "A Place to Rest",
+        "channel": 2,
+        "notes": "Wavetable + Sample engine with morph. Long release. Vocal ahh sits deep in baritone. Perfect for harmony track — chords blur together beautifully with reverb tail."
+      },
+      "track_3_bass": {
+        "plugin": "JUP-8000 V",
+        "preset": "Overcast",
+        "channel": 3,
+        "notes": "Supersaw with detune + tape echo FX. Sparse melody notes with delay trailing off — ambient guitar shimmer. The tape echo delay should be synced to 68 BPM (882ms quarter note)."
+      },
+      "track_4_counterpoint": {
+        "plugin": "Mini Moog V4",
+        "preset": "Choir Pad",
+        "channel": 4,
+        "notes": "Three oscillators, unison on, long attack/release, noise in mixer. Slow attack swells in underneath. Track 4 is a duplicate of harmony track routed to Moog for pad wash in low-mid bed."
+      }
+    },
+    "sections": [
+      {
+        "name": "opening",
+        "bars": 8,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        }
+      },
+      {
+        "name": "swell",
+        "bars": 12,
+        "progression": ["i", "III", "VII", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        }
+      },
+      {
+        "name": "release",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out"
+      }
+    ]
+  }
+}
