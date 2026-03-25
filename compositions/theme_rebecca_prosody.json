@@ -1,0 +1,16 @@
+{
+  "theme": {
+    "name": "Rebecca Prosody",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": { "min": 48, "max": 66 },
+    "phrase": "Rebecca",
+    "palette": {
+      "harmony": "strings",
+      "melody": "warm_pad",
+      "bass": "cello",
+      "counterpoint": "strings"
+    },
+    "notes": "Same as Rebecca but using prosody to generate motifs from the phrase rather than a hand-crafted interval sequence. Each section gets a unique motif shaped by its arc, melody behavior, and density — the word 'Rebecca' is re-sung differently in each emotional context."
+  }
+}

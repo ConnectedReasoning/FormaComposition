@@ -8,10 +8,11 @@ and writes a multi-track MIDI file.
 
 Track layout:
   Track 0 — tempo / time signature metadata
-  Track 1 — Harmony  (ch 0)
-  Track 2 — Bass     (ch 1)
-  Track 3 — Melody   (ch 2)
-  Track 4 — Counterpoint (ch 3, optional)
+  Track 1 — Melody   (ch 0)
+  Track 2 — Counterpoint (ch 1, optional)
+  Track 3 — Harmony  (ch 2)
+  Track 4 — Bass     (ch 3)
+
 
 No GM program_change messages are written. Assign instruments
 in your DAW (Logic Pro + Arturia V Collection).
@@ -30,7 +31,8 @@ from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import generate_melody_for_progression, MelodyNote
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
 from intervals.music.rhythm   import apply_velocity_arc
-from intervals.music.motif    import from_dict as motif_from_dict, Motif
+from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
+from intervals.music.prosody  import phrase_to_motif
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -240,7 +242,6 @@ def generate_section(
     key          = theme["key"]
     mode         = theme["mode"]
     motif_def    = theme.get("motif")
-    motif        = motif_from_dict(motif_def) if motif_def else None
 
     progression  = section["progression"]
     bars         = section.get("bars", 8)
@@ -254,6 +255,22 @@ def generate_section(
 
     # Resolve chords
     chords = resolve_progression(progression, key, mode, density=density)
+
+    # Resolve motif: explicit motif dict takes precedence, then prosody phrase
+    if motif_def is None and theme.get("phrase"):
+        # Generate a section-aware motif from the prosody phrase.
+        # Uses the first chord of the progression for harmonic context
+        # and the section's arc/melody/density for tension profiling.
+        prosody_motif = phrase_to_motif(
+            theme["phrase"],
+            name=theme.get("name", "prosody").lower().replace(" ", "_"),
+            section=section,
+            chord=progression[0],
+            key=key,
+            mode=mode,
+            seed=42 + seed_offset,
+        )
+        motif_def = motif_to_dict(prosody_motif)
 
     # Generate bass
     bass_notes = generate_bass(
@@ -383,6 +400,13 @@ def generate_piece(
         piece_name=piece.get("title", "Intervals Piece")
     ))
 
+    # Melody track
+    mid.tracks.append(build_melody_track(all_melody_notes))
+
+    # Counterpoint track (only if any sections used it)
+    if all_cp_notes:
+        mid.tracks.append(build_counterpoint_track(all_cp_notes))
+
     # Harmony track
     harmony_track = MidiTrack()
     harmony_track.append(MetaMessage("track_name", name=TRACK_NAME_HARMONY, time=0))
@@ -391,13 +415,6 @@ def generate_piece(
 
     # Bass track
     mid.tracks.append(build_bass_track(all_bass_notes))
-
-    # Melody track
-    mid.tracks.append(build_melody_track(all_melody_notes))
-
-    # Counterpoint track (only if any sections used it)
-    if all_cp_notes:
-        mid.tracks.append(build_counterpoint_track(all_cp_notes))
 
     # Write file
     output_path = str(Path(output_path).with_suffix(".mid"))
