@@ -258,8 +258,13 @@ def generate_section(
     swing        = section.get("swing", 0.0)   # 0.0 = straight
     humanize     = section.get("humanize", 0.0) # 0.0 = robotic
 
-    # Distribute bars evenly across chords
-    bars_per_chord = bars / len(progression)
+    # Per-chord bar durations: explicit list or even distribution
+    chord_bars = section.get("chord_bars")
+    if chord_bars is not None:
+        bars_list = [float(b) for b in chord_bars]
+    else:
+        even = bars / len(progression)
+        bars_list = [even] * len(progression)
 
     # Resolve chords
     chords = resolve_progression(progression, key, mode, density=density)
@@ -284,7 +289,7 @@ def generate_section(
     bass_notes = generate_bass(
         chords,
         style=bass_style,
-        bars_per_chord=bars_per_chord,
+        bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
         density=density,
     )
@@ -294,7 +299,7 @@ def generate_section(
         chords, key, mode,
         behavior=melody_beh,
         density=density,
-        bars_per_chord=bars_per_chord,
+        bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
         motif=motif_def,
         groove=groove,
@@ -304,7 +309,7 @@ def generate_section(
     )
 
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section, groove, swing, humanize
+    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section
 
 
 # ---------------------------------------------------------------------------
@@ -342,8 +347,20 @@ def generate_piece(
     global_beat = 0.0
 
     for i, section in enumerate(sections):
-        chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section_dict, groove, swing, humanize = \
+        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict = \
             generate_section(section, theme, seed_offset=i * 10)
+
+        # Section-level rhythm defaults (used by melody, bass)
+        groove   = section_dict.get("groove")
+        swing    = section_dict.get("swing", 0.0)
+        humanize = section_dict.get("humanize", 0.0)
+
+        # Harmony-specific rhythm: independent from melody when specified
+        hr = section_dict.get("harmony_rhythm", {})
+        h_density  = hr.get("density", density)
+        h_groove   = hr.get("groove", groove)
+        h_swing    = hr.get("swing", swing)
+        h_humanize = hr.get("humanize", humanize)
 
         # Counterpoint (optional — only if section defines it)
         cp_def = section_dict.get("counterpoint")
@@ -363,20 +380,19 @@ def generate_piece(
                 cn.start_beat += global_beat
             all_cp_notes.extend(cp_notes)
 
-        # Harmony events
+        # Harmony events — uses harmony-specific rhythm profile
         from intervals.music.rhythm import get_pattern, apply_velocity_arc, apply_swing, apply_humanize
         beat_offset_local = 0.0
-        total_per_chord = bars_per_chord * beats_per_bar
 
-        for chord in chords:
-            rhythm_events = get_pattern(total_per_chord, density=density,
-                                        voice_type="chord", groove=groove,
+        for ci, chord in enumerate(chords):
+            total_per_chord = bars_list[ci] * beats_per_bar
+            rhythm_events = get_pattern(total_per_chord, density=h_density,
+                                        voice_type="chord", groove=h_groove,
                                         beats_per_bar=beats_per_bar)
-            # Apply swing and humanize to harmony rhythm
-            if swing and swing > 0:
-                rhythm_events = apply_swing(rhythm_events, swing_ratio=swing)
-            if humanize and humanize > 0:
-                rhythm_events = apply_humanize(rhythm_events, amount=humanize,
+            if h_swing and h_swing > 0:
+                rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
+            if h_humanize and h_humanize > 0:
+                rhythm_events = apply_humanize(rhythm_events, amount=h_humanize,
                                                seed=42 + i * 10)
 
             arc = section.get("arc", "swell")

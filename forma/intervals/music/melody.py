@@ -454,7 +454,7 @@ def generate_melody_for_progression(
     mode: str,
     behavior: str = "generative",
     density: str = "medium",
-    bars_per_chord: float = 2.0,
+    bars_per_chord=2.0,
     beats_per_bar: int = 4,
     base_velocity: int = 72,
     motif: Optional[dict] = None,
@@ -467,15 +467,24 @@ def generate_melody_for_progression(
     Generate a continuous melodic line across a full chord progression.
     Maintains note continuity between chords.
 
+    Args:
+        bars_per_chord: Float (uniform) or list[float] (per-chord durations).
+
     Returns:
         Flat list of MelodyNote spanning the entire progression
     """
+    # Normalize to list
+    if isinstance(bars_per_chord, (int, float)):
+        bpc_list = [float(bars_per_chord)] * len(chords)
+    else:
+        bpc_list = list(bars_per_chord)
+
     all_notes = []
     prev_note = None
-    total_beats = bars_per_chord * beats_per_bar
     beat_offset = 0.0
 
     for i, chord in enumerate(chords):
+        total_beats = bpc_list[i] * beats_per_bar
         chord_seed = (seed + i) if seed is not None else None
         notes = generate_melody(
             chord, key, mode,

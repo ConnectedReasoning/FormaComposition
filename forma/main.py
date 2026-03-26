@@ -79,6 +79,21 @@ def validate_piece(piece: dict, theme: dict) -> list:
             errors.append(f"{prefix}: progression is required")
         if "bars" not in section:
             errors.append(f"{prefix}: bars is required")
+        chord_bars = section.get("chord_bars")
+        if chord_bars is not None:
+            prog = section.get("progression", [])
+            if len(chord_bars) != len(prog):
+                errors.append(
+                    f"{prefix}: chord_bars has {len(chord_bars)} entries "
+                    f"but progression has {len(prog)} chords — must match"
+                )
+            bars_total = section.get("bars", 0)
+            cb_sum = sum(chord_bars)
+            if abs(cb_sum - bars_total) > 0.01:
+                errors.append(
+                    f"{prefix}: chord_bars sum ({cb_sum}) does not match "
+                    f"bars ({bars_total}) (proceeding anyway)"
+                )
         if section.get("density") and section["density"] not in VALID_DENSITIES:
             errors.append(f"{prefix}: density '{section['density']}' invalid. Valid: {VALID_DENSITIES}")
         if section.get("melody") and section["melody"] not in VALID_BEHAVIORS:
@@ -95,6 +110,19 @@ def validate_piece(piece: dict, theme: dict) -> list:
         humanize = section.get("humanize")
         if humanize is not None and not (0.0 <= humanize <= 1.0):
             errors.append(f"{prefix}: humanize {humanize} out of range. Valid: 0.0–1.0")
+        hr = section.get("harmony_rhythm")
+        if hr and isinstance(hr, dict):
+            hp = f"{prefix}.harmony_rhythm"
+            if hr.get("density") and hr["density"] not in VALID_DENSITIES:
+                errors.append(f"{hp}: density '{hr['density']}' invalid. Valid: {VALID_DENSITIES}")
+            if hr.get("groove") and hr["groove"] not in VALID_GROOVES:
+                errors.append(f"{hp}: groove '{hr['groove']}' invalid. Valid: {VALID_GROOVES}")
+            hr_swing = hr.get("swing")
+            if hr_swing is not None and not (0.0 <= hr_swing <= 0.75):
+                errors.append(f"{hp}: swing {hr_swing} out of range. Valid: 0.0–0.75")
+            hr_humanize = hr.get("humanize")
+            if hr_humanize is not None and not (0.0 <= hr_humanize <= 1.0):
+                errors.append(f"{hp}: humanize {hr_humanize} out of range. Valid: 0.0–1.0")
 
     return errors
 
@@ -143,6 +171,12 @@ def display_info(theme: dict, piece: dict) -> None:
         bars = s.get("bars", 0)
         total_bars += bars
         prog = " → ".join(s.get("progression", []))
+        chord_bars = s.get("chord_bars")
+        if chord_bars:
+            # Show progression with per-chord bars: I(4) → V(2) → vi(2) → IV(4)
+            prog_parts = s.get("progression", [])
+            prog = " → ".join(f"{c}({int(b) if b == int(b) else b})"
+                               for c, b in zip(prog_parts, chord_bars))
         groove_info = ""
         if s.get("groove"):
             parts = [s["groove"]]
@@ -154,6 +188,18 @@ def display_info(theme: dict, piece: dict) -> None:
         print(f"    [{s.get('name', '?'):12s}]  {bars:2d} bars  "
               f"{s.get('density','?'):6s}  {s.get('melody','?'):11s}  "
               f"bass={s.get('bass_style','?')}{groove_info}  [{prog}]")
+        hr = s.get("harmony_rhythm")
+        if hr:
+            hr_parts = []
+            if hr.get("density"):
+                hr_parts.append(f"density={hr['density']}")
+            if hr.get("groove"):
+                hr_parts.append(f"groove={hr['groove']}")
+            if hr.get("swing"):
+                hr_parts.append(f"swing={hr['swing']}")
+            if hr.get("humanize"):
+                hr_parts.append(f"humanize={hr['humanize']}")
+            print(f"      harmony_rhythm: {', '.join(hr_parts)}")
 
     total_beats   = total_bars * beats_per_bar
     total_seconds = total_beats * (60.0 / bpm)

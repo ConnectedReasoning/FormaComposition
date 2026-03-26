@@ -1,0 +1,53 @@
+{
+  "piece": {
+    "title": "Harmony Independence Test",
+    "tempo": 72,
+    "sections": [
+      {
+        "name": "sustained_over_motion",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "groove": "syncopated",
+        "swing": 0.62,
+        "humanize": 0.3,
+        "harmony_rhythm": {
+          "density": "sparse",
+          "groove": "halftime",
+          "swing": 0.0,
+          "humanize": 0.1
+        },
+        "notes": "Syncopated melody with swing over slow, sustained half-time chords. The voices should breathe independently."
+      },
+      {
+        "name": "chords_drive_melody_floats",
+        "bars": 16,
+        "progression": ["i", "III", "VII", "iv"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "halftime",
+        "harmony_rhythm": {
+          "density": "full",
+          "groove": "driving"
+        },
+        "notes": "Flip: driving eighth-note chords underneath a spacious half-time melody. Chords push while melody floats."
+      },
+      {
+        "name": "unison_lockstep",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "groove": "straight",
+        "notes": "No harmony_rhythm override - melody and harmony lock together on purpose for the ending. Contrast with the independence before it."
+      }
+    ]
+  }
+}

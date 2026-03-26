@@ -105,7 +105,7 @@ def interpolate_steps(start: int, end: int, steps: int) -> list[int]:
 
 def style_root_only(
     chords: list[VoicedChord],
-    bars_per_chord: float,
+    bars_per_chord: list[float],
     beats_per_bar: int = 4,
     density: str = "sparse",
     velocity: int = 70,
@@ -113,8 +113,8 @@ def style_root_only(
     """One root note per chord, held for full duration."""
     notes = []
     beat = 0.0
-    dur = bars_per_chord * beats_per_bar
-    for chord in chords:
+    for i, chord in enumerate(chords):
+        dur = bars_per_chord[i] * beats_per_bar
         root = bass_root(chord)
         notes.append(BassNote(root, beat, dur, velocity))
         beat += dur
@@ -123,7 +123,7 @@ def style_root_only(
 
 def style_root_fifth(
     chords: list[VoicedChord],
-    bars_per_chord: float,
+    bars_per_chord: list[float],
     beats_per_bar: int = 4,
     density: str = "medium",
     velocity: int = 70,
@@ -131,10 +131,10 @@ def style_root_fifth(
     """Alternates root and fifth within each chord's duration."""
     notes = []
     beat = 0.0
-    total_beats = bars_per_chord * beats_per_bar
-    half = total_beats / 2.0
 
-    for chord in chords:
+    for i, chord in enumerate(chords):
+        total_beats = bars_per_chord[i] * beats_per_bar
+        half = total_beats / 2.0
         root = bass_root(chord)
         fifth = bass_fifth(chord)
         notes.append(BassNote(root, beat, half, velocity))
@@ -148,7 +148,7 @@ def style_root_fifth(
 
 def style_walking(
     chords: list[VoicedChord],
-    bars_per_chord: float,
+    bars_per_chord: list[float],
     beats_per_bar: int = 4,
     density: str = "medium",
     velocity: int = 72,
@@ -159,10 +159,10 @@ def style_walking(
     """
     notes = []
     beat = 0.0
-    total_beats = bars_per_chord * beats_per_bar
     beat_dur = 1.0  # quarter note steps
 
     for i, chord in enumerate(chords):
+        total_beats = bars_per_chord[i] * beats_per_bar
         root = bass_root(chord)
         next_root = bass_root(chords[(i + 1) % len(chords)])
         num_beats = int(total_beats)
@@ -177,7 +177,7 @@ def style_walking(
 
 def style_pulse(
     chords: list[VoicedChord],
-    bars_per_chord: float,
+    bars_per_chord: list[float],
     beats_per_bar: int = 4,
     density: str = "full",
     velocity: int = 75,
@@ -186,9 +186,9 @@ def style_pulse(
     """Repeated root notes on every subdivision. Rhythmic, driving."""
     notes = []
     beat = 0.0
-    total_beats = bars_per_chord * beats_per_bar
 
-    for chord in chords:
+    for i, chord in enumerate(chords):
+        total_beats = bars_per_chord[i] * beats_per_bar
         root = bass_root(chord)
         t = 0.0
         while t < total_beats - 0.01:
@@ -202,7 +202,7 @@ def style_pulse(
 
 def style_pedal(
     chords: list[VoicedChord],
-    bars_per_chord: float,
+    bars_per_chord: list[float],
     beats_per_bar: int = 4,
     density: str = "sparse",
     velocity: int = 65,
@@ -214,12 +214,12 @@ def style_pedal(
     """
     notes = []
     beat = 0.0
-    total_beats = bars_per_chord * beats_per_bar
 
     if tonic_midi is None:
         tonic_midi = bass_root(chords[0])
 
-    for chord in chords:
+    for i, chord in enumerate(chords):
+        total_beats = bars_per_chord[i] * beats_per_bar
         notes.append(BassNote(tonic_midi, beat, total_beats, velocity))
         beat += total_beats
     return notes
@@ -241,7 +241,7 @@ BASS_STYLES = {
 def generate_bass(
     chords: list[VoicedChord],
     style: str = "root_fifth",
-    bars_per_chord: float = 2.0,
+    bars_per_chord=2.0,
     beats_per_bar: int = 4,
     density: str = "medium",
     velocity: int = 70,
@@ -253,7 +253,7 @@ def generate_bass(
     Args:
         chords:         List of VoicedChord from harmony.resolve_progression()
         style:          Bass style name — root_only | root_fifth | walking | pulse | pedal
-        bars_per_chord: How many bars each chord lasts
+        bars_per_chord: How many bars each chord lasts. Float (uniform) or list[float] (per-chord).
         beats_per_bar:  Time signature numerator (default 4)
         density:        "sparse" | "medium" | "full" — affects rhythm and activity
         velocity:       Base MIDI velocity
@@ -264,6 +264,10 @@ def generate_bass(
     """
     if style not in BASS_STYLES:
         raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
+
+    # Normalize to list
+    if isinstance(bars_per_chord, (int, float)):
+        bars_per_chord = [float(bars_per_chord)] * len(chords)
 
     fn = BASS_STYLES[style]
     return fn(chords, bars_per_chord, beats_per_bar, density, velocity, **kwargs)
