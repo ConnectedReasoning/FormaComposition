@@ -21,7 +21,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
-from intervals.music.rhythm import RhythmEvent, get_pattern
+from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, apply_humanize
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -394,6 +394,10 @@ def generate_melody(
     motif: Optional[dict] = None,
     octave_bottom: int = MELODY_OCTAVE_BOTTOM,
     octave_top: int = MELODY_OCTAVE_TOP,
+    groove: Optional[str] = None,
+    beats_per_bar: int = 4,
+    swing: float = 0.0,
+    humanize: float = 0.0,
     seed: Optional[int] = None,
 ) -> list[MelodyNote]:
     """
@@ -411,6 +415,10 @@ def generate_melody(
         motif:          Motif dict from theme.json (for "develop" behavior)
         octave_bottom:  Lowest melody MIDI note
         octave_top:     Highest melody MIDI note
+        groove:         Optional groove name (overrides density grid)
+        beats_per_bar:  Beats per bar (for groove tiling)
+        swing:          Swing ratio (0.0=straight, 0.67=triplet)
+        humanize:       Humanization amount (0.0–1.0)
         seed:           Random seed
 
     Returns:
@@ -421,7 +429,14 @@ def generate_melody(
 
     scale_tones = get_scale_tones(key, mode, octave_bottom, octave_top)
     chord_tones = get_chord_tones_in_register(chord, octave_bottom, octave_top)
-    rhythm_events = get_pattern(total_beats, density=density, voice_type="melody", seed=seed)
+    rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
+                                groove=groove, beats_per_bar=beats_per_bar, seed=seed)
+
+    # Apply swing and humanize to melody rhythm
+    if swing and swing > 0:
+        rhythm_events = apply_swing(rhythm_events, swing_ratio=swing)
+    if humanize and humanize > 0:
+        rhythm_events = apply_humanize(rhythm_events, amount=humanize, seed=seed)
 
     fn = BEHAVIOR_GENERATORS[behavior]
 
@@ -443,6 +458,9 @@ def generate_melody_for_progression(
     beats_per_bar: int = 4,
     base_velocity: int = 72,
     motif: Optional[dict] = None,
+    groove: Optional[str] = None,
+    swing: float = 0.0,
+    humanize: float = 0.0,
     seed: Optional[int] = None,
 ) -> list[MelodyNote]:
     """
@@ -467,6 +485,10 @@ def generate_melody_for_progression(
             base_velocity=base_velocity,
             prev_note=prev_note,
             motif=motif,
+            groove=groove,
+            beats_per_bar=beats_per_bar,
+            swing=swing,
+            humanize=humanize,
             seed=chord_seed,
         )
         # Offset beat positions

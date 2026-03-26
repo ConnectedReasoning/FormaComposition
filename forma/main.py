@@ -20,6 +20,7 @@ from typing import Optional
 from intervals.core.generator import generate_piece, load_theme, load_piece, bpm_to_tempo, PPQ
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.prosody import phrase_to_motif, analyze_phrase, PRONOUNCING_AVAILABLE
+from intervals.music.rhythm import VALID_GROOVES
 
 # ---------------------------------------------------------------------------
 # Validation
@@ -86,6 +87,14 @@ def validate_piece(piece: dict, theme: dict) -> list:
             errors.append(f"{prefix}: bass_style '{section['bass_style']}' invalid. Valid: {VALID_BASS_STYLES}")
         if section.get("arc") and section["arc"] not in VALID_ARCS:
             errors.append(f"{prefix}: arc '{section['arc']}' invalid. Valid: {VALID_ARCS}")
+        if section.get("groove") and section["groove"] not in VALID_GROOVES:
+            errors.append(f"{prefix}: groove '{section['groove']}' invalid. Valid: {VALID_GROOVES}")
+        swing = section.get("swing")
+        if swing is not None and not (0.0 <= swing <= 0.75):
+            errors.append(f"{prefix}: swing {swing} out of range. Valid: 0.0–0.75")
+        humanize = section.get("humanize")
+        if humanize is not None and not (0.0 <= humanize <= 1.0):
+            errors.append(f"{prefix}: humanize {humanize} out of range. Valid: 0.0–1.0")
 
     return errors
 
@@ -134,9 +143,17 @@ def display_info(theme: dict, piece: dict) -> None:
         bars = s.get("bars", 0)
         total_bars += bars
         prog = " → ".join(s.get("progression", []))
+        groove_info = ""
+        if s.get("groove"):
+            parts = [s["groove"]]
+            if s.get("swing"):
+                parts.append(f"swing={s['swing']}")
+            if s.get("humanize"):
+                parts.append(f"humanize={s['humanize']}")
+            groove_info = f"  groove={','.join(parts)}"
         print(f"    [{s.get('name', '?'):12s}]  {bars:2d} bars  "
               f"{s.get('density','?'):6s}  {s.get('melody','?'):11s}  "
-              f"bass={s.get('bass_style','?')}  [{prog}]")
+              f"bass={s.get('bass_style','?')}{groove_info}  [{prog}]")
 
     total_beats   = total_bars * beats_per_bar
     total_seconds = total_beats * (60.0 / bpm)

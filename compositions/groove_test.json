@@ -1,0 +1,55 @@
+{
+  "piece": {
+    "title": "Groove Test — Downtempo",
+    "tempo": 85,
+    "sections": [
+      {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "groove": "halftime",
+        "swing": 0.0,
+        "humanize": 0.2
+      },
+      {
+        "name": "build",
+        "bars": 16,
+        "progression": ["i", "III", "VII", "iv"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "groove": "syncopated",
+        "swing": 0.62,
+        "humanize": 0.35
+      },
+      {
+        "name": "drop",
+        "bars": 16,
+        "progression": ["i", "VII", "III", "iv", "v"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "broken",
+        "swing": 0.0,
+        "humanize": 0.3
+      },
+      {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "groove": "halftime",
+        "humanize": 0.15
+      }
+    ]
+  }
+}

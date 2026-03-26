@@ -70,6 +70,11 @@ def bpm_to_tempo(bpm: float) -> int:
 # Track builders
 # ---------------------------------------------------------------------------
 
+def _midi_safe(text: str) -> str:
+    """Sanitize text for MIDI meta messages (latin-1 only)."""
+    return text.encode("latin-1", errors="replace").decode("latin-1")
+
+
 def build_metadata_track(
     bpm: float,
     time_sig_numerator: int = 4,
@@ -78,7 +83,7 @@ def build_metadata_track(
 ) -> MidiTrack:
     """Build track 0 with tempo and time signature."""
     track = MidiTrack()
-    track.append(MetaMessage("track_name", name=piece_name, time=0))
+    track.append(MetaMessage("track_name", name=_midi_safe(piece_name), time=0))
     track.append(MetaMessage(
         "time_signature",
         numerator=time_sig_numerator,
@@ -249,6 +254,9 @@ def generate_section(
     melody_beh   = section.get("melody", "generative")
     bass_style   = section.get("bass_style", "root_fifth")
     beats_per_bar= section.get("beats_per_bar", 4)
+    groove       = section.get("groove")       # None = original grid behavior
+    swing        = section.get("swing", 0.0)   # 0.0 = straight
+    humanize     = section.get("humanize", 0.0) # 0.0 = robotic
 
     # Distribute bars evenly across chords
     bars_per_chord = bars / len(progression)
@@ -289,11 +297,14 @@ def generate_section(
         bars_per_chord=bars_per_chord,
         beats_per_bar=beats_per_bar,
         motif=motif_def,
+        groove=groove,
+        swing=swing,
+        humanize=humanize,
         seed=42 + seed_offset,
     )
 
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section
+    return chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section, groove, swing, humanize
 
 
 # ---------------------------------------------------------------------------
@@ -331,7 +342,7 @@ def generate_piece(
     global_beat = 0.0
 
     for i, section in enumerate(sections):
-        chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section_dict = \
+        chords, bass_notes, melody_notes, total_beats, bars_per_chord, beats_per_bar, density, section_dict, groove, swing, humanize = \
             generate_section(section, theme, seed_offset=i * 10)
 
         # Counterpoint (optional — only if section defines it)
@@ -353,12 +364,21 @@ def generate_piece(
             all_cp_notes.extend(cp_notes)
 
         # Harmony events
-        from intervals.music.rhythm import get_pattern, apply_velocity_arc
+        from intervals.music.rhythm import get_pattern, apply_velocity_arc, apply_swing, apply_humanize
         beat_offset_local = 0.0
         total_per_chord = bars_per_chord * beats_per_bar
 
         for chord in chords:
-            rhythm_events = get_pattern(total_per_chord, density=density, voice_type="chord")
+            rhythm_events = get_pattern(total_per_chord, density=density,
+                                        voice_type="chord", groove=groove,
+                                        beats_per_bar=beats_per_bar)
+            # Apply swing and humanize to harmony rhythm
+            if swing and swing > 0:
+                rhythm_events = apply_swing(rhythm_events, swing_ratio=swing)
+            if humanize and humanize > 0:
+                rhythm_events = apply_humanize(rhythm_events, amount=humanize,
+                                               seed=42 + i * 10)
+
             arc = section.get("arc", "swell")
             arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=65)
             for ev, vel in arced:
