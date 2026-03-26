@@ -29,7 +29,7 @@ from intervals.music.rhythm import VALID_GROOVES
 VALID_MODES       = ["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"]
 VALID_DENSITIES   = ["sparse", "medium", "full"]
 VALID_BEHAVIORS   = ["generative", "lyrical", "sparse", "develop"]
-VALID_BASS_STYLES = ["root_only", "root_fifth", "walking", "pulse", "pedal"]
+VALID_BASS_STYLES = ["root_only", "root_fifth", "walking", "steady", "melodic", "pulse", "pedal"]
 VALID_ARCS        = ["flat", "swell", "fade_in", "fade_out", "breath"]
 
 

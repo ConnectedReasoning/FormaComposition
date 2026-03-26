@@ -5,7 +5,12 @@ Generates bass lines from a resolved chord progression.
 Bass styles:
   root_only   — whole note root, one per chord. Minimal, drone-like.
   root_fifth  — alternates root and fifth. Classic new age / ambient.
-  walking     — stepwise movement between chord roots. More melodic.
+  walking     — scale-wise quarter notes: root on 1, chord tones on strong
+                beats, approach note into the next chord. Classic jazz/pop.
+  steady      — a short locked figure that repeats per chord. The bass IS
+                the groove. Cliff Williams, Adam Clayton.
+  melodic     — expressive line through scale tones with contour and leaps.
+                The bass is a second melody. Sting, Geddy Lee.
   pulse       — repeated root notes on the beat. Rhythmic, driving.
   pedal       — holds a single pedal tone (tonic) regardless of chord. Eno-ish.
 """
@@ -13,7 +18,7 @@ Bass styles:
 import random
 from dataclasses import dataclass, field
 from typing import Optional
-from intervals.music.harmony import VoicedChord, CHROMATIC
+from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -21,14 +26,6 @@ from intervals.music.harmony import VoicedChord, CHROMATIC
 
 BASS_OCTAVE_BOTTOM = 36   # C2
 BASS_OCTAVE_TOP    = 48   # C3
-
-# Density → rhythmic subdivision multiplier (in beats, assuming 4/4)
-# These are note durations in beats
-DENSITY_DURATIONS = {
-    "sparse": 4.0,    # whole note per chord change
-    "medium": 2.0,    # half note
-    "full":   1.0,    # quarter note
-}
 
 # ---------------------------------------------------------------------------
 # Data classes
@@ -38,7 +35,7 @@ DENSITY_DURATIONS = {
 class BassNote:
     """A single bass note with timing."""
     midi_note: int
-    start_beat: float       # beat position within the section
+    start_beat: float
     duration_beats: float
     velocity: int = 70
 
@@ -53,11 +50,8 @@ class BassNote:
 
 def bass_root(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> int:
     """Return the root note of a chord dropped into bass register."""
-    root_pc = chord.midi_notes[0] % 12  # pitch class of lowest voiced note
-    # Find root pitch class from chord root name
     root_pc = CHROMATIC.index(chord.root_name)
     note = octave_bottom + root_pc
-    # Nudge up an octave if too low
     while note < octave_bottom:
         note += 12
     while note > BASS_OCTAVE_TOP:
@@ -66,10 +60,9 @@ def bass_root(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> in
 
 
 def bass_fifth(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> Optional[int]:
-    """Return the fifth of the chord in bass register, or None if not present."""
+    """Return the fifth of the chord in bass register, or None."""
     if len(chord.midi_notes) < 3:
         return None
-    # Fifth is the third tone (index 2) in root-position chord
     fifth_pc = chord.midi_notes[2] % 12
     note = octave_bottom + fifth_pc
     while note < octave_bottom:
@@ -79,149 +72,359 @@ def bass_fifth(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> O
     return note
 
 
-def interpolate_steps(start: int, end: int, steps: int) -> list[int]:
+def bass_third(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> Optional[int]:
+    """Return the third of the chord in bass register."""
+    if len(chord.midi_notes) < 2:
+        return None
+    third_pc = chord.midi_notes[1] % 12
+    note = octave_bottom + third_pc
+    while note < octave_bottom:
+        note += 12
+    while note > BASS_OCTAVE_TOP:
+        note -= 12
+    return note
+
+
+def get_bass_scale_tones(key: str, mode: str) -> list[int]:
+    """All scale tones in the bass register, sorted."""
+    intervals = MODES[mode.lower()]
+    tones = []
+    for octave in range(1, 5):
+        root = key_to_midi_root(key, octave)
+        for interval in intervals:
+            n = root + interval
+            if BASS_OCTAVE_BOTTOM - 2 <= n <= BASS_OCTAVE_TOP + 2:
+                tones.append(n)
+    return sorted(set(tones))
+
+
+def nearest_scale_tone(note: int, scale_tones: list[int]) -> int:
+    """Return the closest scale tone to a given MIDI note."""
+    if not scale_tones:
+        return note
+    return min(scale_tones, key=lambda s: abs(s - note))
+
+
+def approach_note(target: int, scale_tones: list[int]) -> int:
     """
-    Generate a stepwise chromatic walk from start to end in `steps` notes.
-    Used for walking bass transitions.
+    Chromatic approach note to the target — half step above or below.
+    Prefers the approach that is NOT a scale tone (stronger pull).
     """
-    if steps <= 1:
-        return [start]
-    direction = 1 if end >= start else -1
-    total = abs(end - start)
-    step_size = max(1, total // steps)
-    notes = []
-    current = start
-    for i in range(steps):
-        notes.append(current)
-        if i < steps - 1:
-            current = min(end, current + step_size * direction) if direction > 0 \
-                      else max(end, current + step_size * direction)
-    return notes
+    above = target + 1
+    below = target - 1
+    above_in = above in scale_tones
+    below_in = below in scale_tones
+    if not below_in and below >= BASS_OCTAVE_BOTTOM:
+        return below
+    if not above_in and above <= BASS_OCTAVE_TOP:
+        return above
+    return below if below >= BASS_OCTAVE_BOTTOM else above
+
+
+def scale_neighbors(note: int, scale_tones: list[int], direction: int = 0) -> list[int]:
+    """Scale tones adjacent to note (within 4 semitones)."""
+    neighbors = []
+    for s in scale_tones:
+        dist = s - note
+        if dist == 0:
+            continue
+        if abs(dist) > 4:
+            continue
+        if direction > 0 and dist < 0:
+            continue
+        if direction < 0 and dist > 0:
+            continue
+        neighbors.append(s)
+    return sorted(neighbors, key=lambda s: abs(s - note))
 
 
 # ---------------------------------------------------------------------------
-# Bass style generators
+# Style: root_only
 # ---------------------------------------------------------------------------
 
-def style_root_only(
-    chords: list[VoicedChord],
-    bars_per_chord: list[float],
-    beats_per_bar: int = 4,
-    density: str = "sparse",
-    velocity: int = 70,
-) -> list[BassNote]:
+def style_root_only(chords, bars_per_chord, beats_per_bar=4, density="sparse",
+                    velocity=70, **kwargs):
     """One root note per chord, held for full duration."""
     notes = []
     beat = 0.0
     for i, chord in enumerate(chords):
         dur = bars_per_chord[i] * beats_per_bar
-        root = bass_root(chord)
-        notes.append(BassNote(root, beat, dur, velocity))
+        notes.append(BassNote(bass_root(chord), beat, dur, velocity))
         beat += dur
     return notes
 
 
-def style_root_fifth(
-    chords: list[VoicedChord],
-    bars_per_chord: list[float],
-    beats_per_bar: int = 4,
-    density: str = "medium",
-    velocity: int = 70,
-) -> list[BassNote]:
+# ---------------------------------------------------------------------------
+# Style: root_fifth
+# ---------------------------------------------------------------------------
+
+def style_root_fifth(chords, bars_per_chord, beats_per_bar=4, density="medium",
+                     velocity=70, **kwargs):
     """Alternates root and fifth within each chord's duration."""
     notes = []
     beat = 0.0
-
     for i, chord in enumerate(chords):
-        total_beats = bars_per_chord[i] * beats_per_bar
-        half = total_beats / 2.0
+        total = bars_per_chord[i] * beats_per_bar
+        half = total / 2.0
         root = bass_root(chord)
-        fifth = bass_fifth(chord)
+        fifth = bass_fifth(chord) or root
         notes.append(BassNote(root, beat, half, velocity))
-        if fifth:
-            notes.append(BassNote(fifth, beat + half, half, max(60, velocity - 8)))
-        else:
-            notes.append(BassNote(root, beat + half, half, max(60, velocity - 8)))
-        beat += total_beats
+        notes.append(BassNote(fifth, beat + half, half, max(60, velocity - 8)))
+        beat += total
     return notes
 
 
-def style_walking(
-    chords: list[VoicedChord],
-    bars_per_chord: list[float],
-    beats_per_bar: int = 4,
-    density: str = "medium",
-    velocity: int = 72,
-) -> list[BassNote]:
+# ---------------------------------------------------------------------------
+# Style: walking (rebuilt — scale-tone based)
+# ---------------------------------------------------------------------------
+
+def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
+                  velocity=72, key="C", mode="ionian", seed=None, **kwargs):
     """
-    Stepwise walk toward next chord's root.
-    Last beat of each chord walks toward the next chord's root.
+    Classic walking bass: quarter notes on scale tones.
+
+    Beat 1: root (strong).
+    Beat 3 (midpoint): fifth or third.
+    Other beats: scale-wise passing tones moving between anchors.
+    Last beat: chromatic approach note into next chord's root.
     """
+    if seed is not None:
+        random.seed(seed)
+
+    scale = get_bass_scale_tones(key, mode)
     notes = []
     beat = 0.0
-    beat_dur = 1.0  # quarter note steps
 
     for i, chord in enumerate(chords):
-        total_beats = bars_per_chord[i] * beats_per_bar
+        total = bars_per_chord[i] * beats_per_bar
+        num_beats = max(1, int(total))
+
         root = bass_root(chord)
+        fifth = bass_fifth(chord) or nearest_scale_tone(root + 7, scale)
+        third = bass_third(chord) or nearest_scale_tone(root + 4, scale)
         next_root = bass_root(chords[(i + 1) % len(chords)])
-        num_beats = int(total_beats)
 
-        walk = interpolate_steps(root, next_root, num_beats)
-        for j, note in enumerate(walk):
-            vel = velocity if j == 0 else max(58, velocity - 6)
-            notes.append(BassNote(note, beat + j * beat_dur, beat_dur, vel))
-        beat += total_beats
+        bar_notes = []
+        for j in range(num_beats):
+            is_last = (j == num_beats - 1) and (num_beats > 1)
+
+            if j == 0:
+                n = root
+            elif is_last:
+                n = approach_note(next_root, scale)
+            elif j % beats_per_bar == (beats_per_bar // 2):
+                n = random.choice([fifth, fifth, third])
+            else:
+                prev = bar_notes[-1] if bar_notes else root
+                nbrs = scale_neighbors(prev, scale)
+                if nbrs:
+                    target = fifth if j < num_beats // 2 else root
+                    toward = [s for s in nbrs if abs(s - target) < abs(prev - target)]
+                    n = random.choice(toward) if toward else random.choice(nbrs)
+                else:
+                    n = nearest_scale_tone(prev + random.choice([-2, -1, 1, 2]), scale)
+
+            vel = velocity if j % beats_per_bar == 0 else max(58, velocity - 6)
+            bar_notes.append(n)
+            notes.append(BassNote(n, beat + j * 1.0, 1.0, vel))
+
+        beat += total
     return notes
 
 
-def style_pulse(
-    chords: list[VoicedChord],
-    bars_per_chord: list[float],
-    beats_per_bar: int = 4,
-    density: str = "full",
-    velocity: int = 75,
-    subdivision: float = 1.0,  # 1.0 = quarter notes, 0.5 = eighth notes
-) -> list[BassNote]:
-    """Repeated root notes on every subdivision. Rhythmic, driving."""
+# ---------------------------------------------------------------------------
+# Style: steady (locked figure — Clayton, Williams)
+# ---------------------------------------------------------------------------
+
+STEADY_FIGURES = [
+    # Root-root-fifth-root: the AC/DC
+    [(0.0, "root", 1.0, 1.0), (1.0, "root", 1.0, 0.85),
+     (2.0, "fifth", 1.0, 0.90), (3.0, "root", 1.0, 0.80)],
+    # Root-fifth-octave-fifth: the U2
+    [(0.0, "root", 1.0, 1.0), (1.0, "fifth", 1.0, 0.85),
+     (2.0, "octave", 1.0, 0.90), (3.0, "fifth", 1.0, 0.80)],
+    # Root-rest-fifth-root: breathing room
+    [(0.0, "root", 1.5, 1.0), (2.0, "fifth", 1.0, 0.85),
+     (3.0, "root", 1.0, 0.80)],
+    # Root-root-root-approach: locked with lead-in
+    [(0.0, "root", 1.0, 1.0), (1.0, "root", 1.0, 0.75),
+     (2.0, "root", 1.0, 0.80), (3.0, "approach", 1.0, 0.90)],
+]
+
+
+def style_steady(chords, bars_per_chord, beats_per_bar=4, density="medium",
+                 velocity=70, key="C", mode="ionian", seed=None, **kwargs):
+    """
+    A locked bass figure that repeats per chord.
+    Picks one figure for the section and tiles it.
+    Last beat at chord boundaries becomes an approach note.
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    scale = get_bass_scale_tones(key, mode)
+    figure = random.choice(STEADY_FIGURES)
     notes = []
     beat = 0.0
 
     for i, chord in enumerate(chords):
-        total_beats = bars_per_chord[i] * beats_per_bar
+        total = bars_per_chord[i] * beats_per_bar
+        root = bass_root(chord)
+        fifth = bass_fifth(chord) or nearest_scale_tone(root + 7, scale)
+        octave = root + 12 if root + 12 <= BASS_OCTAVE_TOP + 2 else root
+        third = bass_third(chord) or nearest_scale_tone(root + 4, scale)
+        next_root = bass_root(chords[(i + 1) % len(chords)])
+        appr = approach_note(next_root, scale)
+
+        tone_map = {"root": root, "fifth": fifth, "third": third,
+                    "octave": octave, "approach": appr}
+
+        bar_offset = 0.0
+        while bar_offset < total - 0.01:
+            for slot_beat, func, dur, vel_scale in figure:
+                abs_beat = bar_offset + slot_beat
+                if abs_beat >= total - 0.01:
+                    break
+                is_last = (abs_beat + dur >= total - 0.01) and (i < len(chords) - 1)
+                n = appr if is_last and func != "approach" else tone_map.get(func, root)
+                actual_dur = min(dur, total - abs_beat)
+                notes.append(BassNote(n, beat + abs_beat, actual_dur, int(velocity * vel_scale)))
+            bar_offset += beats_per_bar
+
+        beat += total
+    return notes
+
+
+# ---------------------------------------------------------------------------
+# Style: melodic (expressive — Sting, Geddy Lee)
+# ---------------------------------------------------------------------------
+
+def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
+                  velocity=72, key="C", mode="ionian", seed=None, **kwargs):
+    """
+    Expressive bass line through scale tones with its own contour.
+
+    Beat 1: root (anchored). Other beats: scale-wise movement with
+    direction — rises toward fifth in first half, explores in middle,
+    returns toward root area before approaching next chord. Occasional
+    eighth-note pairs and leaps for rhythmic and melodic interest.
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    scale = get_bass_scale_tones(key, mode)
+    notes = []
+    beat = 0.0
+
+    for i, chord in enumerate(chords):
+        total = bars_per_chord[i] * beats_per_bar
+        root = bass_root(chord)
+        fifth = bass_fifth(chord) or nearest_scale_tone(root + 7, scale)
+        third = bass_third(chord) or nearest_scale_tone(root + 4, scale)
+        next_root = bass_root(chords[(i + 1) % len(chords)])
+        appr = approach_note(next_root, scale)
+
+        current = root
+        t = 0.0
+
+        while t < total - 0.01:
+            remaining = total - t
+            is_first = (t < 0.01)
+            is_last_region = (remaining <= 1.5)
+            phrase_pos = t / total
+
+            if is_first:
+                n = root
+                dur = 1.0
+            elif is_last_region and i < len(chords) - 1:
+                n = appr
+                dur = min(1.0, remaining)
+            else:
+                # Direction based on phrase position
+                if phrase_pos < 0.4:
+                    target = fifth
+                elif phrase_pos < 0.7:
+                    target = random.choice([third, fifth, root])
+                else:
+                    target = root
+
+                nbrs = scale_neighbors(current, scale)
+                if not nbrs:
+                    nbrs = [nearest_scale_tone(current + random.choice([-2, 2]), scale)]
+
+                toward = [s for s in nbrs if abs(s - target) <= abs(current - target)]
+                away = [s for s in nbrs if s not in toward]
+
+                if toward and random.random() < 0.70:
+                    n = random.choice(toward)
+                elif away:
+                    n = random.choice(away)
+                else:
+                    n = random.choice(nbrs)
+
+                # Occasional leap for expressiveness
+                if random.random() < 0.15 and phrase_pos < 0.6:
+                    n = random.choice([fifth, third])
+
+                # Occasional eighth note pair
+                if random.random() < 0.20 and remaining >= 1.0:
+                    dur = 0.5
+                else:
+                    dur = 1.0
+
+            # Velocity shaping
+            if is_first:
+                vel = velocity
+            elif dur < 1.0:
+                vel = max(50, velocity - 15)
+            else:
+                vel = velocity - 4 if (t % beats_per_bar) < 0.01 else max(55, velocity - 10)
+
+            actual_dur = min(dur, remaining)
+            notes.append(BassNote(n, beat + t, actual_dur, vel))
+            current = n
+            t += actual_dur
+
+        beat += total
+    return notes
+
+
+# ---------------------------------------------------------------------------
+# Style: pulse
+# ---------------------------------------------------------------------------
+
+def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
+                velocity=75, subdivision=1.0, **kwargs):
+    """Repeated root notes on every subdivision."""
+    notes = []
+    beat = 0.0
+    for i, chord in enumerate(chords):
+        total = bars_per_chord[i] * beats_per_bar
         root = bass_root(chord)
         t = 0.0
-        while t < total_beats - 0.01:
-            # Accent beat 1, soften others
+        while t < total - 0.01:
             vel = velocity if t == 0.0 else max(55, velocity - 15)
             notes.append(BassNote(root, beat + t, subdivision, vel))
             t += subdivision
-        beat += total_beats
+        beat += total
     return notes
 
 
-def style_pedal(
-    chords: list[VoicedChord],
-    bars_per_chord: list[float],
-    beats_per_bar: int = 4,
-    density: str = "sparse",
-    velocity: int = 65,
-    tonic_midi: Optional[int] = None,
-) -> list[BassNote]:
-    """
-    Holds a single pedal tone (tonic) throughout regardless of harmony.
-    Very ambient / Eno-ish. Tonic derived from first chord if not specified.
-    """
+# ---------------------------------------------------------------------------
+# Style: pedal
+# ---------------------------------------------------------------------------
+
+def style_pedal(chords, bars_per_chord, beats_per_bar=4, density="sparse",
+                velocity=65, tonic_midi=None, **kwargs):
+    """Holds a single pedal tone (tonic) throughout."""
     notes = []
     beat = 0.0
-
     if tonic_midi is None:
         tonic_midi = bass_root(chords[0])
-
     for i, chord in enumerate(chords):
-        total_beats = bars_per_chord[i] * beats_per_bar
-        notes.append(BassNote(tonic_midi, beat, total_beats, velocity))
-        beat += total_beats
+        total = bars_per_chord[i] * beats_per_bar
+        notes.append(BassNote(tonic_midi, beat, total, velocity))
+        beat += total
     return notes
 
 
@@ -233,6 +436,8 @@ BASS_STYLES = {
     "root_only":  style_root_only,
     "root_fifth": style_root_fifth,
     "walking":    style_walking,
+    "steady":     style_steady,
+    "melodic":    style_melodic,
     "pulse":      style_pulse,
     "pedal":      style_pedal,
 }
@@ -245,51 +450,31 @@ def generate_bass(
     beats_per_bar: int = 4,
     density: str = "medium",
     velocity: int = 70,
+    key: str = "C",
+    mode: str = "ionian",
+    seed: Optional[int] = None,
     **kwargs,
 ) -> list[BassNote]:
     """
     Generate a bass line for a chord progression.
 
     Args:
-        chords:         List of VoicedChord from harmony.resolve_progression()
-        style:          Bass style name — root_only | root_fifth | walking | pulse | pedal
-        bars_per_chord: How many bars each chord lasts. Float (uniform) or list[float] (per-chord).
+        chords:         List of VoicedChord
+        style:          root_only | root_fifth | walking | steady | melodic | pulse | pedal
+        bars_per_chord: Float (uniform) or list[float] (per-chord)
         beats_per_bar:  Time signature numerator (default 4)
-        density:        "sparse" | "medium" | "full" — affects rhythm and activity
+        density:        "sparse" | "medium" | "full"
         velocity:       Base MIDI velocity
-        **kwargs:       Style-specific options (e.g. subdivision for pulse, tonic_midi for pedal)
-
-    Returns:
-        List of BassNote objects
+        key:            Key center (for scale-aware styles)
+        mode:           Mode name (for scale-aware styles)
+        seed:           Random seed
     """
     if style not in BASS_STYLES:
         raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
 
-    # Normalize to list
     if isinstance(bars_per_chord, (int, float)):
         bars_per_chord = [float(bars_per_chord)] * len(chords)
 
     fn = BASS_STYLES[style]
-    return fn(chords, bars_per_chord, beats_per_bar, density, velocity, **kwargs)
-
-
-# ---------------------------------------------------------------------------
-# Quick test / demo
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    from harmony import resolve_progression
-
-    key = "D"
-    mode = "dorian"
-    progression = ["i", "VII", "iv", "v"]
-
-    print("=== Intervals Engine — bass.py demo ===\n")
-    chords = resolve_progression(progression, key, mode, density="medium")
-
-    for style in BASS_STYLES:
-        print(f"Style: {style}")
-        notes = generate_bass(chords, style=style, bars_per_chord=2, density="medium")
-        for n in notes:
-            print(f"  {n}")
-        print()
+    return fn(chords, bars_per_chord, beats_per_bar, density, velocity,
+              key=key, mode=mode, seed=seed, **kwargs)

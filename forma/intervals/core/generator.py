@@ -292,6 +292,9 @@ def generate_section(
         bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
         density=density,
+        key=key,
+        mode=mode,
+        seed=42 + seed_offset,
     )
 
     # Generate melody

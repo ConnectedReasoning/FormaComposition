@@ -1,0 +1,55 @@
+{
+  "piece": {
+    "title": "Bass Personality Test",
+    "tempo": 72,
+    "sections": [
+      {
+        "name": "steady_lock",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "steady",
+        "arc": "swell",
+        "groove": "straight",
+        "harmony_rhythm": { "density": "sparse" },
+        "notes": "Clayton/Williams: locked figure repeats. The bass IS the groove."
+      },
+      {
+        "name": "walking_jazz",
+        "bars": 16,
+        "progression": ["i", "III", "VII", "iv"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "swell",
+        "harmony_rhythm": { "density": "sparse", "groove": "halftime" },
+        "notes": "Classic walking: root-pass-fifth-approach on scale tones."
+      },
+      {
+        "name": "melodic_express",
+        "bars": 16,
+        "progression": ["i", "VII", "III", "iv", "v"],
+        "chord_bars": [4, 4, 4, 2, 2],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "swell",
+        "groove": "syncopated",
+        "swing": 0.62,
+        "harmony_rhythm": { "density": "sparse" },
+        "notes": "Sting/Geddy: the bass has its own melodic contour and eighth-note runs."
+      },
+      {
+        "name": "back_to_lock",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "steady",
+        "arc": "fade_out",
+        "notes": "Return to locked figure for the close."
+      }
+    ]
+  }
+}
