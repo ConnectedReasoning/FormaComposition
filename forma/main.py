@@ -21,6 +21,7 @@ from intervals.core.generator import generate_piece, load_theme, load_piece, bpm
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.prosody import phrase_to_motif, analyze_phrase, PRONOUNCING_AVAILABLE
 from intervals.music.rhythm import VALID_GROOVES
+from intervals.music.percussion import VALID_DRUM_PATTERNS
 
 # ---------------------------------------------------------------------------
 # Validation
@@ -123,6 +124,27 @@ def validate_piece(piece: dict, theme: dict) -> list:
             hr_humanize = hr.get("humanize")
             if hr_humanize is not None and not (0.0 <= hr_humanize <= 1.0):
                 errors.append(f"{hp}: humanize {hr_humanize} out of range. Valid: 0.0–1.0")
+        
+        # Drum validation
+        drums_config = section.get("drums")
+        if drums_config:
+            if isinstance(drums_config, str):
+                pattern = drums_config
+            else:
+                pattern = drums_config.get("pattern") if isinstance(drums_config, dict) else None
+            
+            if pattern and pattern not in VALID_DRUM_PATTERNS:
+                errors.append(
+                    f"{prefix}: drum pattern '{pattern}' invalid. "
+                    f"Valid: {VALID_DRUM_PATTERNS}"
+                )
+            
+            if isinstance(drums_config, dict):
+                velocity = drums_config.get("velocity")
+                if velocity is not None and not (0 <= velocity <= 127):
+                    errors.append(
+                        f"{prefix}: drums velocity {velocity} out of range. Valid: 0–127"
+                    )
 
     return errors
 
@@ -200,6 +222,16 @@ def display_info(theme: dict, piece: dict) -> None:
             if hr.get("humanize"):
                 hr_parts.append(f"humanize={hr['humanize']}")
             print(f"      harmony_rhythm: {', '.join(hr_parts)}")
+        
+        drums_config = s.get("drums")
+        if drums_config:
+            if isinstance(drums_config, str):
+                drums_info = f"drums={drums_config}"
+            else:
+                pattern = drums_config.get("pattern", "four_on_floor")
+                velocity = drums_config.get("velocity", 80)
+                drums_info = f"drums={pattern} (velocity={velocity})"
+            print(f"      {drums_info}")
 
     total_beats   = total_bars * beats_per_bar
     total_seconds = total_beats * (60.0 / bpm)

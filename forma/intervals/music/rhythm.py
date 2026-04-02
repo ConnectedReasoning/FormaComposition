@@ -288,6 +288,7 @@ def grid(
     accent_beats: Optional[list[float]] = None,
     accent_boost: float = 0.15,
     seed: Optional[int] = None,
+    **kwargs,
 ) -> list[RhythmEvent]:
     """Build a uniform grid of RhythmEvents."""
     if seed is not None:
@@ -312,17 +313,17 @@ def grid(
 
 
 def pattern_whole(total_beats: float, **kwargs) -> list[RhythmEvent]:
-    """One note per chord — whole notes."""
+    """One note per chord — whole notes. Used by bass sparse."""
     return grid(total_beats, subdivision=total_beats, rest_probability=0.0,
                 accent_beats=[0.0], **kwargs)
 
 def pattern_half(total_beats: float, **kwargs) -> list[RhythmEvent]:
-    """Half note grid."""
+    """Half note grid. Used by bass medium."""
     return grid(total_beats, subdivision=2.0, rest_probability=0.1,
                 accent_beats=[0.0, 2.0], **kwargs)
 
 def pattern_quarter(total_beats: float, **kwargs) -> list[RhythmEvent]:
-    """Quarter note grid."""
+    """Quarter note grid. Used by bass full."""
     return grid(total_beats, subdivision=1.0, rest_probability=0.15,
                 accent_beats=[0.0, 2.0], **kwargs)
 
@@ -330,6 +331,137 @@ def pattern_quarter_sparse(total_beats: float, **kwargs) -> list[RhythmEvent]:
     """Quarter note grid with more rests."""
     return grid(total_beats, subdivision=1.0, rest_probability=0.40,
                 accent_beats=[0.0], **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# Chord-specific patterns (how a player actually articulates chords)
+# ---------------------------------------------------------------------------
+
+def pattern_chord_sparse(total_beats: float, beats_per_bar: int = 4,
+                         seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
+    """
+    Sparse chord articulation: re-strike at bar boundaries.
+
+    A pad player's rhythm — hold a long note, then re-articulate on beat 1
+    of the next bar. For a 5-bar chord you hear 5 attacks, each sustained,
+    with beat 1 of the first bar strongest and subsequent bars gentler.
+    Not one 20-beat wall.
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    events = []
+    beat = 0.0
+    bar_index = 0
+
+    while beat < total_beats - 0.001:
+        remaining = total_beats - beat
+        dur = min(float(beats_per_bar), remaining)
+
+        # Velocity: first bar strong, subsequent bars softer with slight variation
+        if bar_index == 0:
+            vel = 1.0
+        else:
+            vel = random.uniform(0.65, 0.80)
+
+        events.append(RhythmEvent(beat, dur, vel, is_rest=False))
+        beat += beats_per_bar
+        bar_index += 1
+
+    return events
+
+
+def pattern_chord_medium(total_beats: float, beats_per_bar: int = 4,
+                         seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
+    """
+    Medium chord articulation: hits on beats 1 and 3 (half-note feel).
+
+    Beat 1: strong attack, held for 2 beats.
+    Beat 3: softer re-articulation, held for 2 beats.
+    Occasional ghost on beat 2 or 4 (~15% chance) adds subtle life.
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    events = []
+    beat = 0.0
+    mid = beats_per_bar // 2  # beat 3 in 4/4, beat 2 in 3/4
+
+    while beat < total_beats - 0.001:
+        remaining = total_beats - beat
+        bar_beats = min(float(beats_per_bar), remaining)
+
+        # Beat 1: strong
+        dur_1 = min(float(mid), remaining)
+        events.append(RhythmEvent(beat, dur_1, 1.0, is_rest=False))
+
+        # Beat 3 (midpoint): softer re-articulation
+        if beat + mid < total_beats - 0.001:
+            dur_3 = min(float(beats_per_bar - mid), total_beats - (beat + mid))
+            vel_3 = random.uniform(0.75, 0.88)
+            events.append(RhythmEvent(beat + mid, dur_3, vel_3, is_rest=False))
+
+        # Occasional ghost on an offbeat (~15%)
+        if random.random() < 0.15 and bar_beats >= beats_per_bar:
+            ghost_beat = beat + random.choice([1.0, 3.0])
+            if ghost_beat < total_beats - 0.5:
+                events.append(RhythmEvent(ghost_beat, 0.5, 0.45, is_rest=False))
+
+        beat += beats_per_bar
+
+    events.sort(key=lambda e: e.start_beat)
+    return events
+
+
+def pattern_chord_full(total_beats: float, beats_per_bar: int = 4,
+                       seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
+    """
+    Full chord articulation: quarter notes with musical accents.
+
+    Beat 1: strong (1.0). Beat 3: accented (0.90).
+    Beats 2, 4: softer (0.65-0.75).
+    ~20% chance beat 4 becomes a rest (breathing room before next bar).
+    Occasional eighth-note ghost pickup on the "and" of 4 (~12%).
+    """
+    if seed is not None:
+        random.seed(seed)
+
+    events = []
+    beat = 0.0
+
+    while beat < total_beats - 0.001:
+        for beat_in_bar in range(beats_per_bar):
+            abs_beat = beat + beat_in_bar
+            if abs_beat >= total_beats - 0.001:
+                break
+
+            remaining = total_beats - abs_beat
+
+            # Beat 4 sometimes rests for breathing
+            if beat_in_bar == beats_per_bar - 1 and random.random() < 0.20:
+                events.append(RhythmEvent(abs_beat, min(1.0, remaining), 0.0, is_rest=True))
+                continue
+
+            # Accent pattern
+            if beat_in_bar == 0:
+                vel = 1.0
+            elif beat_in_bar == beats_per_bar // 2:
+                vel = random.uniform(0.85, 0.95)
+            else:
+                vel = random.uniform(0.60, 0.75)
+
+            dur = min(1.0, remaining)
+            events.append(RhythmEvent(abs_beat, dur, vel, is_rest=False))
+
+        # Occasional eighth-note ghost pickup before next bar
+        pickup_beat = beat + beats_per_bar - 0.5
+        if random.random() < 0.12 and pickup_beat < total_beats - 0.2:
+            events.append(RhythmEvent(pickup_beat, 0.5, 0.40, is_rest=False))
+
+        beat += beats_per_bar
+
+    events.sort(key=lambda e: e.start_beat)
+    return events
 
 def pattern_eighth(total_beats: float, **kwargs) -> list[RhythmEvent]:
     """Eighth note grid."""
@@ -375,12 +507,15 @@ def pattern_free(total_beats: float, seed: Optional[int] = None, **kwargs) -> li
 
 
 DENSITY_PATTERNS = {
-    ("sparse", "chord"):  pattern_whole,
-    ("medium", "chord"):  pattern_half,
-    ("full",   "chord"):  pattern_quarter,
+    # Chord voicing patterns — articulate like a player, not a grid
+    ("sparse", "chord"):  pattern_chord_sparse,
+    ("medium", "chord"):  pattern_chord_medium,
+    ("full",   "chord"):  pattern_chord_full,
+    # Melody patterns — more active, more rests for breathing
     ("sparse", "melody"): pattern_free,
     ("medium", "melody"): pattern_eighth_sparse,
     ("full",   "melody"): pattern_eighth,
+    # Bass patterns — kept simple, bass.py handles the real work
     ("sparse", "bass"):   pattern_whole,
     ("medium", "bass"):   pattern_half,
     ("full",   "bass"):   pattern_quarter,
@@ -429,9 +564,7 @@ def get_pattern(
         raise ValueError(f"No pattern for density='{density}', voice_type='{voice_type}'.")
 
     fn = DENSITY_PATTERNS[key]
-    if seed is not None:
-        return fn(total_beats, seed=seed)
-    return fn(total_beats)
+    return fn(total_beats, beats_per_bar=beats_per_bar, seed=seed)
 
 
 # ---------------------------------------------------------------------------

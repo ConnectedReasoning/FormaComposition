@@ -33,6 +33,8 @@ from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
 from intervals.music.rhythm   import apply_velocity_arc
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
 from intervals.music.prosody  import phrase_to_motif
+from intervals.music.percussion import generate_drums, DrumHit
+from intervals.core.motif_loader import resolve_motif_from_theme
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -45,12 +47,14 @@ CHANNEL_MELODY       = 0
 CHANNEL_HARMONY      = 1
 CHANNEL_COUNTERPOINT = 2
 CHANNEL_BASS         = 3
+CHANNEL_DRUMS        = 9
 
 # Track names shown in Logic Pro
 TRACK_NAME_MELODY       = "Melody"
 TRACK_NAME_HARMONY      = "Harmony"
 TRACK_NAME_COUNTERPOINT = "Counterpoint"
 TRACK_NAME_BASS         = "Bass"
+TRACK_NAME_DRUMS        = "Drums"
 
 # ---------------------------------------------------------------------------
 # Timing helpers
@@ -202,6 +206,26 @@ def build_melody_track(
     return track
 
 
+def build_drums_track(
+    drum_hits: list[DrumHit],
+    channel: int = CHANNEL_DRUMS,
+) -> MidiTrack:
+    """Build the drums track from a list of DrumHit objects on channel 9 (GM drums)."""
+    track = MidiTrack()
+    track.append(MetaMessage("track_name", name=TRACK_NAME_DRUMS, time=0))
+    print(TRACK_NAME_DRUMS)
+
+    events = []
+    for dh in drum_hits:
+        start = dh.start_beat
+        end   = start + dh.duration_beats
+        events.append((start, "on",  dh.midi_note, dh.velocity, channel))
+        events.append((end,   "off", dh.midi_note, 0,           channel))
+
+    _write_events_to_track(track, events)
+    return track
+
+
 # ---------------------------------------------------------------------------
 # Event writer (absolute → delta time conversion)
 # ---------------------------------------------------------------------------
@@ -246,7 +270,10 @@ def generate_section(
     """
     key          = theme["key"]
     mode         = theme["mode"]
-    motif_def    = theme.get("motif")
+    
+    # Resolve motif using new loader (supports both embedded and referenced motifs)
+    motif_obj = resolve_motif_from_theme(theme)
+    motif_def = motif_to_dict(motif_obj) if motif_obj else None
 
     progression  = section["progression"]
     bars         = section.get("bars", 8)
@@ -268,22 +295,6 @@ def generate_section(
 
     # Resolve chords
     chords = resolve_progression(progression, key, mode, density=density)
-
-    # Resolve motif: explicit motif dict takes precedence, then prosody phrase
-    if motif_def is None and theme.get("phrase"):
-        # Generate a section-aware motif from the prosody phrase.
-        # Uses the first chord of the progression for harmonic context
-        # and the section's arc/melody/density for tension profiling.
-        prosody_motif = phrase_to_motif(
-            theme["phrase"],
-            name=theme.get("name", "prosody").lower().replace(" ", "_"),
-            section=section,
-            chord=progression[0],
-            key=key,
-            mode=mode,
-            seed=42 + seed_offset,
-        )
-        motif_def = motif_to_dict(prosody_motif)
 
     # Generate bass
     bass_notes = generate_bass(
@@ -346,6 +357,7 @@ def generate_piece(
     all_bass_notes    = []
     all_melody_notes  = []
     all_cp_notes      = []
+    all_drum_hits     = []
 
     global_beat = 0.0
 
@@ -429,6 +441,43 @@ def generate_piece(
                 mn.is_rest,
             ))
 
+        # Drums (optional — only if section defines it)
+        if "drums" in section_dict:
+            drum_config = section_dict.get("drums", "four_on_floor")
+
+            # Handle both string and dict forms
+            if isinstance(drum_config, str):
+                pattern = drum_config
+            else:
+                pattern = drum_config.get("pattern", "four_on_floor")
+
+            # Get rhythm parameters for drums (can use harmony_rhythm if specified)
+            drums_density = h_density      # Use harmony_rhythm density if available, else section density
+            drums_groove = h_groove
+            drums_swing = h_swing
+            drums_humanize = h_humanize
+
+            drum_hits = generate_drums(
+                total_beats=total_beats,
+                bass_notes=bass_notes,
+                pattern=pattern,
+                density=drums_density,
+                groove=drums_groove,
+                swing=drums_swing,
+                humanize=drums_humanize,
+                beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
+                seed=42 + i * 10,
+            )
+
+            # Offset drum hits by global beat
+            for dh in drum_hits:
+                all_drum_hits.append(DrumHit(
+                    midi_note=dh.midi_note,
+                    start_beat=dh.start_beat + global_beat,
+                    duration_beats=dh.duration_beats,
+                    velocity=dh.velocity,
+                ))
+
         global_beat += total_beats
 
     # Build MIDI file
@@ -454,6 +503,10 @@ def generate_piece(
 
     # Bass track
     mid.tracks.append(build_bass_track(all_bass_notes))
+
+    # Drums track (only if any sections used it)
+    if all_drum_hits:
+        mid.tracks.append(build_drums_track(all_drum_hits, channel=CHANNEL_DRUMS))
 
     # Write file
     output_path = str(Path(output_path).with_suffix(".mid"))

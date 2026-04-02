@@ -1,0 +1,18 @@
+{
+  "theme": {
+    "name": "Example Theme (Motif Reference)",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": {
+      "min": 60,
+      "max": 80
+    },
+    "motif": "ascending_hope",
+    "palette": {
+      "harmony": "warm_pad",
+      "melody": "vibraphone",
+      "bass": "strings",
+      "counterpoint": "ensemble"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "motif": {
+    "name": "ascending_hope",
+    "intervals": [2, 2, 1, 2],
+    "rhythm": [1.0, 1.0, 0.5, 1.5],
+    "transform_pool": [
+      "inversion",
+      "retrograde",
+      "augmentation",
+      "diminution",
+      "transpose_up"
+    ]
+  }
+}

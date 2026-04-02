@@ -1,0 +1,39 @@
+{
+  "theme": {
+    "name": "California Sky",
+    "key": "F",
+    "mode": "mixolydian",
+    "tempo": {
+      "min": 55,
+      "max": 65
+    },
+    "phrase": "California",
+    "motif": {
+      "name": "california_sky",
+      "intervals": [
+        6,
+        -2,
+        1,
+        -3
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        1.0,
+        0.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "augmentation",
+        "transpose_up"
+      ]
+    },
+    "palette": {
+      "harmony": "warm_pad",
+      "melody": "vibraphone",
+      "bass": "strings",
+      "counterpoint": "ensemble"
+    }
+  }
+}

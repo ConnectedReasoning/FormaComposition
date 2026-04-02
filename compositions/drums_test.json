@@ -1,0 +1,58 @@
+{
+  "piece": {
+    "title": "Drums Test",
+    "tempo": 85,
+    "sections": [
+      {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "drums": "minimal"
+      },
+      {
+        "name": "verse",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "syncopated",
+        "swing": 0.62,
+        "humanize": 0.15,
+        "drums": "four_on_floor"
+      },
+      {
+        "name": "chorus",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "chord_bars": [4, 2, 4, 6],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "backbeat",
+        "swing": 0.62,
+        "humanize": 0.2,
+        "drums": {
+          "pattern": "backbeat",
+          "velocity": 85
+        }
+      },
+      {
+        "name": "outro",
+        "bars": 12,
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "drums": "halftime"
+      }
+    ]
+  }
+}
