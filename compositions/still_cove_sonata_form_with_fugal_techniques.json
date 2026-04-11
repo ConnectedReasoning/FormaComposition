@@ -1,0 +1,150 @@
+{
+  "piece": {
+    "title": "Still Cove: Development (Sonata Form)",
+    "theme": "Evening Water",
+    "tempo": 68,
+    "seed": 42,
+    "notes": "Sonata form exploration using fugal techniques. Exposition introduces primary and secondary themes (inverted). Development fragments and compresses. Recapitulation returns both themes home. Coda uses inverted motif as final gesture.",
+    "form_type": "narrative",
+    "sections": [
+      {
+        "name": "exposition_primary",
+        "bars": 12,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "exposition_secondary",
+        "bars": 12,
+        "progression": ["III", "V", "I"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "fugal_techniques": {
+          "motif_transform": "inversion"
+        }
+      },
+      {
+        "name": "development_a",
+        "bars": 8,
+        "progression": ["v", "VI", "VII"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "peak",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "fugal_techniques": {
+          "motif_transform": "retrograde",
+          "stretto_compression": 0.75
+        }
+      },
+      {
+        "name": "development_b",
+        "bars": 8,
+        "progression": ["iv", "VII", "v"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "peak",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "dissonant"
+        },
+        "fugal_techniques": {
+          "motif_transform": "retrograde_inversion",
+          "stretto_compression": 0.5
+        }
+      },
+      {
+        "name": "development_c",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "medium",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "breath",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "recap_primary",
+        "bars": 12,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "recap_secondary",
+        "bars": 12,
+        "progression": ["III", "IV", "i"],
+        "density": "medium",
+        "melody": "flowing",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "coda",
+        "bars": 8,
+        "progression": ["i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "fugal_techniques": {
+          "motif_transform": "inversion"
+        }
+      }
+    ]
+  }
+}
