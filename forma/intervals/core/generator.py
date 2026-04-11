@@ -34,7 +34,24 @@ from intervals.music.rhythm   import apply_velocity_arc
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
 from intervals.music.prosody  import phrase_to_motif
 from intervals.music.percussion import generate_drums, DrumHit
+from intervals.music.rhythmic_template import (
+    phrase_to_rhythm_template,
+    tile_template,
+    apply_lens,
+    melody_lens,
+    bass_lens,
+    harmony_lens,
+    counterpoint_lens,
+    drums_lens,
+    RhythmicTemplate,
+)
 from intervals.core.motif_loader import resolve_motif_from_theme
+from intervals.core.context import (
+    PieceContext,
+    SectionContext,
+    VoiceSnapshot,
+    compute_voice_snapshot,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -254,23 +271,92 @@ def _write_events_to_track(track: MidiTrack, events: list[tuple]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Hand-played rhythm pattern support
+# ---------------------------------------------------------------------------
+
+def rhythm_pattern_to_events(
+    pattern: dict,
+    total_beats: float,
+) -> list:
+    """
+    Convert a rhythm_pattern dict (from rhythm_extract.py) into a tiled
+    list of RhythmEvent covering total_beats.
+
+    The pattern is repeated as many times as needed to fill the section.
+    Last repetition is trimmed at the section boundary.
+
+    Args:
+        pattern:      Dict with onsets, durations, velocities, length_beats
+        total_beats:  Total beats to fill
+
+    Returns:
+        list[RhythmEvent]
+    """
+    from intervals.music.rhythm import RhythmEvent
+
+    onsets = pattern["onsets"]
+    durations = pattern["durations"]
+    velocities = pattern.get("velocities", [0.7] * len(onsets))
+    cycle_length = pattern.get("length_beats", 8.0)
+
+    if not onsets or cycle_length <= 0:
+        return []
+
+    events = []
+    offset = 0.0
+    while offset < total_beats:
+        for i in range(len(onsets)):
+            abs_onset = offset + onsets[i]
+            if abs_onset >= total_beats:
+                break
+            dur = durations[i] if i < len(durations) else 0.5
+            # Trim if it exceeds section boundary
+            dur = min(dur, total_beats - abs_onset)
+            vel = velocities[i] if i < len(velocities) else 0.7
+
+            events.append(RhythmEvent(
+                start_beat=abs_onset,
+                duration_beats=max(0.25, dur),
+                velocity_scale=vel,
+                is_rest=False,
+            ))
+        offset += cycle_length
+
+    return events
+
+
+# ---------------------------------------------------------------------------
 # Section assembler
 # ---------------------------------------------------------------------------
 
 def generate_section(
     section: dict,
     theme: dict,
+    base_seed: int = 42,
     seed_offset: int = 0,
+    sec_ctx: Optional[SectionContext] = None,
+    piece_ctx: Optional[PieceContext] = None,
+    transform_sequence: Optional[list[str]] = None,
 ) -> tuple[list[VoicedChord], list[BassNote], list[MelodyNote], float]:
     """
     Generate all voices for a single section.
 
+    Args:
+        section:             Section dict from piece JSON
+        theme:               Theme dict
+        base_seed:           Base seed for reproducibility (from piece JSON, defaults to 42)
+        seed_offset:         Seed offset for reproducibility (per-section variation)
+        sec_ctx:             SectionContext for cross-voice awareness (optional)
+        piece_ctx:           PieceContext for cross-section memory (optional)
+        transform_sequence:  Explicit motif transform plan from piece JSON (optional)
+
     Returns:
-        (chords, bass_notes, melody_notes, total_beats)
+        (chords, bass_notes, melody_notes, total_beats,
+         bars_list, beats_per_bar, density, section)
     """
     key          = theme["key"]
     mode         = theme["mode"]
-    
+
     # Resolve motif using new loader (supports both embedded and referenced motifs)
     motif_obj = resolve_motif_from_theme(theme)
     motif_def = motif_to_dict(motif_obj) if motif_obj else None
@@ -286,9 +372,11 @@ def generate_section(
     humanize     = section.get("humanize", 0.0) # 0.0 = robotic
 
     # Per-chord bar durations: explicit list or even distribution
+    # If chord_bars is provided, it is the source of truth — bars is derived from it.
     chord_bars = section.get("chord_bars")
     if chord_bars is not None:
         bars_list = [float(b) for b in chord_bars]
+        bars = sum(bars_list)   # derive bars — chord_bars wins
     else:
         even = bars / len(progression)
         bars_list = [even] * len(progression)
@@ -296,7 +384,43 @@ def generate_section(
     # Resolve chords
     chords = resolve_progression(progression, key, mode, density=density)
 
-    # Generate bass
+    # ── Compute section totals (used for snapshots) ───────────────
+    total_beats_section = sum(b * beats_per_bar for b in bars_list)
+    total_slots = int(total_beats_section * 2)  # 8th-note resolution
+
+    # ── Resolve prosodic rhythm template (if enabled) ─────────────
+    rhythm_template = None
+    prosodic_rhythm = theme.get("prosodic_rhythm", False)
+    phrase = theme.get("phrase")
+    if prosodic_rhythm and phrase:
+        rhythm_template = phrase_to_rhythm_template(
+            phrase, seed=base_seed + seed_offset,
+        )
+        print(f"    Prosodic rhythm: '{phrase}' → "
+              f"{len(rhythm_template)} syllables, "
+              f"{rhythm_template.total_beats:.1f}b template")
+
+    # ── Resolve melody rhythm events ────────────────────────────────
+    # Priority: 1) hand-played rhythm_pattern  2) prosodic lens  3) get_pattern
+    melody_rhythm_events = None
+    rhythm_pattern = section.get("rhythm_pattern")
+    if rhythm_pattern:
+        melody_rhythm_events = rhythm_pattern_to_events(
+            rhythm_pattern, total_beats=total_beats_section,
+        )
+        print(f"    Melody rhythm: hand-played pattern, "
+              f"{len(rhythm_pattern['onsets'])} notes, "
+              f"{rhythm_pattern.get('length_beats', '?')}b cycle")
+    elif rhythm_template is not None:
+        melody_rhythm_events = melody_lens(
+            rhythm_template,
+            total_beats=total_beats_section,
+            seed=base_seed + seed_offset,
+        )
+
+    # ══════════════════════════════════════════════════════════════
+    # BASS — generates first, writes snapshot for downstream voices
+    # ══════════════════════════════════════════════════════════════
     bass_notes = generate_bass(
         chords,
         style=bass_style,
@@ -305,10 +429,38 @@ def generate_section(
         density=density,
         key=key,
         mode=mode,
-        seed=42 + seed_offset,
+        seed=base_seed + seed_offset,
     )
 
-    # Generate melody
+    # Record bass snapshot so melody/counterpoint can read it
+    if sec_ctx is not None:
+        sec_ctx.add_voice("bass", compute_voice_snapshot(
+            pitches=[bn.midi_note for bn in bass_notes],
+            durations=[bn.duration_beats for bn in bass_notes],
+            total_beats=total_beats_section,
+            total_slots=total_slots,
+            last_chord_degree=progression[-1],
+            key=key,
+            mode=mode,
+        ))
+
+    # ══════════════════════════════════════════════════════════════
+    # MELODY — generates second, can read bass snapshot
+    # ══════════════════════════════════════════════════════════════
+
+    # If using 'develop' behavior, pick a directed transform
+    last_xform = None
+    if melody_beh == "develop" and piece_ctx is not None:
+        pool = []
+        if isinstance(motif_def, dict):
+            pool = motif_def.get("transform_pool", [])
+        if pool:
+            last_xform = piece_ctx.suggest_transform(
+                available=pool,
+                transform_sequence=transform_sequence,
+                section_index=sec_ctx.section_index if sec_ctx else 0,
+            )
+
     melody_notes = generate_melody_for_progression(
         chords, key, mode,
         behavior=melody_beh,
@@ -319,11 +471,333 @@ def generate_section(
         groove=groove,
         swing=swing,
         humanize=humanize,
-        seed=42 + seed_offset,
+        seed=base_seed + seed_offset,
+        section_name=section.get("name", ""),
+        rhythm_events_override=melody_rhythm_events,
     )
 
+    # Record melody snapshot for counterpoint and next-section memory
+    if sec_ctx is not None:
+        melody_pitches = [mn.midi_note for mn in melody_notes
+                          if not mn.is_rest and mn.midi_note is not None]
+        melody_durations = [mn.duration_beats for mn in melody_notes
+                            if not mn.is_rest and mn.midi_note is not None]
+        sec_ctx.add_voice("melody", compute_voice_snapshot(
+            pitches=melody_pitches,
+            durations=melody_durations,
+            total_beats=total_beats_section,
+            total_slots=total_slots,
+            last_transform=last_xform,
+            last_chord_degree=progression[-1],
+            key=key,
+            mode=mode,
+        ))
+
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section
+    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, rhythm_template
+
+
+# ---------------------------------------------------------------------------
+# Chord context builder (statefulness pattern)
+# ---------------------------------------------------------------------------
+
+def create_chord_context(
+    chord_index: int,
+    chords: list[VoicedChord],
+    bars_per_chord: list[float],
+    beats_per_bar: int,
+    section_name: str = "",
+) -> dict:
+    """
+    Build context dict for a single chord in a progression.
+    Passed to melody/bass/counterpoint generators for awareness of
+    position, next chord, and section context.
+
+    Args:
+        chord_index:      Index of current chord in progression
+        chords:           Full list of VoicedChord in progression
+        bars_per_chord:   List of bar durations per chord
+        beats_per_bar:    Beats per bar (usually 4)
+        section_name:     Name of section (e.g., "bloom", "return")
+
+    Returns:
+        Dict with chord context for generators
+    """
+    next_idx = (chord_index + 1) % len(chords)
+    return {
+        "chord_index": chord_index,
+        "total_chords": len(chords),
+        "next_chord": chords[next_idx],
+        "next_chord_root": chords[next_idx].root_name,
+        "bars_in_this_chord": bars_per_chord[chord_index],
+        "bars_in_next_chord": bars_per_chord[next_idx],
+        "section_name": section_name,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Song form helpers
+# ---------------------------------------------------------------------------
+
+def _expand_song_form(piece: dict) -> list[dict]:
+    """
+    Expand a song form structure into an ordered list of sections.
+
+    Input piece format:
+    {
+      "form_type": "song",
+      "form": [
+        { "section": "verse_A", "variation": 0.0 },
+        { "section": "verse_A", "variation": 0.2 },
+        { "section": "chorus", "variation": 0.0 },
+        ...
+      ],
+      "sections": {
+        "verse_A": { "bars": 12, "progression": [...], ... },
+        "chorus": { "bars": 8, "progression": [...], ... },
+        ...
+      }
+    }
+
+    Returns: Flattened list of section dicts with variation applied
+    """
+    form_array = piece.get("form", [])
+    section_defs = piece.get("sections", {})
+
+    if not form_array:
+        raise ValueError("Song form specified but no 'form' array provided.")
+    if not section_defs:
+        raise ValueError("Song form specified but no 'sections' dict provided.")
+
+    expanded = []
+    for form_item in form_array:
+        if isinstance(form_item, str):
+            # Simple string reference: "verse_A"
+            section_name = form_item
+            variation = 0.0
+        else:
+            # Dict with section name and variation
+            section_name = form_item.get("section")
+            variation = form_item.get("variation", 0.0)
+
+        if section_name not in section_defs:
+            raise ValueError(f"Song form references undefined section: '{section_name}'")
+
+        # Get base section definition
+        base_section = section_defs[section_name]
+
+        # Apply variation
+        if variation > 0.0:
+            section = _apply_variation(base_section, variation)
+        else:
+            section = dict(base_section)  # Exact copy for 0.0 variation
+
+        expanded.append(section)
+
+    return expanded
+
+
+def _apply_variation(section: dict, variation: float) -> dict:
+    """
+    Apply variation to a section (0.0 = exact, 1.0 = maximum change).
+
+    Variation affects:
+    - 0.0-0.2:   Melody might shift slightly (sparse→lyrical)
+    - 0.3-0.5:   Density might increase, melody behavior changes
+    - 0.6-1.0:   Major changes: behavior, density, add/remove counterpoint
+    """
+    import random
+    import copy
+
+    varied = copy.deepcopy(section)
+
+    if variation <= 0.0:
+        return varied
+
+    # Seed with variation amount for reproducibility
+    random.seed(int(variation * 1000))
+
+    # Melody behavior shifts (higher variation = more change)
+    melody_behaviors = ["sparse", "generative", "lyrical", "develop"]
+    original_melody = varied.get("melody", "generative")
+
+    if variation > 0.15:
+        # Slight shift in melody behavior
+        if original_melody in melody_behaviors:
+            idx = melody_behaviors.index(original_melody)
+            # Shift by 1 position (circular)
+            new_idx = (idx + random.randint(0, 1)) % len(melody_behaviors)
+            if new_idx != idx:
+                varied["melody"] = melody_behaviors[new_idx]
+
+    # Density might shift with higher variation
+    if variation > 0.4:
+        densities = ["sparse", "medium", "full"]
+        original_density = varied.get("density", "medium")
+        if original_density in densities:
+            idx = densities.index(original_density)
+            if variation > 0.6 and idx < len(densities) - 1:
+                # Increase density slightly
+                varied["density"] = densities[idx + 1]
+
+    # Arc might shift
+    if variation > 0.5:
+        arcs = ["fade_in", "swell", "breath", "fade_out"]
+        original_arc = varied.get("arc", "swell")
+        if original_arc in arcs and variation > 0.7:
+            idx = arcs.index(original_arc)
+            if idx < len(arcs) - 1:
+                varied["arc"] = arcs[idx + 1]
+
+    # Add counterpoint if none exists, high variation
+    if variation > 0.7 and "counterpoint" not in varied:
+        varied["counterpoint"] = {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 54
+        }
+
+    return varied
+
+
+# ---------------------------------------------------------------------------
+# Validator
+# ---------------------------------------------------------------------------
+
+VALID_SECTION_KEYS = {
+    "name", "bars", "chord_bars", "progression", "density", "melody",
+    "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
+    "swing", "humanize", "counterpoint", "notes", "percussion", "drums",
+    "rhythm_pattern", "harmony_pattern",
+}
+
+OBSOLETE_THEME_KEYS = {"palette"}
+
+VALID_DENSITY    = {"low", "medium", "high", "sparse", "full"}
+VALID_MELODY_BEH = {"lyrical", "generative", "motif", "sparse", "flowing", "rhythmic", "develop"}
+VALID_BASS_STYLE = {"root_fifth", "walking", "pedal", "arpeggiated", "sparse", "root_only", "melodic", "steady", "pulse"}
+VALID_ARC        = {"swell", "fade", "build", "plateau", "decay", "fade_in", "fade_out", "breath"}
+
+
+def validate_piece(theme: dict, piece: dict) -> list[str]:
+    """
+    Validate a theme + piece pair before generation.
+
+    Returns a list of error/warning strings.
+    Empty list means all clear.
+    Errors are prefixed with [ERROR], warnings with [WARN].
+    """
+    issues = []
+
+    # Unwrap if nested under "theme" / "piece" keys
+    t = theme.get("theme", theme)
+    p = piece.get("piece", piece)
+    for key in OBSOLETE_THEME_KEYS:
+        if key in t:
+            issues.append(f"[WARN] theme has obsolete field '{key}' — remove it (instruments live in Logic)")
+
+    if "motif" not in t:
+        issues.append("[WARN] theme has no motif defined — melodic identity will be purely generative")
+
+    # --- Piece-level checks ---
+    if "tempo" not in p and "tempo" not in t:
+        issues.append("[WARN] piece has no tempo — will use theme midpoint")
+
+    # Validate transform_sequence if present
+    transform_seq = p.get("transform_sequence")
+    if transform_seq is not None:
+        if not isinstance(transform_seq, list):
+            issues.append("[ERROR] transform_sequence must be a list of transform names")
+        else:
+            form_type = p.get("form_type", "narrative")
+            if form_type == "song":
+                form = p.get("form", [])
+                n_sections = len(form)
+            else:
+                n_sections = len(p.get("sections", []))
+            if len(transform_seq) < n_sections:
+                issues.append(
+                    f"[WARN] transform_sequence has {len(transform_seq)} entries "
+                    f"but piece has {n_sections} sections — later sections will use weighted random"
+                )
+
+    form_type = p.get("form_type", "narrative")
+
+    if form_type == "song":
+        # Song form: validate form array references sections
+        form = p.get("form", [])
+        section_defs = p.get("sections", {})
+        if not form:
+            issues.append("[ERROR] form_type is 'song' but no 'form' array defined")
+        if not section_defs:
+            issues.append("[ERROR] form_type is 'song' but no 'sections' dict defined")
+        for item in form:
+            name = item.get("section") if isinstance(item, dict) else item
+            if name and name not in section_defs:
+                issues.append(f"[ERROR] form references undefined section '{name}'")
+        sections = list(section_defs.values())
+    else:
+        # Narrative form
+        sections = p.get("sections", [])
+        if not sections:
+            issues.append("[ERROR] piece has no sections")
+
+    # --- Section-level checks ---
+    for i, section in enumerate(sections):
+        label = section.get("name", f"section[{i}]")
+
+        # Unknown keys
+        unknown = set(section.keys()) - VALID_SECTION_KEYS
+        if unknown:
+            issues.append(f"[WARN] {label}: unknown field(s) {sorted(unknown)} — typo?")
+
+        # progression required
+        if "progression" not in section:
+            issues.append(f"[ERROR] {label}: missing 'progression'")
+            continue
+
+        prog = section["progression"]
+        chord_bars = section.get("chord_bars")
+        bars = section.get("bars")
+
+        # chord_bars length must match progression
+        if chord_bars is not None:
+            if len(chord_bars) != len(prog):
+                issues.append(
+                    f"[ERROR] {label}: chord_bars has {len(chord_bars)} entries "
+                    f"but progression has {len(prog)} chords"
+                )
+            # bars declared but doesn't match sum(chord_bars)
+            if bars is not None:
+                derived = sum(float(b) for b in chord_bars)
+                if abs(derived - bars) > 0.01:
+                    issues.append(
+                        f"[WARN] {label}: declared bars={bars} but sum(chord_bars)={derived} — "
+                        f"'bars' is ignored when chord_bars is present; consider removing it"
+                    )
+        else:
+            if bars is None:
+                issues.append(f"[WARN] {label}: no 'bars' or 'chord_bars' — defaulting to 8 bars")
+
+        # Enum validation
+        density = section.get("density")
+        if density and density not in VALID_DENSITY:
+            issues.append(f"[ERROR] {label}: density='{density}' — must be one of {sorted(VALID_DENSITY)}")
+
+        melody_beh = section.get("melody")
+        if melody_beh and melody_beh not in VALID_MELODY_BEH:
+            issues.append(f"[ERROR] {label}: melody='{melody_beh}' — must be one of {sorted(VALID_MELODY_BEH)}")
+
+        bass_style = section.get("bass_style")
+        if bass_style and bass_style not in VALID_BASS_STYLE:
+            issues.append(f"[ERROR] {label}: bass_style='{bass_style}' — must be one of {sorted(VALID_BASS_STYLE)}")
+
+        arc = section.get("arc")
+        if arc and arc not in VALID_ARC:
+            issues.append(f"[ERROR] {label}: arc='{arc}' — must be one of {sorted(VALID_ARC)}")
+
+    return issues
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +811,10 @@ def generate_piece(
 ) -> str:
     """
     Generate a complete MIDI file from theme + piece dicts.
+    Supports both narrative arcs and song forms.
+
+    Creates PieceContext for cross-section memory and SectionContext
+    per section for cross-voice awareness.
 
     Args:
         theme:       Parsed theme dict (from theme.json)
@@ -346,11 +824,44 @@ def generate_piece(
     Returns:
         Absolute path of the written file
     """
-    bpm      = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
+    # Validate before generation — print warnings, raise on errors
+    issues = validate_piece(theme, piece)
+    errors   = [i for i in issues if i.startswith("[ERROR]")]
+    warnings = [i for i in issues if i.startswith("[WARN]")]
+    for w in warnings:
+        print(f"  {w}")
+    if errors:
+        for e in errors:
+            print(f"  {e}")
+        raise ValueError(f"Piece validation failed with {len(errors)} error(s). Fix before generating.")
 
-    sections = piece.get("sections", [])
+    bpm      = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
+    base_seed = piece.get("seed", 42)  # Optional seed parameter, defaults to 42
+
+    # Determine form type (song or narrative)
+    form_type = piece.get("form_type", "narrative")
+
+    if form_type == "song":
+        # Song form: expand "form" array into ordered sections with variation
+        sections = _expand_song_form(piece)
+    else:
+        # Narrative form: sections are already defined in order
+        sections = piece.get("sections", [])
+
     if not sections:
         raise ValueError("Piece has no sections defined.")
+
+    # ══════════════════════════════════════════════════════════════
+    # CREATE PIECE CONTEXT — cross-section compositional memory
+    # ══════════════════════════════════════════════════════════════
+    piece_ctx = PieceContext(
+        total_sections=len(sections),
+        key=theme["key"],
+        mode=theme["mode"],
+    )
+
+    # Optional explicit transform plan from piece JSON
+    transform_sequence = piece.get("transform_sequence")
 
     # Accumulate all voice events with beat offsets across sections
     all_chord_events  = []   # (abs_beat, 'on'/'off', note, vel, channel)
@@ -362,8 +873,18 @@ def generate_piece(
     global_beat = 0.0
 
     for i, section in enumerate(sections):
-        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict = \
-            generate_section(section, theme, seed_offset=i * 10)
+
+        # ══════════════════════════════════════════════════════════
+        # CREATE SECTION CONTEXT — cross-voice awareness scratchpad
+        # ══════════════════════════════════════════════════════════
+        sec_ctx = piece_ctx.make_section_context(section, i)
+
+        # In song forms, the same section may repeat with variation.
+        # Use section index for seed to ensure variation is deterministic.
+        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, rhythm_template = \
+            generate_section(section, theme, base_seed=base_seed, seed_offset=i * 10,
+                             sec_ctx=sec_ctx, piece_ctx=piece_ctx,
+                             transform_sequence=transform_sequence)
 
         # Section-level rhythm defaults (used by melody, bass)
         groove   = section_dict.get("groove")
@@ -376,6 +897,7 @@ def generate_piece(
         h_groove   = hr.get("groove", groove)
         h_swing    = hr.get("swing", swing)
         h_humanize = hr.get("humanize", humanize)
+        h_note_duration = hr.get("note_duration")  # "whole", "half", "quarter", etc.
 
         # Counterpoint (optional — only if section defines it)
         cp_def = section_dict.get("counterpoint")
@@ -389,8 +911,45 @@ def generate_piece(
                 beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
                 velocity=cp_def.get("velocity", 58),
                 dissonance=cp_def.get("dissonance", "passing"),
-                seed=42 + i * 10,
+                seed=base_seed + i * 10,
             )
+
+            # Canon offset: when prosodic rhythm is active, shift counterpoint
+            # forward in time by one stressed-syllable duration. This creates
+            # the round effect — same musical material, staggered entry.
+            if rhythm_template is not None:
+                # Default offset: duration of first stressed syllable
+                canon_offset = cp_def.get("canon_offset")
+                if canon_offset is None:
+                    for ti in range(len(rhythm_template)):
+                        if rhythm_template.accents[ti] > 0.5:
+                            canon_offset = rhythm_template.durations[ti]
+                            break
+                    if canon_offset is None:
+                        canon_offset = rhythm_template.durations[0] if rhythm_template.durations else 0.0
+
+                if canon_offset > 0:
+                    for cn in cp_notes:
+                        cn.start_beat += canon_offset
+                    # Trim notes that now extend past section boundary
+                    cp_notes = [cn for cn in cp_notes
+                                if cn.start_beat < total_beats]
+
+            # Record counterpoint snapshot
+            if sec_ctx is not None:
+                cp_pitches = [cn.midi_note for cn in cp_notes
+                              if not cn.is_rest and cn.midi_note is not None]
+                cp_durations = [cn.duration_beats for cn in cp_notes
+                                if not cn.is_rest and cn.midi_note is not None]
+                _tb = sum(b * beats_per_bar for b in bars_list)
+                sec_ctx.add_voice("counterpoint", compute_voice_snapshot(
+                    pitches=cp_pitches,
+                    durations=cp_durations,
+                    total_beats=_tb,
+                    total_slots=int(_tb * 2),
+                    key=theme["key"], mode=theme["mode"],
+                ))
+
             for cn in cp_notes:
                 cn.start_beat += global_beat
             all_cp_notes.extend(cp_notes)
@@ -399,24 +958,121 @@ def generate_piece(
         from intervals.music.rhythm import get_pattern, apply_velocity_arc, apply_swing, apply_humanize
         beat_offset_local = 0.0
 
+        # Resolve harmony rhythm events
+        # Priority: 1) harmony_pattern  2) prosodic lens  3) note_duration  4) get_pattern
+        harmony_hand_events = None
+        harmony_pattern = section_dict.get("harmony_pattern")
+        if harmony_pattern:
+            harmony_hand_events = rhythm_pattern_to_events(
+                harmony_pattern, total_beats=total_beats,
+            )
+            print(f"    Harmony rhythm: hand-played pattern, "
+                  f"{len(harmony_pattern['onsets'])} notes, "
+                  f"{harmony_pattern.get('length_beats', '?')}b cycle")
+
+        harmony_prosodic_events = None
+        if harmony_hand_events is None and rhythm_template is not None:
+            harmony_prosodic_events = harmony_lens(
+                rhythm_template,
+                total_beats=total_beats,
+            )
+
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
-            rhythm_events = get_pattern(total_per_chord, density=h_density,
-                                        voice_type="chord", groove=h_groove,
-                                        beats_per_bar=beats_per_bar)
+
+            # NEW: If note_duration is specified, create simple rhythm instead of density-based
+            if harmony_hand_events is not None:
+                # Hand-played harmony rhythm: slice events for this chord's window
+                chord_start = beat_offset_local
+                chord_end = chord_start + total_per_chord
+                from intervals.music.rhythm import RhythmEvent
+                rhythm_events = []
+                for ev in harmony_hand_events:
+                    if ev.start_beat >= chord_start and ev.start_beat < chord_end:
+                        local_start = ev.start_beat - chord_start
+                        local_dur = min(ev.duration_beats, total_per_chord - local_start)
+                        if local_dur < 0.25:
+                            continue
+                        rhythm_events.append(RhythmEvent(
+                            start_beat=local_start,
+                            duration_beats=local_dur,
+                            velocity_scale=ev.velocity_scale,
+                            is_rest=ev.is_rest,
+                        ))
+                if not rhythm_events:
+                    rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                                velocity_scale=0.7, is_rest=False)]
+            elif h_note_duration:
+                # Map duration names to beat counts
+                duration_map = {
+                    "whole": beats_per_bar * bars_list[ci],
+                    "half": beats_per_bar * bars_list[ci] / 2 if bars_list[ci] >= 0.5 else beats_per_bar,
+                    "quarter": beats_per_bar,
+                    "eighth": beats_per_bar / 2,
+                }
+                note_beats = duration_map.get(h_note_duration, beats_per_bar)
+
+                # Create single note event for the entire chord duration
+                from intervals.music.rhythm import RhythmEvent
+                rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                            velocity_scale=1.0, is_rest=False)]
+            elif harmony_prosodic_events is not None:
+                # Prosodic harmony: slice events for this chord's window
+                chord_start = beat_offset_local
+                chord_end = chord_start + total_per_chord
+                from intervals.music.rhythm import RhythmEvent
+                rhythm_events = []
+                for ev in harmony_prosodic_events:
+                    if ev.start_beat >= chord_start and ev.start_beat < chord_end:
+                        local_start = ev.start_beat - chord_start
+                        local_dur = min(ev.duration_beats, total_per_chord - local_start)
+                        # Skip events that are too short after trimming —
+                        # these are boundary artifacts, not musical content
+                        if local_dur < 0.5:
+                            continue
+                        rhythm_events.append(RhythmEvent(
+                            start_beat=local_start,
+                            duration_beats=local_dur,
+                            velocity_scale=ev.velocity_scale,
+                            is_rest=ev.is_rest,
+                        ))
+                if not rhythm_events:
+                    # Fallback: sustain for the full chord
+                    rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                                velocity_scale=0.7, is_rest=False)]
+            else:
+                # Original behavior: density-based rhythm
+                rhythm_events = get_pattern(total_per_chord, density=h_density,
+                                            voice_type="chord", groove=h_groove,
+                                            beats_per_bar=beats_per_bar)
+
             if h_swing and h_swing > 0:
                 rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
             if h_humanize and h_humanize > 0:
                 rhythm_events = apply_humanize(rhythm_events, amount=h_humanize,
-                                               seed=42 + i * 10)
+                                               seed=base_seed + i * 10)
 
             arc = section.get("arc", "swell")
             arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=65)
-            for ev, vel in arced:
-                if ev.is_rest:
-                    continue
+
+            # Build harmony note events with clean re-articulation.
+            # Cap each event's duration so it ends before the next event starts,
+            # with a tiny gap for clean note-off → note-on transitions.
+            REARTIC_GAP = 0.03  # ~1/32 beat — inaudible but prevents overlap
+            arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]
+
+            for idx_ev, (ev, vel) in enumerate(arced_list):
                 abs_start = global_beat + beat_offset_local + ev.start_beat
-                abs_end   = abs_start + ev.duration_beats
+                dur = ev.duration_beats
+
+                # If there's a next event, cap duration at the gap
+                if idx_ev + 1 < len(arced_list):
+                    next_ev = arced_list[idx_ev + 1][0]
+                    next_start = global_beat + beat_offset_local + next_ev.start_beat
+                    max_dur = next_start - abs_start - REARTIC_GAP
+                    dur = max(0.25, min(dur, max_dur))
+
+                abs_end = abs_start + dur
                 for note in chord.midi_notes:
                     all_chord_events.append((abs_start, "on",  note, min(127, vel), CHANNEL_HARMONY))
                     all_chord_events.append((abs_end,   "off", note, 0,             CHANNEL_HARMONY))
@@ -466,7 +1122,7 @@ def generate_piece(
                 swing=drums_swing,
                 humanize=drums_humanize,
                 beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
-                seed=42 + i * 10,
+                seed=base_seed + i * 10,
             )
 
             # Offset drum hits by global beat
@@ -479,6 +1135,26 @@ def generate_piece(
                 ))
 
         global_beat += total_beats
+
+        # ══════════════════════════════════════════════════════════
+        # FREEZE SECTION — store in piece history for next section
+        # ══════════════════════════════════════════════════════════
+        piece_ctx.complete_section(sec_ctx)
+
+    # ── Log context summary ───────────────────────────────────────
+    print(f"\n  Context summary:")
+    print(f"    Sections completed: {len(piece_ctx.completed_sections)}")
+    if piece_ctx.transform_history:
+        print(f"    Transform history:  {piece_ctx.transform_history}")
+        print(f"    Transform counts:   {piece_ctx.transforms_used()}")
+    for ss in piece_ctx.completed_sections:
+        voices_str = ", ".join(
+            f"{name}(pitch={v.last_pitch}, contour={v.ending_contour}, "
+            f"density={v.achieved_density:.2f})"
+            for name, v in ss.voices.items()
+            if v.last_pitch is not None
+        )
+        print(f"    [{ss.section_name}] {voices_str}")
 
     # Build MIDI file
     mid = MidiFile(type=1, ticks_per_beat=PPQ)
@@ -557,6 +1233,7 @@ if __name__ == "__main__":
     piece = {
         "title": "Still Cove",
         "tempo": 68,
+        "transform_sequence": ["original", "inversion", "retrograde"],
         "sections": [
             {
                 "name": "opening",

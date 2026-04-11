@@ -58,12 +58,138 @@ def validate_theme(theme: dict) -> list:
     return errors
 
 
+def _validate_section(section: dict, prefix: str) -> list:
+    """Validate a single section dict. Used for both narrative and song form."""
+    errors = []
+    if "progression" not in section or not section["progression"]:
+        errors.append(f"{prefix}: progression is required")
+    if "bars" not in section:
+        errors.append(f"{prefix}: bars is required")
+
+    chord_bars = section.get("chord_bars")
+    if chord_bars is not None:
+        prog = section.get("progression", [])
+        if len(chord_bars) != len(prog):
+            errors.append(
+                f"{prefix}: chord_bars has {len(chord_bars)} entries "
+                f"but progression has {len(prog)} chords — must match"
+            )
+        bars_total = section.get("bars", 0)
+        cb_sum = sum(chord_bars)
+        if abs(cb_sum - bars_total) > 0.01:
+            errors.append(
+                f"{prefix}: chord_bars sum ({cb_sum}) does not match "
+                f"bars ({bars_total}) (proceeding anyway)"
+            )
+
+    if section.get("density") and section["density"] not in VALID_DENSITIES:
+        errors.append(f"{prefix}: density '{section['density']}' invalid. Valid: {VALID_DENSITIES}")
+    if section.get("melody") and section["melody"] not in VALID_BEHAVIORS:
+        errors.append(f"{prefix}: melody behavior '{section['melody']}' invalid. Valid: {VALID_BEHAVIORS}")
+    if section.get("bass_style") and section["bass_style"] not in VALID_BASS_STYLES:
+        errors.append(f"{prefix}: bass_style '{section['bass_style']}' invalid. Valid: {VALID_BASS_STYLES}")
+    if section.get("arc") and section["arc"] not in VALID_ARCS:
+        errors.append(f"{prefix}: arc '{section['arc']}' invalid. Valid: {VALID_ARCS}")
+    if section.get("groove") and section["groove"] not in VALID_GROOVES:
+        errors.append(f"{prefix}: groove '{section['groove']}' invalid. Valid: {VALID_GROOVES}")
+
+    swing = section.get("swing")
+    if swing is not None and not (0.0 <= swing <= 0.75):
+        errors.append(f"{prefix}: swing {swing} out of range. Valid: 0.0–0.75")
+
+    humanize = section.get("humanize")
+    if humanize is not None and not (0.0 <= humanize <= 1.0):
+        errors.append(f"{prefix}: humanize {humanize} out of range. Valid: 0.0–1.0")
+
+    hr = section.get("harmony_rhythm")
+    if hr and isinstance(hr, dict):
+        hp = f"{prefix}.harmony_rhythm"
+        if hr.get("density") and hr["density"] not in VALID_DENSITIES:
+            errors.append(f"{hp}: density '{hr['density']}' invalid. Valid: {VALID_DENSITIES}")
+        if hr.get("groove") and hr["groove"] not in VALID_GROOVES:
+            errors.append(f"{hp}: groove '{hr['groove']}' invalid. Valid: {VALID_GROOVES}")
+        hr_swing = hr.get("swing")
+        if hr_swing is not None and not (0.0 <= hr_swing <= 0.75):
+            errors.append(f"{hp}: swing {hr_swing} out of range. Valid: 0.0–0.75")
+        hr_humanize = hr.get("humanize")
+        if hr_humanize is not None and not (0.0 <= hr_humanize <= 1.0):
+            errors.append(f"{hp}: humanize {hr_humanize} out of range. Valid: 0.0–1.0")
+        if hr.get("note_duration"):
+            valid_durations = ["whole", "half", "quarter", "eighth"]
+            if hr["note_duration"] not in valid_durations:
+                errors.append(f"{hp}: note_duration '{hr['note_duration']}' invalid. Valid: {valid_durations}")
+
+    # Drum validation
+    drums_config = section.get("drums")
+    if drums_config:
+        if isinstance(drums_config, str):
+            pattern = drums_config
+        else:
+            pattern = drums_config.get("pattern") if isinstance(drums_config, dict) else None
+
+        if pattern and pattern not in VALID_DRUM_PATTERNS:
+            errors.append(
+                f"{prefix}: drum pattern '{pattern}' invalid. "
+                f"Valid: {VALID_DRUM_PATTERNS}"
+            )
+
+        if isinstance(drums_config, dict):
+            velocity = drums_config.get("velocity")
+            if velocity is not None and not (0 <= velocity <= 127):
+                errors.append(
+                    f"{prefix}: drums velocity {velocity} out of range. Valid: 0–127"
+                )
+
+    return errors
+
+
 def validate_piece(piece: dict, theme: dict) -> list:
     errors = []
-    if "sections" not in piece or not piece["sections"]:
-        errors.append("piece.sections is required and must be non-empty")
-        return errors
 
+    # Determine form type (song or narrative)
+    form_type = piece.get("form_type", "narrative")
+
+    if form_type == "song":
+        # Song form mode
+        if "form" not in piece or not piece["form"]:
+            errors.append("piece.form is required for song form")
+            return errors
+        if "sections" not in piece or not piece["sections"]:
+            errors.append("piece.sections dict is required for song form")
+            return errors
+
+        # Validate form array references
+        sections_dict = piece["sections"]
+        for form_item in piece["form"]:
+            if isinstance(form_item, dict):
+                section_name = form_item.get("section")
+                variation = form_item.get("variation", 0.0)
+                if not (0.0 <= variation <= 1.0):
+                    errors.append(f"form item section '{section_name}': variation {variation} out of range. Valid: 0.0–1.0")
+            else:
+                section_name = form_item
+
+            if section_name not in sections_dict:
+                errors.append(f"form references undefined section: '{section_name}'")
+
+        # Validate each section definition in the dict
+        for section_name, section in sections_dict.items():
+            prefix = f"sections['{section_name}']"
+            section_errors = _validate_section(section, prefix)
+            errors.extend(section_errors)
+    else:
+        # Narrative mode
+        if "sections" not in piece or not piece["sections"]:
+            errors.append("piece.sections is required and must be non-empty")
+            return errors
+
+        # Validate each section in the list
+        for i, section in enumerate(piece["sections"]):
+            prefix = f"sections[{i}] '{section.get('name', '?')}'"
+            section_errors = _validate_section(section, prefix)
+            errors.extend(section_errors)
+
+    # Check tempo range
     tempo = piece.get("tempo")
     if tempo is not None:
         t = theme.get("tempo", {})
@@ -73,78 +199,6 @@ def validate_piece(piece: dict, theme: dict) -> list:
                     f"piece.tempo {tempo} is outside theme range "
                     f"{t['min']}–{t['max']} BPM (proceeding anyway)"
                 )
-
-    for i, section in enumerate(piece["sections"]):
-        prefix = f"sections[{i}] '{section.get('name', '?')}'"
-        if "progression" not in section or not section["progression"]:
-            errors.append(f"{prefix}: progression is required")
-        if "bars" not in section:
-            errors.append(f"{prefix}: bars is required")
-        chord_bars = section.get("chord_bars")
-        if chord_bars is not None:
-            prog = section.get("progression", [])
-            if len(chord_bars) != len(prog):
-                errors.append(
-                    f"{prefix}: chord_bars has {len(chord_bars)} entries "
-                    f"but progression has {len(prog)} chords — must match"
-                )
-            bars_total = section.get("bars", 0)
-            cb_sum = sum(chord_bars)
-            if abs(cb_sum - bars_total) > 0.01:
-                errors.append(
-                    f"{prefix}: chord_bars sum ({cb_sum}) does not match "
-                    f"bars ({bars_total}) (proceeding anyway)"
-                )
-        if section.get("density") and section["density"] not in VALID_DENSITIES:
-            errors.append(f"{prefix}: density '{section['density']}' invalid. Valid: {VALID_DENSITIES}")
-        if section.get("melody") and section["melody"] not in VALID_BEHAVIORS:
-            errors.append(f"{prefix}: melody behavior '{section['melody']}' invalid. Valid: {VALID_BEHAVIORS}")
-        if section.get("bass_style") and section["bass_style"] not in VALID_BASS_STYLES:
-            errors.append(f"{prefix}: bass_style '{section['bass_style']}' invalid. Valid: {VALID_BASS_STYLES}")
-        if section.get("arc") and section["arc"] not in VALID_ARCS:
-            errors.append(f"{prefix}: arc '{section['arc']}' invalid. Valid: {VALID_ARCS}")
-        if section.get("groove") and section["groove"] not in VALID_GROOVES:
-            errors.append(f"{prefix}: groove '{section['groove']}' invalid. Valid: {VALID_GROOVES}")
-        swing = section.get("swing")
-        if swing is not None and not (0.0 <= swing <= 0.75):
-            errors.append(f"{prefix}: swing {swing} out of range. Valid: 0.0–0.75")
-        humanize = section.get("humanize")
-        if humanize is not None and not (0.0 <= humanize <= 1.0):
-            errors.append(f"{prefix}: humanize {humanize} out of range. Valid: 0.0–1.0")
-        hr = section.get("harmony_rhythm")
-        if hr and isinstance(hr, dict):
-            hp = f"{prefix}.harmony_rhythm"
-            if hr.get("density") and hr["density"] not in VALID_DENSITIES:
-                errors.append(f"{hp}: density '{hr['density']}' invalid. Valid: {VALID_DENSITIES}")
-            if hr.get("groove") and hr["groove"] not in VALID_GROOVES:
-                errors.append(f"{hp}: groove '{hr['groove']}' invalid. Valid: {VALID_GROOVES}")
-            hr_swing = hr.get("swing")
-            if hr_swing is not None and not (0.0 <= hr_swing <= 0.75):
-                errors.append(f"{hp}: swing {hr_swing} out of range. Valid: 0.0–0.75")
-            hr_humanize = hr.get("humanize")
-            if hr_humanize is not None and not (0.0 <= hr_humanize <= 1.0):
-                errors.append(f"{hp}: humanize {hr_humanize} out of range. Valid: 0.0–1.0")
-        
-        # Drum validation
-        drums_config = section.get("drums")
-        if drums_config:
-            if isinstance(drums_config, str):
-                pattern = drums_config
-            else:
-                pattern = drums_config.get("pattern") if isinstance(drums_config, dict) else None
-            
-            if pattern and pattern not in VALID_DRUM_PATTERNS:
-                errors.append(
-                    f"{prefix}: drum pattern '{pattern}' invalid. "
-                    f"Valid: {VALID_DRUM_PATTERNS}"
-                )
-            
-            if isinstance(drums_config, dict):
-                velocity = drums_config.get("velocity")
-                if velocity is not None and not (0 <= velocity <= 127):
-                    errors.append(
-                        f"{prefix}: drums velocity {velocity} out of range. Valid: 0–127"
-                    )
 
     return errors
 
@@ -186,10 +240,26 @@ def display_info(theme: dict, piece: dict) -> None:
 
     print(f"\n  PIECE:  {piece.get('title', '(untitled)')}")
     print(f"  Tempo:  {bpm} BPM")
-    print(f"  Sections:")
+
+    form_type = piece.get("form_type", "narrative")
+    if form_type == "song":
+        print(f"  Form:   song")
+        print(f"  Form array:")
+        for form_item in piece.get("form", []):
+            if isinstance(form_item, dict):
+                section_name = form_item.get("section", "?")
+                variation = form_item.get("variation", 0.0)
+                print(f"    - {section_name} (variation={variation})")
+            else:
+                print(f"    - {form_item}")
+        print(f"  Section definitions:")
+        sections_to_display = piece.get("sections", {}).values()
+    else:
+        print(f"  Sections:")
+        sections_to_display = piece.get("sections", [])
 
     total_bars = 0
-    for s in piece.get("sections", []):
+    for s in sections_to_display:
         bars = s.get("bars", 0)
         total_bars += bars
         prog = " → ".join(s.get("progression", []))
@@ -221,8 +291,11 @@ def display_info(theme: dict, piece: dict) -> None:
                 hr_parts.append(f"swing={hr['swing']}")
             if hr.get("humanize"):
                 hr_parts.append(f"humanize={hr['humanize']}")
-            print(f"      harmony_rhythm: {', '.join(hr_parts)}")
-        
+            if hr.get("note_duration"):
+                hr_parts.append(f"note_duration={hr['note_duration']}")
+            if hr_parts:
+                print(f"      harmony_rhythm: {', '.join(hr_parts)}")
+
         drums_config = s.get("drums")
         if drums_config:
             if isinstance(drums_config, str):

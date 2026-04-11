@@ -201,6 +201,7 @@ def generate_generative(
     prev_note: Optional[int],
     base_velocity: int,
     seed: Optional[int],
+    context: Optional[dict] = None,  # NEW
 ) -> list[MelodyNote]:
     """Freely picks notes from weighted pool of chord + scale tones."""
     if seed is not None:
@@ -239,6 +240,7 @@ def generate_lyrical(
     prev_note: Optional[int],
     base_velocity: int,
     seed: Optional[int],
+    context: Optional[dict] = None,  # NEW
 ) -> list[MelodyNote]:
     """Stepwise motion, gravitates toward chord tones, longer phrases."""
     if seed is not None:
@@ -247,7 +249,14 @@ def generate_lyrical(
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
 
-    for ev in rhythm_events:
+    # NEW: Get next chord tones for look-ahead at phrase end
+    next_chord_tones = chord_tones
+    if context and context.get("next_chord"):
+        next_chord_tones = get_chord_tones_in_register(
+            context["next_chord"], MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
+        )
+
+    for i, ev in enumerate(rhythm_events):
         if ev.is_rest:
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
@@ -260,6 +269,11 @@ def generate_lyrical(
         candidates = stepwise + chord_nearby
         if not candidates:
             candidates = scale_tones
+
+        # NEW: Near the end, bias toward next chord's tones
+        is_last_note = (i == len(rhythm_events) - 1)
+        if is_last_note and context and next_chord_tones != chord_tones:
+            candidates.extend(next_chord_tones)
 
         # Small directional bias to avoid pure random walk
         direction = random.choice([-1, 1])
@@ -283,6 +297,7 @@ def generate_sparse(
     prev_note: Optional[int],
     base_velocity: int,
     seed: Optional[int],
+    context: Optional[dict] = None,  # NEW
 ) -> list[MelodyNote]:
     """Wide intervals, few notes, lots of space. Very ambient."""
     if seed is not None:
@@ -316,6 +331,7 @@ def generate_develop(
     base_velocity: int,
     seed: Optional[int],
     motif: Optional[dict] = None,
+    context: Optional[dict] = None,  # NEW
 ) -> list[MelodyNote]:
     """
     Applies motif transforms to generate melodic material.
@@ -324,7 +340,7 @@ def generate_develop(
     if motif is None or not motif.get("intervals"):
         return generate_generative(
             rhythm_events, chord, scale_tones, chord_tones,
-            prev_note, base_velocity, seed
+            prev_note, base_velocity, seed, context
         )
 
     if seed is not None:
@@ -399,6 +415,8 @@ def generate_melody(
     swing: float = 0.0,
     humanize: float = 0.0,
     seed: Optional[int] = None,
+    context: Optional[dict] = None,  # NEW: chord context for statefulness
+    rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events (skip get_pattern)
 ) -> list[MelodyNote]:
     """
     Generate a melodic line over a single chord.
@@ -420,6 +438,7 @@ def generate_melody(
         swing:          Swing ratio (0.0=straight, 0.67=triplet)
         humanize:       Humanization amount (0.0–1.0)
         seed:           Random seed
+        rhythm_events_override: Pre-computed rhythm events from prosodic lens (skips get_pattern)
 
     Returns:
         List of MelodyNote
@@ -429,8 +448,13 @@ def generate_melody(
 
     scale_tones = get_scale_tones(key, mode, octave_bottom, octave_top)
     chord_tones = get_chord_tones_in_register(chord, octave_bottom, octave_top)
-    rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
-                                groove=groove, beats_per_bar=beats_per_bar, seed=seed)
+
+    # Use prosodic rhythm if provided, otherwise get_pattern
+    if rhythm_events_override is not None:
+        rhythm_events = rhythm_events_override
+    else:
+        rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
+                                    groove=groove, beats_per_bar=beats_per_bar, seed=seed)
 
     # Apply swing and humanize to melody rhythm
     if swing and swing > 0:
@@ -442,10 +466,10 @@ def generate_melody(
 
     if behavior == "develop":
         return fn(rhythm_events, chord, scale_tones, chord_tones,
-                  prev_note, base_velocity, seed, motif)
+                  prev_note, base_velocity, seed, motif, context)
     else:
         return fn(rhythm_events, chord, scale_tones, chord_tones,
-                  prev_note, base_velocity, seed)
+                  prev_note, base_velocity, seed, context)
 
 
 def generate_melody_for_progression(
@@ -462,6 +486,8 @@ def generate_melody_for_progression(
     swing: float = 0.0,
     humanize: float = 0.0,
     seed: Optional[int] = None,
+    section_name: str = "",  # NEW: section context
+    rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events per chord
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -469,6 +495,9 @@ def generate_melody_for_progression(
 
     Args:
         bars_per_chord: Float (uniform) or list[float] (per-chord durations).
+        section_name: Name of section for context-aware generation.
+        rhythm_events_override: Pre-computed rhythm events for the FULL progression.
+            When provided, events are sliced per chord by beat range.
 
     Returns:
         Flat list of MelodyNote spanning the entire progression
@@ -486,6 +515,40 @@ def generate_melody_for_progression(
     for i, chord in enumerate(chords):
         total_beats = bpc_list[i] * beats_per_bar
         chord_seed = (seed + i) if seed is not None else None
+
+        # NEW: Build chord context for this position in progression
+        chord_context = {
+            "chord_index": i,
+            "total_chords": len(chords),
+            "next_chord": chords[(i + 1) % len(chords)],
+            "next_chord_root": chords[(i + 1) % len(chords)].root_name,
+            "bars_in_this_chord": bpc_list[i],
+            "bars_in_next_chord": bpc_list[(i + 1) % len(chords)],
+            "section_name": section_name,
+        }
+
+        # Slice prosodic rhythm events for this chord's time window
+        chord_rhythm = None
+        if rhythm_events_override is not None:
+            chord_end = beat_offset + total_beats
+            chord_rhythm = []
+            for ev in rhythm_events_override:
+                if ev.start_beat >= beat_offset and ev.start_beat < chord_end:
+                    # Shift to local beat (relative to chord start)
+                    from intervals.music.rhythm import RhythmEvent
+                    local_start = ev.start_beat - beat_offset
+                    # Trim duration if it would exceed chord boundary
+                    local_dur = min(ev.duration_beats, total_beats - local_start)
+                    chord_rhythm.append(RhythmEvent(
+                        start_beat=local_start,
+                        duration_beats=max(0.25, local_dur),
+                        velocity_scale=ev.velocity_scale,
+                        is_rest=ev.is_rest,
+                    ))
+            # If no events landed in this chord window, don't override
+            if not chord_rhythm:
+                chord_rhythm = None
+
         notes = generate_melody(
             chord, key, mode,
             behavior=behavior,
@@ -499,6 +562,8 @@ def generate_melody_for_progression(
             swing=swing,
             humanize=humanize,
             seed=chord_seed,
+            context=chord_context,
+            rhythm_events_override=chord_rhythm,
         )
         # Offset beat positions
         for n in notes:

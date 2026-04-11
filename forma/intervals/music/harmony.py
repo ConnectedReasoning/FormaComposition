@@ -118,15 +118,29 @@ def get_scale(key: str, mode: str, octave: int = 4) -> list[int]:
 def parse_roman(roman: str) -> tuple[int, Optional[str]]:
     """
     Parse a Roman numeral string into (degree_index, quality_override_or_None).
+    Supports chromatic alterations with 'b' (flat) and '#' (sharp) prefixes.
+
     Examples:
         "i"      → (0, None)
         "IV"     → (3, None)
         "iim7"   → (1, "minor7")
         "Vmaj9"  → (4, "major9")
         "viidim" → (6, "diminished")
+        "bVI"    → (5, None)  [VI lowered by semitone]
+        "#iv"    → (3, None)  [iv raised by semitone]
+        "bVImaj7" → (5, "major7")  [alteration + quality]
     """
     # Strip leading/trailing whitespace
     roman = roman.strip()
+
+    # Check for chromatic alteration prefix
+    alteration = 0  # -1 for flat, +1 for sharp
+    if roman.startswith('b'):
+        alteration = -1
+        roman = roman[1:]
+    elif roman.startswith('#'):
+        alteration = 1
+        roman = roman[1:]
 
     # Extract the base Roman numeral (uppercase comparison)
     upper = roman.upper()
@@ -139,6 +153,11 @@ def parse_roman(roman: str) -> tuple[int, Optional[str]]:
         raise ValueError(f"Cannot parse Roman numeral: '{roman}'")
 
     degree = ROMAN_TO_DEGREE[base.upper()]
+
+    # Apply chromatic alteration
+    # In a 7-degree system, alterations wrap: bI → VII, #VII → I, etc.
+    degree = (degree + alteration) % 7
+
     remainder = roman[len(base):]  # anything after the numeral
 
     # Check for explicit quality symbol
