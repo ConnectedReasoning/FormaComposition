@@ -474,6 +474,7 @@ def generate_section(
         seed=base_seed + seed_offset,
         section_name=section.get("name", ""),
         rhythm_events_override=melody_rhythm_events,
+        fugal_techniques=section_dict.get("fugal_techniques"),
     )
 
     # Record melody snapshot for counterpoint and next-section memory

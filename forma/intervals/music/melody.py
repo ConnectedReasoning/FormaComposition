@@ -488,6 +488,7 @@ def generate_melody_for_progression(
     seed: Optional[int] = None,
     section_name: str = "",  # NEW: section context
     rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events per chord
+    fugal_techniques: Optional[dict] = None,  # NEW: fugal technique flags
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -498,6 +499,7 @@ def generate_melody_for_progression(
         section_name: Name of section for context-aware generation.
         rhythm_events_override: Pre-computed rhythm events for the FULL progression.
             When provided, events are sliced per chord by beat range.
+        fugal_techniques: Optional dict with keys like "motif_transform", "stretto_compression", etc.
 
     Returns:
         Flat list of MelodyNote spanning the entire progression
@@ -507,6 +509,32 @@ def generate_melody_for_progression(
         bpc_list = [float(bars_per_chord)] * len(chords)
     else:
         bpc_list = list(bars_per_chord)
+
+    # Apply fugal techniques to motif if specified
+    effective_motif = motif
+    if fugal_techniques and motif:
+        from intervals.music.motif import transform as transform_motif, from_dict as motif_from_dict, to_dict as motif_to_dict
+        
+        # Convert dict to Motif object if needed
+        if isinstance(motif, dict):
+            motif_obj = motif_from_dict(motif)
+        else:
+            motif_obj = motif
+        
+        # Apply motif_transform if specified
+        transform_name = fugal_techniques.get("motif_transform")
+        if transform_name and transform_name != "none":
+            motif_obj = transform_motif(motif_obj, transform_name, seed=seed)
+        
+        # Apply stretto_compression to rhythm if specified
+        compression = fugal_techniques.get("stretto_compression")
+        if compression and compression != 1.0:
+            # Scale all rhythm values by compression factor
+            compressed_rhythm = [r * compression for r in motif_obj.rhythm]
+            motif_obj.rhythm = compressed_rhythm
+        
+        # Convert back to dict for use in generate_melody
+        effective_motif = motif_to_dict(motif_obj)
 
     all_notes = []
     prev_note = None
@@ -556,7 +584,7 @@ def generate_melody_for_progression(
             total_beats=total_beats,
             base_velocity=base_velocity,
             prev_note=prev_note,
-            motif=motif,
+            motif=effective_motif,
             groove=groove,
             beats_per_bar=beats_per_bar,
             swing=swing,
