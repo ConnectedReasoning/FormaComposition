@@ -1,0 +1,103 @@
+{
+  "title": "Glass Cathedral",
+  "tempo": 66,
+  "transform_sequence": [
+    "original",
+    "inversion",
+    "augmentation",
+    "diminution",
+    "retrograde",
+    "original"
+  ],
+  "sections": [
+    {
+      "name": "threshold",
+      "bars": 8,
+      "progression": ["i", "VI"],
+      "density": "sparse",
+      "melody": "sparse",
+      "bass_style": "pedal",
+      "arc": "fade_in",
+      "harmony_rhythm": {
+        "note_duration": "whole"
+      }
+    },
+    {
+      "name": "nave",
+      "bars": 16,
+      "progression": ["i", "VII", "III", "iv"],
+      "density": "medium",
+      "melody": "lyrical",
+      "bass_style": "root_fifth",
+      "arc": "swell",
+      "groove": "straight",
+      "swing": 0.12,
+      "humanize": 0.08
+    },
+    {
+      "name": "light",
+      "bars": 12,
+      "progression": ["VI", "III", "VII"],
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "walking",
+      "arc": "swell",
+      "counterpoint": {
+        "species": "free",
+        "register": "below",
+        "dissonance": "passing",
+        "velocity": 52
+      },
+      "groove": "syncopated",
+      "swing": 0.18,
+      "humanize": 0.10
+    },
+    {
+      "name": "resonance",
+      "bars": 16,
+      "progression": ["iv", "i", "v", "VI"],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "melodic",
+      "arc": "swell",
+      "counterpoint": {
+        "species": "free",
+        "register": "above",
+        "dissonance": "passing",
+        "velocity": 56
+      },
+      "drums": "minimal",
+      "harmony_rhythm": {
+        "density": "medium",
+        "groove": "straight"
+      },
+      "groove": "driving",
+      "swing": 0.15,
+      "humanize": 0.12
+    },
+    {
+      "name": "clearing",
+      "bars": 12,
+      "progression": ["VII", "iv", "i"],
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "root_fifth",
+      "arc": "fade_out",
+      "groove": "straight",
+      "swing": 0.08,
+      "humanize": 0.06
+    },
+    {
+      "name": "stillness",
+      "bars": 8,
+      "progression": ["iv", "i"],
+      "density": "sparse",
+      "melody": "sparse",
+      "bass_style": "pedal",
+      "arc": "fade_out",
+      "harmony_rhythm": {
+        "note_duration": "whole"
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "theme":{
+    "name":"Simple Theme",
+    "key": "D",
+    "mode": "mixolydian",
+    "tempo": { "min":90, "max": 120 }
+  }
+}

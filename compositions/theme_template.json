@@ -1,0 +1,38 @@
+{
+  "_comment": "FormaComposition — Theme Template. The theme defines musical identity. Multiple compositions can share one theme.",
+
+  "theme": {
+    "name": "Untitled Theme",
+
+    "_comment_key": "Any note: C, C#, D, Eb, E, F, F#, G, Ab, A, Bb, B",
+    "key": "D",
+
+    "_comment_mode": "ionian (major, bright) | dorian (dark+warm) | phrygian (spanish, dark) | lydian (floating, luminous) | mixolydian (bluesy, rock) | aeolian (minor, melancholic) | locrian (unstable, tense)",
+    "mode": "dorian",
+
+    "tempo": { "min": 60, "max": 80 },
+
+    "_comment_motif": "The melodic seed. Hand-craft intervals or use phrase (below) for prosody. If both exist, motif wins.",
+    "motif": {
+      "name": "my_motif",
+
+      "_comment_intervals": "Semitone steps between notes. Positive = up, negative = down. Hum a phrase, write the movement.",
+      "intervals": [2, -1, 3, -2],
+
+      "_comment_rhythm": "Duration in beats per note. 1.0 = quarter, 0.5 = eighth, 2.0 = half.",
+      "rhythm": [1.0, 0.5, 0.5, 1.0],
+
+      "_comment_transform_pool": "Available transforms for 'develop' melody behavior.",
+      "_valid_transforms": "inversion | retrograde | augmentation | diminution | transpose_up | transpose_down | shuffle | expand | compress | retrograde_inversion",
+      "transform_pool": ["inversion", "retrograde", "augmentation"]
+    },
+
+    "_comment_phrase": "Alternative to motif. A word or phrase whose speech rhythm becomes the melodic seed. Uses CMU Pronouncing Dictionary.",
+    "_phrase_example": "Rebecca",
+
+    "_comment_prosodic_rhythm": "When true + phrase is set, all voices derive rhythmic impulse from the phrase's stress pattern.",
+    "_prosodic_rhythm": false,
+
+    "_comment_notes": "Free text for your own reference."
+  }
+}

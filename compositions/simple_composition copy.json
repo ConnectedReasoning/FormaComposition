@@ -1,0 +1,54 @@
+{
+  "title":"Simple Composition",
+  "tempo":100,
+  "transform_sequence":[
+    "original", "inversion"
+  ],
+  "sections":[
+    {
+      "name":"first",
+      "bars": 8,
+      "progression": ["I", "I", "V", "VII"],
+      "rhythm_pattern": {
+        "onsets": [0.0, 0.5, 1.0, 1.5, 3.0, 4.0, 5.0, 5.5],
+        "durations": [0.25, 0.5, 0.5, 1.5, 1.25, 1.0, 0.5, 1.5],
+        "velocities": [0.25, 0.83, 0.31, 0.18, 0.25, 0.62, 0.28, 0.43],
+        "length_beats": 8.0
+      },
+      "density": "medium",
+      "harmony_rhythm": {
+        "note_duration": "whole"
+      }
+    },
+    {
+      "name":"second",
+      "bars": 8,
+      "progression": ["I", "I", "V", "VII"],
+      "rhythm_pattern": {
+        "onsets": [0.0, 0.5, 1.0, 1.5, 3.0, 4.0, 5.0, 5.5],
+        "durations": [0.25, 0.5, 0.5, 1.5, 1.25, 1.0, 0.5, 1.5],
+        "velocities": [0.25, 0.83, 0.31, 0.18, 0.25, 0.62, 0.28, 0.43],
+        "length_beats": 8.0
+      },
+      "density": "full",
+      "harmony_rhythm": {
+        "note_duration": "whole"
+      }
+    },
+    {
+      "name":"third",
+      "bars": 8,
+      "progression": ["I", "I", "V", "VII"],
+      "rhythm_pattern": {
+        "onsets": [0.0, 0.5, 1.0, 1.5, 3.0, 4.0, 5.0, 5.5],
+        "durations": [0.25, 0.5, 0.5, 1.5, 1.25, 1.0, 0.5, 1.5],
+        "velocities": [0.25, 0.83, 0.31, 0.18, 0.25, 0.62, 0.28, 0.43],
+        "length_beats": 8.0
+      },
+      "density": "full",
+      "harmony_rhythm": {
+        "note_duration": "whole"
+      }
+    }
+  ]
+}

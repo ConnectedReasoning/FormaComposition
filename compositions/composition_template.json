@@ -1,0 +1,143 @@
+{
+  "_comment": "FormaComposition — Base Template. Copy this file and fill in your values. Remove fields you don't need — the engine uses sensible defaults. Fields marked (required) must be present.",
+
+  "title": "Untitled Piece",
+  "tempo": 66,
+
+  "_valid_form_types": "narrative | song",
+  "_note_narrative": "narrative = sections play in order (default). song = sections dict + form array with variation.",
+
+  "sections": [
+    {
+      "_comment": "── SECTION 1: Opening ──",
+      "name": "opening",
+
+      "_comment_bars": "Total bars. Ignored if chord_bars is set.",
+      "bars": 8,
+
+      "_comment_progression": "Roman numerals. Uppercase = major, lowercase = minor. Suffixes: m7, maj7, dim, aug, 9, 11, 13",
+      "progression": ["i", "VII", "iv", "v"],
+
+      "_comment_chord_bars": "Per-chord bar durations. Must match progression length. Omit for even split.",
+      "_chord_bars_example": [3, 2, 2, 1],
+
+      "_comment_density": "sparse | medium | full",
+      "_density_notes": "sparse = triads, whole notes. medium = 7th chords, half notes. full = extensions, quarter notes.",
+      "density": "sparse",
+
+      "_comment_melody": "generative | lyrical | sparse | develop",
+      "_melody_notes": "generative = ambient wandering. lyrical = singable stepwise. sparse = wide leaps, few notes. develop = motif transforms.",
+      "melody": "sparse",
+
+      "_comment_bass_style": "root_only | root_fifth | walking | pulse | pedal | melodic | steady",
+      "_bass_notes": "root_only = whole note root. root_fifth = alternating. walking = stepwise. pulse = repeated quarter. pedal = tonic drone. melodic = independent line.",
+      "bass_style": "pedal",
+
+      "_comment_arc": "flat | swell | fade_in | fade_out | breath",
+      "_arc_notes": "flat = constant. swell = build to middle, release. fade_in = emerge from silence. fade_out = dissolve. breath = two gentle waves.",
+      "arc": "fade_in",
+
+      "_comment_beats_per_bar": "Default 4. Set to 3 for waltz, 6 for compound.",
+      "_beats_per_bar": 4,
+
+      "_comment_groove": "straight | push | backbeat | syncopated | halftime | shuffle | broken | clave | waltz | offbeat | driving",
+      "_groove_notes": "Omit for density-based grid rhythm. Groove overrides the grid.",
+
+      "_comment_swing": "0.0 = straight, 0.12 = subtle lilt, 0.5 = moderate, 0.67 = triplet",
+      "_swing": 0.0,
+
+      "_comment_humanize": "0.0 = robotic, 0.05-0.1 = subtle, 0.2+ = loose",
+      "_humanize": 0.0,
+
+      "_comment_harmony_rhythm": "Override harmony rhythm independently from melody.",
+      "_harmony_rhythm_example": {
+        "note_duration": "whole",
+        "_valid_note_duration": "whole | half | quarter | eighth",
+        "_note_duration_notes": "When set, harmony sustains for this duration instead of using density/groove.",
+        "density": "medium",
+        "groove": "straight",
+        "swing": 0.0,
+        "humanize": 0.0
+      },
+
+      "_comment_rhythm_pattern": "Hand-played melody rhythm from rhythm_extract.py. Overrides groove and prosodic rhythm.",
+      "_rhythm_pattern_example": {
+        "onsets": [0.0, 0.5, 1.0, 1.5, 3.0, 4.0, 5.0, 5.5],
+        "durations": [0.25, 0.5, 0.5, 1.5, 1.25, 1.0, 0.5, 1.5],
+        "velocities": [0.25, 0.83, 0.31, 0.18, 0.25, 0.62, 0.28, 0.43],
+        "length_beats": 8.0
+      },
+
+      "_comment_harmony_pattern": "Hand-played harmony rhythm. Same format as rhythm_pattern.",
+
+      "_comment_counterpoint": "Omit entirely if no counterpoint wanted.",
+      "_counterpoint_example": {
+        "species": "free",
+        "_valid_species": "first | free",
+        "register": "below",
+        "_valid_register": "above | below",
+        "dissonance": "passing",
+        "_valid_dissonance": "none | passing | free",
+        "velocity": 52,
+        "_canon_offset": 3.0,
+        "_canon_offset_notes": "Beats to delay counterpoint entry (canon/round effect). Only active when prosodic_rhythm is on."
+      },
+
+      "_comment_drums": "Omit for no drums. String = pattern name, or dict with pattern key.",
+      "_drums_example": "minimal",
+      "_valid_drums": "four_on_floor | backbeat | minimal | sparse | driving",
+
+      "_comment_notes": "Free text for your own reference. Not used by the engine."
+    },
+
+    {
+      "_comment": "── SECTION 2: Growth ──",
+      "name": "growth",
+      "bars": 16,
+      "progression": ["i", "III", "VII", "i"],
+      "density": "medium",
+      "melody": "lyrical",
+      "bass_style": "root_fifth",
+      "arc": "swell"
+    },
+
+    {
+      "_comment": "── SECTION 3: Peak ──",
+      "name": "peak",
+      "bars": 16,
+      "progression": ["iv", "i", "v", "VI"],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "walking",
+      "arc": "swell",
+      "counterpoint": {
+        "species": "free",
+        "register": "below",
+        "dissonance": "passing",
+        "velocity": 52
+      }
+    },
+
+    {
+      "_comment": "── SECTION 4: Breath ──",
+      "name": "breath",
+      "bars": 8,
+      "progression": ["iv", "i"],
+      "density": "sparse",
+      "melody": "generative",
+      "bass_style": "pedal",
+      "arc": "breath"
+    },
+
+    {
+      "_comment": "── SECTION 5: Close ──",
+      "name": "close",
+      "bars": 8,
+      "progression": ["iv", "i"],
+      "density": "sparse",
+      "melody": "sparse",
+      "bass_style": "root_only",
+      "arc": "fade_out"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "theme": {
+    "name": "Glass Cathedral",
+    "key": "A",
+    "mode": "aeolian",
+    "tempo": { "min": 62, "max": 72 },
+    "phrase": "Glass Cathedral",
+    "prosodic_rhythm": true,
+    "motif": {
+      "name": "glass_cathedral",
+      "intervals": [3, 2, -1, -2, 5],
+      "rhythm": [1.5, 0.5, 1.0, 0.5, 1.5],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "augmentation",
+        "diminution",
+        "transpose_up"
+      ]
+    }
+  }
+}

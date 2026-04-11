@@ -1,0 +1,28 @@
+{
+  "piece": {
+    "title": "Skyline",
+    "theme": "Skyline",
+    "tempo": 83,
+    "form_type": "song",
+    "notes": "An instrumental song about watching the city from above. F major, warm and open. Classic verse-chorus-bridge structure with clear repetition (hooks) and subtle variation (living melody). The chorus is the view—sparse, wide, unchanging. Verses explore the journey. Bridge breaks the pattern. Uses song form to create listener expectation and payoff.",
+    "form": [
+      { "section": "verse_A", "variation": 0.0 }
+    ],
+    "sections": {
+      "verse_A": {
+        "name": "verse_A",
+        "bars": 12,
+        "progression": ["I", "V", "vi", "IV"],
+        "chord_bars": [2, 4, 2, 4],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "harmony_rhythm": {
+          "note_duration": "half"
+        },
+        "notes": "The climb up. I-V-vi-IV is the classic warm progression. Lyrical melody with root-fifth bass gives forward motion. Whole-note harmony blooms gently."
+      }
+    }
+  }
+}

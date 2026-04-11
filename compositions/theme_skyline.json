@@ -1,0 +1,16 @@
+{
+  "theme": {
+    "name": "Skyline",
+    "key": "F",
+    "mode": "ionian",
+    "tempo": { "min": 100, "max": 120 },
+    "motif": {
+      "name": "skyline",
+      "intervals": [2, 3, -2, 4, -1],
+      "rhythm": [1.0, 0.5, 1.0, 1.0, 0.5],
+      "transform_pool": ["inversion", "augmentation", "retrograde"],
+      "notes": "Rising gesture (2, 3 semitones up) that peaks and falls. The 'ascent and view' motif. Augmentation stretches the anticipation. Inversion questions the ascent. Retrograde collapses the descent."
+    },
+    "notes": "F major—warm, open, inviting. No chromatic color like Mixolydian. Pure major tonality for the bright daylight. The motif rises and falls like a skyline itself. Perfect for ambient instrumental that has clear emotional arc: climb, view, realization, fade."
+  }
+}
