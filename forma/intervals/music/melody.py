@@ -512,33 +512,69 @@ def generate_melody_for_progression(
 
     # Apply fugal techniques to motif if specified
     effective_motif = motif
-    if fugal_techniques and motif:
+    fugal_tech = fugal_techniques or {}
+
+    if fugal_tech and motif:
         from intervals.music.motif import transform as transform_motif, from_dict as motif_from_dict, to_dict as motif_to_dict
-        
+
         # Convert dict to Motif object if needed
         if isinstance(motif, dict):
             motif_obj = motif_from_dict(motif)
         else:
             motif_obj = motif
-        
-        # Apply motif_transform if specified
-        transform_name = fugal_techniques.get("motif_transform")
+
+        # ════════════════════════════════════════════════════════════
+        # MOTIF TRANSFORMS (inversion, retrograde, augmentation, etc.)
+        # ════════════════════════════════════════════════════════════
+
+        transform_name = fugal_tech.get("motif_transform")
         if transform_name and transform_name != "none":
-            motif_obj = transform_motif(motif_obj, transform_name, seed=seed)
-        
-        # Apply stretto_compression to rhythm if specified
-        compression = fugal_techniques.get("stretto_compression")
+            # Support multiple transform options from motif.py
+            valid_transforms = [
+                "inversion", "retrograde", "retrograde_inversion",
+                "augmentation", "diminution",
+                "transpose_up", "transpose_down",
+                "expand", "compress", "shuffle"
+            ]
+            if transform_name in valid_transforms:
+                motif_obj = transform_motif(motif_obj, transform_name, seed=seed)
+
+        # ════════════════════════════════════════════════════════════
+        # STRETTO COMPRESSION (rhythm scaling)
+        # ════════════════════════════════════════════════════════════
+
+        compression = fugal_tech.get("stretto_compression")
         if compression and compression != 1.0:
             # Scale all rhythm values by compression factor
-            compressed_rhythm = [r * compression for r in motif_obj.rhythm]
+            # Ensure minimum duration to avoid zero-length notes
+            compressed_rhythm = [max(0.125, r * compression) for r in motif_obj.rhythm]
             motif_obj.rhythm = compressed_rhythm
-        
+
+        # ════════════════════════════════════════════════════════════
+        # SUBJECT FRAGMENTATION (episodic development)
+        # ════════════════════════════════════════════════════════════
+
+        fragment_size = fugal_tech.get("subject_fragmentation")
+        if fragment_size and isinstance(fragment_size, int) and fragment_size > 0:
+            # Use only first N intervals of the motif
+            n = min(fragment_size, len(motif_obj.intervals))
+            motif_obj.intervals = motif_obj.intervals[:n]
+            motif_obj.rhythm = motif_obj.rhythm[:n]
+            motif_obj.name = f"{motif_obj.name}_fragment_{n}"
+
         # Convert back to dict for use in generate_melody
         effective_motif = motif_to_dict(motif_obj)
 
     all_notes = []
     prev_note = None
     beat_offset = 0.0
+
+    # ════════════════════════════════════════════════════════════
+    # CANONIC IMITATION (offset voice entries like stretto)
+    # ════════════════════════════════════════════════════════════
+
+    canonic_imitation = fugal_tech.get("canonic_imitation", False) if fugal_tech else False
+    canon_interval = fugal_tech.get("canon_interval", 4) if fugal_tech else 4  # beats
 
     for i, chord in enumerate(chords):
         total_beats = bpc_list[i] * beats_per_bar
