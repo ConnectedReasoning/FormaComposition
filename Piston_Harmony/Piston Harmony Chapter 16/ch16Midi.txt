@@ -1,0 +1,9 @@
+ex1 — V7 alone, then V°9 (the Ab added), then resolution to major I, then resolution to minor i. The single added note (Ab) dramatically changes the chord's feel — V7 sounds like it wants to move, V°9 sounds like it must move.
+ex2 — the enharmonic paradox made audible: the same four pitches (B D F Ab) held while the resolution chord changes each time, pointing to C, then Eb, then Gb, then A. Identical sounds, four completely different harmonic meanings. This is the most striking demonstration in the chapter — the pitches don't change; the arrival does.
+ex3 — all four positions: B in bass, D in bass, F in bass, Ab in bass. Each resolves slightly differently due to the bass voice's direction, but the upper voices all follow the same tendency-tone logic.
+ex4 — secondary diminished sevenths: the main V°9 of C followed by V°9ofII, V°9ofV, V°9ofVI each resolving to their temporary tonic. The chromatic variety is striking — each brings different foreign notes into the C major context.
+ex5 — consecutive dim7s moving by half step. Three chords a semitone apart, each sounding like the previous but slightly shifted. The tonal suspension — the "where are we?" quality — is audible. The resolution at the end snaps the key back into focus.
+ex6 — modulation through dim7: C major to G major via V°9ofV. The F# A C Eb chord (secondary dim7 of G) is the pivot moment; when it resolves to G the ear accepts G as a new tonic.
+ex7 — a complete phrase weaving in the main V°9 and V°9ofVI as secondary dominant. The phrase stays in C throughout; the dim7s add intensity at specific moments without modulating.
+ex8 — the tension comparison: same harmonic context three times — with plain V7, with V°9, with V°9ofV as secondary dominant. A graduated tension scale: moderate, high, very high. The secondary dim7 version has the sharpest harmonic color because it introduces the most foreign notes (F# and Eb in C major).
+

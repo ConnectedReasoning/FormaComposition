@@ -1,0 +1,180 @@
+{
+  "piece": {
+    "title": "Threshold",
+    "theme": "Evening Water",
+    "tempo": 70,
+    "seed": 137,
+    "notes": "Full Sonata form using all Greenberg-inspired fugal techniques. A-minor based (Aeolian), exploring emotional journey from contemplation through urgency back to resolution. Demonstrates: subject/answer (inversion), development through retrograde and fragmentation, stretto compression for climax, and augmentation for coda reflection.",
+    "form_type": "narrative",
+    "sections": [
+      {
+        "name": "exposition_primary",
+        "bars": 16,
+        "progression": ["i", "III", "VII", "iv", "i"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none",
+          "velocity": 60
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "exposition_secondary",
+        "bars": 14,
+        "progression": ["VI", "II", "VII", "III"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 65
+        },
+        "fugal_techniques": {
+          "motif_transform": "inversion"
+        }
+      },
+      {
+        "name": "development_a_episodic",
+        "bars": 10,
+        "progression": ["v", "VI", "VII", "iv"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "passing",
+          "velocity": 62
+        },
+        "fugal_techniques": {
+          "motif_transform": "retrograde",
+          "subject_fragmentation": 2,
+          "stretto_compression": 0.85
+        }
+      },
+      {
+        "name": "development_b_intensification",
+        "bars": 10,
+        "progression": ["III", "vii", "i", "VII"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "steady",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "dissonant",
+          "velocity": 70
+        },
+        "fugal_techniques": {
+          "motif_transform": "retrograde_inversion",
+          "stretto_compression": 0.6,
+          "subject_fragmentation": 3
+        }
+      },
+      {
+        "name": "development_c_stretto_climax",
+        "bars": 8,
+        "progression": ["v", "VII", "iv", "v"],
+        "density": "full",
+        "melody": "sparse",
+        "bass_style": "steady",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "dissonant",
+          "velocity": 72
+        },
+        "fugal_techniques": {
+          "motif_transform": "retrograde",
+          "stretto_compression": 0.45
+        }
+      },
+      {
+        "name": "development_d_breath",
+        "bars": 10,
+        "progression": ["iv", "III", "iv", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "breath",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none",
+          "velocity": 58
+        },
+        "fugal_techniques": {
+          "motif_transform": "none",
+          "subject_fragmentation": 1
+        }
+      },
+      {
+        "name": "recapitulation_primary",
+        "bars": 16,
+        "progression": ["i", "III", "VII", "iv", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 64
+        },
+        "fugal_techniques": {
+          "motif_transform": "none"
+        }
+      },
+      {
+        "name": "recapitulation_secondary",
+        "bars": 14,
+        "progression": ["i", "III", "VII", "iv"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 62
+        },
+        "fugal_techniques": {
+          "motif_transform": "inversion"
+        }
+      },
+      {
+        "name": "coda_reflection",
+        "bars": 12,
+        "progression": ["i", "iv", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none",
+          "velocity": 56
+        },
+        "fugal_techniques": {
+          "motif_transform": "augmentation"
+        }
+      }
+    ]
+  }
+}

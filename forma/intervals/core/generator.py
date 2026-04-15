@@ -474,7 +474,7 @@ def generate_section(
         seed=base_seed + seed_offset,
         section_name=section.get("name", ""),
         rhythm_events_override=melody_rhythm_events,
-        fugal_techniques=section_dict.get("fugal_techniques"),
+        fugal_techniques=section.get("fugal_techniques"),
     )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -670,13 +670,13 @@ VALID_SECTION_KEYS = {
     "name", "bars", "chord_bars", "progression", "density", "melody",
     "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
     "swing", "humanize", "counterpoint", "notes", "percussion", "drums",
-    "rhythm_pattern", "harmony_pattern",
+    "rhythm_pattern", "harmony_pattern", "fugal_techniques",
 }
 
 OBSOLETE_THEME_KEYS = {"palette"}
 
 VALID_DENSITY    = {"low", "medium", "high", "sparse", "full"}
-VALID_MELODY_BEH = {"lyrical", "generative", "motif", "sparse", "flowing", "rhythmic", "develop"}
+VALID_MELODY_BEH = {"lyrical", "generative", "motif", "sparse", "rhythmic", "develop"}
 VALID_BASS_STYLE = {"root_fifth", "walking", "pedal", "arpeggiated", "sparse", "root_only", "melodic", "steady", "pulse"}
 VALID_ARC        = {"swell", "fade", "build", "plateau", "decay", "fade_in", "fade_out", "breath"}
 
