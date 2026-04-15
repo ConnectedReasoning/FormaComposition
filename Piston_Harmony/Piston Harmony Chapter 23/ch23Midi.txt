@@ -1,0 +1,12 @@
+9 files. The MIDI breakdown:
+
+ex1 — the core comparison: II6 → V → I (diatonic, clean) versus N6 → V → I (the Db F Ab triad landing before the dominant). That Db chord is immediately distinctive — a dark, subdominant shadow that makes the subsequent dominant resolution feel more inevitable and emotionally weighted.
+ex2 — N6 in its natural home, C minor: N6 vs II6 (the diminished supertonic chord in minor) in identical phrase contexts. The Neapolitan is clearly more expressive and characteristic in the minor mode.
+ex3 — the full cadential formula in both modes: N6 → I64 → V7 → I. The I64 inserted between N6 and V absorbs the cross-relation between Db and D, allowing smooth stepwise contrary motion in the upper voices while the bass ascends to G. This is the polished, classical-era Neapolitan approach.
+ex4 — N6 via dim7 (avoiding the cross-relation entirely): N6 → V°9 (B D F Ab — no D natural, so no Db/D conflict), then the same with V7 direct showing what the cross-relation sounds like. The dim7 route is smoother; the direct route has a characteristic Baroque friction that composers embraced.
+ex5 — root position Neapolitan in three versions: first inversion (traditional), root position (Db bass — bold, remote), then root position held for three bars creating a false modulation effect. The long-held root-position Neapolitan is one of the most striking harmonic effects in Beethoven and Schubert.
+ex6 — the Neapolitan as shadow in major: same cadential approach with and without N6. In C major, that Db chord is a sudden dark intrusion — audibly foreign — before the dominant restores direction. The contrast with the plain II6 version makes the coloristic effect clear.
+ex7 — modulation via Neapolitan: N6 of C minor (Db F Ab) reinterpreted as IV of Ab major, then Ab V → Ab I. The chord connects C minor and Ab major — keys a major third apart — as a natural pivot.
+ex8 — the complete two-phrase period: antecedent ending with half cadence (using diatonic II6), consequent replacing II6 with the Neapolitan for the full-cadential formula N6 → I64 → V7 → I. This is the Beethoven-era standard — the antecedent using conventional pre-dominant harmony, the consequent intensifying it with the Neapolitan.
+
+ex3 and ex8 are the most immediately usable for FormaComposition — just substituting N6 for II6 at the consequent cadence creates an immediate late-Classical harmonic character. Ch. 24 is the Augmented Sixth chords — the last major chromatic chord family before the end of the book.
