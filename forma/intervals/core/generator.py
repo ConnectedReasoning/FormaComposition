@@ -132,8 +132,6 @@ def build_harmony_track(
     """
     Build the harmony track — voiced chords with rhythmic timing from density.
     """
-    from intervals.music.rhythm import get_pattern, apply_velocity_arc
-
     track = MidiTrack()
     track.append(MetaMessage("track_name", name=TRACK_NAME_HARMONY, time=0))
     print(TRACK_NAME_HARMONY)
@@ -295,8 +293,6 @@ def rhythm_pattern_to_events(
     Returns:
         list[RhythmEvent]
     """
-    from intervals.music.rhythm import RhythmEvent
-
     onsets = pattern["onsets"]
     durations = pattern["durations"]
     velocities = pattern.get("velocities", [0.7] * len(onsets))
