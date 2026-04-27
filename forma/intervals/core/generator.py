@@ -30,7 +30,10 @@ from intervals.music.harmony  import resolve_progression, VoicedChord, CHROMATIC
 from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import generate_melody_for_progression, MelodyNote
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
-from intervals.music.rhythm   import apply_velocity_arc
+from intervals.music.rhythm   import (
+    apply_velocity_arc, apply_swing, apply_humanize,
+    get_pattern, RhythmEvent,
+)
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
 from intervals.music.prosody  import phrase_to_motif
 from intervals.music.percussion import generate_drums, DrumHit
@@ -802,6 +805,114 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Harmony rhythm resolution helpers
+# ---------------------------------------------------------------------------
+
+def _slice_events_into_window(
+    events: list,
+    window_start: float,
+    window_length: float,
+    min_duration: float = 0.25,
+) -> list:
+    """
+    Take a list of section-level RhythmEvents and return only those whose
+    start_beat falls inside [window_start, window_start + window_length),
+    translated to coordinates local to the window.
+
+    Events with duration shorter than `min_duration` after trimming at the
+    window boundary are dropped (boundary artifacts, not musical content).
+
+    Used by the harmony rhythm priority chain to extract the per-chord
+    portion of whole-section event streams (hand-played harmony_pattern,
+    prosodic harmony_lens). Returns an empty list if no events fall in the
+    window — the caller is responsible for any fallback behavior.
+    """
+    window_end = window_start + window_length
+    sliced = []
+    for ev in events:
+        if ev.start_beat < window_start or ev.start_beat >= window_end:
+            continue
+        local_start = ev.start_beat - window_start
+        local_dur = min(ev.duration_beats, window_length - local_start)
+        if local_dur < min_duration:
+            continue
+        sliced.append(RhythmEvent(
+            start_beat=local_start,
+            duration_beats=local_dur,
+            velocity_scale=ev.velocity_scale,
+            is_rest=ev.is_rest,
+        ))
+    return sliced
+
+
+def _resolve_harmony_rhythm(
+    section_dict: dict,
+    chord_index: int,
+    total_per_chord: float,
+    beat_offset_local: float,
+    beats_per_bar: int,
+    rhythm_template: Optional[RhythmicTemplate],
+    harmony_hand_events: Optional[list],
+    harmony_prosodic_events: Optional[list],
+    h_density: str,
+    h_groove: Optional[str],
+    h_note_duration: Optional[str],
+) -> list:
+    """
+    Return rhythm events for a single chord window, applying the harmony
+    rhythm priority chain.
+
+    Current priority order (highest first):
+      1) harmony_pattern   — hand-played whole-section pattern, sliced
+      2) note_duration     — single sustained event per chord
+      3) prosodic lens     — phrase-driven harmony_lens, sliced
+      4) get_pattern()     — density-based grid fallback
+
+    NOTE: Priorities 2 and 3 are currently in this order to preserve existing
+    behavior. There's a known issue where note_duration silently overrides
+    prosodic harmony when both are configured. Reordering would be a separate
+    behavior-changing diff.
+
+    The `section_dict` and `chord_index` parameters are unused at this priority
+    chain but are accepted to support future per-chord features (e.g. inline
+    chord_rhythms entries) without changing the call site.
+    """
+    # 1) Hand-played harmony pattern — slice the section-level event stream
+    if harmony_hand_events is not None:
+        events = _slice_events_into_window(
+            harmony_hand_events, beat_offset_local, total_per_chord,
+            min_duration=0.25,
+        )
+        if not events:
+            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                  velocity_scale=0.7, is_rest=False)]
+        return events
+
+    # 2) Simple note_duration — single sustained event per chord
+    if h_note_duration:
+        return [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                            velocity_scale=1.0, is_rest=False)]
+
+    # 3) Prosodic harmony lens — slice the section-level event stream
+    if harmony_prosodic_events is not None:
+        events = _slice_events_into_window(
+            harmony_prosodic_events, beat_offset_local, total_per_chord,
+            min_duration=0.5,
+        )
+        if not events:
+            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                  velocity_scale=0.7, is_rest=False)]
+        return events
+
+    # 4) Density-based grid fallback
+    return get_pattern(
+        total_per_chord, density=h_density,
+        voice_type="chord", groove=h_groove,
+        beats_per_bar=beats_per_bar,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main generation entry point
 # ---------------------------------------------------------------------------
 
@@ -956,11 +1067,11 @@ def generate_piece(
             all_cp_notes.extend(cp_notes)
 
         # Harmony events — uses harmony-specific rhythm profile
-        from intervals.music.rhythm import get_pattern, apply_velocity_arc, apply_swing, apply_humanize
         beat_offset_local = 0.0
 
         # Resolve harmony rhythm events
-        # Priority: 1) harmony_pattern  2) prosodic lens  3) note_duration  4) get_pattern
+        # Priority: 1) harmony_pattern  2) note_duration  3) prosodic lens  4) get_pattern
+        # (See _resolve_harmony_rhythm docstring for notes on priority order.)
         harmony_hand_events = None
         harmony_pattern = section_dict.get("harmony_pattern")
         if harmony_pattern:
@@ -981,71 +1092,19 @@ def generate_piece(
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
 
-            # NEW: If note_duration is specified, create simple rhythm instead of density-based
-            if harmony_hand_events is not None:
-                # Hand-played harmony rhythm: slice events for this chord's window
-                chord_start = beat_offset_local
-                chord_end = chord_start + total_per_chord
-                from intervals.music.rhythm import RhythmEvent
-                rhythm_events = []
-                for ev in harmony_hand_events:
-                    if ev.start_beat >= chord_start and ev.start_beat < chord_end:
-                        local_start = ev.start_beat - chord_start
-                        local_dur = min(ev.duration_beats, total_per_chord - local_start)
-                        if local_dur < 0.25:
-                            continue
-                        rhythm_events.append(RhythmEvent(
-                            start_beat=local_start,
-                            duration_beats=local_dur,
-                            velocity_scale=ev.velocity_scale,
-                            is_rest=ev.is_rest,
-                        ))
-                if not rhythm_events:
-                    rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                                velocity_scale=0.7, is_rest=False)]
-            elif h_note_duration:
-                # Map duration names to beat counts
-                duration_map = {
-                    "whole": beats_per_bar * bars_list[ci],
-                    "half": beats_per_bar * bars_list[ci] / 2 if bars_list[ci] >= 0.5 else beats_per_bar,
-                    "quarter": beats_per_bar,
-                    "eighth": beats_per_bar / 2,
-                }
-                note_beats = duration_map.get(h_note_duration, beats_per_bar)
-
-                # Create single note event for the entire chord duration
-                from intervals.music.rhythm import RhythmEvent
-                rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                            velocity_scale=1.0, is_rest=False)]
-            elif harmony_prosodic_events is not None:
-                # Prosodic harmony: slice events for this chord's window
-                chord_start = beat_offset_local
-                chord_end = chord_start + total_per_chord
-                from intervals.music.rhythm import RhythmEvent
-                rhythm_events = []
-                for ev in harmony_prosodic_events:
-                    if ev.start_beat >= chord_start and ev.start_beat < chord_end:
-                        local_start = ev.start_beat - chord_start
-                        local_dur = min(ev.duration_beats, total_per_chord - local_start)
-                        # Skip events that are too short after trimming —
-                        # these are boundary artifacts, not musical content
-                        if local_dur < 0.5:
-                            continue
-                        rhythm_events.append(RhythmEvent(
-                            start_beat=local_start,
-                            duration_beats=local_dur,
-                            velocity_scale=ev.velocity_scale,
-                            is_rest=ev.is_rest,
-                        ))
-                if not rhythm_events:
-                    # Fallback: sustain for the full chord
-                    rhythm_events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                                velocity_scale=0.7, is_rest=False)]
-            else:
-                # Original behavior: density-based rhythm
-                rhythm_events = get_pattern(total_per_chord, density=h_density,
-                                            voice_type="chord", groove=h_groove,
-                                            beats_per_bar=beats_per_bar)
+            rhythm_events = _resolve_harmony_rhythm(
+                section_dict=section_dict,
+                chord_index=ci,
+                total_per_chord=total_per_chord,
+                beat_offset_local=beat_offset_local,
+                beats_per_bar=beats_per_bar,
+                rhythm_template=rhythm_template,
+                harmony_hand_events=harmony_hand_events,
+                harmony_prosodic_events=harmony_prosodic_events,
+                h_density=h_density,
+                h_groove=h_groove,
+                h_note_duration=h_note_duration,
+            )
 
             if h_swing and h_swing > 0:
                 rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
