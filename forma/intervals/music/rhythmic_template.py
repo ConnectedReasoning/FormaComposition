@@ -293,7 +293,26 @@ def phrase_to_rhythm_template(
 
     Returns:
         RhythmicTemplate
+
+    Raises:
+        RuntimeError: if the 'pronouncing' library is not installed.
+                      Without it, syllable stress analysis falls back to a
+                      hardcoded heuristic that produces structurally wrong
+                      rhythm output (every syllable treated as primary stress).
+                      Install with: pip install pronouncing
     """
+    # Hard guard: prosodic rhythm requires real CMU stress data.
+    # The fallback in prosody.py:_stress_fallback returns "1", "10", "100"
+    # for 1/2/3-syllable words — purely positional, not phonetic. Using that
+    # output produces rhythm that pretends to be prosody but isn't. Fail loud.
+    from intervals.music.prosody import PRONOUNCING_AVAILABLE
+    if not PRONOUNCING_AVAILABLE:
+        raise RuntimeError(
+            "phrase_to_rhythm_template requires the 'pronouncing' library "
+            "for CMU dictionary stress analysis. Without it, prosodic rhythm "
+            "output is fictional. Install with: pip install pronouncing"
+        )
+
     analysis = analyze_phrase(phrase)
     return analysis_to_rhythm_template(
         analysis, name=name, slow=slow, seed=seed,

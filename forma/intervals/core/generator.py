@@ -698,6 +698,46 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
     if "motif" not in t:
         issues.append("[WARN] theme has no motif defined — melodic identity will be purely generative")
 
+    # --- Prosodic rhythm prerequisite check ----------------------------
+    # If the theme requests prosodic_rhythm, the CMU pronouncing dictionary
+    # MUST be available. Without it, _stress_fallback returns a hardcoded
+    # pattern (e.g. "10" for any 2-syllable word) that does not reflect
+    # actual English stress, which makes prosody-driven rhythm fictional.
+    # See prosody.py:_stress_fallback for the failure mode.
+    if t.get("prosodic_rhythm"):
+        if not t.get("phrase"):
+            issues.append(
+                "[ERROR] theme has prosodic_rhythm=true but no 'phrase' — "
+                "prosody requires a phrase to analyze"
+            )
+        else:
+            try:
+                from intervals.music.prosody import PRONOUNCING_AVAILABLE
+            except ImportError:
+                PRONOUNCING_AVAILABLE = False
+            if not PRONOUNCING_AVAILABLE:
+                issues.append(
+                    "[ERROR] theme has prosodic_rhythm=true but the 'pronouncing' "
+                    "library is not installed. Without the CMU pronouncing "
+                    "dictionary, syllable stress cannot be analyzed and the "
+                    "prosodic rhythm output is structurally wrong (every syllable "
+                    "is treated as primary stress). Install with: "
+                    "pip install pronouncing"
+                )
+            else:
+                # Library is available — check that the phrase's words are
+                # actually in the CMU dict. Words that aren't fall back to a
+                # syllable-count heuristic; warn the user which ones.
+                from intervals.music.prosody import analyze_phrase
+                analysis = analyze_phrase(t["phrase"])
+                if analysis.fallback_words:
+                    issues.append(
+                        f"[WARN] phrase '{t['phrase']}' contains words not in "
+                        f"the CMU dictionary: {analysis.fallback_words}. "
+                        f"Stress for these words is guessed by syllable count "
+                        f"and may not match natural speech."
+                    )
+
     # --- Piece-level checks ---
     if "tempo" not in p and "tempo" not in t:
         issues.append("[WARN] piece has no tempo — will use theme midpoint")
