@@ -3,7 +3,7 @@ percussion.py — Intervals Engine
 Generates drum patterns that track the bass and lock to groove/rhythm.
 
 Drum patterns are MIDI-based: kick, snare, hi-hat, ghost notes.
-They follow the same groove/density/swing/humanize system as other voices.
+They follow the same groove/density/swing system as other voices.
 
 The drums reinforce bass note onsets and add rhythmic definition at the
 subdivision level. Five named patterns: four_on_floor, backbeat, halftime,
@@ -21,7 +21,7 @@ import random
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.bass import BassNote
-from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, apply_humanize
+from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +155,6 @@ def generate_drums(
     density: str = "medium",
     groove: Optional[str] = None,
     swing: float = 0.0,
-    humanize: float = 0.0,
     beats_per_bar: int = 4,
     seed: Optional[int] = None,
 ) -> list[DrumHit]:
@@ -166,16 +165,15 @@ def generate_drums(
     1. Tiles the named drum pattern across total_beats
     2. Filters by density (sparse/medium/full)
     3. Reinforces bass note onsets with kick hits
-    4. Applies swing and humanization
+    4. Applies swing
 
     Args:
         total_beats:    Total beats to fill
         bass_notes:     List of BassNote to track
         pattern:        Drum pattern name
         density:        "sparse" | "medium" | "full"
-        groove:         Optional groove name (for future swing/humanization)
+        groove:         Optional groove name
         swing:          Swing ratio (0.0 = straight, 0.67 = triplet)
-        humanize:       Humanization amount (0.0–1.0)
         beats_per_bar:  Beats per bar (default 4)
         seed:           Random seed
 
@@ -237,10 +235,6 @@ def generate_drums(
     # Apply swing if specified
     if swing > 0.001:
         hits = _apply_swing_to_drums(hits, swing, beats_per_bar)
-
-    # Apply humanization if specified
-    if humanize > 0.001:
-        hits = _apply_humanize_to_drums(hits, humanize, beats_per_bar)
 
     # Sort by beat and return
     hits.sort(key=lambda h: h.start_beat)
@@ -313,40 +307,6 @@ def _apply_swing_to_drums(
             swung.append(hit)
 
     return swung
-
-
-def _apply_humanize_to_drums(
-    hits: list[DrumHit],
-    humanize_amount: float,
-    beats_per_bar: int,
-) -> list[DrumHit]:
-    """
-    Apply humanization to drums: timing jitter and velocity variation.
-    humanize_amount: 0.0 (none) to 1.0 (maximum)
-    """
-    if humanize_amount < 0.001:
-        return hits
-
-    humanized = []
-    for hit in hits:
-        # Timing jitter: ±10ms per point of humanization
-        time_jitter = random.uniform(-0.01, 0.01) * humanize_amount
-        new_beat = max(0.0, hit.start_beat + time_jitter)
-
-        # Velocity variation: ±20% per point of humanization
-        vel_jitter = int(hit.velocity * 0.2 * humanize_amount * random.uniform(-1.0, 1.0))
-        new_vel = max(20, min(127, hit.velocity + vel_jitter))
-
-        humanized.append(
-            DrumHit(
-                midi_note=hit.midi_note,
-                start_beat=new_beat,
-                duration_beats=hit.duration_beats,
-                velocity=new_vel,
-            )
-        )
-
-    return humanized
 
 
 # ---------------------------------------------------------------------------

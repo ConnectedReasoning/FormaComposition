@@ -455,7 +455,7 @@ def prosodic_chord_bars(
 #
 # Each lens: RhythmicTemplate → list[RhythmEvent]
 # The output replaces what get_pattern() normally provides.
-# Swing and humanize still apply AFTER the lens, same as before.
+# Swing still applies AFTER the lens, same as before.
 
 from intervals.music.rhythm import RhythmEvent
 

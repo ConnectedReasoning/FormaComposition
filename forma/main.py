@@ -97,10 +97,6 @@ def _validate_section(section: dict, prefix: str) -> list:
     if swing is not None and not (0.0 <= swing <= 0.75):
         errors.append(f"{prefix}: swing {swing} out of range. Valid: 0.0–0.75")
 
-    humanize = section.get("humanize")
-    if humanize is not None and not (0.0 <= humanize <= 1.0):
-        errors.append(f"{prefix}: humanize {humanize} out of range. Valid: 0.0–1.0")
-
     hr = section.get("harmony_rhythm")
     if hr and isinstance(hr, dict):
         hp = f"{prefix}.harmony_rhythm"
@@ -111,9 +107,6 @@ def _validate_section(section: dict, prefix: str) -> list:
         hr_swing = hr.get("swing")
         if hr_swing is not None and not (0.0 <= hr_swing <= 0.75):
             errors.append(f"{hp}: swing {hr_swing} out of range. Valid: 0.0–0.75")
-        hr_humanize = hr.get("humanize")
-        if hr_humanize is not None and not (0.0 <= hr_humanize <= 1.0):
-            errors.append(f"{hp}: humanize {hr_humanize} out of range. Valid: 0.0–1.0")
         if hr.get("note_duration"):
             valid_durations = ["whole", "half", "quarter", "eighth"]
             if hr["note_duration"] not in valid_durations:
@@ -274,8 +267,6 @@ def display_info(theme: dict, piece: dict) -> None:
             parts = [s["groove"]]
             if s.get("swing"):
                 parts.append(f"swing={s['swing']}")
-            if s.get("humanize"):
-                parts.append(f"humanize={s['humanize']}")
             groove_info = f"  groove={','.join(parts)}"
         print(f"    [{s.get('name', '?'):12s}]  {bars:2d} bars  "
               f"{s.get('density','?'):6s}  {s.get('melody','?'):11s}  "
@@ -289,8 +280,6 @@ def display_info(theme: dict, piece: dict) -> None:
                 hr_parts.append(f"groove={hr['groove']}")
             if hr.get("swing"):
                 hr_parts.append(f"swing={hr['swing']}")
-            if hr.get("humanize"):
-                hr_parts.append(f"humanize={hr['humanize']}")
             if hr.get("note_duration"):
                 hr_parts.append(f"note_duration={hr['note_duration']}")
             if hr_parts:

@@ -1,12 +1,15 @@
 """
 rhythm.py — Intervals Engine
-Rhythmic pattern generation with groove templates, density, swing, and humanization.
+Rhythmic pattern generation with groove templates, density, and swing.
 
-Four independent axes:
+Three independent axes:
   groove    — where notes land within a bar (the pattern/feel)
   density   — how many slots are active (sparse/medium/full)
   swing     — timing push on offbeats (0.0 = straight, 0.67 = triplet)
-  humanize  — timing jitter + velocity variation (0.0–1.0)
+
+Timing humanization (correlated jitter across voices) is handled by the
+groove pass in apply_groove.py, not per-voice. Per-voice independent jitter
+is deliberately absent — it produces anti-group-time behaviour.
 
 Rhythm is expressed in beats (float), tempo-agnostic.
 The generator converts beats → MIDI ticks using tempo + PPQ.
@@ -232,49 +235,6 @@ def groove_pattern(
     events.sort(key=lambda e: e.start_beat)
     return events
 
-
-# ---------------------------------------------------------------------------
-# Humanization
-# ---------------------------------------------------------------------------
-
-def apply_humanize(
-    events: list[RhythmEvent],
-    amount: float = 0.3,
-    seed: Optional[int] = None,
-) -> list[RhythmEvent]:
-    """
-    Add human feel: timing jitter, velocity variation, duration micro-variation.
-
-    amount controls intensity (0.0 = robotic, 1.0 = very loose):
-      - Timing jitter: +/-(amount * 0.05) beats
-      - Velocity variation: +/-(amount * 0.15)
-      - Duration: +/-10% at full humanize
-      - Downbeats get less jitter (more anchored)
-    """
-    if amount <= 0.0:
-        return list(events)
-
-    if seed is not None:
-        random.seed(seed)
-
-    result = []
-    for ev in events:
-        beat_in_bar = ev.start_beat % 4.0
-        is_downbeat = beat_in_bar < 0.01
-        jitter_range = amount * 0.05 * (0.3 if is_downbeat else 1.0)
-        time_jitter = random.uniform(-jitter_range, jitter_range)
-        new_beat = max(0.0, ev.start_beat + time_jitter)
-
-        vel_range = amount * 0.15
-        vel_jitter = random.uniform(-vel_range, vel_range)
-        new_vel = max(0.2, min(1.0, ev.velocity_scale + vel_jitter))
-
-        dur_factor = 1.0 + random.uniform(-0.1, 0.1) * amount
-        new_dur = max(0.1, ev.duration_beats * dur_factor)
-
-        result.append(RhythmEvent(new_beat, new_dur, new_vel, ev.is_rest))
-
-    return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════

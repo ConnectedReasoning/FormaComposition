@@ -31,7 +31,7 @@ from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import generate_melody_for_progression, MelodyNote
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
 from intervals.music.rhythm   import (
-    apply_velocity_arc, apply_swing, apply_humanize,
+    apply_velocity_arc, apply_swing,
     get_pattern, RhythmEvent,
 )
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
@@ -368,7 +368,6 @@ def generate_section(
     beats_per_bar= section.get("beats_per_bar", 4)
     groove       = section.get("groove")       # None = original grid behavior
     swing        = section.get("swing", 0.0)   # 0.0 = straight
-    humanize     = section.get("humanize", 0.0) # 0.0 = robotic
 
     # Per-chord bar durations: explicit list or even distribution
     # If chord_bars is provided, it is the source of truth — bars is derived from it.
@@ -469,7 +468,6 @@ def generate_section(
         motif=motif_def,
         groove=groove,
         swing=swing,
-        humanize=humanize,
         seed=base_seed + seed_offset,
         section_name=section.get("name", ""),
         rhythm_events_override=melody_rhythm_events,
@@ -668,7 +666,7 @@ def _apply_variation(section: dict, variation: float) -> dict:
 VALID_SECTION_KEYS = {
     "name", "bars", "chord_bars", "progression", "density", "melody",
     "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
-    "swing", "humanize", "counterpoint", "notes", "percussion", "drums",
+    "swing", "counterpoint", "notes", "percussion", "drums",
     "rhythm_pattern", "harmony_pattern", "fugal_techniques",
 }
 
@@ -997,14 +995,12 @@ def generate_piece(
         # Section-level rhythm defaults (used by melody, bass)
         groove   = section_dict.get("groove")
         swing    = section_dict.get("swing", 0.0)
-        humanize = section_dict.get("humanize", 0.0)
 
         # Harmony-specific rhythm: independent from melody when specified
         hr = section_dict.get("harmony_rhythm", {})
         h_density  = hr.get("density", density)
         h_groove   = hr.get("groove", groove)
         h_swing    = hr.get("swing", swing)
-        h_humanize = hr.get("humanize", humanize)
         h_note_duration = hr.get("note_duration")  # "whole", "half", "quarter", etc.
 
         # Counterpoint (optional — only if section defines it)
@@ -1104,9 +1100,6 @@ def generate_piece(
 
             if h_swing and h_swing > 0:
                 rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
-            if h_humanize and h_humanize > 0:
-                rhythm_events = apply_humanize(rhythm_events, amount=h_humanize,
-                                               seed=base_seed + i * 10)
 
             arc = section.get("arc", "swell")
             arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=65)
@@ -1167,7 +1160,6 @@ def generate_piece(
             drums_density = h_density      # Use harmony_rhythm density if available, else section density
             drums_groove = h_groove
             drums_swing = h_swing
-            drums_humanize = h_humanize
 
             drum_hits = generate_drums(
                 total_beats=total_beats,
@@ -1176,7 +1168,6 @@ def generate_piece(
                 density=drums_density,
                 groove=drums_groove,
                 swing=drums_swing,
-                humanize=drums_humanize,
                 beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
                 seed=base_seed + i * 10,
             )

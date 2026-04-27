@@ -21,7 +21,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
-from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, apply_humanize
+from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -413,7 +413,6 @@ def generate_melody(
     groove: Optional[str] = None,
     beats_per_bar: int = 4,
     swing: float = 0.0,
-    humanize: float = 0.0,
     seed: Optional[int] = None,
     context: Optional[dict] = None,  # NEW: chord context for statefulness
     rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events (skip get_pattern)
@@ -436,7 +435,6 @@ def generate_melody(
         groove:         Optional groove name (overrides density grid)
         beats_per_bar:  Beats per bar (for groove tiling)
         swing:          Swing ratio (0.0=straight, 0.67=triplet)
-        humanize:       Humanization amount (0.0–1.0)
         seed:           Random seed
         rhythm_events_override: Pre-computed rhythm events from prosodic lens (skips get_pattern)
 
@@ -456,11 +454,9 @@ def generate_melody(
         rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
                                     groove=groove, beats_per_bar=beats_per_bar, seed=seed)
 
-    # Apply swing and humanize to melody rhythm
+    # Apply swing to melody rhythm
     if swing and swing > 0:
         rhythm_events = apply_swing(rhythm_events, swing_ratio=swing)
-    if humanize and humanize > 0:
-        rhythm_events = apply_humanize(rhythm_events, amount=humanize, seed=seed)
 
     fn = BEHAVIOR_GENERATORS[behavior]
 
@@ -484,7 +480,6 @@ def generate_melody_for_progression(
     motif: Optional[dict] = None,
     groove: Optional[str] = None,
     swing: float = 0.0,
-    humanize: float = 0.0,
     seed: Optional[int] = None,
     section_name: str = "",  # NEW: section context
     rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events per chord
@@ -624,7 +619,6 @@ def generate_melody_for_progression(
             groove=groove,
             beats_per_bar=beats_per_bar,
             swing=swing,
-            humanize=humanize,
             seed=chord_seed,
             context=chord_context,
             rhythm_events_override=chord_rhythm,
