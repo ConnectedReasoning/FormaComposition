@@ -453,27 +453,75 @@ def generate_bass(
     key: str = "C",
     mode: str = "ionian",
     seed: Optional[int] = None,
+    rhythm_events_override: Optional[list] = None,
     **kwargs,
 ) -> list[BassNote]:
     """
     Generate a bass line for a chord progression.
 
     Args:
-        chords:         List of VoicedChord
-        style:          root_only | root_fifth | walking | steady | melodic | pulse | pedal
-        bars_per_chord: Float (uniform) or list[float] (per-chord)
-        beats_per_bar:  Time signature numerator (default 4)
-        density:        "sparse" | "medium" | "full"
-        velocity:       Base MIDI velocity
-        key:            Key center (for scale-aware styles)
-        mode:           Mode name (for scale-aware styles)
-        seed:           Random seed
+        chords:                 List of VoicedChord
+        style:                  root_only | root_fifth | walking | steady | melodic | pulse | pedal
+        bars_per_chord:         Float (uniform) or list[float] (per-chord)
+        beats_per_bar:          Time signature numerator (default 4)
+        density:                "sparse" | "medium" | "full"
+        velocity:               Base MIDI velocity
+        key:                    Key center (for scale-aware styles)
+        mode:                   Mode name (for scale-aware styles)
+        seed:                   Random seed
+        rhythm_events_override: Optional list of RhythmEvent from _motif_rhythm_to_events.
+                                When provided, bypasses style dispatch entirely and
+                                generates root notes at the specified beat positions.
+                                The style parameter is ignored — timing comes from the
+                                motif rhythm, pitches are chord roots in bass register.
+                                This is the "anchor" articulation path: the bass follows
+                                the motif's primary beats, one root per onset.
     """
-    if style not in BASS_STYLES:
-        raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
-
     if isinstance(bars_per_chord, (int, float)):
         bars_per_chord = [float(bars_per_chord)] * len(chords)
+
+    # ── Motif rhythm override path ───────────────────────────────────
+    # When the motif provides timing, bypass the style functions entirely.
+    # Walk the override events, determine which chord is sounding at each
+    # beat, and emit a root BassNote at that position.
+    if rhythm_events_override is not None and rhythm_events_override:
+        # Build a lookup: beat → chord index
+        chord_start_beats = []
+        beat = 0.0
+        for bars in bars_per_chord:
+            chord_start_beats.append(beat)
+            beat += bars * beats_per_bar
+
+        def _chord_at_beat(b: float) -> VoicedChord:
+            idx = 0
+            for i, start in enumerate(chord_start_beats):
+                if b >= start:
+                    idx = i
+            return chords[idx]
+
+        notes = []
+        for k, ev in enumerate(rhythm_events_override):
+            if ev.is_rest:
+                continue
+            chord = _chord_at_beat(ev.start_beat)
+            root  = bass_root(chord)
+            vel   = int(velocity * ev.velocity_scale)
+            # Sustain to the next event's onset (or end of section),
+            # not just for the motif note's duration. Bass should hold,
+            # not leave gaps between motif anchor hits.
+            if k + 1 < len(rhythm_events_override):
+                dur = rhythm_events_override[k + 1].start_beat - ev.start_beat
+            else:
+                # Last note: sustain to end of section
+                total_section = sum(b * beats_per_bar for b in bars_per_chord)
+                dur = total_section - ev.start_beat
+            dur = max(0.25, dur)
+            notes.append(BassNote(root, ev.start_beat, dur, vel))
+        return notes
+
+    # ── Style dispatch (existing behavior) ──────────────────────────
+    if style not in BASS_STYLES:
+        raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
 
     fn = BASS_STYLES[style]
     return fn(chords, bars_per_chord, beats_per_bar, density, velocity,

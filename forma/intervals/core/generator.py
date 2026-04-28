@@ -399,7 +399,10 @@ def generate_section(
               f"{rhythm_template.total_beats:.1f}b template")
 
     # ── Resolve melody rhythm events ────────────────────────────────
-    # Priority: 1) hand-played rhythm_pattern  2) prosodic lens  3) get_pattern
+    # Priority: 1) hand-played rhythm_pattern
+    #           2) motif rhythm ("full" articulation)
+    #           3) prosodic lens
+    #           4) get_pattern() density-based fallback
     melody_rhythm_events = None
     rhythm_pattern = section.get("rhythm_pattern")
     if rhythm_pattern:
@@ -409,12 +412,39 @@ def generate_section(
         print(f"    Melody rhythm: hand-played pattern, "
               f"{len(rhythm_pattern['onsets'])} notes, "
               f"{rhythm_pattern.get('length_beats', '?')}b cycle")
+    elif motif_def and motif_def.get("rhythm"):
+        melody_rhythm_events = _motif_rhythm_to_events(
+            motif_def["rhythm"], total_beats_section, "full",
+            velocities=motif_def.get("velocities"),
+        )
+        cycle = sum(motif_def["rhythm"])
+        print(f"    Melody rhythm: motif ({len(motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
     elif rhythm_template is not None:
         melody_rhythm_events = melody_lens(
             rhythm_template,
             total_beats=total_beats_section,
             seed=base_seed + seed_offset,
         )
+
+    # ── Resolve motif rhythm events for harmony and bass ────────────
+    # Derived from the same motif rhythm at reduced articulation density.
+    # These are section-level event lists; the harmony per-chord loop
+    # slices them into chord windows via _slice_events_into_window.
+    # Bass uses them as whole-section timing anchors.
+    motif_harmony_events = None
+    motif_bass_events    = None
+    if motif_def and motif_def.get("rhythm"):
+        motif_harmony_events = _motif_rhythm_to_events(
+            motif_def["rhythm"], total_beats_section, "stressed",
+            velocities=motif_def.get("velocities"),
+        )
+        motif_bass_events = _motif_rhythm_to_events(
+            motif_def["rhythm"], total_beats_section, "anchor",
+            velocities=motif_def.get("velocities"),
+        )
+        cycle = sum(motif_def["rhythm"])
+        print(f"    Harmony rhythm: motif (stressed, {len(motif_harmony_events)} triggers, {cycle:.1f}b cycle)")
+        print(f"    Bass rhythm:    motif (anchor,   {len(motif_bass_events)} triggers, {cycle:.1f}b cycle)")
 
     # ══════════════════════════════════════════════════════════════
     # BASS — generates first, writes snapshot for downstream voices
@@ -428,6 +458,7 @@ def generate_section(
         key=key,
         mode=mode,
         seed=base_seed + seed_offset,
+        rhythm_events_override=motif_bass_events,
     )
 
     # Record bass snapshot so melody/counterpoint can read it
@@ -492,7 +523,7 @@ def generate_section(
         ))
 
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, rhythm_template
+    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, rhythm_template, motif_harmony_events
 
 
 # ---------------------------------------------------------------------------
@@ -879,6 +910,81 @@ def _slice_events_into_window(
     return sliced
 
 
+def _motif_rhythm_to_events(
+    rhythm: list,
+    total_beats: float,
+    articulation: str = "full",
+    velocities: Optional[list] = None,
+) -> list:
+    """
+    Convert a motif rhythm (list of beat durations, e.g. [1.0, 0.5, 1.5, 1.0])
+    to a tiled list of RhythmEvent covering total_beats.
+
+    This is the bridge between the motif system and the voice rhythm system.
+    The motif's rhythmic identity propagates to all voices, each expressing
+    it at an appropriate articulation density:
+
+      "full"     — every onset in the cycle (melody density: pronounces)
+      "stressed" — onsets whose duration >= median duration in the cycle
+                   (harmony density: accompanies on strong beats)
+      "anchor"   — first onset of each cycle only (bass density: anchors)
+
+    Example: rhythm = [1.0, 0.5, 1.5, 1.0], cycle = 4.0 beats
+      full:     onsets [0.0, 1.0, 1.5, 3.0]  → 4 events per cycle
+      stressed: onsets [0.0, 1.5, 3.0]        → 3 events (dur >= median 1.0)
+      anchor:   onsets [0.0]                  → 1 event per cycle
+
+    Returns empty list if rhythm is empty or total_beats <= 0.
+    The caller is responsible for any fallback if the list is empty.
+    """
+    import statistics as _stats
+
+    if not rhythm or total_beats <= 0:
+        return []
+    cycle_length = sum(rhythm)
+    if cycle_length <= 0:
+        return []
+
+    # Compute per-onset positions and decide which to keep
+    onsets = []
+    t = 0.0
+    for dur in rhythm:
+        onsets.append(t)
+        t += dur
+
+    if articulation == "anchor":
+        keep = [0]
+    elif articulation == "stressed":
+        median_dur = _stats.median(rhythm)
+        keep = [i for i, d in enumerate(rhythm) if d >= median_dur]
+        if 0 not in keep:          # always include the downbeat
+            keep = [0] + keep
+    else:                           # "full"
+        keep = list(range(len(rhythm)))
+
+    if velocities is None or len(velocities) != len(rhythm):
+        velocities = [0.8] * len(rhythm)
+
+    events = []
+    offset = 0.0
+    while offset < total_beats:
+        for i in keep:
+            abs_onset = offset + onsets[i]
+            if abs_onset >= total_beats:
+                break
+            dur = min(rhythm[i], total_beats - abs_onset)
+            if dur < 0.25:
+                continue
+            events.append(RhythmEvent(
+                start_beat=abs_onset,
+                duration_beats=dur,
+                velocity_scale=velocities[i],
+                is_rest=False,
+            ))
+        offset += cycle_length
+    return events
+
+
 def _resolve_harmony_rhythm(
     section_dict: dict,
     chord_index: int,
@@ -888,6 +994,7 @@ def _resolve_harmony_rhythm(
     rhythm_template: Optional[RhythmicTemplate],
     harmony_hand_events: Optional[list],
     harmony_prosodic_events: Optional[list],
+    harmony_motif_events: Optional[list],
     h_density: str,
     h_groove: Optional[str],
     h_note_duration: Optional[str],
@@ -898,18 +1005,21 @@ def _resolve_harmony_rhythm(
 
     Current priority order (highest first):
       1) harmony_pattern   — hand-played whole-section pattern, sliced
-      2) note_duration     — single sustained event per chord
-      3) prosodic lens     — phrase-driven harmony_lens, sliced
-      4) get_pattern()     — density-based grid fallback
+      2) note_duration     — explicit single-event override
+      3) motif rhythm      — motif["rhythm"] at "stressed" articulation
+      4) prosodic lens     — phrase-driven harmony_lens, sliced
+      5) get_pattern()     — density-based grid fallback
 
-    NOTE: Priorities 2 and 3 are currently in this order to preserve existing
-    behavior. There's a known issue where note_duration silently overrides
-    prosodic harmony when both are configured. Reordering would be a separate
-    behavior-changing diff.
+    The motif rhythm (priority 3) fires automatically when the theme has a
+    motif with a rhythm field and no higher-priority override is set. This
+    propagates the motif's rhythmic identity to harmony without any
+    explicit section-level config — the harmony breathes with the motif.
 
-    The `section_dict` and `chord_index` parameters are unused at this priority
-    chain but are accepted to support future per-chord features (e.g. inline
-    chord_rhythms entries) without changing the call site.
+    note_duration (priority 2) stays above motif rhythm so that explicit
+    `harmony_rhythm: {note_duration: "whole"}` overrides are still respected.
+
+    The `section_dict` and `chord_index` parameters are currently unused but
+    accepted for future per-chord features without changing the call site.
     """
     # 1) Hand-played harmony pattern — slice the section-level event stream
     if harmony_hand_events is not None:
@@ -927,7 +1037,22 @@ def _resolve_harmony_rhythm(
         return [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
                             velocity_scale=1.0, is_rest=False)]
 
-    # 3) Prosodic harmony lens — slice the section-level event stream
+    # 3) Motif rhythm at "stressed" articulation — slice section-level events
+    if harmony_motif_events is not None:
+        events = _slice_events_into_window(
+            harmony_motif_events, beat_offset_local, total_per_chord,
+            min_duration=0.25,
+        )
+        if not events:
+            # Fallback within this path: sustain the full chord window.
+            # This happens when no stressed motif onset falls in this chord's
+            # window (e.g. short chord, long motif cycle). Sustaining is more
+            # musical than silencing.
+            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                                  velocity_scale=0.7, is_rest=False)]
+        return events
+
+    # 4) Prosodic harmony lens — slice the section-level event stream
     if harmony_prosodic_events is not None:
         events = _slice_events_into_window(
             harmony_prosodic_events, beat_offset_local, total_per_chord,
@@ -938,7 +1063,7 @@ def _resolve_harmony_rhythm(
                                   velocity_scale=0.7, is_rest=False)]
         return events
 
-    # 4) Density-based grid fallback
+    # 5) Density-based grid fallback
     return get_pattern(
         total_per_chord, density=h_density,
         voice_type="chord", groove=h_groove,
@@ -1027,7 +1152,7 @@ def generate_piece(
 
         # In song forms, the same section may repeat with variation.
         # Use section index for seed to ensure variation is deterministic.
-        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, rhythm_template = \
+        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, rhythm_template, motif_harmony_events = \
             generate_section(section, theme, base_seed=base_seed, seed_offset=i * 10,
                              sec_ctx=sec_ctx, piece_ctx=piece_ctx,
                              transform_sequence=transform_sequence)
@@ -1102,8 +1227,9 @@ def generate_piece(
         beat_offset_local = 0.0
 
         # Resolve harmony rhythm events
-        # Priority: 1) harmony_pattern  2) note_duration  3) prosodic lens  4) get_pattern
-        # (See _resolve_harmony_rhythm docstring for notes on priority order.)
+        # Priority: 1) harmony_pattern  2) note_duration  3) motif rhythm
+        #           4) prosodic lens  5) get_pattern
+        # (See _resolve_harmony_rhythm docstring for priority rationale.)
         harmony_hand_events = None
         harmony_pattern = section_dict.get("harmony_pattern")
         if harmony_pattern:
@@ -1133,6 +1259,7 @@ def generate_piece(
                 rhythm_template=rhythm_template,
                 harmony_hand_events=harmony_hand_events,
                 harmony_prosodic_events=harmony_prosodic_events,
+                harmony_motif_events=motif_harmony_events,
                 h_density=h_density,
                 h_groove=h_groove,
                 h_note_duration=h_note_duration,
