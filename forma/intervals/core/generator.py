@@ -386,15 +386,19 @@ def generate_section(
     total_beats_section = sum(b * beats_per_bar for b in bars_list)
     total_slots = int(total_beats_section * 2)  # 8th-note resolution
 
-    # ── Resolve prosodic rhythm template (if enabled) ─────────────
+    # ── Resolve prosodic rhythm template ───────────────────────────
+    # Priority: section rhythm_phrase > theme rhythm_phrase > none
+    # Section-level allows per-section rhythmic identity.
+    # phrase (without rhythm_phrase) is a separate pitch-contour tool
+    # and does not affect the rhythm template.
     rhythm_template = None
-    prosodic_rhythm = theme.get("prosodic_rhythm", False)
-    phrase = theme.get("phrase")
-    if prosodic_rhythm and phrase:
+    rhythm_phrase = section.get("rhythm_phrase") or theme.get("rhythm_phrase")
+    if rhythm_phrase:
         rhythm_template = phrase_to_rhythm_template(
-            phrase, seed=base_seed + seed_offset,
+            rhythm_phrase, seed=base_seed + seed_offset,
         )
-        print(f"    Prosodic rhythm: '{phrase}' → "
+        source = "section" if section.get("rhythm_phrase") else "theme"
+        print(f"    Rhythm phrase ({source}): '{rhythm_phrase}' → "
               f"{len(rhythm_template)} syllables, "
               f"{rhythm_template.total_beats:.1f}b template")
 
@@ -698,7 +702,7 @@ VALID_SECTION_KEYS = {
     "name", "bars", "chord_bars", "progression", "density", "melody",
     "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
     "swing", "counterpoint", "notes", "percussion", "drums",
-    "rhythm_pattern", "harmony_pattern", "fugal_techniques",
+    "rhythm_pattern", "harmony_pattern", "fugal_techniques", "rhythm_phrase",
 }
 
 OBSOLETE_THEME_KEYS = {"palette"}
@@ -729,45 +733,42 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
     if "motif" not in t:
         issues.append("[WARN] theme has no motif defined — melodic identity will be purely generative")
 
-    # --- Prosodic rhythm prerequisite check ----------------------------
-    # If the theme requests prosodic_rhythm, the CMU pronouncing dictionary
-    # MUST be available. Without it, _stress_fallback returns a hardcoded
-    # pattern (e.g. "10" for any 2-syllable word) that does not reflect
-    # actual English stress, which makes prosody-driven rhythm fictional.
-    # See prosody.py:_stress_fallback for the failure mode.
+    # --- rhythm_phrase prerequisite check ------------------------------
+    # rhythm_phrase drives the rhythmic template for all voices.
+    # It is a separate tool from phrase (pitch contour only).
+    # The CMU pronouncing dictionary MUST be available for rhythm_phrase
+    # to produce valid output. Without it, every syllable is treated as
+    # primary stress, making the rhythm template fictional.
     if t.get("prosodic_rhythm"):
-        if not t.get("phrase"):
+        issues.append(
+            "[ERROR] 'prosodic_rhythm' is no longer supported. "
+            "Use 'rhythm_phrase' for phrase-driven rhythm (all voices) "
+            "and 'phrase' for pitch contour only. These are now separate keys."
+        )
+
+    if t.get("rhythm_phrase"):
+        try:
+            from intervals.music.prosody import PRONOUNCING_AVAILABLE
+        except ImportError:
+            PRONOUNCING_AVAILABLE = False
+        if not PRONOUNCING_AVAILABLE:
             issues.append(
-                "[ERROR] theme has prosodic_rhythm=true but no 'phrase' — "
-                "prosody requires a phrase to analyze"
+                "[ERROR] theme has 'rhythm_phrase' but the 'pronouncing' "
+                "library is not installed. Without the CMU pronouncing "
+                "dictionary, syllable stress cannot be analyzed and the "
+                "rhythm template output is structurally wrong. "
+                "Install with: pip install pronouncing"
             )
         else:
-            try:
-                from intervals.music.prosody import PRONOUNCING_AVAILABLE
-            except ImportError:
-                PRONOUNCING_AVAILABLE = False
-            if not PRONOUNCING_AVAILABLE:
+            from intervals.music.prosody import analyze_phrase
+            analysis = analyze_phrase(t["rhythm_phrase"])
+            if analysis.fallback_words:
                 issues.append(
-                    "[ERROR] theme has prosodic_rhythm=true but the 'pronouncing' "
-                    "library is not installed. Without the CMU pronouncing "
-                    "dictionary, syllable stress cannot be analyzed and the "
-                    "prosodic rhythm output is structurally wrong (every syllable "
-                    "is treated as primary stress). Install with: "
-                    "pip install pronouncing"
+                    f"[WARN] rhythm_phrase '{t['rhythm_phrase']}' contains "
+                    f"words not in the CMU dictionary: {analysis.fallback_words}. "
+                    f"Stress for these words is guessed by syllable count "
+                    f"and may not match natural speech."
                 )
-            else:
-                # Library is available — check that the phrase's words are
-                # actually in the CMU dict. Words that aren't fall back to a
-                # syllable-count heuristic; warn the user which ones.
-                from intervals.music.prosody import analyze_phrase
-                analysis = analyze_phrase(t["phrase"])
-                if analysis.fallback_words:
-                    issues.append(
-                        f"[WARN] phrase '{t['phrase']}' contains words not in "
-                        f"the CMU dictionary: {analysis.fallback_words}. "
-                        f"Stress for these words is guessed by syllable count "
-                        f"and may not match natural speech."
-                    )
 
     # --- Piece-level checks ---
     if "tempo" not in p and "tempo" not in t:
@@ -865,6 +866,28 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         arc = section.get("arc")
         if arc and arc not in VALID_ARC:
             issues.append(f"[ERROR] {label}: arc='{arc}' — must be one of {sorted(VALID_ARC)}")
+
+        # Section-level rhythm_phrase — same CMU requirement as theme-level
+        sec_rp = section.get("rhythm_phrase")
+        if sec_rp:
+            try:
+                from intervals.music.prosody import PRONOUNCING_AVAILABLE as _PA
+            except ImportError:
+                _PA = False
+            if not _PA:
+                issues.append(
+                    f"[ERROR] {label}: rhythm_phrase requires the 'pronouncing' "
+                    f"library. Install with: pip install pronouncing"
+                )
+            else:
+                from intervals.music.prosody import analyze_phrase as _ap
+                _analysis = _ap(sec_rp)
+                if _analysis.fallback_words:
+                    issues.append(
+                        f"[WARN] {label}: rhythm_phrase '{sec_rp}' contains words "
+                        f"not in the CMU dictionary: {_analysis.fallback_words}. "
+                        f"Stress for these words is estimated by syllable count."
+                    )
 
     return issues
 
