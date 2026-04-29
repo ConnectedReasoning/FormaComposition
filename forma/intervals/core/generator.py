@@ -34,7 +34,7 @@ from intervals.music.rhythm   import (
     apply_velocity_arc, apply_swing,
     get_pattern, RhythmEvent,
 )
-from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif
+from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.prosody  import phrase_to_motif
 from intervals.music.percussion import generate_drums, DrumHit
 from intervals.music.rhythmic_template import (
@@ -390,6 +390,35 @@ def generate_section(
     else:
         _hr_normalized = _hr_raw
 
+    # ── Resolve active motif for this section ────────────────────────
+    # transform_sequence selects a named transform by section index.
+    # The transformed motif drives ALL voices — melody, harmony, bass —
+    # so the selection must happen before rhythm events are computed.
+    # "original" is a valid sequence value meaning no transform applied.
+    active_motif_def = motif_def  # default: original
+    active_transform_name = None
+
+    if motif_def and transform_sequence and piece_ctx is not None:
+        pool = motif_def.get("transform_pool", [])
+        section_index = sec_ctx.section_index if sec_ctx else 0
+        active_transform_name = piece_ctx.suggest_transform(
+            available=pool,
+            transform_sequence=transform_sequence,
+            section_index=section_index,
+        )
+        if active_transform_name and active_transform_name != "original":
+            motif_obj_active = motif_from_dict(motif_def)
+            transformed = apply_motif_transform(
+                motif_obj_active, active_transform_name,
+                seed=base_seed + seed_offset,
+            )
+            active_motif_def = motif_to_dict(transformed)
+            print(f"    Motif transform: {active_transform_name} "
+                  f"→ intervals={active_motif_def['intervals']} "
+                  f"rhythm={active_motif_def['rhythm']}")
+        else:
+            print(f"    Motif transform: original")
+
     # ── Melody + bass rhythm (explicit switch on section.rhythm) ────
     melody_rhythm_events = None
     bass_rhythm_events   = None
@@ -404,15 +433,15 @@ def generate_section(
 
     elif rhythm_source == "motif":
         melody_rhythm_events = _motif_rhythm_to_events(
-            motif_def["rhythm"], total_beats_section, "full",
-            velocities=motif_def.get("velocities"),
+            active_motif_def["rhythm"], total_beats_section, "full",
+            velocities=active_motif_def.get("velocities"),
         )
         bass_rhythm_events = _motif_rhythm_to_events(
-            motif_def["rhythm"], total_beats_section, "anchor",
-            velocities=motif_def.get("velocities"),
+            active_motif_def["rhythm"], total_beats_section, "anchor",
+            velocities=active_motif_def.get("velocities"),
         )
-        cycle = sum(motif_def["rhythm"])
-        print(f"    Melody rhythm: motif full   ({len(motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
+        cycle = sum(active_motif_def["rhythm"])
+        print(f"    Melody rhythm: motif full   ({len(active_motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
         print(f"    Bass rhythm:   motif anchor ({len(bass_rhythm_events)} triggers, {cycle:.1f}b cycle)")
 
     else:  # "free"
@@ -436,10 +465,10 @@ def generate_section(
 
     elif h_rhythm_source == "motif":
         harmony_section_events = _motif_rhythm_to_events(
-            motif_def["rhythm"], total_beats_section, "stressed",
-            velocities=motif_def.get("velocities"),
+            active_motif_def["rhythm"], total_beats_section, "stressed",
+            velocities=active_motif_def.get("velocities"),
         )
-        cycle = sum(motif_def["rhythm"])
+        cycle = sum(active_motif_def["rhythm"])
         print(f"    Harmony rhythm: motif stressed ({len(harmony_section_events)} triggers, {cycle:.1f}b cycle)")
 
     else:  # "free"
@@ -477,26 +506,13 @@ def generate_section(
     # MELODY — generates second, can read bass snapshot
     # ══════════════════════════════════════════════════════════════
 
-    # If using 'develop' behavior, pick a directed transform
-    last_xform = None
-    if melody_beh == "develop" and piece_ctx is not None:
-        pool = []
-        if isinstance(motif_def, dict):
-            pool = motif_def.get("transform_pool", [])
-        if pool:
-            last_xform = piece_ctx.suggest_transform(
-                available=pool,
-                transform_sequence=transform_sequence,
-                section_index=sec_ctx.section_index if sec_ctx else 0,
-            )
-
     melody_notes = generate_melody_for_progression(
         chords, key, mode,
         behavior=melody_beh,
         density=density,
         bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
-        motif=motif_def,
+        motif=active_motif_def,
         groove=groove,
         swing=swing,
         seed=base_seed + seed_offset,
@@ -516,7 +532,7 @@ def generate_section(
             durations=melody_durations,
             total_beats=total_beats_section,
             total_slots=total_slots,
-            last_transform=last_xform,
+            last_transform=active_transform_name,
             last_chord_degree=progression[-1],
             key=key,
             mode=mode,
@@ -756,16 +772,23 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         if not isinstance(transform_seq, list):
             issues.append("[ERROR] transform_sequence must be a list of transform names")
         else:
+            valid_transforms = {
+                "original", "inversion", "retrograde", "retrograde_inversion",
+                "augmentation", "diminution", "transpose_up", "transpose_down",
+                "shuffle", "expand", "compress",
+            }
+            for i, t in enumerate(transform_seq):
+                if t not in valid_transforms:
+                    issues.append(
+                        f"[ERROR] transform_sequence[{i}]: '{t}' is not a valid transform. "
+                        f"Valid values: {sorted(valid_transforms)}"
+                    )
             form_type = p.get("form_type", "narrative")
-            if form_type == "song":
-                form = p.get("form", [])
-                n_sections = len(form)
-            else:
-                n_sections = len(p.get("sections", []))
+            n_sections = len(p.get("form", [])) if form_type == "song" else len(p.get("sections", []))
             if len(transform_seq) < n_sections:
                 issues.append(
                     f"[WARN] transform_sequence has {len(transform_seq)} entries "
-                    f"but piece has {n_sections} sections — later sections will use weighted random"
+                    f"but piece has {n_sections} sections — sequence wraps (repeats from start)"
                 )
 
     form_type = p.get("form_type", "narrative")

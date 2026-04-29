@@ -329,9 +329,9 @@ class PieceContext:
         Returns:
             Name of the selected transform
         """
-        # Explicit plan takes priority
-        if transform_sequence and section_index < len(transform_sequence):
-            requested = transform_sequence[section_index]
+        # Explicit plan takes priority — wraps if shorter than section count
+        if transform_sequence:
+            requested = transform_sequence[section_index % len(transform_sequence)]
             if requested in available or requested == "original":
                 return requested
 
