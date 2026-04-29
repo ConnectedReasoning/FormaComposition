@@ -474,6 +474,7 @@ def generate_melody_for_progression(
     beats_per_bar: int = 4,
     base_velocity: int = 72,
     motif: Optional[dict] = None,
+    motif_pool: Optional[list] = None,
     groove: Optional[str] = None,
     swing: float = 0.0,
     seed: Optional[int] = None,
@@ -572,7 +573,15 @@ def generate_melody_for_progression(
         total_beats = bpc_list[i] * beats_per_bar
         chord_seed = (seed + i) if seed is not None else None
 
-        # NEW: Build chord context for this position in progression
+        # Pick motif for this chord — draw from pool if available, else use primary
+        if motif_pool and len(motif_pool) > 1:
+            import random as _rnd
+            rng = _rnd.Random(chord_seed)
+            chord_motif = rng.choice(motif_pool)
+        else:
+            chord_motif = effective_motif
+
+        # Build chord context for this position in progression
         chord_context = {
             "chord_index": i,
             "total_chords": len(chords),
@@ -583,17 +592,15 @@ def generate_melody_for_progression(
             "section_name": section_name,
         }
 
-        # Slice prosodic rhythm events for this chord's time window
+        # Slice rhythm events for this chord's time window
         chord_rhythm = None
         if rhythm_events_override is not None:
             chord_end = beat_offset + total_beats
             chord_rhythm = []
             for ev in rhythm_events_override:
                 if ev.start_beat >= beat_offset and ev.start_beat < chord_end:
-                    # Shift to local beat (relative to chord start)
                     from intervals.music.rhythm import RhythmEvent
                     local_start = ev.start_beat - beat_offset
-                    # Trim duration if it would exceed chord boundary
                     local_dur = min(ev.duration_beats, total_beats - local_start)
                     chord_rhythm.append(RhythmEvent(
                         start_beat=local_start,
@@ -601,7 +608,6 @@ def generate_melody_for_progression(
                         velocity_scale=ev.velocity_scale,
                         is_rest=ev.is_rest,
                     ))
-            # If no events landed in this chord window, don't override
             if not chord_rhythm:
                 chord_rhythm = None
 
@@ -612,7 +618,7 @@ def generate_melody_for_progression(
             total_beats=total_beats,
             base_velocity=base_velocity,
             prev_note=prev_note,
-            motif=effective_motif,
+            motif=chord_motif,
             groove=groove,
             beats_per_bar=beats_per_bar,
             swing=swing,

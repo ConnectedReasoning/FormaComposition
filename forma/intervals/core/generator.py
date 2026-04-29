@@ -40,7 +40,7 @@ from intervals.music.percussion import generate_drums, DrumHit
 from intervals.music.rhythmic_template import (
     RhythmicTemplate,
 )
-from intervals.core.motif_loader import resolve_motif_from_theme
+from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme
 from intervals.core.context import (
     PieceContext,
     SectionContext,
@@ -348,9 +348,15 @@ def generate_section(
     key          = theme["key"]
     mode         = theme["mode"]
 
-    # Resolve motif using new loader (supports both embedded and referenced motifs)
+    # Resolve motif — single primary (for rhythm + transform) and full pool (for melody variety)
     motif_obj = resolve_motif_from_theme(theme)
     motif_def = motif_to_dict(motif_obj) if motif_obj else None
+    motif_pool = resolve_motif_pool_from_theme(theme)  # list of dicts; primary is [0]
+
+    # When using theme.motifs array, resolve_motif_from_theme returns None
+    # (it only reads theme.motif). Use the first pool entry as the primary.
+    if motif_def is None and motif_pool:
+        motif_def = motif_pool[0]
 
     progression  = section["progression"]
     bars         = section.get("bars", 8)
@@ -506,6 +512,10 @@ def generate_section(
     # MELODY — generates second, can read bass snapshot
     # ══════════════════════════════════════════════════════════════
 
+    if motif_pool and len(motif_pool) > 1:
+        print(f"    Motif pool: {len(motif_pool)} motifs "
+              f"({', '.join(m.get('name', '?') for m in motif_pool)})")
+
     melody_notes = generate_melody_for_progression(
         chords, key, mode,
         behavior=melody_beh,
@@ -513,6 +523,7 @@ def generate_section(
         bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
         motif=active_motif_def,
+        motif_pool=motif_pool if len(motif_pool) > 1 else None,
         groove=groove,
         swing=swing,
         seed=base_seed + seed_offset,
@@ -748,8 +759,18 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         if key in t:
             issues.append(f"[WARN] theme has obsolete field '{key}' — remove it (instruments live in Logic)")
 
-    if "motif" not in t:
-        issues.append("[WARN] theme has no motif defined — melodic identity will be purely generative")
+    if "motif" not in t and "motifs" not in t:
+        issues.append("[WARN] theme has no motif or motifs defined — melodic identity will be purely generative")
+    if "motif" in t and "motifs" in t:
+        issues.append("[WARN] theme has both 'motif' and 'motifs' — 'motifs' array takes precedence; 'motif' is ignored")
+    motifs_raw = t.get("motifs")
+    if motifs_raw is not None:
+        if not isinstance(motifs_raw, list) or len(motifs_raw) == 0:
+            issues.append("[ERROR] theme 'motifs' must be a non-empty array of motif objects")
+        else:
+            for i, m in enumerate(motifs_raw):
+                if isinstance(m, dict) and "intervals" not in m:
+                    issues.append(f"[ERROR] theme motifs[{i}]: missing 'intervals' field")
 
     # --- rhythm_phrase prerequisite check ------------------------------
     # rhythm_phrase drives the rhythmic template for all voices.
@@ -778,10 +799,10 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
                 "augmentation", "diminution", "transpose_up", "transpose_down",
                 "shuffle", "expand", "compress",
             }
-            for i, t in enumerate(transform_seq):
-                if t not in valid_transforms:
+            for i, xfm in enumerate(transform_seq):
+                if xfm not in valid_transforms:
                     issues.append(
-                        f"[ERROR] transform_sequence[{i}]: '{t}' is not a valid transform. "
+                        f"[ERROR] transform_sequence[{i}]: '{xfm}' is not a valid transform. "
                         f"Valid values: {sorted(valid_transforms)}"
                     )
             form_type = p.get("form_type", "narrative")
@@ -884,10 +905,16 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
                 f"must be one of {sorted(VALID_RHYTHM_SOURCE)}"
             )
         else:
-            # Cross-validate against available resources
+            # Cross-validate against available resources.
+            # theme_motif_has_rhythm = True if any motif source (motif or motifs[0]) has rhythm
+            _primary_motif = t.get("motif") if isinstance(t.get("motif"), dict) else None
+            _motifs_arr = t.get("motifs")
+            if not _primary_motif and _motifs_arr and isinstance(_motifs_arr, list):
+                _primary_motif = _motifs_arr[0] if _motifs_arr else None
+            _theme_has_rhythm = bool(_primary_motif and _primary_motif.get("rhythm"))
+
             if rhythm_source == "motif":
-                motif = theme.get("motif", {})
-                if not motif.get("rhythm"):
+                if not _theme_has_rhythm:
                     issues.append(
                         f"[ERROR] {label}: rhythm='motif' but theme motif has "
                         f"no 'rhythm' field"
@@ -903,7 +930,6 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         hr = section.get("harmony_rhythm", {})
         if hr:
             # Guard: harmony_rhythm must be a dict, not a bare string.
-            # "harmony_rhythm": "sustain" is the old shorthand — tell user the new form.
             if isinstance(hr, str):
                 issues.append(
                     f"[ERROR] {label}: harmony_rhythm must be an object, not a string. "
@@ -923,8 +949,7 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
                     )
                 else:
                     if h_rhythm == "motif":
-                        motif = theme.get("motif", {})
-                        if not motif.get("rhythm"):
+                        if not _theme_has_rhythm:
                             issues.append(
                                 f"[ERROR] {label}: harmony_rhythm.rhythm='motif' but "
                                 f"theme motif has no 'rhythm' field"

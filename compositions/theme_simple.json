@@ -1,8 +1,8 @@
 {
   "theme":{
     "name":"Simple Theme",
-    "key": "C",
-    "mode": "ionian",
+    "key": "D",
+    "mode": "mixolydian",
     "tempo": { "min":90, "max": 120 },
     "motif": {
         "name": "evening_water",
