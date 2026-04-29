@@ -201,7 +201,8 @@ def generate_generative(
     prev_note: Optional[int],
     base_velocity: int,
     seed: Optional[int],
-    context: Optional[dict] = None,  # NEW
+    context: Optional[dict] = None,
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """Freely picks notes from weighted pool of chord + scale tones."""
     if seed is not None:
@@ -218,7 +219,7 @@ def generate_generative(
     current = prev_note or _pick_start_note(chord_tones, scale_tones, None)
 
     for ev in rhythm_events:
-        if ev.is_rest:
+        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
         # Prefer notes within a 5th of current for smooth motion
@@ -240,7 +241,8 @@ def generate_lyrical(
     prev_note: Optional[int],
     base_velocity: int,
     seed: Optional[int],
-    context: Optional[dict] = None,  # NEW
+    context: Optional[dict] = None,
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """Stepwise motion, gravitates toward chord tones, longer phrases."""
     if seed is not None:
@@ -249,7 +251,6 @@ def generate_lyrical(
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
 
-    # NEW: Get next chord tones for look-ahead at phrase end
     next_chord_tones = chord_tones
     if context and context.get("next_chord"):
         next_chord_tones = get_chord_tones_in_register(
@@ -257,25 +258,21 @@ def generate_lyrical(
         )
 
     for i, ev in enumerate(rhythm_events):
-        if ev.is_rest:
+        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
-        # Stepwise: prefer scale tones within 3 semitones
         stepwise = [n for n in scale_tones if 1 <= abs(n - current) <= 3]
-        # Also weight chord tones higher
         chord_nearby = [n for n in chord_tones if abs(n - current) <= 5]
 
         candidates = stepwise + chord_nearby
         if not candidates:
             candidates = scale_tones
 
-        # NEW: Near the end, bias toward next chord's tones
         is_last_note = (i == len(rhythm_events) - 1)
         if is_last_note and context and next_chord_tones != chord_tones:
             candidates.extend(next_chord_tones)
 
-        # Small directional bias to avoid pure random walk
         direction = random.choice([-1, 1])
         directed = [n for n in candidates if (n - current) * direction > 0]
         if directed:
@@ -331,7 +328,8 @@ def generate_develop(
     base_velocity: int,
     seed: Optional[int],
     motif: Optional[dict] = None,
-    context: Optional[dict] = None,  # NEW
+    context: Optional[dict] = None,
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """
     Applies motif transforms to generate melodic material.
@@ -340,7 +338,7 @@ def generate_develop(
     if motif is None or not motif.get("intervals"):
         return generate_generative(
             rhythm_events, chord, scale_tones, chord_tones,
-            prev_note, base_velocity, seed, context
+            prev_note, base_velocity, seed, context, rest_probability
         )
 
     if seed is not None:
@@ -362,13 +360,11 @@ def generate_develop(
         MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
     )
 
-    # Map motif notes onto rhythm events (fill remaining slots generatively)
     notes_out = []
     motif_idx = 0
-    total_beat = 0.0
 
     for ev in rhythm_events:
-        if ev.is_rest:
+        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
@@ -376,7 +372,6 @@ def generate_develop(
             note, _ = motif_notes[motif_idx]
             motif_idx += 1
         else:
-            # Motif exhausted — fill generatively
             candidates = chord_tones if chord_tones else scale_tones
             note = random.choice(candidates) if candidates else 60
 
@@ -414,8 +409,9 @@ def generate_melody(
     beats_per_bar: int = 4,
     swing: float = 0.0,
     seed: Optional[int] = None,
-    context: Optional[dict] = None,  # NEW: chord context for statefulness
-    rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events (skip get_pattern)
+    context: Optional[dict] = None,
+    rhythm_events_override: Optional[list] = None,
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """
     Generate a melodic line over a single chord.
@@ -462,10 +458,10 @@ def generate_melody(
 
     if behavior == "develop":
         return fn(rhythm_events, chord, scale_tones, chord_tones,
-                  prev_note, base_velocity, seed, motif, context)
+                  prev_note, base_velocity, seed, motif, context, rest_probability)
     else:
         return fn(rhythm_events, chord, scale_tones, chord_tones,
-                  prev_note, base_velocity, seed, context)
+                  prev_note, base_velocity, seed, context, rest_probability)
 
 
 def generate_melody_for_progression(
@@ -481,9 +477,10 @@ def generate_melody_for_progression(
     groove: Optional[str] = None,
     swing: float = 0.0,
     seed: Optional[int] = None,
-    section_name: str = "",  # NEW: section context
-    rhythm_events_override: Optional[list] = None,  # Prosodic rhythm events per chord
-    fugal_techniques: Optional[dict] = None,  # NEW: fugal technique flags
+    section_name: str = "",
+    rhythm_events_override: Optional[list] = None,
+    fugal_techniques: Optional[dict] = None,
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -622,6 +619,7 @@ def generate_melody_for_progression(
             seed=chord_seed,
             context=chord_context,
             rhythm_events_override=chord_rhythm,
+            rest_probability=rest_probability,
         )
         # Offset beat positions
         for n in notes:

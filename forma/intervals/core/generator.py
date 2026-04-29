@@ -519,6 +519,7 @@ def generate_section(
         section_name=section.get("name", ""),
         rhythm_events_override=melody_rhythm_events,
         fugal_techniques=section.get("fugal_techniques"),
+        rest_probability=section.get("rest_probability", 0.0),
     )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -715,7 +716,7 @@ VALID_SECTION_KEYS = {
     "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
     "swing", "counterpoint", "notes", "percussion", "drums",
     "rhythm_pattern", "harmony_pattern", "fugal_techniques",
-    "rhythm",
+    "rhythm", "rest_probability",
 }
 
 # Explicit rhythm source declarations — no cascade, no defaults
@@ -865,6 +866,10 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         arc = section.get("arc")
         if arc and arc not in VALID_ARC:
             issues.append(f"[ERROR] {label}: arc='{arc}' — must be one of {sorted(VALID_ARC)}")
+
+        rp = section.get("rest_probability")
+        if rp is not None and not (0.0 <= rp <= 1.0):
+            issues.append(f"[ERROR] {label}: rest_probability={rp} — must be 0.0–1.0")
 
         # rhythm source — required, explicit, no defaults
         rhythm_source = section.get("rhythm")

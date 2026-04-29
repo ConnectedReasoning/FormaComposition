@@ -5,6 +5,7 @@
       "sections": [
           {
               "name": "opening",
+              "rest_probability": 0.15,
               "bars": 8,
               "progression": ["i", "VII", "iv", "v"],
               "density": "medium",
@@ -16,6 +17,7 @@
           },
           {
               "name": "middle",
+              "rest_probability": 0.05,
               "bars": 8,
               "progression": ["i", "VII", "iv", "v"],
               "density": "medium",
@@ -27,6 +29,7 @@
           },
           {
               "name": "closing",
+              "rest_probability": 0.2,
               "bars": 8,
               "progression": ["i", "VII", "iv", "v"],
               "density": "medium",
