@@ -38,14 +38,6 @@ from intervals.music.motif    import from_dict as motif_from_dict, to_dict as mo
 from intervals.music.prosody  import phrase_to_motif
 from intervals.music.percussion import generate_drums, DrumHit
 from intervals.music.rhythmic_template import (
-    phrase_to_rhythm_template,
-    tile_template,
-    apply_lens,
-    melody_lens,
-    bass_lens,
-    harmony_lens,
-    counterpoint_lens,
-    drums_lens,
     RhythmicTemplate,
 )
 from intervals.core.motif_loader import resolve_motif_from_theme
@@ -386,69 +378,73 @@ def generate_section(
     total_beats_section = sum(b * beats_per_bar for b in bars_list)
     total_slots = int(total_beats_section * 2)  # 8th-note resolution
 
-    # ── Resolve prosodic rhythm template ───────────────────────────
-    # Priority: section rhythm_phrase > theme rhythm_phrase > none
-    # Section-level allows per-section rhythmic identity.
-    # phrase (without rhythm_phrase) is a separate pitch-contour tool
-    # and does not affect the rhythm template.
-    rhythm_template = None
-    rhythm_phrase = section.get("rhythm_phrase") or theme.get("rhythm_phrase")
-    if rhythm_phrase:
-        rhythm_template = phrase_to_rhythm_template(
-            rhythm_phrase, seed=base_seed + seed_offset,
-        )
-        source = "section" if section.get("rhythm_phrase") else "theme"
-        print(f"    Rhythm phrase ({source}): '{rhythm_phrase}' → "
-              f"{len(rhythm_template)} syllables, "
-              f"{rhythm_template.total_beats:.1f}b template")
+    rhythm_source = section.get("rhythm", "free")  # required — validator enforces
 
-    # ── Resolve melody rhythm events ────────────────────────────────
-    # Priority: 1) hand-played rhythm_pattern
-    #           2) motif rhythm ("full" articulation)
-    #           3) prosodic lens
-    #           4) get_pattern() density-based fallback
+    # Normalize harmony_rhythm: if someone wrote "harmony_rhythm": "sustain"
+    # (bare string), convert to {"rhythm": "sustain"} so all downstream
+    # code can safely call .get() on it. The validator will have already
+    # flagged this as an error, but we don't crash during generation.
+    _hr_raw = section.get("harmony_rhythm", {})
+    if isinstance(_hr_raw, str):
+        _hr_normalized = {"rhythm": _hr_raw}
+    else:
+        _hr_normalized = _hr_raw
+
+    # ── Melody + bass rhythm (explicit switch on section.rhythm) ────
     melody_rhythm_events = None
-    rhythm_pattern = section.get("rhythm_pattern")
-    if rhythm_pattern:
-        melody_rhythm_events = rhythm_pattern_to_events(
-            rhythm_pattern, total_beats=total_beats_section,
-        )
-        print(f"    Melody rhythm: hand-played pattern, "
-              f"{len(rhythm_pattern['onsets'])} notes, "
-              f"{rhythm_pattern.get('length_beats', '?')}b cycle")
-    elif motif_def and motif_def.get("rhythm"):
+    bass_rhythm_events   = None
+
+    if rhythm_source == "pattern":
+        rp = section.get("rhythm_pattern")
+        if rp:
+            melody_rhythm_events = rhythm_pattern_to_events(rp, total_beats=total_beats_section)
+            bass_rhythm_events   = melody_rhythm_events
+            print(f"    Melody/Bass rhythm: hand-played pattern "
+                  f"({len(rp['onsets'])} onsets, {rp.get('length_beats','?')}b)")
+
+    elif rhythm_source == "motif":
         melody_rhythm_events = _motif_rhythm_to_events(
             motif_def["rhythm"], total_beats_section, "full",
             velocities=motif_def.get("velocities"),
         )
-        cycle = sum(motif_def["rhythm"])
-        print(f"    Melody rhythm: motif ({len(motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
-    elif rhythm_template is not None:
-        melody_rhythm_events = melody_lens(
-            rhythm_template,
-            total_beats=total_beats_section,
-            seed=base_seed + seed_offset,
-        )
-
-    # ── Resolve motif rhythm events for harmony and bass ────────────
-    # Derived from the same motif rhythm at reduced articulation density.
-    # These are section-level event lists; the harmony per-chord loop
-    # slices them into chord windows via _slice_events_into_window.
-    # Bass uses them as whole-section timing anchors.
-    motif_harmony_events = None
-    motif_bass_events    = None
-    if motif_def and motif_def.get("rhythm"):
-        motif_harmony_events = _motif_rhythm_to_events(
-            motif_def["rhythm"], total_beats_section, "stressed",
-            velocities=motif_def.get("velocities"),
-        )
-        motif_bass_events = _motif_rhythm_to_events(
+        bass_rhythm_events = _motif_rhythm_to_events(
             motif_def["rhythm"], total_beats_section, "anchor",
             velocities=motif_def.get("velocities"),
         )
         cycle = sum(motif_def["rhythm"])
-        print(f"    Harmony rhythm: motif (stressed, {len(motif_harmony_events)} triggers, {cycle:.1f}b cycle)")
-        print(f"    Bass rhythm:    motif (anchor,   {len(motif_bass_events)} triggers, {cycle:.1f}b cycle)")
+        print(f"    Melody rhythm: motif full   ({len(motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
+        print(f"    Bass rhythm:   motif anchor ({len(bass_rhythm_events)} triggers, {cycle:.1f}b cycle)")
+
+    else:  # "free"
+        print(f"    Melody/Bass rhythm: free (density grid)")
+
+    # ── Harmony section events (explicit switch on harmony_rhythm.rhythm) ─
+    hr_block = _hr_normalized
+    h_rhythm_source = hr_block.get("rhythm", rhythm_source)
+
+    harmony_section_events = None  # None → free; "sustain" → sustain sentinel
+
+    if h_rhythm_source == "sustain":
+        harmony_section_events = "sustain"
+        print(f"    Harmony rhythm: sustain")
+
+    elif h_rhythm_source == "pattern":
+        hp = section.get("harmony_pattern")
+        if hp:
+            harmony_section_events = rhythm_pattern_to_events(hp, total_beats=total_beats_section)
+            print(f"    Harmony rhythm: hand-played pattern ({len(hp['onsets'])} onsets)")
+
+    elif h_rhythm_source == "motif":
+        harmony_section_events = _motif_rhythm_to_events(
+            motif_def["rhythm"], total_beats_section, "stressed",
+            velocities=motif_def.get("velocities"),
+        )
+        cycle = sum(motif_def["rhythm"])
+        print(f"    Harmony rhythm: motif stressed ({len(harmony_section_events)} triggers, {cycle:.1f}b cycle)")
+
+    else:  # "free"
+        harmony_section_events = None
+        print(f"    Harmony rhythm: free (density grid)")
 
     # ══════════════════════════════════════════════════════════════
     # BASS — generates first, writes snapshot for downstream voices
@@ -462,7 +458,7 @@ def generate_section(
         key=key,
         mode=mode,
         seed=base_seed + seed_offset,
-        rhythm_events_override=motif_bass_events,
+        rhythm_events_override=bass_rhythm_events,
     )
 
     # Record bass snapshot so melody/counterpoint can read it
@@ -527,7 +523,7 @@ def generate_section(
         ))
 
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, rhythm_template, motif_harmony_events
+    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, harmony_section_events
 
 
 # ---------------------------------------------------------------------------
@@ -702,8 +698,13 @@ VALID_SECTION_KEYS = {
     "name", "bars", "chord_bars", "progression", "density", "melody",
     "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
     "swing", "counterpoint", "notes", "percussion", "drums",
-    "rhythm_pattern", "harmony_pattern", "fugal_techniques", "rhythm_phrase",
+    "rhythm_pattern", "harmony_pattern", "fugal_techniques",
+    "rhythm",
 }
+
+# Explicit rhythm source declarations — no cascade, no defaults
+VALID_RHYTHM_SOURCE         = {"motif", "pattern", "free"}
+VALID_HARMONY_RHYTHM_SOURCE = {"motif", "pattern", "sustain", "free"}
 
 OBSOLETE_THEME_KEYS = {"palette"}
 
@@ -739,36 +740,11 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
     # The CMU pronouncing dictionary MUST be available for rhythm_phrase
     # to produce valid output. Without it, every syllable is treated as
     # primary stress, making the rhythm template fictional.
-    if t.get("prosodic_rhythm"):
+    if t.get("prosodic_rhythm") or t.get("rhythm_phrase"):
         issues.append(
-            "[ERROR] 'prosodic_rhythm' is no longer supported. "
-            "Use 'rhythm_phrase' for phrase-driven rhythm (all voices) "
-            "and 'phrase' for pitch contour only. These are now separate keys."
+            "[ERROR] prosodic rhythm ('prosodic_rhythm', 'rhythm_phrase') has been removed. "
+            "Use a motif with a 'rhythm' field instead."
         )
-
-    if t.get("rhythm_phrase"):
-        try:
-            from intervals.music.prosody import PRONOUNCING_AVAILABLE
-        except ImportError:
-            PRONOUNCING_AVAILABLE = False
-        if not PRONOUNCING_AVAILABLE:
-            issues.append(
-                "[ERROR] theme has 'rhythm_phrase' but the 'pronouncing' "
-                "library is not installed. Without the CMU pronouncing "
-                "dictionary, syllable stress cannot be analyzed and the "
-                "rhythm template output is structurally wrong. "
-                "Install with: pip install pronouncing"
-            )
-        else:
-            from intervals.music.prosody import analyze_phrase
-            analysis = analyze_phrase(t["rhythm_phrase"])
-            if analysis.fallback_words:
-                issues.append(
-                    f"[WARN] rhythm_phrase '{t['rhythm_phrase']}' contains "
-                    f"words not in the CMU dictionary: {analysis.fallback_words}. "
-                    f"Stress for these words is guessed by syllable count "
-                    f"and may not match natural speech."
-                )
 
     # --- Piece-level checks ---
     if "tempo" not in p and "tempo" not in t:
@@ -867,27 +843,77 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
         if arc and arc not in VALID_ARC:
             issues.append(f"[ERROR] {label}: arc='{arc}' — must be one of {sorted(VALID_ARC)}")
 
-        # Section-level rhythm_phrase — same CMU requirement as theme-level
-        sec_rp = section.get("rhythm_phrase")
-        if sec_rp:
-            try:
-                from intervals.music.prosody import PRONOUNCING_AVAILABLE as _PA
-            except ImportError:
-                _PA = False
-            if not _PA:
+        # rhythm source — required, explicit, no defaults
+        rhythm_source = section.get("rhythm")
+        if rhythm_source is None:
+            issues.append(
+                f"[ERROR] {label}: missing 'rhythm' field — "
+                f"must be one of {sorted(VALID_RHYTHM_SOURCE)}"
+            )
+        elif rhythm_source not in VALID_RHYTHM_SOURCE:
+            issues.append(
+                f"[ERROR] {label}: rhythm='{rhythm_source}' — "
+                f"must be one of {sorted(VALID_RHYTHM_SOURCE)}"
+            )
+        else:
+            # Cross-validate against available resources
+            if rhythm_source == "motif":
+                motif = theme.get("motif", {})
+                if not motif.get("rhythm"):
+                    issues.append(
+                        f"[ERROR] {label}: rhythm='motif' but theme motif has "
+                        f"no 'rhythm' field"
+                    )
+            elif rhythm_source == "pattern":
+                if not section.get("rhythm_pattern"):
+                    issues.append(
+                        f"[ERROR] {label}: rhythm='pattern' but no rhythm_pattern "
+                        f"block in section"
+                    )
+
+        # harmony_rhythm block — rhythm field required when block is present
+        hr = section.get("harmony_rhythm", {})
+        if hr:
+            # Guard: harmony_rhythm must be a dict, not a bare string.
+            # "harmony_rhythm": "sustain" is the old shorthand — tell user the new form.
+            if isinstance(hr, str):
                 issues.append(
-                    f"[ERROR] {label}: rhythm_phrase requires the 'pronouncing' "
-                    f"library. Install with: pip install pronouncing"
+                    f"[ERROR] {label}: harmony_rhythm must be an object, not a string. "
+                    f"Use: harmony_rhythm: {{\"rhythm\": \"{hr}\"}}"
                 )
             else:
-                from intervals.music.prosody import analyze_phrase as _ap
-                _analysis = _ap(sec_rp)
-                if _analysis.fallback_words:
+                h_rhythm = hr.get("rhythm")
+                if h_rhythm is None:
                     issues.append(
-                        f"[WARN] {label}: rhythm_phrase '{sec_rp}' contains words "
-                        f"not in the CMU dictionary: {_analysis.fallback_words}. "
-                        f"Stress for these words is estimated by syllable count."
+                        f"[ERROR] {label}: harmony_rhythm block present but missing "
+                        f"'rhythm' field — must be one of {sorted(VALID_HARMONY_RHYTHM_SOURCE)}"
                     )
+                elif h_rhythm not in VALID_HARMONY_RHYTHM_SOURCE:
+                    issues.append(
+                        f"[ERROR] {label}: harmony_rhythm.rhythm='{h_rhythm}' — "
+                        f"must be one of {sorted(VALID_HARMONY_RHYTHM_SOURCE)}"
+                    )
+                else:
+                    if h_rhythm == "motif":
+                        motif = theme.get("motif", {})
+                        if not motif.get("rhythm"):
+                            issues.append(
+                                f"[ERROR] {label}: harmony_rhythm.rhythm='motif' but "
+                                f"theme motif has no 'rhythm' field"
+                            )
+                    elif h_rhythm == "pattern":
+                        if not section.get("harmony_pattern"):
+                            issues.append(
+                                f"[ERROR] {label}: harmony_rhythm.rhythm='pattern' but "
+                                f"no harmony_pattern block in section"
+                            )
+
+        # Warn if rhythm_phrase present — it no longer does anything
+        if section.get("rhythm_phrase"):
+            issues.append(
+                f"[WARN] {label}: 'rhythm_phrase' is no longer used. "
+                f"Define a motif with a 'rhythm' field in theme.json instead."
+            )
 
     return issues
 
@@ -1009,89 +1035,39 @@ def _motif_rhythm_to_events(
 
 
 def _resolve_harmony_rhythm(
-    section_dict: dict,
-    chord_index: int,
-    total_per_chord: float,
+    harmony_section_events,
     beat_offset_local: float,
+    total_per_chord: float,
     beats_per_bar: int,
-    rhythm_template: Optional[RhythmicTemplate],
-    harmony_hand_events: Optional[list],
-    harmony_prosodic_events: Optional[list],
-    harmony_motif_events: Optional[list],
     h_density: str,
-    h_groove: Optional[str],
-    h_note_duration: Optional[str],
+    h_groove,
 ) -> list:
     """
-    Return rhythm events for a single chord window, applying the harmony
-    rhythm priority chain.
-
-    Current priority order (highest first):
-      1) harmony_pattern   — hand-played whole-section pattern, sliced
-      2) note_duration     — explicit single-event override
-      3) motif rhythm      — motif["rhythm"] at "stressed" articulation
-      4) prosodic lens     — phrase-driven harmony_lens, sliced
-      5) get_pattern()     — density-based grid fallback
-
-    The motif rhythm (priority 3) fires automatically when the theme has a
-    motif with a rhythm field and no higher-priority override is set. This
-    propagates the motif's rhythmic identity to harmony without any
-    explicit section-level config — the harmony breathes with the motif.
-
-    note_duration (priority 2) stays above motif rhythm so that explicit
-    `harmony_rhythm: {note_duration: "whole"}` overrides are still respected.
-
-    The `section_dict` and `chord_index` parameters are currently unused but
-    accepted for future per-chord features without changing the call site.
+    Return rhythm events for a single chord window.
+    harmony_section_events is pre-computed by generate_section based on the
+    explicit harmony_rhythm.rhythm declaration (or section.rhythm when the
+    harmony_rhythm block is absent).
+      "sustain"           -> single event, full chord window
+      None                -> density-based grid (free)
+      list[RhythmEvent]   -> slice into this chord window
     """
-    # 1) Hand-played harmony pattern — slice the section-level event stream
-    if harmony_hand_events is not None:
-        events = _slice_events_into_window(
-            harmony_hand_events, beat_offset_local, total_per_chord,
-            min_duration=0.25,
-        )
-        if not events:
-            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                  velocity_scale=0.7, is_rest=False)]
-        return events
-
-    # 2) Simple note_duration — single sustained event per chord
-    if h_note_duration:
+    if harmony_section_events == "sustain":
         return [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
                             velocity_scale=1.0, is_rest=False)]
-
-    # 3) Motif rhythm at "stressed" articulation — slice section-level events
-    if harmony_motif_events is not None:
-        events = _slice_events_into_window(
-            harmony_motif_events, beat_offset_local, total_per_chord,
-            min_duration=0.25,
+    if harmony_section_events is None:
+        return get_pattern(
+            total_per_chord, density=h_density,
+            voice_type="chord", groove=h_groove,
+            beats_per_bar=beats_per_bar,
         )
-        if not events:
-            # Fallback within this path: sustain the full chord window.
-            # This happens when no stressed motif onset falls in this chord's
-            # window (e.g. short chord, long motif cycle). Sustaining is more
-            # musical than silencing.
-            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                  velocity_scale=0.7, is_rest=False)]
-        return events
-
-    # 4) Prosodic harmony lens — slice the section-level event stream
-    if harmony_prosodic_events is not None:
-        events = _slice_events_into_window(
-            harmony_prosodic_events, beat_offset_local, total_per_chord,
-            min_duration=0.5,
-        )
-        if not events:
-            events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                                  velocity_scale=0.7, is_rest=False)]
-        return events
-
-    # 5) Density-based grid fallback
-    return get_pattern(
-        total_per_chord, density=h_density,
-        voice_type="chord", groove=h_groove,
-        beats_per_bar=beats_per_bar,
+    events = _slice_events_into_window(
+        harmony_section_events, beat_offset_local, total_per_chord,
+        min_duration=0.25,
     )
+    if not events:
+        events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
+                              velocity_scale=0.7, is_rest=False)]
+    return events
 
 
 # ---------------------------------------------------------------------------
@@ -1175,7 +1151,7 @@ def generate_piece(
 
         # In song forms, the same section may repeat with variation.
         # Use section index for seed to ensure variation is deterministic.
-        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, rhythm_template, motif_harmony_events = \
+        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, harmony_section_events = \
             generate_section(section, theme, base_seed=base_seed, seed_offset=i * 10,
                              sec_ctx=sec_ctx, piece_ctx=piece_ctx,
                              transform_sequence=transform_sequence)
@@ -1184,12 +1160,13 @@ def generate_piece(
         groove   = section_dict.get("groove")
         swing    = section_dict.get("swing", 0.0)
 
-        # Harmony-specific rhythm: independent from melody when specified
-        hr = section_dict.get("harmony_rhythm", {})
-        h_density  = hr.get("density", density)
-        h_groove   = hr.get("groove", groove)
-        h_swing    = hr.get("swing", swing)
-        h_note_duration = hr.get("note_duration")  # "whole", "half", "quarter", etc.
+        # Harmony-specific rhythm tuning (groove, swing, density)
+        # rhythm source was already resolved in generate_section
+        _hr_raw_gp = section_dict.get("harmony_rhythm", {})
+        hr = _hr_raw_gp if isinstance(_hr_raw_gp, dict) else {"rhythm": _hr_raw_gp}
+        h_density = hr.get("density", density)
+        h_groove  = hr.get("groove", groove)
+        h_swing   = hr.get("swing", swing)
 
         # Counterpoint (optional — only if section defines it)
         cp_def = section_dict.get("counterpoint")
@@ -1206,26 +1183,15 @@ def generate_piece(
                 seed=base_seed + i * 10,
             )
 
-            # Canon offset: when prosodic rhythm is active, shift counterpoint
-            # forward in time by one stressed-syllable duration. This creates
-            # the round effect — same musical material, staggered entry.
-            if rhythm_template is not None:
-                # Default offset: duration of first stressed syllable
-                canon_offset = cp_def.get("canon_offset")
-                if canon_offset is None:
-                    for ti in range(len(rhythm_template)):
-                        if rhythm_template.accents[ti] > 0.5:
-                            canon_offset = rhythm_template.durations[ti]
-                            break
-                    if canon_offset is None:
-                        canon_offset = rhythm_template.durations[0] if rhythm_template.durations else 0.0
-
-                if canon_offset > 0:
-                    for cn in cp_notes:
-                        cn.start_beat += canon_offset
-                    # Trim notes that now extend past section boundary
-                    cp_notes = [cn for cn in cp_notes
-                                if cn.start_beat < total_beats]
+            # Canon offset: shift counterpoint forward in time.
+            # Specify explicitly via cp_def["canon_offset"] (in beats).
+            canon_offset = cp_def.get("canon_offset", 0)
+            if canon_offset > 0:
+                for cn in cp_notes:
+                    cn.start_beat += canon_offset
+                # Trim notes that now extend past section boundary
+                cp_notes = [cn for cn in cp_notes
+                            if cn.start_beat < total_beats]
 
             # Record counterpoint snapshot
             if sec_ctx is not None:
@@ -1246,46 +1212,19 @@ def generate_piece(
                 cn.start_beat += global_beat
             all_cp_notes.extend(cp_notes)
 
-        # Harmony events — uses harmony-specific rhythm profile
+        # Harmony events — harmony_section_events pre-computed in generate_section
         beat_offset_local = 0.0
-
-        # Resolve harmony rhythm events
-        # Priority: 1) harmony_pattern  2) note_duration  3) motif rhythm
-        #           4) prosodic lens  5) get_pattern
-        # (See _resolve_harmony_rhythm docstring for priority rationale.)
-        harmony_hand_events = None
-        harmony_pattern = section_dict.get("harmony_pattern")
-        if harmony_pattern:
-            harmony_hand_events = rhythm_pattern_to_events(
-                harmony_pattern, total_beats=total_beats,
-            )
-            print(f"    Harmony rhythm: hand-played pattern, "
-                  f"{len(harmony_pattern['onsets'])} notes, "
-                  f"{harmony_pattern.get('length_beats', '?')}b cycle")
-
-        harmony_prosodic_events = None
-        if harmony_hand_events is None and rhythm_template is not None:
-            harmony_prosodic_events = harmony_lens(
-                rhythm_template,
-                total_beats=total_beats,
-            )
 
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
 
             rhythm_events = _resolve_harmony_rhythm(
-                section_dict=section_dict,
-                chord_index=ci,
-                total_per_chord=total_per_chord,
+                harmony_section_events=harmony_section_events,
                 beat_offset_local=beat_offset_local,
+                total_per_chord=total_per_chord,
                 beats_per_bar=beats_per_bar,
-                rhythm_template=rhythm_template,
-                harmony_hand_events=harmony_hand_events,
-                harmony_prosodic_events=harmony_prosodic_events,
-                harmony_motif_events=motif_harmony_events,
                 h_density=h_density,
                 h_groove=h_groove,
-                h_note_duration=h_note_duration,
             )
 
             if h_swing and h_swing > 0:
