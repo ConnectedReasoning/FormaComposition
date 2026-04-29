@@ -1,0 +1,40 @@
+{
+      "title": "Still Cove",
+      "tempo": 120,
+      "transform_sequence": ["original", "inversion", "retrograde"],
+      "sections": [
+          {
+              "name": "opening",
+              "bars": 8,
+              "progression": ["i", "VII", "iv", "v"],
+              "density": "medium",
+              "melody": "lyrical",
+              "bass_style": "melodic",
+              "arc": "fade_in",
+              "rhythm": "motif",
+              "harmony_rhythm": { "rhythm": "sustain" }
+          },
+          {
+              "name": "middle",
+              "bars": 8,
+              "progression": ["i", "VII", "iv", "v"],
+              "density": "medium",
+              "melody": "generative",
+              "bass_style": "melodic",
+              "arc": "fade_in",
+              "rhythm": "motif",
+              "harmony_rhythm": { "rhythm": "sustain" }
+          },
+          {
+              "name": "closing",
+              "bars": 8,
+              "progression": ["i", "VII", "iv", "v"],
+              "density": "medium",
+              "melody": "lyrical",
+              "bass_style": "melodic",
+              "arc": "fade_out",
+              "rhythm": "motif",
+              "harmony_rhythm": { "rhythm": "sustain" }
+          }
+      ]
+  }

@@ -1,0 +1,17 @@
+{
+  "theme": {
+    "name": "prosody_demo",
+    "key": "A",
+    "mode": "aeolian",
+    "tempo": { "min": 62, "max": 66 },
+
+    "prosodic_rhythm": true,
+    "phrase": "The forgotten harbor sleeps",
+
+    "motif": {
+      "name": "harbor",
+      "intervals": [-2, -1, 3, -2],
+      "rhythm": [1.0, 0.5, 1.5, 1.0]
+    }
+  }
+}
