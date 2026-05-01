@@ -47,6 +47,16 @@ from intervals.core.context import (
     VoiceSnapshot,
     compute_voice_snapshot,
 )
+from intervals.core.strategies import (
+    RhythmStrategyRegistry,
+    MelodyStrategyRegistry,
+    build_rhythm_context,
+    build_melody_context,
+    # Re-imported here so external callers (main.py, tests) don't need to change
+    rhythm_pattern_to_events,
+    _motif_rhythm_to_events,
+    _slice_events_into_window,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -267,53 +277,10 @@ def _write_events_to_track(track: MidiTrack, events: list[tuple]) -> None:
 # Hand-played rhythm pattern support
 # ---------------------------------------------------------------------------
 
-def rhythm_pattern_to_events(
-    pattern: dict,
-    total_beats: float,
-) -> list:
-    """
-    Convert a rhythm_pattern dict (from rhythm_extract.py) into a tiled
-    list of RhythmEvent covering total_beats.
-
-    The pattern is repeated as many times as needed to fill the section.
-    Last repetition is trimmed at the section boundary.
-
-    Args:
-        pattern:      Dict with onsets, durations, velocities, length_beats
-        total_beats:  Total beats to fill
-
-    Returns:
-        list[RhythmEvent]
-    """
-    onsets = pattern["onsets"]
-    durations = pattern["durations"]
-    velocities = pattern.get("velocities", [0.7] * len(onsets))
-    cycle_length = pattern.get("length_beats", 8.0)
-
-    if not onsets or cycle_length <= 0:
-        return []
-
-    events = []
-    offset = 0.0
-    while offset < total_beats:
-        for i in range(len(onsets)):
-            abs_onset = offset + onsets[i]
-            if abs_onset >= total_beats:
-                break
-            dur = durations[i] if i < len(durations) else 0.5
-            # Trim if it exceeds section boundary
-            dur = min(dur, total_beats - abs_onset)
-            vel = velocities[i] if i < len(velocities) else 0.7
-
-            events.append(RhythmEvent(
-                start_beat=abs_onset,
-                duration_beats=max(0.25, dur),
-                velocity_scale=vel,
-                is_rest=False,
-            ))
-        offset += cycle_length
-
-    return events
+# rhythm_pattern_to_events, _motif_rhythm_to_events, and _slice_events_into_window
+# have been moved to intervals/core/strategies.py to avoid circular imports.
+# They are re-imported above and remain accessible from this module for
+# backward compatibility with any external callers.
 
 
 # ---------------------------------------------------------------------------
@@ -974,117 +941,9 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
 # ---------------------------------------------------------------------------
 # Harmony rhythm resolution helpers
 # ---------------------------------------------------------------------------
-
-def _slice_events_into_window(
-    events: list,
-    window_start: float,
-    window_length: float,
-    min_duration: float = 0.25,
-) -> list:
-    """
-    Take a list of section-level RhythmEvents and return only those whose
-    start_beat falls inside [window_start, window_start + window_length),
-    translated to coordinates local to the window.
-
-    Events with duration shorter than `min_duration` after trimming at the
-    window boundary are dropped (boundary artifacts, not musical content).
-
-    Used by the harmony rhythm priority chain to extract the per-chord
-    portion of whole-section event streams (hand-played harmony_pattern,
-    prosodic harmony_lens). Returns an empty list if no events fall in the
-    window — the caller is responsible for any fallback behavior.
-    """
-    window_end = window_start + window_length
-    sliced = []
-    for ev in events:
-        if ev.start_beat < window_start or ev.start_beat >= window_end:
-            continue
-        local_start = ev.start_beat - window_start
-        local_dur = min(ev.duration_beats, window_length - local_start)
-        if local_dur < min_duration:
-            continue
-        sliced.append(RhythmEvent(
-            start_beat=local_start,
-            duration_beats=local_dur,
-            velocity_scale=ev.velocity_scale,
-            is_rest=ev.is_rest,
-        ))
-    return sliced
-
-
-def _motif_rhythm_to_events(
-    rhythm: list,
-    total_beats: float,
-    articulation: str = "full",
-    velocities: Optional[list] = None,
-) -> list:
-    """
-    Convert a motif rhythm (list of beat durations, e.g. [1.0, 0.5, 1.5, 1.0])
-    to a tiled list of RhythmEvent covering total_beats.
-
-    This is the bridge between the motif system and the voice rhythm system.
-    The motif's rhythmic identity propagates to all voices, each expressing
-    it at an appropriate articulation density:
-
-      "full"     — every onset in the cycle (melody density: pronounces)
-      "stressed" — onsets whose duration >= median duration in the cycle
-                   (harmony density: accompanies on strong beats)
-      "anchor"   — first onset of each cycle only (bass density: anchors)
-
-    Example: rhythm = [1.0, 0.5, 1.5, 1.0], cycle = 4.0 beats
-      full:     onsets [0.0, 1.0, 1.5, 3.0]  → 4 events per cycle
-      stressed: onsets [0.0, 1.5, 3.0]        → 3 events (dur >= median 1.0)
-      anchor:   onsets [0.0]                  → 1 event per cycle
-
-    Returns empty list if rhythm is empty or total_beats <= 0.
-    The caller is responsible for any fallback if the list is empty.
-    """
-    import statistics as _stats
-
-    if not rhythm or total_beats <= 0:
-        return []
-    cycle_length = sum(rhythm)
-    if cycle_length <= 0:
-        return []
-
-    # Compute per-onset positions and decide which to keep
-    onsets = []
-    t = 0.0
-    for dur in rhythm:
-        onsets.append(t)
-        t += dur
-
-    if articulation == "anchor":
-        keep = [0]
-    elif articulation == "stressed":
-        median_dur = _stats.median(rhythm)
-        keep = [i for i, d in enumerate(rhythm) if d >= median_dur]
-        if 0 not in keep:          # always include the downbeat
-            keep = [0] + keep
-    else:                           # "full"
-        keep = list(range(len(rhythm)))
-
-    if velocities is None or len(velocities) != len(rhythm):
-        velocities = [0.8] * len(rhythm)
-
-    events = []
-    offset = 0.0
-    while offset < total_beats:
-        for i in keep:
-            abs_onset = offset + onsets[i]
-            if abs_onset >= total_beats:
-                break
-            dur = min(rhythm[i], total_beats - abs_onset)
-            if dur < 0.25:
-                continue
-            events.append(RhythmEvent(
-                start_beat=abs_onset,
-                duration_beats=dur,
-                velocity_scale=velocities[i],
-                is_rest=False,
-            ))
-        offset += cycle_length
-    return events
+# _slice_events_into_window and _motif_rhythm_to_events have been moved to
+# intervals/core/strategies.py to break the circular import with that module.
+# They are re-imported at the top of this file and remain callable here.
 
 
 def _resolve_harmony_rhythm(
