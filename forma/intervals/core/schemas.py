@@ -107,17 +107,25 @@ class HarmonyRhythmModel(_StrictBase):
     Corresponds to section["harmony_rhythm"] block.
     When omitted from a section, HarmonyRhythmModel is not instantiated —
     the factory falls back to the section's main rhythm source.
+
+    ``rhythm`` is Optional: existing compositions supply only density/groove/
+    note_duration overrides without an explicit rhythm source, relying on the
+    cascade: harmony_rhythm.rhythm -> section.rhythm -> "free".
+    The factory handles None by falling back to section.rhythm.
     """
-    rhythm:  HarmonyRhythmSourceLiteral
-    density: Optional[DensityLiteral] = None
-    groove:  Optional[str] = None
-    swing:   Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    rhythm:        Optional[HarmonyRhythmSourceLiteral] = None
+    density:       Optional[DensityLiteral] = None
+    groove:        Optional[str] = None
+    swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    note_duration: Optional[Literal["whole", "half", "quarter", "eighth"]] = None
 
 
 class CounterpointModel(_StrictBase):
     """Corresponds to section["counterpoint"] block."""
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
     species:      CounterpointSpeciesLiteral  = "free"
-    register:     CounterpointRegisterLiteral = "below"
+    cp_register:  CounterpointRegisterLiteral = Field(default="below", alias="register")
     dissonance:   DissonanceLiteral           = "passing"
     velocity:     Annotated[int, Field(ge=1, le=127)] = 58
     canon_offset: Annotated[float, Field(ge=0.0)]     = 0.0
@@ -254,6 +262,7 @@ class SectionModel(BaseModel):
             )
         if self.harmony_rhythm is not None:
             hr = self.harmony_rhythm
+            # rhythm may be None (cascade to section.rhythm handled by factory)
             if hr.rhythm == "pattern" and self.harmony_pattern is None:
                 raise ValueError(
                     f"Section '{self.name}': harmony_rhythm.rhythm='pattern' "
