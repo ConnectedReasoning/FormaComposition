@@ -57,6 +57,12 @@ from intervals.core.strategies import (
     _motif_rhythm_to_events,
     _slice_events_into_window,
 )
+from intervals.core.schemas import SectionModel, ThemeModel, PieceModel
+from intervals.core.strategies_typed import (
+    build_rhythm_context_from_model,
+    build_harmony_rhythm_context_from_model,
+    build_melody_context_from_model,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -315,6 +321,16 @@ def generate_section(
     key          = theme["key"]
     mode         = theme["mode"]
 
+    # Validate and coerce the raw section dict once — all downstream code
+    # uses the typed model via the _from_model factory functions.
+    from pydantic import ValidationError as _PydanticValidationError
+    try:
+        section_model = SectionModel.model_validate(section)
+    except _PydanticValidationError as exc:
+        raise ValueError(
+            f"Section '{section.get('name', '?')}' failed validation:\n{exc}"
+        ) from exc
+
     # Resolve motif — single primary (for rhythm + transform) and full pool (for melody variety)
     motif_obj = resolve_motif_from_theme(theme)
     motif_def = motif_to_dict(motif_obj) if motif_obj else None
@@ -325,24 +341,17 @@ def generate_section(
     if motif_def is None and motif_pool:
         motif_def = motif_pool[0]
 
-    progression  = section["progression"]
-    bars         = section.get("bars", 8)
-    density      = section.get("density", "medium")
-    melody_beh   = section.get("melody", "generative")
-    bass_style   = section.get("bass_style", "root_fifth")
-    beats_per_bar= section.get("beats_per_bar", 4)
-    groove       = section.get("groove")       # None = original grid behavior
-    swing        = section.get("swing", 0.0)   # 0.0 = straight
+    progression  = section_model.progression
+    bars         = section_model.bars or 8.0
+    density      = section_model.density
+    melody_beh   = section_model.melody
+    bass_style   = section_model.bass_style
+    beats_per_bar= section_model.beats_per_bar
+    groove       = section_model.groove
+    swing        = section_model.swing
 
-    # Per-chord bar durations: explicit list or even distribution
-    # If chord_bars is provided, it is the source of truth — bars is derived from it.
-    chord_bars = section.get("chord_bars")
-    if chord_bars is not None:
-        bars_list = [float(b) for b in chord_bars]
-        bars = sum(bars_list)   # derive bars — chord_bars wins
-    else:
-        even = bars / len(progression)
-        bars_list = [even] * len(progression)
+    # Per-chord bar durations — model helper handles chord_bars vs bars logic
+    bars_list = section_model.bars_list()
 
     # Resolve chords
     chords = resolve_progression(progression, key, mode, density=density)
@@ -494,10 +503,10 @@ def generate_section(
         groove=groove,
         swing=swing,
         seed=base_seed + seed_offset,
-        section_name=section.get("name", ""),
+        section_name=section_model.name or "",
         rhythm_events_override=melody_rhythm_events,
-        fugal_techniques=section.get("fugal_techniques"),
-        rest_probability=section.get("rest_probability", 0.0),
+        fugal_techniques=section_model.fugal_techniques,
+        rest_probability=section_model.rest_probability,
     )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -1006,16 +1015,17 @@ def generate_piece(
     Returns:
         Absolute path of the written file
     """
-    # Validate before generation — print warnings, raise on errors
-    issues = validate_piece(theme, piece)
-    errors   = [i for i in issues if i.startswith("[ERROR]")]
-    warnings = [i for i in issues if i.startswith("[WARN]")]
-    for w in warnings:
-        print(f"  {w}")
-    if errors:
-        for e in errors:
-            print(f"  {e}")
-        raise ValueError(f"Piece validation failed with {len(errors)} error(s). Fix before generating.")
+    # Validate theme + piece via Pydantic models before generation.
+    # ThemeModel / PieceModel raise ValidationError with field-level detail;
+    # we convert to ValueError so callers that catch ValueError still work.
+    from pydantic import ValidationError as _PydanticValidationError
+    try:
+        ThemeModel.model_validate(theme)
+        PieceModel.model_validate(piece)
+    except _PydanticValidationError as exc:
+        raise ValueError(
+            f"Validation failed before generation:\n{exc}"
+        ) from exc
 
     bpm      = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
     base_seed = piece.get("seed", 42)  # Optional seed parameter, defaults to 42

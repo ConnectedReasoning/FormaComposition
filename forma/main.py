@@ -18,183 +18,11 @@ from pathlib import Path
 from typing import Optional
 
 from intervals.core.generator import generate_piece, load_theme, load_piece, bpm_to_tempo, PPQ
+from intervals.core.schemas import ThemeModel, PieceModel
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.prosody import phrase_to_motif, analyze_phrase, PRONOUNCING_AVAILABLE
 from intervals.music.rhythm import VALID_GROOVES
 from intervals.music.percussion import VALID_DRUM_PATTERNS
-
-# ---------------------------------------------------------------------------
-# Validation
-# ---------------------------------------------------------------------------
-
-VALID_MODES       = ["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"]
-VALID_DENSITIES   = ["sparse", "medium", "full"]
-VALID_BEHAVIORS   = ["generative", "lyrical", "sparse", "develop"]
-VALID_BASS_STYLES = ["root_only", "root_fifth", "walking", "steady", "melodic", "pulse", "pedal"]
-VALID_ARCS        = ["flat", "swell", "fade_in", "fade_out", "breath"]
-
-
-def validate_theme(theme: dict) -> list:
-    errors = []
-    if "key" not in theme:
-        errors.append("theme.key is required")
-    if "mode" not in theme:
-        errors.append("theme.mode is required")
-    elif theme["mode"].lower() not in VALID_MODES:
-        errors.append(f"theme.mode '{theme['mode']}' unknown. Valid: {VALID_MODES}")
-    if "tempo" not in theme:
-        errors.append("theme.tempo is required (object with min/max keys)")
-    else:
-        t = theme["tempo"]
-        if "min" not in t or "max" not in t:
-            errors.append("theme.tempo must have 'min' and 'max' keys")
-        elif t["min"] > t["max"]:
-            errors.append("theme.tempo.min must be <= theme.tempo.max")
-    if theme.get("motif") and theme.get("phrase"):
-        errors.append(
-            "theme has both 'motif' and 'phrase' — explicit motif takes "
-            "precedence, phrase will be ignored (proceeding anyway)"
-        )
-    return errors
-
-
-def _validate_section(section: dict, prefix: str) -> list:
-    """Validate a single section dict. Used for both narrative and song form."""
-    errors = []
-    if "progression" not in section or not section["progression"]:
-        errors.append(f"{prefix}: progression is required")
-    if "bars" not in section:
-        errors.append(f"{prefix}: bars is required")
-
-    chord_bars = section.get("chord_bars")
-    if chord_bars is not None:
-        prog = section.get("progression", [])
-        if len(chord_bars) != len(prog):
-            errors.append(
-                f"{prefix}: chord_bars has {len(chord_bars)} entries "
-                f"but progression has {len(prog)} chords — must match"
-            )
-        bars_total = section.get("bars", 0)
-        cb_sum = sum(chord_bars)
-        if abs(cb_sum - bars_total) > 0.01:
-            errors.append(
-                f"{prefix}: chord_bars sum ({cb_sum}) does not match "
-                f"bars ({bars_total}) (proceeding anyway)"
-            )
-
-    if section.get("density") and section["density"] not in VALID_DENSITIES:
-        errors.append(f"{prefix}: density '{section['density']}' invalid. Valid: {VALID_DENSITIES}")
-    if section.get("melody") and section["melody"] not in VALID_BEHAVIORS:
-        errors.append(f"{prefix}: melody behavior '{section['melody']}' invalid. Valid: {VALID_BEHAVIORS}")
-    if section.get("bass_style") and section["bass_style"] not in VALID_BASS_STYLES:
-        errors.append(f"{prefix}: bass_style '{section['bass_style']}' invalid. Valid: {VALID_BASS_STYLES}")
-    if section.get("arc") and section["arc"] not in VALID_ARCS:
-        errors.append(f"{prefix}: arc '{section['arc']}' invalid. Valid: {VALID_ARCS}")
-    if section.get("groove") and section["groove"] not in VALID_GROOVES:
-        errors.append(f"{prefix}: groove '{section['groove']}' invalid. Valid: {VALID_GROOVES}")
-
-    swing = section.get("swing")
-    if swing is not None and not (0.0 <= swing <= 0.75):
-        errors.append(f"{prefix}: swing {swing} out of range. Valid: 0.0–0.75")
-
-    hr = section.get("harmony_rhythm")
-    if hr and isinstance(hr, dict):
-        hp = f"{prefix}.harmony_rhythm"
-        if hr.get("density") and hr["density"] not in VALID_DENSITIES:
-            errors.append(f"{hp}: density '{hr['density']}' invalid. Valid: {VALID_DENSITIES}")
-        if hr.get("groove") and hr["groove"] not in VALID_GROOVES:
-            errors.append(f"{hp}: groove '{hr['groove']}' invalid. Valid: {VALID_GROOVES}")
-        hr_swing = hr.get("swing")
-        if hr_swing is not None and not (0.0 <= hr_swing <= 0.75):
-            errors.append(f"{hp}: swing {hr_swing} out of range. Valid: 0.0–0.75")
-        if hr.get("note_duration"):
-            valid_durations = ["whole", "half", "quarter", "eighth"]
-            if hr["note_duration"] not in valid_durations:
-                errors.append(f"{hp}: note_duration '{hr['note_duration']}' invalid. Valid: {valid_durations}")
-
-    # Drum validation
-    drums_config = section.get("drums")
-    if drums_config:
-        if isinstance(drums_config, str):
-            pattern = drums_config
-        else:
-            pattern = drums_config.get("pattern") if isinstance(drums_config, dict) else None
-
-        if pattern and pattern not in VALID_DRUM_PATTERNS:
-            errors.append(
-                f"{prefix}: drum pattern '{pattern}' invalid. "
-                f"Valid: {VALID_DRUM_PATTERNS}"
-            )
-
-        if isinstance(drums_config, dict):
-            velocity = drums_config.get("velocity")
-            if velocity is not None and not (0 <= velocity <= 127):
-                errors.append(
-                    f"{prefix}: drums velocity {velocity} out of range. Valid: 0–127"
-                )
-
-    return errors
-
-
-def validate_piece(piece: dict, theme: dict) -> list:
-    errors = []
-
-    # Determine form type (song or narrative)
-    form_type = piece.get("form_type", "narrative")
-
-    if form_type == "song":
-        # Song form mode
-        if "form" not in piece or not piece["form"]:
-            errors.append("piece.form is required for song form")
-            return errors
-        if "sections" not in piece or not piece["sections"]:
-            errors.append("piece.sections dict is required for song form")
-            return errors
-
-        # Validate form array references
-        sections_dict = piece["sections"]
-        for form_item in piece["form"]:
-            if isinstance(form_item, dict):
-                section_name = form_item.get("section")
-                variation = form_item.get("variation", 0.0)
-                if not (0.0 <= variation <= 1.0):
-                    errors.append(f"form item section '{section_name}': variation {variation} out of range. Valid: 0.0–1.0")
-            else:
-                section_name = form_item
-
-            if section_name not in sections_dict:
-                errors.append(f"form references undefined section: '{section_name}'")
-
-        # Validate each section definition in the dict
-        for section_name, section in sections_dict.items():
-            prefix = f"sections['{section_name}']"
-            section_errors = _validate_section(section, prefix)
-            errors.extend(section_errors)
-    else:
-        # Narrative mode
-        if "sections" not in piece or not piece["sections"]:
-            errors.append("piece.sections is required and must be non-empty")
-            return errors
-
-        # Validate each section in the list
-        for i, section in enumerate(piece["sections"]):
-            prefix = f"sections[{i}] '{section.get('name', '?')}'"
-            section_errors = _validate_section(section, prefix)
-            errors.extend(section_errors)
-
-    # Check tempo range
-    tempo = piece.get("tempo")
-    if tempo is not None:
-        t = theme.get("tempo", {})
-        if t.get("min") and t.get("max"):
-            if not (t["min"] <= tempo <= t["max"]):
-                errors.append(
-                    f"piece.tempo {tempo} is outside theme range "
-                    f"{t['min']}–{t['max']} BPM (proceeding anyway)"
-                )
-
-    return errors
-
 
 # ---------------------------------------------------------------------------
 # Info display
@@ -319,20 +147,15 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
         print(f"  ERROR loading piece '{piece_path}': {e}", file=sys.stderr)
         return False
 
-    theme_errors = validate_theme(theme)
-    piece_errors = validate_piece(piece, theme)
-    all_errors   = theme_errors + piece_errors
-
-    warnings    = [e for e in all_errors if "proceeding anyway" in e]
-    hard_errors = [e for e in all_errors if "proceeding anyway" not in e]
-
-    for w in warnings:
-        print(f"  WARNING: {w}")
-
-    if hard_errors:
+    from pydantic import ValidationError as _PydanticValidationError
+    try:
+        ThemeModel.model_validate(theme)
+        PieceModel.model_validate(piece)
+    except _PydanticValidationError as exc:
         print(f"  ERRORS in '{piece_path}':")
-        for e in hard_errors:
-            print(f"    • {e}")
+        for error in exc.errors():
+            loc = " → ".join(str(l) for l in error["loc"]) if error["loc"] else "piece"
+            print(f"    • {loc}: {error['msg']}")
         return False
 
     if info_only:
