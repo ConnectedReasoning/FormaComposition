@@ -244,6 +244,7 @@ def score_candidate(
     beats_per_bar: int,
     register: str,
     is_final: bool = False,
+    rng=None,
 ) -> float:
     """
     Score a candidate counterpoint note. Lower = better.
@@ -301,7 +302,8 @@ def score_candidate(
         score += 20.0
 
     # Slight randomness to avoid mechanical repetition
-    score += random.uniform(0.0, 1.5)
+    _rng = rng if rng is not None else random.Random()
+    score += _rng.uniform(0.0, 1.5)
 
     return score
 
@@ -336,7 +338,9 @@ def generate_first_species(
         List of CounterpointNote
     """
     if seed is not None:
-        random.seed(seed)
+        rng = random.Random(seed)
+    else:
+        rng = random.Random()
 
     # Register ranges
     if register == "below":
@@ -375,7 +379,8 @@ def generate_first_species(
         for c in candidates:
             s = score_candidate(
                 c, mn.midi_note, melody_prev, cp_prev,
-                scale_tones, beat, beats_per_bar, register, is_final
+                scale_tones, beat, beats_per_bar, register, is_final,
+                rng=rng,
             )
             scored.append((s, c))
 
@@ -437,7 +442,9 @@ def generate_free_species(
         List of CounterpointNote
     """
     if seed is not None:
-        random.seed(seed)
+        rng = random.Random(seed)
+    else:
+        rng = random.Random()
 
     if register == "below":
         bottom, top = 48, 69
@@ -497,7 +504,8 @@ def generate_free_species(
         for c in candidates:
             s = score_candidate(
                 c, mn.midi_note, melody_prev, cp_prev,
-                scale_tones, beat, beats_per_bar, register, is_final
+                scale_tones, beat, beats_per_bar, register, is_final,
+                rng=rng,
             )
             scored.append((s, c))
 
@@ -514,7 +522,7 @@ def generate_free_species(
             dissonance == "free"
             and not is_strong
             and not is_final
-            and random.random() < 0.12
+            and rng.random() < 0.12
         )
 
         if use_rest:

@@ -710,8 +710,8 @@ def _apply_variation(section: dict, variation: float) -> dict:
     if variation <= 0.0:
         return varied
 
-    # Seed with variation amount for reproducibility
-    random.seed(int(variation * 1000))
+    # Local RNG instance seeded by variation — no global state mutation.
+    rng = random.Random(int(variation * 1000))
 
     # Melody behavior shifts (higher variation = more change)
     melody_behaviors = ["sparse", "generative", "lyrical", "develop"]
@@ -722,7 +722,7 @@ def _apply_variation(section: dict, variation: float) -> dict:
         if original_melody in melody_behaviors:
             idx = melody_behaviors.index(original_melody)
             # Shift by 1 position (circular)
-            new_idx = (idx + random.randint(0, 1)) % len(melody_behaviors)
+            new_idx = (idx + rng.randint(0, 1)) % len(melody_behaviors)
             if new_idx != idx:
                 varied["melody"] = melody_behaviors[new_idx]
 
@@ -829,6 +829,7 @@ def generate_piece(
         total_sections=len(sections),
         key=theme["key"],
         mode=theme["mode"],
+        seed=base_seed,
     )
 
     # Optional explicit transform plan from piece JSON

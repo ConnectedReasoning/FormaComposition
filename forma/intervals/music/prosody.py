@@ -304,12 +304,14 @@ def choose_note(
     prev_tension: Optional[str],
     is_phrase_end: bool,
     chord_root_midi: int,
+    rng=None,
 ) -> tuple:
     """
     Choose a MIDI note and tension level for a syllable.
     Enforces voice leading: tension resolves, phrase ends on stable tones.
     Returns (midi_note, tension_level).
     """
+    _rng = rng if rng is not None else random.Random()
     stress = syllable.stress
     freq   = profile["freq"]
     p_pass = profile["passing_prob"]
@@ -328,25 +330,25 @@ def choose_note(
 
     # Choose tension level by stress + profile
     if stress == 1:
-        if random.random() < freq * 0.4 and COLOR in pool:
+        if _rng.random() < freq * 0.4 and COLOR in pool:
             level = COLOR
-        elif random.random() < freq * 0.6 and WARM in pool:
+        elif _rng.random() < freq * 0.6 and WARM in pool:
             level = WARM
         else:
             level = STABLE
     elif stress == 2:
-        if random.random() < freq and COLOR in pool:
+        if _rng.random() < freq and COLOR in pool:
             level = COLOR
         elif WARM in pool:
             level = WARM
         else:
             level = STABLE
     else:
-        if random.random() < p_pass and PASSING in pool:
+        if _rng.random() < p_pass and PASSING in pool:
             level = PASSING
-        elif random.random() < freq and TENSION in pool:
+        elif _rng.random() < freq and TENSION in pool:
             level = TENSION
-        elif random.random() < freq and COLOR in pool:
+        elif _rng.random() < freq and COLOR in pool:
             level = COLOR
         else:
             level = WARM if WARM in pool else STABLE
@@ -384,9 +386,10 @@ RHYTHM_SLOW = {1: [2.0, 2.5, 3.0], 2: [1.0, 1.5], 0: [0.5, 0.75, 1.0]}
 RHYTHM_NORM = {1: [1.5, 2.0],       2: [1.0, 1.5], 0: [0.5, 0.75]}
 
 
-def _rhythm(stress: int, is_long_vowel: bool, slow: bool) -> float:
+def _rhythm(stress: int, is_long_vowel: bool, slow: bool, rng=None) -> float:
     pool = (RHYTHM_SLOW if slow else RHYTHM_NORM).get(stress, [1.0])
-    r = random.choice(pool)
+    _rng = rng if rng is not None else random.Random()
+    r = _rng.choice(pool)
     if is_long_vowel and stress >= 1:
         r = round(r * 1.25 * 4) / 4
     return r
@@ -432,7 +435,9 @@ def analysis_to_motif(
     Without harmonic context: falls back to interval-based mode.
     """
     if seed is not None:
-        random.seed(seed)
+        rng = random.Random(seed)
+    else:
+        rng = random.Random()
 
     syllables = analysis.syllables[:max_syllables]
     stress_pattern = analysis.stress_pattern[:max_syllables]
@@ -473,9 +478,10 @@ def analysis_to_motif(
                 prev_note, prev_tension,
                 is_phrase_end=(i == len(syllables) - 1),
                 chord_root_midi=chord_root_midi,
+                rng=rng,
             )
             notes.append(midi_note)
-            rhythms.append(_rhythm(syl.stress, syl.vowel in LONG_VOWELS, slow))
+            rhythms.append(_rhythm(syl.stress, syl.vowel in LONG_VOWELS, slow, rng=rng))
             prev_note, prev_tension = midi_note, tension_level
 
         intervals = [notes[i] - notes[i-1] for i in range(1, len(notes))]
@@ -500,9 +506,9 @@ def analysis_to_motif(
         pool = INTERVAL_MAP.get((syl.stress, direction), [0, 1, -1])
         if prev_iv is not None and len(pool) > 1:
             pool = [x for x in pool if x != prev_iv] or pool
-        iv = random.choice(pool)
+        iv = rng.choice(pool)
         intervals.append(iv)
-        rhythms.append(_rhythm(syl.stress, syl.vowel in LONG_VOWELS, slow))
+        rhythms.append(_rhythm(syl.stress, syl.vowel in LONG_VOWELS, slow, rng=rng))
         prev_iv = iv
 
     return Motif(intervals=intervals, rhythm=rhythms,

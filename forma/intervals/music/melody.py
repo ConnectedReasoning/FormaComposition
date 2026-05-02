@@ -102,7 +102,7 @@ def nearest_scale_tone(note: int, scale_tones: list[int]) -> int:
 # Motif engine
 # ---------------------------------------------------------------------------
 
-def apply_transform(intervals: list[int], transform: str) -> list[int]:
+def apply_transform(intervals: list[int], transform: str, rng=None) -> list[int]:
     """
     Apply a Bach-style transform to an interval sequence.
 
@@ -114,6 +114,9 @@ def apply_transform(intervals: list[int], transform: str) -> list[int]:
       transpose    — shift all intervals by +2 (adds variety)
       shuffle      — randomly reorder intervals
     """
+    if rng is None:
+        import random as _r
+        rng = _r.Random()
     if transform == "inversion":
         return [-i for i in intervals]
     elif transform == "retrograde":
@@ -122,7 +125,7 @@ def apply_transform(intervals: list[int], transform: str) -> list[int]:
         return [i + 2 for i in intervals]
     elif transform == "shuffle":
         shuffled = list(intervals)
-        random.shuffle(shuffled)
+        rng.shuffle(shuffled)
         return shuffled
     else:
         # augmentation / diminution affect rhythm, not intervals
@@ -205,8 +208,7 @@ def generate_generative(
     rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """Freely picks notes from weighted pool of chord + scale tones."""
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     cw, sw, _ = BEHAVIOR_WEIGHTS["generative"]
     pool = ([(n, cw / len(chord_tones)) for n in chord_tones] if chord_tones else []) + \
@@ -219,13 +221,13 @@ def generate_generative(
     current = prev_note or _pick_start_note(chord_tones, scale_tones, None)
 
     for ev in rhythm_events:
-        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
+        if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
         # Prefer notes within a 5th of current for smooth motion
         close = [n for n, _ in pool if abs(n - current) <= 7]
         candidates = close if close else [n for n, _ in pool]
-        note = random.choice(candidates)
+        note = rng.choice(candidates)
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
@@ -245,8 +247,7 @@ def generate_lyrical(
     rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """Stepwise motion, gravitates toward chord tones, longer phrases."""
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
@@ -258,7 +259,7 @@ def generate_lyrical(
         )
 
     for i, ev in enumerate(rhythm_events):
-        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
+        if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
@@ -273,12 +274,12 @@ def generate_lyrical(
         if is_last_note and context and next_chord_tones != chord_tones:
             candidates.extend(next_chord_tones)
 
-        direction = random.choice([-1, 1])
+        direction = rng.choice([-1, 1])
         directed = [n for n in candidates if (n - current) * direction > 0]
         if directed:
             candidates = directed
 
-        note = random.choice(candidates) if candidates else current
+        note = rng.choice(candidates) if candidates else current
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
@@ -297,8 +298,7 @@ def generate_sparse(
     context: Optional[dict] = None,  # NEW
 ) -> list[MelodyNote]:
     """Wide intervals, few notes, lots of space. Very ambient."""
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
@@ -306,12 +306,12 @@ def generate_sparse(
     play_probability = 0.40
 
     for ev in rhythm_events:
-        if ev.is_rest or random.random() > play_probability:
+        if ev.is_rest or rng.random() > play_probability:
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
         # Wide leaps preferred — chord tones anywhere in register
-        note = random.choice(chord_tones) if chord_tones else random.choice(scale_tones)
+        note = rng.choice(chord_tones) if chord_tones else rng.choice(scale_tones)
         vel = int(base_velocity * ev.velocity_scale * 0.85)  # slightly softer
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
@@ -341,17 +341,16 @@ def generate_develop(
             prev_note, base_velocity, seed, context, rest_probability
         )
 
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     intervals = list(motif["intervals"])
     rhythm    = list(motif.get("rhythm", [1.0] * len(intervals)))
     pool      = motif.get("transform_pool", ["inversion", "retrograde"])
 
     # Pick a random transform
-    transform = random.choice(pool) if pool else None
+    transform = rng.choice(pool) if pool else None
     if transform:
-        intervals = apply_transform(intervals, transform)
+        intervals = apply_transform(intervals, transform, rng=rng)
         rhythm    = apply_rhythm_transform(rhythm, transform)
 
     start = _pick_start_note(chord_tones, scale_tones, prev_note)
@@ -364,7 +363,7 @@ def generate_develop(
     motif_idx = 0
 
     for ev in rhythm_events:
-        if ev.is_rest or (rest_probability > 0 and random.random() < rest_probability):
+        if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
@@ -373,7 +372,7 @@ def generate_develop(
             motif_idx += 1
         else:
             candidates = chord_tones if chord_tones else scale_tones
-            note = random.choice(candidates) if candidates else 60
+            note = rng.choice(candidates) if candidates else 60
 
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
@@ -575,8 +574,7 @@ def generate_melody_for_progression(
 
         # Pick motif for this chord — draw from pool if available, else use primary
         if motif_pool and len(motif_pool) > 1:
-            import random as _rnd
-            rng = _rnd.Random(chord_seed)
+            rng = random.Random(chord_seed)
             chord_motif = rng.choice(motif_pool)
         else:
             chord_motif = effective_motif

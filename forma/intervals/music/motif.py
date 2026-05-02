@@ -114,7 +114,9 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         New Motif with transform applied
     """
     if seed is not None:
-        random.seed(seed)
+        rng = random.Random(seed)
+    else:
+        rng = random.Random()
 
     intervals = list(motif.intervals)
     rhythm    = list(motif.rhythm)
@@ -145,7 +147,7 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
 
     elif transform_name == "shuffle":
         combined = list(zip(intervals, rhythm))
-        random.shuffle(combined)
+        rng.shuffle(combined)
         intervals, rhythm = zip(*combined) if combined else ([], [])
         intervals = list(intervals)
         rhythm    = list(rhythm)
@@ -205,13 +207,12 @@ def mutate(
     Returns:
         New Motif with random mutations applied
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     intervals = list(motif.intervals)
     for i in range(len(intervals)):
-        if random.random() < mutation_rate:
-            delta = random.randint(-interval_range, interval_range)
+        if rng.random() < mutation_rate:
+            delta = rng.randint(-interval_range, interval_range)
             intervals[i] += delta
 
     return Motif(
@@ -248,8 +249,7 @@ def generate_random(
     Returns:
         New random Motif
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     if rhythm_pool is None:
         rhythm_pool = [0.5, 1.0, 1.5, 2.0]
@@ -259,10 +259,10 @@ def generate_random(
     for _ in range(length):
         v = 0
         while v == 0:
-            v = random.randint(-max_interval, max_interval)
+            v = rng.randint(-max_interval, max_interval)
         intervals.append(v)
 
-    rhythm = [random.choice(rhythm_pool) for _ in range(length)]
+    rhythm = [rng.choice(rhythm_pool) for _ in range(length)]
 
     return Motif(intervals=intervals, rhythm=rhythm, name=name)
 

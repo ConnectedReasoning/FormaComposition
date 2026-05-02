@@ -13,6 +13,7 @@ Drop this file into:  forma/intervals/core/context.py
 
 from __future__ import annotations
 
+import random as _random_module
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -255,6 +256,14 @@ class PieceContext:
     """Ordered list of transforms applied across all sections.
     Used to weight future transform selection and prevent repetition."""
 
+    # ── Seeded RNG instance (never use the global random module) ────
+    seed: int = 42
+    """Base seed for this piece's PieceContext RNG."""
+
+    def __post_init__(self) -> None:
+        # Instance-based RNG: isolated from global random state.
+        object.__setattr__(self, "_rng", _random_module.Random(self.seed))
+
     def complete_section(self, ctx: SectionContext) -> None:
         """Freeze a SectionContext and store it.  Also extracts any
         transform info from the melody voice into transform_history."""
@@ -336,7 +345,7 @@ class PieceContext:
                 return requested
 
         # Weighted random: penalize recent usage
-        import random
+        # Uses self._rng (instance-based) — never the global random module.
         counts = self.transforms_used()
 
         weights = []
@@ -352,12 +361,12 @@ class PieceContext:
         # Normalize
         total = sum(weights)
         if total == 0:
-            return random.choice(available)
+            return self._rng.choice(available)
 
         weights = [w / total for w in weights]
 
         # Weighted selection
-        r = random.random()
+        r = self._rng.random()
         cumulative = 0.0
         for t, w in zip(available, weights):
             cumulative += w

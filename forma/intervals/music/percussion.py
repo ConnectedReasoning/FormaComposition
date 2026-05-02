@@ -180,8 +180,7 @@ def generate_drums(
     Returns:
         List of DrumHit
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     if pattern not in DRUM_PATTERNS:
         raise ValueError(

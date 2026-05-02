@@ -188,8 +188,7 @@ def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
     Other beats: scale-wise passing tones moving between anchors.
     Last beat: chromatic approach note into next chord's root.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     scale = get_bass_scale_tones(key, mode)
     notes = []
@@ -213,16 +212,16 @@ def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
             elif is_last:
                 n = approach_note(next_root, scale)
             elif j % beats_per_bar == (beats_per_bar // 2):
-                n = random.choice([fifth, fifth, third])
+                n = rng.choice([fifth, fifth, third])
             else:
                 prev = bar_notes[-1] if bar_notes else root
                 nbrs = scale_neighbors(prev, scale)
                 if nbrs:
                     target = fifth if j < num_beats // 2 else root
                     toward = [s for s in nbrs if abs(s - target) < abs(prev - target)]
-                    n = random.choice(toward) if toward else random.choice(nbrs)
+                    n = rng.choice(toward) if toward else rng.choice(nbrs)
                 else:
-                    n = nearest_scale_tone(prev + random.choice([-2, -1, 1, 2]), scale)
+                    n = nearest_scale_tone(prev + rng.choice([-2, -1, 1, 2]), scale)
 
             vel = velocity if j % beats_per_bar == 0 else max(58, velocity - 6)
             bar_notes.append(n)
@@ -259,11 +258,10 @@ def style_steady(chords, bars_per_chord, beats_per_bar=4, density="medium",
     Picks one figure for the section and tiles it.
     Last beat at chord boundaries becomes an approach note.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     scale = get_bass_scale_tones(key, mode)
-    figure = random.choice(STEADY_FIGURES)
+    figure = rng.choice(STEADY_FIGURES)
     notes = []
     beat = 0.0
 
@@ -309,8 +307,7 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
     returns toward root area before approaching next chord. Occasional
     eighth-note pairs and leaps for rhythmic and melodic interest.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     scale = get_bass_scale_tones(key, mode)
     notes = []
@@ -344,30 +341,30 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 if phrase_pos < 0.4:
                     target = fifth
                 elif phrase_pos < 0.7:
-                    target = random.choice([third, fifth, root])
+                    target = rng.choice([third, fifth, root])
                 else:
                     target = root
 
                 nbrs = scale_neighbors(current, scale)
                 if not nbrs:
-                    nbrs = [nearest_scale_tone(current + random.choice([-2, 2]), scale)]
+                    nbrs = [nearest_scale_tone(current + rng.choice([-2, 2]), scale)]
 
                 toward = [s for s in nbrs if abs(s - target) <= abs(current - target)]
                 away = [s for s in nbrs if s not in toward]
 
-                if toward and random.random() < 0.70:
-                    n = random.choice(toward)
+                if toward and rng.random() < 0.70:
+                    n = rng.choice(toward)
                 elif away:
-                    n = random.choice(away)
+                    n = rng.choice(away)
                 else:
-                    n = random.choice(nbrs)
+                    n = rng.choice(nbrs)
 
                 # Occasional leap for expressiveness
-                if random.random() < 0.15 and phrase_pos < 0.6:
-                    n = random.choice([fifth, third])
+                if rng.random() < 0.15 and phrase_pos < 0.6:
+                    n = rng.choice([fifth, third])
 
                 # Occasional eighth note pair
-                if random.random() < 0.20 and remaining >= 1.0:
+                if rng.random() < 0.20 and remaining >= 1.0:
                     dur = 0.5
                 else:
                     dur = 1.0

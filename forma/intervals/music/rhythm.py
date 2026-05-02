@@ -206,8 +206,7 @@ def groove_pattern(
     Density filters which priority levels are active.
     The template tiles across total_beats.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     if groove not in GROOVES:
         raise ValueError(f"Unknown groove: '{groove}'. Choose from: {VALID_GROOVES}")
@@ -230,7 +229,7 @@ def groove_pattern(
             if abs_beat >= total_beats - 0.001:
                 continue
             dur = min(slot.duration, total_beats - abs_beat)
-            is_rest = random.random() < rest_probability
+            is_rest = rng.random() < rest_probability
             events.append(RhythmEvent(abs_beat, dur, slot.velocity_scale, is_rest))
         bar_start += beats_per_bar
 
@@ -253,8 +252,7 @@ def grid(
     **kwargs,
 ) -> list[RhythmEvent]:
     """Build a uniform grid of RhythmEvents."""
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
     if accent_beats is None:
         accent_beats = []
 
@@ -262,7 +260,7 @@ def grid(
     beat = 0.0
     while beat < total_beats - 0.001:
         dur = min(subdivision, total_beats - beat)
-        is_rest = random.random() < rest_probability
+        is_rest = rng.random() < rest_probability
         # Use MusicalTime so this respects beats_per_bar rather than hardcoding 4.0
         beat_in_bar = MusicalTime.from_beats(beat, beats_per_bar=int(kwargs.get("beats_per_bar", 4))).beat
         vel = 1.0
@@ -310,8 +308,7 @@ def pattern_chord_sparse(total_beats: float, beats_per_bar: int = 4,
     with beat 1 of the first bar strongest and subsequent bars gentler.
     Not one 20-beat wall.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     events = []
     beat = 0.0
@@ -325,7 +322,7 @@ def pattern_chord_sparse(total_beats: float, beats_per_bar: int = 4,
         if bar_index == 0:
             vel = 1.0
         else:
-            vel = random.uniform(0.65, 0.80)
+            vel = rng.uniform(0.65, 0.80)
 
         events.append(RhythmEvent(beat, dur, vel, is_rest=False))
         beat += beats_per_bar
@@ -343,8 +340,7 @@ def pattern_chord_medium(total_beats: float, beats_per_bar: int = 4,
     Beat 3: softer re-articulation, held for 2 beats.
     Occasional ghost on beat 2 or 4 (~15% chance) adds subtle life.
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     events = []
     beat = 0.0
@@ -361,12 +357,12 @@ def pattern_chord_medium(total_beats: float, beats_per_bar: int = 4,
         # Beat 3 (midpoint): softer re-articulation
         if beat + mid < total_beats - 0.001:
             dur_3 = min(float(beats_per_bar - mid), total_beats - (beat + mid))
-            vel_3 = random.uniform(0.75, 0.88)
+            vel_3 = rng.uniform(0.75, 0.88)
             events.append(RhythmEvent(beat + mid, dur_3, vel_3, is_rest=False))
 
         # Occasional ghost on an offbeat (~15%)
-        if random.random() < 0.15 and bar_beats >= beats_per_bar:
-            ghost_beat = beat + random.choice([1.0, 3.0])
+        if rng.random() < 0.15 and bar_beats >= beats_per_bar:
+            ghost_beat = beat + rng.choice([1.0, 3.0])
             if ghost_beat < total_beats - 0.5:
                 events.append(RhythmEvent(ghost_beat, 0.5, 0.45, is_rest=False))
 
@@ -386,8 +382,7 @@ def pattern_chord_full(total_beats: float, beats_per_bar: int = 4,
     ~20% chance beat 4 becomes a rest (breathing room before next bar).
     Occasional eighth-note ghost pickup on the "and" of 4 (~12%).
     """
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
 
     events = []
     beat = 0.0
@@ -401,7 +396,7 @@ def pattern_chord_full(total_beats: float, beats_per_bar: int = 4,
             remaining = total_beats - abs_beat
 
             # Beat 4 sometimes rests for breathing
-            if beat_in_bar == beats_per_bar - 1 and random.random() < 0.20:
+            if beat_in_bar == beats_per_bar - 1 and rng.random() < 0.20:
                 events.append(RhythmEvent(abs_beat, min(1.0, remaining), 0.0, is_rest=True))
                 continue
 
@@ -409,16 +404,16 @@ def pattern_chord_full(total_beats: float, beats_per_bar: int = 4,
             if beat_in_bar == 0:
                 vel = 1.0
             elif beat_in_bar == beats_per_bar // 2:
-                vel = random.uniform(0.85, 0.95)
+                vel = rng.uniform(0.85, 0.95)
             else:
-                vel = random.uniform(0.60, 0.75)
+                vel = rng.uniform(0.60, 0.75)
 
             dur = min(1.0, remaining)
             events.append(RhythmEvent(abs_beat, dur, vel, is_rest=False))
 
         # Occasional eighth-note ghost pickup before next bar
         pickup_beat = beat + beats_per_bar - 0.5
-        if random.random() < 0.12 and pickup_beat < total_beats - 0.2:
+        if rng.random() < 0.12 and pickup_beat < total_beats - 0.2:
             events.append(RhythmEvent(pickup_beat, 0.5, 0.40, is_rest=False))
 
         beat += beats_per_bar
@@ -436,8 +431,9 @@ def pattern_eighth_sparse(total_beats: float, **kwargs) -> list[RhythmEvent]:
     return grid(total_beats, subdivision=0.5, rest_probability=0.55,
                 accent_beats=[0.0, 2.0], **kwargs)
 
-def pattern_dotted(total_beats: float, **kwargs) -> list[RhythmEvent]:
+def pattern_dotted(total_beats: float, seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
     """Dotted quarter + eighth feel."""
+    rng = random.Random(seed) if seed is not None else random.Random()
     events = []
     beat = 0.0
     while beat < total_beats - 0.001:
@@ -446,24 +442,23 @@ def pattern_dotted(total_beats: float, **kwargs) -> list[RhythmEvent]:
                 break
             actual_dur = min(dur, total_beats - beat)
             vel = 1.0 if dur == 1.5 else 0.75
-            is_rest = random.random() < 0.15
+            is_rest = rng.random() < 0.15
             events.append(RhythmEvent(beat, actual_dur, vel, is_rest))
             beat += actual_dur
     return events
 
 def pattern_free(total_beats: float, seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
     """Freely varied note lengths. Ambient, non-metronomic feel."""
-    if seed is not None:
-        random.seed(seed)
+    rng = random.Random(seed) if seed is not None else random.Random()
     durations = [0.5, 1.0, 1.5, 2.0, 3.0]
     weights   = [0.10, 0.30, 0.25, 0.25, 0.10]
     events = []
     beat = 0.0
     while beat < total_beats - 0.001:
-        dur = random.choices(durations, weights=weights, k=1)[0]
+        dur = rng.choices(durations, weights=weights, k=1)[0]
         dur = min(dur, total_beats - beat)
-        is_rest = random.random() < 0.20
-        vel = random.uniform(0.65, 1.0)
+        is_rest = rng.random() < 0.20
+        vel = rng.uniform(0.65, 1.0)
         events.append(RhythmEvent(beat, dur, vel, is_rest))
         beat += dur
     return events
