@@ -31,10 +31,7 @@ from intervals.music.harmony  import resolve_progression, VoicedChord, CHROMATIC
 from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import generate_melody_for_progression, MelodyNote
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
-from intervals.music.rhythm   import (
-    apply_velocity_arc, apply_swing,
-    get_pattern, RhythmEvent,
-)
+from intervals.music.rhythm   import RhythmEvent
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
 
@@ -178,46 +175,6 @@ def build_metadata_track(
     track.append(MetaMessage("set_tempo", tempo=bpm_to_tempo(bpm), time=0))
     return track
 
-
-def build_harmony_track(
-    chords: list[VoicedChord],
-    bars_per_chord: float,
-    beats_per_bar: int,
-    density: str,
-    velocity: int = 65,
-    channel: int = CHANNEL_HARMONY,
-    arc: str = "swell",
-) -> MidiTrack:
-    """
-    Build the harmony track — voiced chords with rhythmic timing from density.
-    """
-    track = MidiTrack()
-    track.append(MetaMessage("track_name", name=TRACK_NAME_HARMONY, time=0))
-    print(TRACK_NAME_HARMONY)
-    total_beats_per_chord = bars_per_chord * beats_per_bar
-
-    # Build a flat event list: (absolute_tick, 'on'/'off', notes, velocity)
-    events = []
-
-    beat_offset = 0.0
-    for chord in chords:
-        rhythm_events = get_pattern(total_beats_per_chord, density=density, voice_type="chord")
-        arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=velocity)
-
-        for ev, vel in arced:
-            if ev.is_rest:
-                beat_offset_local = beat_offset + ev.start_beat
-                continue
-            abs_start = beat_offset + ev.start_beat
-            abs_end   = abs_start + ev.duration_beats
-            for note in chord.midi_notes:
-                events.append((abs_start, "on",  note, min(127, vel), channel))
-                events.append((abs_end,   "off", note, 0,             channel))
-
-        beat_offset += total_beats_per_chord
-
-    _write_events_to_track(track, events)
-    return track
 
 
 def build_bass_track(
@@ -862,15 +819,9 @@ def generate_piece(
         section_model          = res.section_model
         harmony_section_events = res.harmony_section_events
 
-        # section_dict: raw dict still needed for a few optional fields
-        # (drums, counterpoint, arc) that are not yet on SectionModel.
-        # Derive it from the validated model's own dict to keep a single
-        # source of truth and avoid re-reading the raw section arg.
-        section_dict = section_model.model_dump(exclude_none=True)
-
         # Section-level rhythm defaults (used by melody, bass)
-        groove = section_dict.get("groove")
-        swing  = section_dict.get("swing", 0.0)
+        groove = section_model.groove
+        swing  = section_model.swing or 0.0
 
         # Counterpoint (optional — only if section defines it)
         cp_model = section_model.counterpoint
@@ -923,8 +874,8 @@ def generate_piece(
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
 
-            hrctx = build_harmony_rhythm_context(
-                section=section_dict,
+            hrctx = build_harmony_rhythm_context_from_model(
+                section=section_model,
                 active_motif_def=None,   # motif rhythm already in precomputed_events
                 total_beats_section=total_beats,
                 total_per_chord=total_per_chord,
