@@ -137,8 +137,7 @@ def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> O
 
     Old format (embedded motif):
       theme = {
-        "motif": { "intervals": [...], "rhythm": [...] },
-        "phrase": "light on still water"
+        "motif": { "intervals": [...], "rhythm": [...] }
       }
 
     New format (motif reference):
@@ -153,7 +152,6 @@ def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> O
     Returns:
         Motif object, or None if no motif defined
     """
-    from intervals.music.prosody import phrase_to_motif
 
     # Priority 1: Explicit motif (embedded dict or name reference)
     if "motif" in theme:
@@ -166,10 +164,6 @@ def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> O
         # Old format: embedded dict
         elif isinstance(motif_value, dict):
             return motif_from_dict(motif_value)
-
-    # Priority 2: Phrase converted to motif via prosody
-    if "phrase" in theme:
-        return phrase_to_motif(theme["phrase"])
 
     return None
 

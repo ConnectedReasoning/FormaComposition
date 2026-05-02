@@ -87,7 +87,6 @@ VALID_TRANSFORMS            = set(get_args(TransformLiteral))
 # ─── Obsolete field registries ───────────────────────────────────────────────
 
 _OBSOLETE_THEME_KEYS    = {"palette"}
-_OBSOLETE_SECTION_KEYS  = {"rhythm_phrase", "prosodic_rhythm"}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -312,13 +311,6 @@ class SectionModel(BaseModel):
                 f"possible typo or obsolete key.",
                 stacklevel=4,
             )
-        for key in _OBSOLETE_SECTION_KEYS:
-            if key in extra_keys:
-                warnings.warn(
-                    f"Section '{self.name}': '{key}' is no longer used. "
-                    f"Define a motif with a 'rhythm' field in theme.json instead.",
-                    stacklevel=4,
-                )
         return self
 
     @model_validator(mode="after")
@@ -479,13 +471,6 @@ class ThemeModel(BaseModel):
                 warnings.warn(
                     f"theme has obsolete field '{key}' — remove it "
                     f"(instruments live in Logic)",
-                    stacklevel=5,
-                )
-        for key in ("prosodic_rhythm", "rhythm_phrase"):
-            if key in t:
-                warnings.warn(
-                    f"theme field '{key}' has been removed. "
-                    f"Use a motif with a 'rhythm' field instead.",
                     stacklevel=5,
                 )
         return data

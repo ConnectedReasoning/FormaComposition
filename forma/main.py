@@ -20,7 +20,6 @@ from typing import Optional
 from intervals.core.generator import generate_piece, load_theme, load_piece, bpm_to_tempo, PPQ
 from intervals.core.schemas import ThemeModel, PieceModel
 from intervals.music.motif import from_dict as motif_from_dict
-from intervals.music.prosody import phrase_to_motif, analyze_phrase, PRONOUNCING_AVAILABLE
 from intervals.music.rhythm import VALID_GROOVES
 from intervals.music.percussion import VALID_DRUM_PATTERNS
 
@@ -44,15 +43,6 @@ def display_info(theme: dict, piece: dict) -> None:
         print(f"  Motif:  intervals={m.intervals}  rhythm={m.rhythm}")
         print(f"          contour={''.join(m.contour())}  transforms={m.transform_pool}")
 
-    phrase = theme.get("phrase")
-    if phrase:
-        analysis = analyze_phrase(phrase)
-        print(f"  Phrase:  \"{phrase}\"  (prosody → motif)")
-        print(f"           stress={analysis.stress_pattern}  "
-              f"syllables={len(analysis.syllables)}  "
-              f"CMU={'yes' if PRONOUNCING_AVAILABLE else 'fallback'}")
-        if motif_def:
-            print(f"           (explicit motif takes precedence over phrase)")
 
     palette = theme.get("palette", {})
     if palette:

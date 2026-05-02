@@ -36,11 +36,8 @@ from intervals.music.rhythm   import (
     get_pattern, RhythmEvent,
 )
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
-from intervals.music.prosody  import phrase_to_motif
 from intervals.music.percussion import generate_drums, DrumHit
-from intervals.music.rhythmic_template import (
-    RhythmicTemplate,
-)
+
 from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme
 from intervals.core.context import (
     PieceContext,
