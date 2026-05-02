@@ -1,7 +1,0 @@
-ex1 — all four triad types on C: major, minor, augmented, diminished — arpeggiated then held
-ex2/ex3 — all seven diatonic triads in C major and C harmonic minor — hear how the quality shifts on each degree
-ex4 — C major in all three positions: root → first inversion → second inversion → back to root
-ex5 — close vs. open position — same chord, dramatically different texture
-ex6 — doubling comparison: root doubled (correct default) vs. third doubled (hear the difference)
-ex7 — I–IV–V–I cadence in four parts, the primary triad skeleton of tonal harmony
-ex8 — major vs. minor back to back three times, just for the ear

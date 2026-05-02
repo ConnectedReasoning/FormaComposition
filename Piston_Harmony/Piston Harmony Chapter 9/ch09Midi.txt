@@ -1,8 +1,0 @@
-ex1 — four chord pairs back to back: each triad in root position then first inversion (I, II, IV, V). The weight difference is subtle but real — root position lands heavier, first inversion floats.
-ex2 — all seven first inversions of C major in sequence (I6 through VII6), then root-position I for closure. A reference file for hearing the individual character of each.
-ex3 — the core demonstration of the chapter. Same six-chord progression twice: first all root position (bass leaps: C→F→G→A→G→C), then with strategic first inversions giving the bass a stepwise C–D–E–F–G–F–E–D–C line. Load both in the piano roll — the bass voice transforms from a root-chasing line into an actual melody.
-ex4 — V→I root (heavy close) versus V→I6 (light, continues). The I6 version then keeps moving through IV–V–I for the real cadence. This is why V–I6 is so common mid-phrase.
-ex5 — II root position in cadence vs II6 in cadence. The II6 version is noticeably smoother approaching the dominant.
-ex6 — I→V6→I with the leading tone in the bass (B), and a longer decorated sequence showing V6 in context. The upward half-step resolution of that bass B to C is one of the strongest single bass movements in tonal music.
-ex7 — the scalewise ascending and descending bass: five beats up (C D E F G) then back down, each step harmonized with a mix of root positions and inversions. This is the quintessential Baroque bass gesture.
-ex8 — a complete phrase built around inversions: I–I6–II6–V–I–IV–II6–V–I. Load into Logic's piano roll and watch the bass voice — it moves almost entirely by step.

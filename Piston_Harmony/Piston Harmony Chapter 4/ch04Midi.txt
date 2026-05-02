@@ -1,8 +1,0 @@
-ex1 — all seven modes ascending and descending on C: Dorian, Phrygian, Lydian, Mixolydian, Aeolian, then major and harmonic minor for reference. The flat-2 of Phrygian and the sharp-4 of Lydian will immediately jump out.
-ex2 — the three exotic scales: pentatonic, whole-tone, Hungarian. The whole-tone one is disorienting in the best way.
-ex3 — the money file. Each mode: tonic chord → scale → tonic chord. Same tonic C, six completely different emotional worlds. This is the direct reference for your mode field decisions.
-ex4 — tonal backbone (I–IV–V–I) versus same backbone with modal degrees added (I–III–VI–IV–V–I). Hear how III and VI add color without disturbing the key.
-ex5 — tonal ambiguity: a lone C major chord, then confirmed as I in C, then recontextualized as IV in G. Same notes, different harmonic world.
-ex6 — the "harmonic words": IV–V, II–V, V–VI, and II–V–I. These are the unambiguous key-defining gestures. II–V alone nails the key with no I required.
-ex7 — mode mixture: I–IV–V–I in C major, then in C minor (V stays major), then the Beethoven-style flip — major tonic, minor tonic, back to major, in the same tonal center.
-ex8 — the Picardy third: a minor progression resolves twice — once to minor tonic, then the final cadence lands on major. The shift on that last chord is worth hearing carefully.

@@ -1,7 +1,0 @@
-ex1 — harmonic interval (simultaneous) vs melodic interval (sequential), using a major 3rd
-ex2a/b/c/d — all four scales: major, harmonic minor, melodic minor (correct ascending/descending), chromatic
-ex3 — interval table, all diatonic intervals above C played as harmonic intervals
-ex5 — consonant intervals followed by a pause, then dissonant intervals — the ear difference is the point
-ex6 — interval inversion: major 6th → minor 3rd, perfect 5th → perfect 4th
-ex7 — enharmonic equivalents: augmented 2nd / minor 3rd, tritone both spellings
-bonus — all three minor scale forms back to back for direct comparison

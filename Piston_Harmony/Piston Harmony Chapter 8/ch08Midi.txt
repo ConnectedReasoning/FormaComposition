@@ -1,8 +1,0 @@
-ex1 — the chord ambiguity foundation: the same C major triad heard five times, each time surrounded by different chords that force it into a different tonal interpretation (I, IV, V, III, VI). Same four pitches, five completely different harmonic identities. This is what makes modulation possible.
-ex2 — the three stages in C→G: C established clearly, then the pivot chord (C_I = G_IV) held long so you can hear it first as tonic, then feel it shift to subdominant, then II–V–I of G arrives and the modulation is complete.
-ex3 — C→F (subdominant): the dominant of C becomes the tonic of F. This one is slightly surprising — the C chord that felt like resolution now feels like a point of departure.
-ex4 — C→A minor (relative minor): the tonic of C becomes the mediant of A minor. The shift into minor is smooth because six of seven notes are shared.
-ex5 — the parallel mode flip: C major phrase, then C minor. One note changes (E→Eb). The mood shift is total. This is the most useful modulation tool for ambient music and requires no pivot at all.
-ex6 — C→Eb (bIII, the 19th century move): F major chord functions as IV in C, then gets reinterpreted as II in Eb, followed by V–I of Eb. That bIII arrival is the characteristic Romantic sound — wide, warm, slightly unmoored.
-ex7 — the full key family of C: all six relatives heard in sequence as brief I–V–I each (C, G, F, Am, Em, Dm), then home. Useful as a reference — you're hearing the tonal neighborhood of any piece in C.
-ex8 — the complete modulating period: antecedent phrase C→G (half cadence in G), then consequent G→C (authentic cadence home). This is the fundamental two-phrase arc of classical-period writing. The pivot chord in each direction is the same I/IV relationship in reverse.

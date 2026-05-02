@@ -1,8 +1,0 @@
-ex1 — the same three opening chords, then two different endings: one that hangs unresolved on V (half cadence, comma), one that resolves to I (authentic, period). The difference in finality is unmistakable.
-ex2 — masculine vs feminine ending on the same V→I. First version: V is short and arrives on the upbeat, I lands heavily on the downbeat. Second version: V is held long on the strong beat, I settles quietly on the weak beat. Same two chords, completely different character.
-ex3 — the fundamental antecedent/consequent pair. Four bars ending on V, answered by four bars ending on I. This is the smallest complete tonal structure.
-ex4 — static phrase (four bars on I) followed by the same length of active harmonic motion. The static version isn't wrong; it's a frame. The contrast when motion begins is the point.
-ex5 — Brahms Waltz model: eight bars of locked I–V pulse in 3/4, then the same basic progression with varied rhythm. The regular pulse is hypnotic; the varied version has shape.
-ex6 — the Schubert unity/variety model. First: pure I–V alternation (too much unity, mechanical). Second: the actual Schubert pattern where bar 3 breaks in with III and VI. That one bar of modal color completely changes the phrase's character.
-ex7 — the three-step process heard in sequence: bare bass roots only → full SATB block chords → same scheme with melody added on top. You hear the skeleton, then the flesh, then the surface.
-ex8 — a phrase pair that doesn't open on tonic. Both antecedent (starts on V) and consequent (starts on I) feel tonally clear despite the non-tonic opening.

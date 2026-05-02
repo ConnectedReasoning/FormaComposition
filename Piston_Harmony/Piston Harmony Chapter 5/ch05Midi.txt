@@ -1,8 +1,0 @@
-ex1 — the core demonstration: same basic progression, four harmonic densities in sequence — one chord per bar (broad), two per bar, four per bar (busy), then four bars of static I. The density shift is stark and immediate.
-ex2 — rhythmic weight of strong vs weak progressions. V→I repeated three times with V short and I long (upbeat/downbeat feel), then I→III with I long and III short (weight stays on the first chord), then I→II by step (weight arrives on II). Three completely different rhythmic characters from root motion alone.
-ex3 — agogic accent: same chords, different durations. The chord held longest becomes the centre of gravity even when it's not the tonic.
-ex4 — static harmony: eight bars on I, then harmonic motion resumes. The contrast when the harmony finally moves is physical.
-ex5 — pedal point: C bass held the entire duration while upper voices move through I, IV, V, II, and back. The IV and II over the C bass are the moments of harmonic friction — the upper harmony and the bass are in two different worlds.
-ex6 — Chopin syncopation type: harmony shifting off the beat while the melody (implicitly) sits on the beat. The floating, unmoored quality of much ambient music lives here.
-ex7 — homophonic texture: simple whole-note chords underneath a conjunct quarter-note melody. The harmony is deliberately low in rhythmic interest — exactly what Piston prescribes when the melody is carrying the weight.
-ex8 — the key one for FormaComposition: same V–VI–IV–I progression, four different harmony_pattern rhythms. Same notes, completely different character each time. This is the direct argument for why harmony_pattern matters as much as the chord list itself.
