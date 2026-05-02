@@ -116,7 +116,6 @@ Themes now reference motifs **by name** instead of embedding them:
 The generator will:
 1. Check if `"motif"` is a **string** → load from `motifs/motif_<name>.json`
 2. Check if `"motif"` is a **dict** → use embedded definition (backward compatible)
-3. Check if `"phrase"` exists → generate motif from prosody (still works)
 
 ---
 
@@ -165,7 +164,6 @@ from intervals.core.motif_loader import resolve_motif_from_theme
 # Supports all three formats:
 theme_new = {"motif": "ascending_hope"}          # Name reference
 theme_old = {"motif": {"intervals": [...]}}      # Embedded dict
-theme_prosody = {"phrase": "light on still water"}  # Prosody
 
 motif = resolve_motif_from_theme(theme_new)
 ```
@@ -208,7 +206,7 @@ save_motif(motif)
 The old embedded format still works! The loader handles both:
 - **New**: `"motif": "ascending_hope"` (string reference)
 - **Old**: `"motif": {"intervals": [...]}` (embedded dict)
-- **Prosody**: `"phrase": "light on still water"` (auto-generated)
+
 
 ---
 
@@ -240,21 +238,6 @@ The old embedded format still works! The loader handles both:
 
 Same melodic DNA, completely different harmonic worlds.
 
-### Building a Motif from a Phrase
-
-```python
-from intervals.music.prosody import phrase_to_motif
-from intervals.core.motif_loader import save_motif
-
-# Convert phrase to motif
-motif = phrase_to_motif("light on still water")
-motif.name = "still_water"
-
-# Save for reuse
-save_motif(motif)
-```
-
-Now you can reference it: `"motif": "still_water"`
 
 ### Creating a Motif Library
 
@@ -263,7 +246,6 @@ compositions/motifs/
 ├── motif_ascending_hope.json      # Major upward motion
 ├── motif_descending_melancholy.json  # Minor downward motion
 ├── motif_lydian_shimmer.json      # Raised 4th character
-├── motif_still_water.json         # Prosody-derived
 ├── motif_bach_subject_01.json     # Baroque counterpoint
 └── motif_eno_ambient.json         # Slow evolving
 ```
@@ -389,6 +371,6 @@ Motif → Theme (references motif) → Piece → Section
 - ✅ Build a library of motifs
 - ✅ Experiment with same motif in different tonalities
 - ✅ Backward compatible with existing themes
-- ✅ Prosody integration still works
+
 
 **No breaking changes** — all existing themes continue to work as-is!

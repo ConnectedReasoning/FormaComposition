@@ -341,5 +341,3 @@ Start with these. Forget grove/swing until you have the basics right.
 - Form awareness: allow sections to auto-adjust behavior based on role
 - Harmonic function: v knows it wants i (but not forced)
 - Voice-leading constraints: melody aware of bass, avoiding parallel fifths
-- Stateful prosody: stress patterns evolve with arc
-- Phrase boundaries: from linguistic or harmonic structure, not arbitrary bars

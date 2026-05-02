@@ -108,8 +108,7 @@ compositions/
 | Module | Role | Description |
 |---|---|---|
 | `generator.py` | Main engine | Reads JSON, resolves motifs, applies transforms, writes MIDI via mido. Includes `create_chord_context()` for statefulness. |
-| `motif_loader.py` | Motif resolution | Loads standalone motif files, supports all three formats: name reference, embedded dict, prosody phrase. |
-| `prosody.py` | Text-to-motif | Maps phonetic stress patterns (CMU Pronouncing Dictionary) onto musical motifs. Spoken phrases seed melodic contour. |
+| `motif_loader.py` | Motif resolution | Loads standalone motif files, supports all three formats: name reference, embedded dict,  x phrase. |
 | `melody.py` | Melody generation | Four behavior modes: generative, lyrical, sparse, develop. All accept optional chord context for statefulness. |
 | `bass.py` | Bass generation | Three behaviors: steady, melodic, walking. Responds to harmonic context. |
 | `percussion.py` | Drum patterns | Five named patterns rendered to MIDI ch.9 with groove templates, swing, and humanization. |
@@ -192,26 +191,7 @@ The loader supports three motif resolution strategies, all backward-compatible:
 | Format | Resolution |
 |---|---|
 | `"motif": "ascending_hope"` | String → load from `motifs/motif_ascending_hope.json` |
-| `"motif": {"intervals": [...]}` | Dict → use embedded definition (legacy support) |
-| `"phrase": "light on still water"` | String phrase → generate motif from prosody |
-
-### 3.5 Prosody: Text as Melodic Contour
-
-The prosody module converts spoken phrases into musical motifs using the CMU Pronouncing Dictionary. Stress patterns in language map to melodic emphasis: stressed syllables receive upward intervallic motion and longer durations; unstressed syllables receive smaller steps and shorter durations.
-
-**Example — the word "RETURN":**
-
-```
-R  E  T  U  R  N
--  .  .  -  .  .    (- = unstressed, . = stressed)
-re  turn
-
-Intervals: [-2, 4, 1, -3]
-Rhythm:    [0.5, 1.0, 0.5, 1.0]
-```
-
-The resulting motif physically sounds like the word. The descending approach (`-2`), the leap to the stressed syllable (`+4`), the continuation (`+1`), and the resolution back (`-3`) create a gesture of arrival — a motif that sounds like returning to a door.
-
+| `"motif": {"intervals": [...]}` | Dict → use embedded definition (legacy support) | d 
 ---
 
 ## 4. Statefulness: Context-Aware Generation

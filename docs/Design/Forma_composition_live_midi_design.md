@@ -68,7 +68,6 @@ FormaComposition uses a **JSON-driven composition schema** organized in a four-l
 
 - **`generator.py`** — The main engine. Reads a JSON composition, resolves motifs, applies transforms, and writes MIDI output via `mido`.
 - **`motif_loader.py`** — Loads standalone motif files from `compositions/motifs/`, providing reusability across compositions. Backward-compatible with embedded motif dictionaries.
-- **`prosody.py`** — Maps phonetic stress patterns (via the CMU Pronouncing Dictionary) onto musical motifs, allowing spoken phrases to seed melodic contour.
 - **`percussion.py`** — Five named drum patterns rendered to MIDI channel 9 with groove templates, swing, and humanization.
 - **`bass.py`** — Three bass behaviors (steady, melodic, walking) that respond to harmonic context.
 - **`rhythm.py`** — Rhythm generation with harmony-rhythm independence and per-chord `chord_bars` arrays.

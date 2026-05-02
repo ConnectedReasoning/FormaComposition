@@ -17,33 +17,6 @@
 
 ---
 
-## Motif: "Return" Prosody
-
-```
-R  E  T  U  R  N
--  .  .  -  .  .
-re  turn
-(unstressed, stressed)
-```
-
-**Intervals:** [-2, 4, 1, -3]
-- Down 2 semitones (approach)
-- Up 4 semitones (the leap to the stressed syllable)
-- Up 1 semitone (continuation)
-- Down 3 semitones (resolution back)
-
-**Rhythm:** [0.5, 1.0, 0.5, 1.0]
-- Short, long emphasis (mirrors the stress pattern)
-
-**Transforms:**
-- Augmentation: stretches the arrival (makes it linger)
-- Retrograde: collapses the arrival (reverses the journey)
-- Inversion: questions the arrival (turns it upside down)
-
-This motif should *sound* like arriving at a door. Every phrase is a gesture of arrival.
-
----
-
 ## Section-by-Section Breakdown
 
 ### 1. Threshold (12 bars, fade_in)
@@ -186,23 +159,8 @@ Generate it. Listen 3+ times.
 If yes → the pattern works. Move to bass statefulness next.  
 If no → listen more carefully. Maybe statefulness isn't the missing piece.
 
----
 
-## Future: Stateful Prosody Evolution
-
-This piece is a foundation for the next idea: **prosody that evolves with the composition.**
-
-**Future possibility:**
-- **Threshold:** "Return" motif at *minimum intensity* (sparse stress)
-- **Passage:** "Return" motif at *full intensity* (compressed, emphasized stress)
-- **Recognition:** "Return" motif at *resolution intensity* (stress dispersed, acceptance)
-- **Settling:** "Return" motif at *echoing intensity* (retrograded, fading)
-
-Same word. Same root. But **the stress pattern evolves to match emotional arc.**
-
-That's weeks away. First, live with statefulness and hear if it works.
-
----
+ ---
 
 ## Installation
 

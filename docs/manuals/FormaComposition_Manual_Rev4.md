@@ -27,9 +27,8 @@ file that you assign to instruments in Logic Pro.
 | melody.py | Four melodic behaviours over chord tones / motif transforms |
 | bass.py | Seven bass styles (root, fifth, walking, steady, melodic, pulse, pedal) |
 | rhythm.py | 11 groove templates + swing + velocity arcs |
-| rhythmic_template.py | Phrase → syllable rhythm template; lens functions per voice |
+
 | percussion.py | 5 drum patterns with velocity and arc |
-| prosody.py | Text phrase → harmonically-aware motif via CMU dictionary |
 | motif.py | Motif data type + 7 Bach-style transforms |
 | context.py | SectionContext (cross-voice) + PieceContext (cross-section memory) |
 | rhythm_extract.py | Imports hand-played MIDI loops → JSON rhythm patterns |
@@ -116,10 +115,6 @@ One theme file can serve many piece files.
     "rhythm": [1.0, 0.5, 0.5, 1.0],
     "transform_pool": ["inversion","retrograde","augmentation"]
   },
-
-  // Option B — phrase-driven tools (independent; can use both together)
-  "phrase": "Still water flows",           // pitch contour only
-  "rhythm_phrase": "Still water flows"     // rhythmic template for all voices
 }
 ```
 
@@ -129,8 +124,6 @@ One theme file can serve many piece files.
 | mode | string | ✓ | Scale mode (see §3.1) |
 | tempo | object | ✓ | { min: BPM, max: BPM } |
 | motif | object | — | Explicit motif definition (see §3.2) |
-| phrase | string | — | English phrase → pitch motif via syllable stress (CMU). Drives pitch contour only. Works without `pronouncing` installed (uses fallback). Ignored when `motif` is present. |
-| rhythm_phrase | string | — | English phrase → rhythmic template for all voices via `rhythmic_template.py`. Drives onset timing and durations; does not affect pitch. Requires `pronouncing` installed — hard error if absent. Can be the same phrase as `phrase` or a different one. |
 | name | string | — | Label shown in --info output |
 | palette | object | — | Default voice settings for pieces using this theme |
 
@@ -350,8 +343,7 @@ Priority chain (highest first):
 1. **harmony_pattern** — hand-played whole-section pattern
 2. **note_duration** — single sustained event per chord
 3. **Motif rhythm** — if theme motif has a `rhythm` field; re-articulates at stressed onsets (durations ≥ median)
-4. **Prosodic lens** — if `rhythm_phrase` is set in theme
-5. **Density-based grid fallback**
+4. **Density-based grid fallback**
 
 ```json
 "harmony_rhythm": {
@@ -444,130 +436,12 @@ By default each chord in the progression gets equal time. Use
 
 ---
 
-## 6 — Prosody
-
-Prosody provides two independent tools. They solve different problems,
-use different keys, and can be used separately or together.
-
-| **Tool** | **Theme key** | **Drives** | **Requires CMU?** |
-|---|---|---|---|
-| Pitch contour | `phrase` | Note pitch selection | No (fallback available) |
-| Rhythm template | `rhythm_phrase` | Onset timing + durations for all voices | Yes (hard error if absent) |
-
-Using a different phrase for each tool is valid and often desirable — the
-phrase with the right emotional connotation for pitch may scan poorly as
-a rhythm template, and vice versa.
-
-### 6.1 — Pitch Contour: `phrase`
-
-Set `"phrase": "your words"` in theme.json. The engine converts syllable
-stress into a harmonically-aware pitch motif using the CMU Pronouncing
-Dictionary. This drives **pitch selection only** — it has no effect on
-rhythm or timing.
-
-Works without `pronouncing` installed, falling back to a syllable-count
-heuristic. Results with the fallback are approximate.
-
-```json
-{
-  "key": "D",
-  "mode": "dorian",
-  "tempo": { "min": 65, "max": 72 },
-  "phrase": "Still water flows"
-}
-```
-
-> **NOTE:** If both `motif` and `phrase` are present, the explicit motif
-> wins and `phrase` is ignored entirely.
-
-### 6.2 — Rhythm Template: `rhythm_phrase`
-
-Set `"rhythm_phrase": "your words"` in theme.json. The engine analyzes
-syllable stress, onset timing, and vowel duration to build a
-`RhythmicTemplate` that drives **rhythm for all voices** via lens
-functions. Pitch is not affected.
-
-| **Voice** | **Lens** | **Behaviour** |
-|---|---|---|
-| Melody | melody_lens | Every syllable onset. Full articulation — melody pronounces the phrase. |
-| Harmony | harmony_lens | Stressed syllable onsets only. Re-articulates on stress peaks, sustains between. |
-| Bass | bass_lens | Primary stressed onsets only. One hit per phrase arc, sustained. |
-
-```json
-{
-  "key": "A",
-  "mode": "aeolian",
-  "tempo": { "min": 62, "max": 66 },
-  "rhythm_phrase": "The forgotten harbor sleeps"
-}
-```
-
-**Requirements:**
-
-- The `pronouncing` library must be installed: `pip install pronouncing`
-- Generation fails with a hard error if `pronouncing` is absent — there
-  is no silent fallback. Without the CMU dictionary, every syllable gets
-  treated as primary stress, producing rhythm that appears prosodic but
-  isn't.
-
-**Per-word warnings:** If specific words in `rhythm_phrase` are not in
-the CMU dictionary (proper nouns, brand names, neologisms), the validator
-emits a `[WARN]` listing those words. Stress is estimated by syllable
-count. Generation proceeds.
-
-### 6.3 — Using Both Together
-
-`phrase` and `rhythm_phrase` are independent and can be used together
-with the same or different phrases:
-
-```json
-{
-  "key": "G",
-  "mode": "dorian",
-  "tempo": { "min": 60, "max": 72 },
-  "phrase": "Ember light",
-  "rhythm_phrase": "The circle at Ember Grove"
-}
-```
-
-Here `"Ember light"` shapes the pitch motif (two syllables, simple
-contour), while `"The circle at Ember Grove"` drives the rhythm (richer
-stress pattern, longer phrase arc).
-
-### 6.4 — Tension Hierarchy (`phrase` pitch mode)
-
-When `phrase` drives pitch selection, tension levels govern which chord
-tones are available at each stress position:
-
-| **Level** | **Notes Used** | **Triggered By** |
-|---|---|---|
-| STABLE | Root, Fifth | Stressed downbeats; always available |
-| WARM | Third, Sixth, Major 7th | Lyrical / develop behaviour |
-| COLOR | Ninth, Thirteenth | Swell arc + develop melody |
-| TENSION | Minor 7th, Eleventh | Full density sections |
-| PASSING | Chromatic neighbors | Unstressed syllables; sparse density only |
-
-### 6.5 — Section Properties That Drive Tension
-
-| **Property** | **Effect on Tension** |
-|---|---|
-| arc: swell | Allows COLOR and TENSION tones |
-| arc: fade_in | Conservative; stays STABLE/WARM |
-| melody: develop | Uses full tension hierarchy |
-| melody: lyrical | STABLE and WARM only |
-| melody: sparse | STABLE only |
-| density: full | More passing tones |
-| density: sparse | Fewer passing tones; strongly prefers STABLE |
-
-
----
-
-## 7 — Context System
+## 8 — Context System
 
 The context system gives voices the ability to listen to each other and
 remember across sections.
 
-### 7.1 — SectionContext (within a section)
+### 8.1 — SectionContext (within a section)
 
 Updated sequentially as each voice generates. Downstream voices read it
 to:
@@ -576,7 +450,7 @@ to:
 - Lock rhythmically to the bass or drums
 - Apply contrary motion relative to the previous voice's contour
 
-### 7.2 — PieceContext (cross-section)
+### 8.2 — PieceContext (cross-section)
 
 Carries a VoiceSnapshot forward from each section. Each snapshot
 records:
@@ -593,21 +467,17 @@ records:
 
 ---
 
-## 8 — Validation
+## 9 — Validation
 
 Validation runs automatically before every generation. Hard errors stop
 generation; warnings print and continue.
 
-### 8.1 — Theme Validation
+### 9.1 — Theme Validation
 
 - `key`, `mode`, `tempo` are required
 - `tempo.min` must be ≤ `tempo.max`
-- Both `motif` and `phrase` present → warning (motif wins; phrase ignored)
-- `prosodic_rhythm` present → **hard error** (removed; use `rhythm_phrase` instead)
-- `rhythm_phrase` without the `pronouncing` library installed → **hard error** (install with `pip install pronouncing`)
-- `rhythm_phrase` with words not in CMU dictionary → warning listing the affected words; generation continues with syllable-count estimates for those words
 
-### 8.2 — Piece Validation
+### 9.2 — Piece Validation
 
 - Every section must have `progression` and `bars` (or `chord_bars`)
 - `chord_bars` length must match `progression` length
@@ -622,7 +492,7 @@ generation; warnings print and continue.
 
 ---
 
-## 9 — Seed System
+## 10 — Seed System
 
 FormaComposition is deterministic given the same JSON and seed. Change
 the seed to get different-feeling output from the same composition.
@@ -639,7 +509,7 @@ repeated sections have variation while remaining musically coherent.
 
 ---
 
-## 10 — Complete Example: Ambient Piece
+## 11 — Complete Example: Ambient Piece
 
 **theme.json**
 
@@ -719,7 +589,7 @@ propagates to all voices automatically:
 
 ---
 
-## 11 — Recommended Workflow
+## 12 — Recommended Workflow
 
 ### New Piece
 
@@ -754,7 +624,7 @@ prompt. Good prompt ingredients:
 
 ---
 
-## 12 — Quick Reference Tables
+## 13 — Quick Reference Tables
 
 ### All Valid Enums
 
@@ -782,9 +652,6 @@ prompt. Good prompt ingredients:
 | swing X out of range | Keep swing between 0.0 and 0.75 |
 | form references undefined section 'X' | Add 'X' to the sections dict, or fix the typo in form array |
 | piece.tempo outside theme range | Warning only; adjust piece.tempo or widen theme tempo range |
-| 'prosodic_rhythm' is no longer supported | Replace with `rhythm_phrase` for rhythm, `phrase` for pitch contour |
-| theme has 'rhythm_phrase' but 'pronouncing' not installed | Run: `pip install pronouncing` |
-| rhythm_phrase contains words not in CMU dictionary | Warning only — generation continues. Consider rewording if rhythm feels wrong. |
 
 ---
 

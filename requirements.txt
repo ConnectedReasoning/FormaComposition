@@ -1,3 +1,2 @@
 mido
 numpy
-pronouncing  # optional: enables CMU dictionary for prosody.py (falls back to heuristics)
