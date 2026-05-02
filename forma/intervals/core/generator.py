@@ -954,45 +954,12 @@ def validate_piece(theme: dict, piece: dict) -> list[str]:
 # ---------------------------------------------------------------------------
 # Harmony rhythm resolution helpers
 # ---------------------------------------------------------------------------
-# _slice_events_into_window and _motif_rhythm_to_events have been moved to
-# intervals/core/strategies.py to break the circular import with that module.
+# _resolve_harmony_rhythm, _slice_events_into_window and _motif_rhythm_to_events
+# have been moved to intervals/core/strategies.py to break circular imports.
 # They are re-imported at the top of this file and remain callable here.
-
-
-def _resolve_harmony_rhythm(
-    harmony_section_events,
-    beat_offset_local: float,
-    total_per_chord: float,
-    beats_per_bar: int,
-    h_density: str,
-    h_groove,
-) -> list:
-    """
-    Return rhythm events for a single chord window.
-    harmony_section_events is pre-computed by generate_section based on the
-    explicit harmony_rhythm.rhythm declaration (or section.rhythm when the
-    harmony_rhythm block is absent).
-      "sustain"           -> single event, full chord window
-      None                -> density-based grid (free)
-      list[RhythmEvent]   -> slice into this chord window
-    """
-    if harmony_section_events == "sustain":
-        return [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                            velocity_scale=1.0, is_rest=False)]
-    if harmony_section_events is None:
-        return get_pattern(
-            total_per_chord, density=h_density,
-            voice_type="chord", groove=h_groove,
-            beats_per_bar=beats_per_bar,
-        )
-    events = _slice_events_into_window(
-        harmony_section_events, beat_offset_local, total_per_chord,
-        min_duration=0.25,
-    )
-    if not events:
-        events = [RhythmEvent(start_beat=0.0, duration_beats=total_per_chord,
-                              velocity_scale=0.7, is_rest=False)]
-    return events
+# _resolve_harmony_rhythm has been removed — its logic now lives entirely
+# in the HarmonyStrategy subclasses (SustainHarmonyStrategy, FreeHarmonyStrategy,
+# PatternHarmonyStrategy, MotifHarmonyStrategy).
 
 
 # ---------------------------------------------------------------------------
@@ -1130,20 +1097,10 @@ def generate_piece(
                 cn.start_beat += global_beat
             all_cp_notes.extend(cp_notes)
 
-        # ── Harmony events — dispatched through HarmonyStrategy ────────────
-        # Determine the harmony rhythm source once per section; the strategy
-        # registry resolves the correct concrete class.  Each chord iteration
-        # builds a HarmonyChordContext and calls apply() — no if/else branching.
-
-        _hr_raw_gp = section_dict.get("harmony_rhythm", {})
-        hr = _hr_raw_gp if isinstance(_hr_raw_gp, dict) else {"rhythm": _hr_raw_gp}
-        h_density = hr.get("density", density)
-        h_groove  = hr.get("groove", groove)
-        h_swing   = hr.get("swing", swing)
-
-        # Resolve harmony source once — same key used by HarmonyStrategyRegistry
-        _hr_source = hr.get("rhythm", section_dict.get("rhythm", "free"))
-        harmony_strategy = HarmonyStrategyRegistry.resolve(_hr_source)
+        # ── Harmony events — pure strategy dispatch, zero if/else ───────────
+        # HarmonyRhythmContext absorbs all HR overrides (density/groove/swing).
+        # HarmonyStrategyRegistry selects the correct implementation from ctx.source.
+        # The loop body is clean: build context → dispatch → extend.
 
         arc = section.get("arc", "swell")
         beat_offset_local = 0.0
@@ -1165,9 +1122,10 @@ def generate_piece(
                 global_beat=global_beat,
                 beat_offset_local=beat_offset_local,
                 arc=arc,
-                h_swing=float(h_swing),
             )
-            all_chord_events.extend(harmony_strategy.apply(hctx))
+            all_chord_events.extend(
+                HarmonyStrategyRegistry.resolve(hrctx.source).apply(hctx)
+            )
             beat_offset_local += total_per_chord
 
         # Bass notes — offset by global beat
@@ -1199,10 +1157,14 @@ def generate_piece(
             else:
                 pattern = drum_config.get("pattern", "four_on_floor")
 
-            # Get rhythm parameters for drums (can use harmony_rhythm if specified)
-            drums_density = h_density      # Use harmony_rhythm density if available, else section density
-            drums_groove = h_groove
-            drums_swing = h_swing
+            # Drums rhythm params: prefer harmony_rhythm overrides when defined,
+            # falling back to section-level groove/swing.  The HR block is already
+            # normalised — read it directly here rather than re-deriving locals.
+            _hr_blk = section_dict.get("harmony_rhythm", {})
+            _hr_blk = _hr_blk if isinstance(_hr_blk, dict) else {"rhythm": _hr_blk}
+            drums_density = _hr_blk.get("density", density)
+            drums_groove  = _hr_blk.get("groove",  groove)
+            drums_swing   = float(_hr_blk.get("swing", swing))
 
             drum_hits = generate_drums(
                 total_beats=total_beats,

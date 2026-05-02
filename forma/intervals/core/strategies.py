@@ -211,6 +211,7 @@ class HarmonyRhythmContext:
     density: str
     groove: Optional[str] = None
     beats_per_bar: int = 4
+    swing: float = 0.0
 
     # Hand-played harmony pattern (optional, used by PatternHarmonyStrategy)
     harmony_pattern: Optional[dict] = None
@@ -249,9 +250,13 @@ class HarmonyChordContext:
 
     # Articulation / expression
     arc: str                           # velocity arc shape (e.g. "swell")
-    h_swing: float                     # swing ratio (0.0 = straight)
     base_velocity: int = 65
     channel: int = _CHANNEL_HARMONY
+
+    @property
+    def h_swing(self) -> float:
+        """Convenience accessor — swing lives on the rhythm context."""
+        return self.harmony_rhythm_ctx.swing
 
 
 @dataclass(frozen=True)
@@ -871,16 +876,22 @@ def build_harmony_rhythm_context(
 ) -> HarmonyRhythmContext:
     """
     Construct a HarmonyRhythmContext for a single chord window.
+
+    Absorbs all harmony_rhythm block overrides (density, groove, swing)
+    so callers never touch the raw section dict for these values.
+    The resolved source field drives HarmonyStrategyRegistry dispatch.
     """
     _hr_raw = section.get("harmony_rhythm", {})
-    if isinstance(_hr_raw, str):
-        _hr_block = {"rhythm": _hr_raw}
-    else:
-        _hr_block = _hr_raw
+    _hr_block: dict = {"rhythm": _hr_raw} if isinstance(_hr_raw, str) else _hr_raw
 
     rhythm_fallback = section.get("rhythm", "free")
-    h_source = _hr_block.get("rhythm", rhythm_fallback)
-    density = section.get("density", "medium")
+    h_source   = _hr_block.get("rhythm",   rhythm_fallback)
+
+    # HR block can override density, groove, and swing per-section.
+    # Falls back to the section-level values so omitting the field is safe.
+    h_density  = _hr_block.get("density",  section.get("density",  "medium"))
+    h_groove   = _hr_block.get("groove",   section.get("groove"))
+    h_swing    = float(_hr_block.get("swing", section.get("swing", 0.0)))
     beats_per_bar = int(section.get("beats_per_bar", 4))
 
     motif_rhythm = None
@@ -894,8 +905,9 @@ def build_harmony_rhythm_context(
         total_beats_section=total_beats_section,
         total_per_chord=total_per_chord,
         beat_offset=beat_offset,
-        density=density,
-        groove=section.get("groove"),
+        density=h_density,
+        groove=h_groove,
+        swing=h_swing,
         beats_per_bar=beats_per_bar,
         harmony_pattern=section.get("harmony_pattern") if h_source == "pattern" else None,
         motif_rhythm=motif_rhythm,
@@ -910,13 +922,15 @@ def build_harmony_chord_context(
     global_beat: float,
     beat_offset_local: float,
     arc: str,
-    h_swing: float,
     base_velocity: int = 65,
     channel: int = _CHANNEL_HARMONY,
 ) -> HarmonyChordContext:
     """
     Construct a HarmonyChordContext for one chord in the section loop.
     Called once per chord by the generate_piece loop.
+
+    swing is no longer a direct parameter — it is read from harmony_rhythm_ctx
+    via the h_swing property so the caller has zero manual HR field handling.
     """
     return HarmonyChordContext(
         chord=chord,
@@ -924,7 +938,6 @@ def build_harmony_chord_context(
         global_beat=global_beat,
         beat_offset_local=beat_offset_local,
         arc=arc,
-        h_swing=h_swing,
         base_velocity=base_velocity,
         channel=channel,
     )
