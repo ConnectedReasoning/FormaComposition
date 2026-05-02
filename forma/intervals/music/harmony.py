@@ -86,9 +86,17 @@ class VoicedChord:
     roman: str = ""         # original Roman numeral string
     degree: int = 0         # scale degree 0-6
 
+    # Per-chord rhythm DNA.  When present, the harmony strategy uses these
+    # events instead of the section-level stencil.  Events are expressed in
+    # chord-local beat coordinates (first onset at 0.0).
+    # Set by _enrich_chords_with_rhythm() in generator.py; never populated by
+    # resolve_progression() or resolve_chord() directly.
+    rhythm_events: Optional[list] = field(default=None, repr=False)
+
     def __repr__(self):
         notes_str = ", ".join(str(n) for n in self.midi_notes)
-        return f"VoicedChord({self.root_name}{self.quality} inv={self.inversion} [{notes_str}])"
+        dna = f" dna={len(self.rhythm_events)}ev" if self.rhythm_events else ""
+        return f"VoicedChord({self.root_name}{self.quality} inv={self.inversion} [{notes_str}]{dna})"
 
 
 # ---------------------------------------------------------------------------

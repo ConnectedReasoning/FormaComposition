@@ -457,6 +457,18 @@ def generate_section(
         harmony_section_events = None
         print(f"    Harmony rhythm: free (density grid)")
 
+    # ── Enrichment Pass ───────────────────────────────────────────────────────
+    # Distribute section-level harmony events into per-chord rhythm_events DNA.
+    # Must run after harmony_section_events is fully resolved above.
+    # No-op when source is "free" (None) or "sustain" — those strategies own
+    # their own rhythm resolution and do not consult chord.rhythm_events.
+    chords = _enrich_chords_with_rhythm(
+        chords=chords,
+        bars_list=bars_list,
+        beats_per_bar=beats_per_bar,
+        harmony_section_events=harmony_section_events,
+    )
+
     # ══════════════════════════════════════════════════════════════
     # BASS — generates first, writes snapshot for downstream voices
     # ══════════════════════════════════════════════════════════════
@@ -713,6 +725,50 @@ def _apply_variation(section: dict, variation: float) -> dict:
 # _resolve_harmony_rhythm has been removed — its logic now lives entirely
 # in the HarmonyStrategy subclasses (_SustainHarmonyStrategy, _FreeHarmonyStrategy,
 # _PatternHarmonyStrategy, _MotifHarmonyStrategy), dispatched via HarmonyStrategyRegistry.
+
+
+def _enrich_chords_with_rhythm(
+    chords: list[VoicedChord],
+    bars_list: list[float],
+    beats_per_bar: int,
+    harmony_section_events,   # list[RhythmEvent] | "sustain" | None
+) -> list[VoicedChord]:
+    """
+    Attach chord-local RhythmEvent slices to each VoicedChord.
+
+    This is the Enrichment Pass — the single place that translates section-level
+    pre-tiled harmony events into per-chord beat-local coordinates.  The resulting
+    chord.rhythm_events list is consumed by _PatternHarmonyStrategy and
+    _MotifHarmonyStrategy as Priority 1 (DNA path), bypassing the legacy
+    slice-on-demand path in those strategies.
+
+    Returns new VoicedChord instances (via dataclasses.replace); originals are
+    never mutated.
+
+    Chords receive rhythm_events=None when:
+      - harmony_section_events is None     → "free" strategy handles rhythm itself
+      - harmony_section_events is "sustain" → sustain strategy handles it
+      - The window slice is empty           → strategy falls back to sustain event
+    """
+    from dataclasses import replace as _dc_replace
+
+    if not harmony_section_events or harmony_section_events == "sustain":
+        # Nothing to distribute — originals already have rhythm_events=None.
+        return chords
+
+    enriched = []
+    beat_cursor = 0.0
+    for chord, bars in zip(chords, bars_list):
+        window_beats = bars * beats_per_bar
+        sliced = _slice_events_into_window(
+            harmony_section_events,
+            window_start=beat_cursor,
+            window_length=window_beats,
+            min_duration=0.25,
+        )
+        enriched.append(_dc_replace(chord, rhythm_events=sliced if sliced else None))
+        beat_cursor += window_beats
+    return enriched
 
 
 # ---------------------------------------------------------------------------

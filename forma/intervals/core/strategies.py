@@ -517,8 +517,11 @@ class _SustainHarmonyStrategy(HarmonyStrategy):
 class _PatternHarmonyStrategy(HarmonyStrategy):
     """
     Harmony source: "pattern" (hand-played harmony groove)
-    Slices the pre-tiled section event list into this chord's window.
-    Falls back to a single sustain event if the slice is empty.
+
+    Priority dispatch:
+      1. chord.rhythm_events       — DNA: pre-enriched chord-local events. Use as-is.
+      2. rctx.precomputed_events   — global stencil: slice on demand (legacy path).
+      3. Single sustain event      — fallback when both sources are absent or empty.
     """
 
     @property
@@ -527,9 +530,15 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
 
     def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
         rctx = ctx.harmony_rhythm_ctx
-        if not rctx.precomputed_events or rctx.precomputed_events == "sustain":
-            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 1.0, False)]
-        else:
+
+        # Priority 1 — DNA path: chord was pre-enriched by _enrich_chords_with_rhythm.
+        # Events are already in chord-local coordinates; use them directly.
+        if ctx.chord.rhythm_events:
+            rhythm_events = ctx.chord.rhythm_events
+
+        # Priority 2 — global stencil: slice from section-level tiled events.
+        # This is the legacy path for any chord that was not enriched.
+        elif rctx.precomputed_events and rctx.precomputed_events != "sustain":
             rhythm_events = _slice_events_into_window(
                 rctx.precomputed_events,
                 rctx.beat_offset,
@@ -538,6 +547,10 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
             )
             if not rhythm_events:
                 rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
+
+        # Priority 3 — sustain fallback.
+        else:
+            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 1.0, False)]
 
         return _build_chord_events(
             rhythm_events, ctx.chord,
@@ -549,7 +562,11 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
 class _MotifHarmonyStrategy(HarmonyStrategy):
     """
     Harmony source: "motif" (stressed articulation — strong beats only)
-    Same slice approach as _PatternHarmonyStrategy but with motif-derived events.
+
+    Priority dispatch mirrors _PatternHarmonyStrategy:
+      1. chord.rhythm_events       — DNA: pre-enriched chord-local events.
+      2. rctx.precomputed_events   — global motif stencil, sliced on demand.
+      3. Single sustain event      — fallback.
     """
 
     @property
@@ -558,9 +575,13 @@ class _MotifHarmonyStrategy(HarmonyStrategy):
 
     def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
         rctx = ctx.harmony_rhythm_ctx
-        if not rctx.precomputed_events or rctx.precomputed_events == "sustain":
-            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
-        else:
+
+        # Priority 1 — DNA path.
+        if ctx.chord.rhythm_events:
+            rhythm_events = ctx.chord.rhythm_events
+
+        # Priority 2 — global motif stencil slice (legacy path).
+        elif rctx.precomputed_events and rctx.precomputed_events != "sustain":
             rhythm_events = _slice_events_into_window(
                 rctx.precomputed_events,
                 rctx.beat_offset,
@@ -569,6 +590,10 @@ class _MotifHarmonyStrategy(HarmonyStrategy):
             )
             if not rhythm_events:
                 rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
+
+        # Priority 3 — sustain fallback.
+        else:
+            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
 
         return _build_chord_events(
             rhythm_events, ctx.chord,
