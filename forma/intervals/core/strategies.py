@@ -215,8 +215,8 @@ class RhythmContext:
 @dataclass(frozen=True)
 class HarmonyRhythmContext:
     """
-    Everything a HarmonyRhythmStrategy needs to produce chord rhythm events
-    for a single chord window.
+    Context data for harmony chord rhythm resolution.
+    Consumed by HarmonyStrategyRegistry dispatch (_*HarmonyStrategy.apply).
     """
     source: str                        # "sustain" | "pattern" | "motif" | "free"
     total_beats_section: float         # full section length (for pattern tiling)
@@ -228,7 +228,7 @@ class HarmonyRhythmContext:
     beats_per_bar: int = 4
     swing: float = 0.0
 
-    # Hand-played harmony pattern (optional, used by PatternHarmonyStrategy)
+    # Hand-played harmony pattern (optional, used by _PatternHarmonyStrategy)
     harmony_pattern: Optional[dict] = None
 
     # Motif rhythm fields
@@ -419,115 +419,6 @@ class FreeRhythmStrategy(RhythmStrategy):
     def apply(self, ctx: RhythmContext) -> tuple[None, None]:
         print(f"    Melody/Bass rhythm: free (density grid)")
         return None, None
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Harmony rhythm strategies
-# ═══════════════════════════════════════════════════════════════════════════════
-
-class HarmonyRhythmStrategy(ABC):
-    """
-    Abstract base: produce chord rhythm events for a single chord window.
-    Called once per chord in the section loop inside generate_piece.
-    """
-
-    @abstractmethod
-    def apply(self, ctx: HarmonyRhythmContext) -> list[RhythmEvent]:
-        ...
-
-    @property
-    @abstractmethod
-    def label(self) -> str:
-        ...
-
-
-class SustainHarmonyStrategy(HarmonyRhythmStrategy):
-    """
-    Harmony rhythm: "sustain"
-    One held note per chord, full window duration.
-    """
-
-    @property
-    def label(self) -> str:
-        return "sustain"
-
-    def apply(self, ctx: HarmonyRhythmContext) -> list[RhythmEvent]:
-        return [RhythmEvent(
-            start_beat=0.0,
-            duration_beats=ctx.total_per_chord,
-            velocity_scale=1.0,
-            is_rest=False,
-        )]
-
-
-class PatternHarmonyStrategy(HarmonyRhythmStrategy):
-    """
-    Harmony rhythm: "pattern" (hand-played harmony groove)
-    Slices the pre-tiled section event list into this chord's window.
-    """
-
-    @property
-    def label(self) -> str:
-        return "pattern"
-
-    def apply(self, ctx: HarmonyRhythmContext) -> list[RhythmEvent]:
-        if not ctx.precomputed_events or ctx.precomputed_events == "sustain":
-            # Fallback: single sustain event
-            return [RhythmEvent(0.0, ctx.total_per_chord, 1.0, False)]
-
-        events = _slice_events_into_window(
-            ctx.precomputed_events,
-            ctx.beat_offset,
-            ctx.total_per_chord,
-            min_duration=0.25,
-        )
-        if not events:
-            events = [RhythmEvent(0.0, ctx.total_per_chord, 0.7, False)]
-        return events
-
-
-class MotifHarmonyStrategy(HarmonyRhythmStrategy):
-    """
-    Harmony rhythm: "motif" (stressed articulation — strong beats only)
-    Same slice approach as PatternHarmonyStrategy but from motif-derived events.
-    """
-
-    @property
-    def label(self) -> str:
-        return "motif"
-
-    def apply(self, ctx: HarmonyRhythmContext) -> list[RhythmEvent]:
-        if not ctx.precomputed_events or ctx.precomputed_events == "sustain":
-            return [RhythmEvent(0.0, ctx.total_per_chord, 0.7, False)]
-
-        events = _slice_events_into_window(
-            ctx.precomputed_events,
-            ctx.beat_offset,
-            ctx.total_per_chord,
-            min_duration=0.25,
-        )
-        if not events:
-            events = [RhythmEvent(0.0, ctx.total_per_chord, 0.7, False)]
-        return events
-
-
-class FreeHarmonyStrategy(HarmonyRhythmStrategy):
-    """
-    Harmony rhythm: "free" — density-based grid, same as the legacy default.
-    """
-
-    @property
-    def label(self) -> str:
-        return "free"
-
-    def apply(self, ctx: HarmonyRhythmContext) -> list[RhythmEvent]:
-        return get_pattern(
-            ctx.total_per_chord,
-            density=ctx.density,
-            voice_type="chord",
-            groove=ctx.groove,
-            beats_per_bar=ctx.beats_per_bar,
-        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -832,16 +723,12 @@ RhythmStrategyRegistry = _StrategyRegistry(
     name="rhythm source",
 )
 
-HarmonyRhythmStrategyRegistry = _StrategyRegistry(
-    strategies=[
-        SustainHarmonyStrategy(),
-        PatternHarmonyStrategy(),
-        MotifHarmonyStrategy(),
-        FreeHarmonyStrategy(),
-    ],
-    name="harmony rhythm source",
-)
-
+# ---------------------------------------------------------------------------
+# Active production dispatch path for harmony resolution.
+# HarmonyStrategyRegistry is the sole entry point for selecting how a chord
+# window is rendered to MIDI events.  All call sites use .resolve(source)
+# to obtain the appropriate _*HarmonyStrategy and call .apply(ctx) on it.
+# ---------------------------------------------------------------------------
 HarmonyStrategyRegistry = _StrategyRegistry(
     strategies=[
         _SustainHarmonyStrategy(),

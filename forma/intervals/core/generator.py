@@ -764,8 +764,8 @@ def _apply_variation(section: dict, variation: float) -> dict:
 # have been moved to intervals/core/strategies.py to break circular imports.
 # They are re-imported at the top of this file and remain callable here.
 # _resolve_harmony_rhythm has been removed — its logic now lives entirely
-# in the HarmonyStrategy subclasses (SustainHarmonyStrategy, FreeHarmonyStrategy,
-# PatternHarmonyStrategy, MotifHarmonyStrategy).
+# in the HarmonyStrategy subclasses (_SustainHarmonyStrategy, _FreeHarmonyStrategy,
+# _PatternHarmonyStrategy, _MotifHarmonyStrategy), dispatched via HarmonyStrategyRegistry.
 
 
 # ---------------------------------------------------------------------------
