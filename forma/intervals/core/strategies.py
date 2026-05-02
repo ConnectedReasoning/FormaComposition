@@ -26,9 +26,17 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
-from intervals.music.rhythm import RhythmEvent, get_pattern
+from intervals.music.rhythm import (
+    RhythmEvent, get_pattern,
+    apply_velocity_arc, apply_swing,
+)
 from intervals.music.melody import generate_melody_for_progression, MelodyNote
 from intervals.music.harmony import VoicedChord
+
+# MIDI channel for harmony voice — mirrors the constant in generator.py.
+# Defined here so HarmonyStrategy subclasses don't import generator (circular).
+_CHANNEL_HARMONY = 1
+_REARTIC_GAP = 0.03   # beats — inaudible gap prevents note-off/on overlap
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,6 +223,35 @@ class HarmonyRhythmContext:
     # Kept as an escape hatch so the refactor doesn't break the existing
     # _resolve_harmony_rhythm call in generate_piece.
     precomputed_events: Optional[list] = None   # list[RhythmEvent] or "sustain"
+
+
+@dataclass(frozen=True)
+class HarmonyChordContext:
+    """
+    Everything a HarmonyStrategy needs to produce MIDI event tuples for
+    a single chord window inside generate_piece's section loop.
+
+    This is distinct from HarmonyRhythmContext (which only carries rhythm
+    resolution inputs). HarmonyChordContext wraps that rhythm context and
+    adds the chord itself, timing offsets, articulation, and channel so that
+    apply() returns ready-to-append event tuples.
+
+    Returned event tuple format:
+        (abs_beat: float, kind: str, note: int, vel: int, channel: int)
+    where kind is 'on' or 'off'.
+    """
+    chord: VoicedChord                 # chord whose notes are voiced
+    harmony_rhythm_ctx: HarmonyRhythmContext
+
+    # Absolute timing for this chord within the piece
+    global_beat: float                 # beat offset of the whole section
+    beat_offset_local: float           # beat offset within the section
+
+    # Articulation / expression
+    arc: str                           # velocity arc shape (e.g. "swell")
+    h_swing: float                     # swing ratio (0.0 = straight)
+    base_velocity: int = 65
+    channel: int = _CHANNEL_HARMONY
 
 
 @dataclass(frozen=True)
@@ -451,6 +488,187 @@ class FreeHarmonyStrategy(HarmonyRhythmStrategy):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# HarmonyStrategy — full chord-event production (rhythm → MIDI tuples)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _build_chord_events(
+    rhythm_events: list[RhythmEvent],
+    chord: VoicedChord,
+    global_beat: float,
+    beat_offset_local: float,
+    arc: str,
+    h_swing: float,
+    base_velocity: int,
+    channel: int,
+) -> list[tuple]:
+    """
+    Shared event-building kernel.  Given a list of RhythmEvents for one chord
+    window, apply swing → velocity arc → rearticulation gap, then expand into
+    (abs_beat, 'on'/'off', note, vel, channel) tuples for every MIDI note in
+    the chord.
+
+    This is the single place that knows the output tuple format.
+    """
+    if h_swing and h_swing > 0:
+        rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
+
+    arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=base_velocity)
+    arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]
+
+    events: list[tuple] = []
+    for idx_ev, (ev, vel) in enumerate(arced_list):
+        abs_start = global_beat + beat_offset_local + ev.start_beat
+        dur = ev.duration_beats
+
+        # Cap duration so the note ends before the next event starts
+        if idx_ev + 1 < len(arced_list):
+            next_ev = arced_list[idx_ev + 1][0]
+            next_start = global_beat + beat_offset_local + next_ev.start_beat
+            max_dur = next_start - abs_start - _REARTIC_GAP
+            dur = max(0.25, min(dur, max_dur))
+
+        abs_end = abs_start + dur
+        for note in chord.midi_notes:
+            events.append((abs_start, "on",  note, min(127, vel), channel))
+            events.append((abs_end,   "off", note, 0,             channel))
+    return events
+
+
+class HarmonyStrategy(ABC):
+    """
+    Abstract base: produce all MIDI event tuples for one chord window.
+
+    apply() encapsulates the full pipeline:
+        rhythm resolution → swing → velocity arc → rearticulation → MIDI tuples
+
+    The returned list is appended directly to all_chord_events in generate_piece.
+    Event tuple format: (abs_beat: float, kind: str, note: int, vel: int, ch: int)
+    """
+
+    @abstractmethod
+    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
+        ...
+
+    @property
+    @abstractmethod
+    def label(self) -> str:
+        ...
+
+
+class _SustainHarmonyStrategy(HarmonyStrategy):
+    """
+    Harmony source: "sustain"
+    One held event per chord, spanning the full chord window.
+    """
+
+    @property
+    def label(self) -> str:
+        return "sustain"
+
+    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
+        rctx = ctx.harmony_rhythm_ctx
+        rhythm_events = [RhythmEvent(
+            start_beat=0.0,
+            duration_beats=rctx.total_per_chord,
+            velocity_scale=1.0,
+            is_rest=False,
+        )]
+        return _build_chord_events(
+            rhythm_events, ctx.chord,
+            ctx.global_beat, ctx.beat_offset_local,
+            ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+        )
+
+
+class _PatternHarmonyStrategy(HarmonyStrategy):
+    """
+    Harmony source: "pattern" (hand-played harmony groove)
+    Slices the pre-tiled section event list into this chord's window.
+    Falls back to a single sustain event if the slice is empty.
+    """
+
+    @property
+    def label(self) -> str:
+        return "pattern"
+
+    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
+        rctx = ctx.harmony_rhythm_ctx
+        if not rctx.precomputed_events or rctx.precomputed_events == "sustain":
+            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 1.0, False)]
+        else:
+            rhythm_events = _slice_events_into_window(
+                rctx.precomputed_events,
+                rctx.beat_offset,
+                rctx.total_per_chord,
+                min_duration=0.25,
+            )
+            if not rhythm_events:
+                rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
+
+        return _build_chord_events(
+            rhythm_events, ctx.chord,
+            ctx.global_beat, ctx.beat_offset_local,
+            ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+        )
+
+
+class _MotifHarmonyStrategy(HarmonyStrategy):
+    """
+    Harmony source: "motif" (stressed articulation — strong beats only)
+    Same slice approach as _PatternHarmonyStrategy but with motif-derived events.
+    """
+
+    @property
+    def label(self) -> str:
+        return "motif"
+
+    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
+        rctx = ctx.harmony_rhythm_ctx
+        if not rctx.precomputed_events or rctx.precomputed_events == "sustain":
+            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
+        else:
+            rhythm_events = _slice_events_into_window(
+                rctx.precomputed_events,
+                rctx.beat_offset,
+                rctx.total_per_chord,
+                min_duration=0.25,
+            )
+            if not rhythm_events:
+                rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
+
+        return _build_chord_events(
+            rhythm_events, ctx.chord,
+            ctx.global_beat, ctx.beat_offset_local,
+            ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+        )
+
+
+class _FreeHarmonyStrategy(HarmonyStrategy):
+    """
+    Harmony source: "free" — density-based grid, same as the legacy default.
+    """
+
+    @property
+    def label(self) -> str:
+        return "free"
+
+    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
+        rctx = ctx.harmony_rhythm_ctx
+        rhythm_events = get_pattern(
+            rctx.total_per_chord,
+            density=rctx.density,
+            voice_type="chord",
+            groove=rctx.groove,
+            beats_per_bar=rctx.beats_per_bar,
+        )
+        return _build_chord_events(
+            rhythm_events, ctx.chord,
+            ctx.global_beat, ctx.beat_offset_local,
+            ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Melody behavior strategies
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -581,6 +799,16 @@ HarmonyRhythmStrategyRegistry = _StrategyRegistry(
     name="harmony rhythm source",
 )
 
+HarmonyStrategyRegistry = _StrategyRegistry(
+    strategies=[
+        _SustainHarmonyStrategy(),
+        _PatternHarmonyStrategy(),
+        _MotifHarmonyStrategy(),
+        _FreeHarmonyStrategy(),
+    ],
+    name="harmony source",
+)
+
 MelodyStrategyRegistry = _StrategyRegistry(
     strategies=[
         LyricalMelodyStrategy(),
@@ -673,6 +901,32 @@ def build_harmony_rhythm_context(
         motif_rhythm=motif_rhythm,
         motif_velocities=motif_velocities,
         precomputed_events=precomputed_events,
+    )
+
+
+def build_harmony_chord_context(
+    harmony_rhythm_ctx: HarmonyRhythmContext,
+    chord: VoicedChord,
+    global_beat: float,
+    beat_offset_local: float,
+    arc: str,
+    h_swing: float,
+    base_velocity: int = 65,
+    channel: int = _CHANNEL_HARMONY,
+) -> HarmonyChordContext:
+    """
+    Construct a HarmonyChordContext for one chord in the section loop.
+    Called once per chord by the generate_piece loop.
+    """
+    return HarmonyChordContext(
+        chord=chord,
+        harmony_rhythm_ctx=harmony_rhythm_ctx,
+        global_beat=global_beat,
+        beat_offset_local=beat_offset_local,
+        arc=arc,
+        h_swing=h_swing,
+        base_velocity=base_velocity,
+        channel=channel,
     )
 
 

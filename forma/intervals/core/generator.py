@@ -50,8 +50,12 @@ from intervals.core.context import (
 from intervals.core.strategies import (
     RhythmStrategyRegistry,
     MelodyStrategyRegistry,
+    HarmonyStrategyRegistry,
+    HarmonyRhythmContext,
     build_rhythm_context,
     build_melody_context,
+    build_harmony_chord_context,
+    build_harmony_rhythm_context,
     # Re-imported here so external callers (main.py, tests) don't need to change
     rhythm_pattern_to_events,
     _motif_rhythm_to_events,
@@ -1082,14 +1086,6 @@ def generate_piece(
         groove   = section_dict.get("groove")
         swing    = section_dict.get("swing", 0.0)
 
-        # Harmony-specific rhythm tuning (groove, swing, density)
-        # rhythm source was already resolved in generate_section
-        _hr_raw_gp = section_dict.get("harmony_rhythm", {})
-        hr = _hr_raw_gp if isinstance(_hr_raw_gp, dict) else {"rhythm": _hr_raw_gp}
-        h_density = hr.get("density", density)
-        h_groove  = hr.get("groove", groove)
-        h_swing   = hr.get("swing", swing)
-
         # Counterpoint (optional — only if section defines it)
         cp_def = section_dict.get("counterpoint")
         if cp_def:
@@ -1134,48 +1130,44 @@ def generate_piece(
                 cn.start_beat += global_beat
             all_cp_notes.extend(cp_notes)
 
-        # Harmony events — harmony_section_events pre-computed in generate_section
+        # ── Harmony events — dispatched through HarmonyStrategy ────────────
+        # Determine the harmony rhythm source once per section; the strategy
+        # registry resolves the correct concrete class.  Each chord iteration
+        # builds a HarmonyChordContext and calls apply() — no if/else branching.
+
+        _hr_raw_gp = section_dict.get("harmony_rhythm", {})
+        hr = _hr_raw_gp if isinstance(_hr_raw_gp, dict) else {"rhythm": _hr_raw_gp}
+        h_density = hr.get("density", density)
+        h_groove  = hr.get("groove", groove)
+        h_swing   = hr.get("swing", swing)
+
+        # Resolve harmony source once — same key used by HarmonyStrategyRegistry
+        _hr_source = hr.get("rhythm", section_dict.get("rhythm", "free"))
+        harmony_strategy = HarmonyStrategyRegistry.resolve(_hr_source)
+
+        arc = section.get("arc", "swell")
         beat_offset_local = 0.0
 
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
 
-            rhythm_events = _resolve_harmony_rhythm(
-                harmony_section_events=harmony_section_events,
-                beat_offset_local=beat_offset_local,
+            hrctx = build_harmony_rhythm_context(
+                section=section_dict,
+                active_motif_def=None,   # motif rhythm already in precomputed_events
+                total_beats_section=total_beats,
                 total_per_chord=total_per_chord,
-                beats_per_bar=beats_per_bar,
-                h_density=h_density,
-                h_groove=h_groove,
+                beat_offset=beat_offset_local,
+                precomputed_events=harmony_section_events,
             )
-
-            if h_swing and h_swing > 0:
-                rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
-
-            arc = section.get("arc", "swell")
-            arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=65)
-
-            # Build harmony note events with clean re-articulation.
-            # Cap each event's duration so it ends before the next event starts,
-            # with a tiny gap for clean note-off → note-on transitions.
-            REARTIC_GAP = 0.03  # ~1/32 beat — inaudible but prevents overlap
-            arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]
-
-            for idx_ev, (ev, vel) in enumerate(arced_list):
-                abs_start = global_beat + beat_offset_local + ev.start_beat
-                dur = ev.duration_beats
-
-                # If there's a next event, cap duration at the gap
-                if idx_ev + 1 < len(arced_list):
-                    next_ev = arced_list[idx_ev + 1][0]
-                    next_start = global_beat + beat_offset_local + next_ev.start_beat
-                    max_dur = next_start - abs_start - REARTIC_GAP
-                    dur = max(0.25, min(dur, max_dur))
-
-                abs_end = abs_start + dur
-                for note in chord.midi_notes:
-                    all_chord_events.append((abs_start, "on",  note, min(127, vel), CHANNEL_HARMONY))
-                    all_chord_events.append((abs_end,   "off", note, 0,             CHANNEL_HARMONY))
+            hctx = build_harmony_chord_context(
+                harmony_rhythm_ctx=hrctx,
+                chord=chord,
+                global_beat=global_beat,
+                beat_offset_local=beat_offset_local,
+                arc=arc,
+                h_swing=float(h_swing),
+            )
+            all_chord_events.extend(harmony_strategy.apply(hctx))
             beat_offset_local += total_per_chord
 
         # Bass notes — offset by global beat
