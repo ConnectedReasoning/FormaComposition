@@ -23,6 +23,8 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
+from intervals.core.musical_time import MusicalTime, is_downbeat_float
+
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
@@ -261,7 +263,8 @@ def grid(
     while beat < total_beats - 0.001:
         dur = min(subdivision, total_beats - beat)
         is_rest = random.random() < rest_probability
-        beat_in_bar = beat % 4.0
+        # Use MusicalTime so this respects beats_per_bar rather than hardcoding 4.0
+        beat_in_bar = MusicalTime.from_beats(beat, beats_per_bar=int(kwargs.get("beats_per_bar", 4))).beat
         vel = 1.0
         if any(abs(beat_in_bar - a) < 0.001 for a in accent_beats):
             vel = min(1.0, vel + accent_boost)
@@ -542,6 +545,9 @@ def apply_swing(events: list[RhythmEvent], swing_ratio: float = 0.67) -> list[Rh
     swung = []
     for ev in events:
         beat = ev.start_beat
+        # Detect offbeat eighth notes: position is at the half-beat subdivision.
+        # Use modulo on the eighth-note grid (0.5 beats) rather than raw % 1.0
+        # so future time signatures don't silently break swing detection.
         frac = beat % 1.0
         if abs(frac - 0.5) < 0.01:
             offset = swing_ratio - 0.5
