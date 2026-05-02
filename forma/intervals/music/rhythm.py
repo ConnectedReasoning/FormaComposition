@@ -206,7 +206,9 @@ def groove_pattern(
     Density filters which priority levels are active.
     The template tiles across total_beats.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     if groove not in GROOVES:
         raise ValueError(f"Unknown groove: '{groove}'. Choose from: {VALID_GROOVES}")
@@ -252,7 +254,9 @@ def grid(
     **kwargs,
 ) -> list[RhythmEvent]:
     """Build a uniform grid of RhythmEvents."""
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
     if accent_beats is None:
         accent_beats = []
 
@@ -308,7 +312,9 @@ def pattern_chord_sparse(total_beats: float, beats_per_bar: int = 4,
     with beat 1 of the first bar strongest and subsequent bars gentler.
     Not one 20-beat wall.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     events = []
     beat = 0.0
@@ -340,7 +346,9 @@ def pattern_chord_medium(total_beats: float, beats_per_bar: int = 4,
     Beat 3: softer re-articulation, held for 2 beats.
     Occasional ghost on beat 2 or 4 (~15% chance) adds subtle life.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     events = []
     beat = 0.0
@@ -382,7 +390,9 @@ def pattern_chord_full(total_beats: float, beats_per_bar: int = 4,
     ~20% chance beat 4 becomes a rest (breathing room before next bar).
     Occasional eighth-note ghost pickup on the "and" of 4 (~12%).
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     events = []
     beat = 0.0
@@ -433,7 +443,9 @@ def pattern_eighth_sparse(total_beats: float, **kwargs) -> list[RhythmEvent]:
 
 def pattern_dotted(total_beats: float, seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
     """Dotted quarter + eighth feel."""
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
     events = []
     beat = 0.0
     while beat < total_beats - 0.001:
@@ -449,7 +461,9 @@ def pattern_dotted(total_beats: float, seed: Optional[int] = None, **kwargs) -> 
 
 def pattern_free(total_beats: float, seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
     """Freely varied note lengths. Ambient, non-metronomic feel."""
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
     durations = [0.5, 1.0, 1.5, 2.0, 3.0]
     weights   = [0.10, 0.30, 0.25, 0.25, 0.10]
     events = []

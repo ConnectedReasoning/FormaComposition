@@ -188,7 +188,9 @@ def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
     Other beats: scale-wise passing tones moving between anchors.
     Last beat: chromatic approach note into next chord's root.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     scale = get_bass_scale_tones(key, mode)
     notes = []
@@ -258,7 +260,9 @@ def style_steady(chords, bars_per_chord, beats_per_bar=4, density="medium",
     Picks one figure for the section and tiles it.
     Last beat at chord boundaries becomes an approach note.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     scale = get_bass_scale_tones(key, mode)
     figure = rng.choice(STEADY_FIGURES)
@@ -307,7 +311,9 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
     returns toward root area before approaching next chord. Occasional
     eighth-note pairs and leaps for rhythmic and melodic interest.
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     scale = get_bass_scale_tones(key, mode)
     notes = []

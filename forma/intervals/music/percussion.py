@@ -180,7 +180,9 @@ def generate_drums(
     Returns:
         List of DrumHit
     """
-    rng = random.Random(seed) if seed is not None else random.Random()
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
 
     if pattern not in DRUM_PATTERNS:
         raise ValueError(

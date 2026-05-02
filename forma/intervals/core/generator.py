@@ -47,10 +47,7 @@ from intervals.core.strategies import (
     MelodyStrategyRegistry,
     HarmonyStrategyRegistry,
     HarmonyRhythmContext,
-    build_rhythm_context,
-    build_melody_context,
     build_harmony_chord_context,
-    build_harmony_rhythm_context,
     # Re-imported here so external callers (main.py, tests) don't need to change
     rhythm_pattern_to_events,
     _motif_rhythm_to_events,
