@@ -410,17 +410,12 @@ def generate_section(
     total_beats_section = sum(b * beats_per_bar for b in bars_list)
     total_slots = int(total_beats_section * 2)  # 8th-note resolution
 
-    rhythm_source = section.get("rhythm", "free")  # required — validator enforces
+    rhythm_source = section_model.rhythm
 
-    # Normalize harmony_rhythm: if someone wrote "harmony_rhythm": "sustain"
-    # (bare string), convert to {"rhythm": "sustain"} so all downstream
-    # code can safely call .get() on it. The validator will have already
-    # flagged this as an error, but we don't crash during generation.
-    _hr_raw = section.get("harmony_rhythm", {})
-    if isinstance(_hr_raw, str):
-        _hr_normalized = {"rhythm": _hr_raw}
-    else:
-        _hr_normalized = _hr_raw
+    # harmony_rhythm is already a validated HarmonyRhythmModel (or None).
+    # The Pydantic validator _coerce_harmony_rhythm rejects bare strings at
+    # load time, so no isinstance normalisation is needed here.
+    _hr_model = section_model.harmony_rhythm
 
     # ── Resolve active motif for this section ────────────────────────
     # transform_sequence selects a named transform by section index.
@@ -456,8 +451,9 @@ def generate_section(
     bass_rhythm_events   = None
 
     if rhythm_source == "pattern":
-        rp = section.get("rhythm_pattern")
-        if rp:
+        rp_model = section_model.rhythm_pattern
+        if rp_model:
+            rp = rp_model.model_dump(exclude_none=True)
             melody_rhythm_events = rhythm_pattern_to_events(rp, total_beats=total_beats_section)
             bass_rhythm_events   = melody_rhythm_events
             print(f"    Melody/Bass rhythm: hand-played pattern "
@@ -480,8 +476,7 @@ def generate_section(
         print(f"    Melody/Bass rhythm: free (density grid)")
 
     # ── Harmony section events (explicit switch on harmony_rhythm.rhythm) ─
-    hr_block = _hr_normalized
-    h_rhythm_source = hr_block.get("rhythm", rhythm_source)
+    h_rhythm_source = (_hr_model.rhythm if _hr_model is not None else None) or rhythm_source
 
     harmony_section_events = None  # None → free; "sustain" → sustain sentinel
 
@@ -490,8 +485,9 @@ def generate_section(
         print(f"    Harmony rhythm: sustain")
 
     elif h_rhythm_source == "pattern":
-        hp = section.get("harmony_pattern")
-        if hp:
+        hp_model = section_model.harmony_pattern
+        if hp_model:
+            hp = hp_model.model_dump(exclude_none=True)
             harmony_section_events = rhythm_pattern_to_events(hp, total_beats=total_beats_section)
             print(f"    Harmony rhythm: hand-played pattern ({len(hp['onsets'])} onsets)")
 
@@ -921,7 +917,7 @@ def generate_piece(
         # HarmonyStrategyRegistry selects the correct implementation from ctx.source.
         # The loop body is clean: build context → dispatch → extend.
 
-        arc = section.get("arc", "swell")
+        arc = res.section_model.arc
         beat_offset_local = 0.0
 
         for ci, chord in enumerate(chords):
