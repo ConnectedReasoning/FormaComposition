@@ -12,7 +12,6 @@
 
     "tempo": { "min": 60, "max": 80 },
 
-    "_comment_motif": "The melodic seed. Hand-craft intervals or use phrase (below) for prosody. If both exist, motif wins.",
     "motif": {
       "name": "my_motif",
 
@@ -27,11 +26,6 @@
       "transform_pool": ["inversion", "retrograde", "augmentation"]
     },
 
-    "_comment_phrase": "Alternative to motif. A word or phrase whose speech rhythm becomes the melodic seed. Uses CMU Pronouncing Dictionary.",
-    "_phrase_example": "Rebecca",
-
-    "_comment_prosodic_rhythm": "When true + phrase is set, all voices derive rhythmic impulse from the phrase's stress pattern.",
-    "_prosodic_rhythm": false,
 
     "_comment_notes": "Free text for your own reference."
   }

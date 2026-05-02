@@ -4,8 +4,6 @@
     "key": "A",
     "mode": "aeolian",
     "tempo": { "min": 62, "max": 72 },
-    "phrase": "Glass Cathedral",
-    "prosodic_rhythm": true,
     "motif": {
       "name": "glass_cathedral",
       "intervals": [3, 2, -1, -2, 5],
