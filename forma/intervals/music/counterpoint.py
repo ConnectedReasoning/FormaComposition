@@ -27,6 +27,9 @@ from dataclasses import dataclass, field
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
 from intervals.music.melody import MelodyNote
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from intervals.core.schemas import CounterpointModel
 
 # ---------------------------------------------------------------------------
 # Interval classification
@@ -552,6 +555,8 @@ def generate_counterpoint(
     velocity: int = 60,
     dissonance: str = "passing",
     seed: Optional[int] = None,
+    *,
+    cp_model: "Optional[CounterpointModel]" = None,
 ) -> list[CounterpointNote]:
     """
     Generate a counterpoint voice against a melody.
@@ -566,10 +571,21 @@ def generate_counterpoint(
         velocity:      Base MIDI velocity
         dissonance:    For free species: "none" | "passing" | "free"
         seed:          Random seed
+        cp_model:      Optional CounterpointModel instance.  When provided,
+                       its fields override the individual keyword arguments so
+                       the caller does not need to unpack the model manually.
 
     Returns:
         List of CounterpointNote
     """
+    # If a typed model is supplied, let it win over individual kwargs.
+    if cp_model is not None:
+        species       = cp_model.species
+        register      = cp_model.cp_register
+        beats_per_bar = beats_per_bar  # not on CounterpointModel — caller supplies
+        velocity      = cp_model.velocity
+        dissonance    = cp_model.dissonance
+
     if species == "first":
         return generate_first_species(
             melody_notes, key, mode, register, beats_per_bar, velocity, seed

@@ -20,6 +20,7 @@ in your DAW (Logic Pro + Arturia V Collection).
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -99,6 +100,43 @@ TRACK_NAME_HARMONY      = "Harmony"
 TRACK_NAME_COUNTERPOINT = "Counterpoint"
 TRACK_NAME_BASS         = "Bass"
 TRACK_NAME_DRUMS        = "Drums"
+
+# ---------------------------------------------------------------------------
+# Section result contract
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SectionResult:
+    """
+    Typed return value from generate_section().
+
+    Replaces the anonymous 9-element tuple, eliminating positional coupling
+    between the producer (generate_section) and consumer (generate_piece).
+
+    Fields
+    ------
+    chords                 : Voiced chord objects for each chord slot.
+    bass_notes             : BassNote objects for this section (beat-local).
+    melody_notes           : MelodyNote objects for this section (beat-local).
+    total_beats            : Total duration of the section in beats.
+    bars_list              : Per-chord bar durations (length == len(chords)).
+    beats_per_bar          : Time signature numerator (usually 4).
+    density                : Density literal used ("sparse" | "medium" | "full").
+    section_model          : The validated SectionModel instance (source of truth
+                             for all section metadata; prefer over the raw dict).
+    harmony_section_events : Pre-computed harmony rhythm events, or None (free),
+                             or the sentinel string "sustain".
+    """
+    chords:                 list[VoicedChord]
+    bass_notes:             list[BassNote]
+    melody_notes:           list[MelodyNote]
+    total_beats:            float
+    bars_list:              list[float]
+    beats_per_bar:          int
+    density:                str
+    section_model:          "SectionModel"
+    harmony_section_events: "list[RhythmEvent] | str | None"
+
 
 # ---------------------------------------------------------------------------
 # Timing helpers
@@ -317,7 +355,7 @@ def generate_section(
     sec_ctx: Optional[SectionContext] = None,
     piece_ctx: Optional[PieceContext] = None,
     transform_sequence: Optional[list[str]] = None,
-) -> tuple[list[VoicedChord], list[BassNote], list[MelodyNote], float]:
+) -> SectionResult:
     """
     Generate all voices for a single section.
 
@@ -331,8 +369,7 @@ def generate_section(
         transform_sequence:  Explicit motif transform plan from piece JSON (optional)
 
     Returns:
-        (chords, bass_notes, melody_notes, total_beats,
-         bars_list, beats_per_bar, density, section)
+        SectionResult with all generated voice data and section metadata.
     """
     key          = theme["key"]
     mode         = theme["mode"]
@@ -543,7 +580,17 @@ def generate_section(
         ))
 
     total_beats = bars * beats_per_bar
-    return chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section, harmony_section_events
+    return SectionResult(
+        chords=chords,
+        bass_notes=bass_notes,
+        melody_notes=melody_notes,
+        total_beats=total_beats,
+        bars_list=bars_list,
+        beats_per_bar=beats_per_bar,
+        density=density,
+        section_model=section_model,
+        harmony_section_events=harmony_section_events,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -805,33 +852,46 @@ def generate_piece(
 
         # In song forms, the same section may repeat with variation.
         # Use section index for seed to ensure variation is deterministic.
-        chords, bass_notes, melody_notes, total_beats, bars_list, beats_per_bar, density, section_dict, harmony_section_events = \
-            generate_section(section, theme, base_seed=base_seed, seed_offset=i * 10,
-                             sec_ctx=sec_ctx, piece_ctx=piece_ctx,
-                             transform_sequence=transform_sequence)
+        res = generate_section(
+            section, theme, base_seed=base_seed, seed_offset=i * 10,
+            sec_ctx=sec_ctx, piece_ctx=piece_ctx,
+            transform_sequence=transform_sequence,
+        )
+
+        chords                 = res.chords
+        bass_notes             = res.bass_notes
+        melody_notes           = res.melody_notes
+        total_beats            = res.total_beats
+        bars_list              = res.bars_list
+        beats_per_bar          = res.beats_per_bar
+        density                = res.density
+        section_model          = res.section_model
+        harmony_section_events = res.harmony_section_events
+
+        # section_dict: raw dict still needed for a few optional fields
+        # (drums, counterpoint, arc) that are not yet on SectionModel.
+        # Derive it from the validated model's own dict to keep a single
+        # source of truth and avoid re-reading the raw section arg.
+        section_dict = section_model.model_dump(exclude_none=True)
 
         # Section-level rhythm defaults (used by melody, bass)
-        groove   = section_dict.get("groove")
-        swing    = section_dict.get("swing", 0.0)
+        groove = section_dict.get("groove")
+        swing  = section_dict.get("swing", 0.0)
 
         # Counterpoint (optional — only if section defines it)
-        cp_def = section_dict.get("counterpoint")
-        if cp_def:
+        cp_model = section_model.counterpoint
+        if cp_model is not None:
             cp_notes = generate_counterpoint(
                 melody_notes,
                 key=theme["key"],
                 mode=theme["mode"],
-                species=cp_def.get("species", "free"),
-                register=cp_def.get("register", "below"),
-                beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
-                velocity=cp_def.get("velocity", 58),
-                dissonance=cp_def.get("dissonance", "passing"),
+                beats_per_bar=section_model.beats_per_bar,
                 seed=base_seed + i * 10,
+                cp_model=cp_model,
             )
 
             # Canon offset: shift counterpoint forward in time.
-            # Specify explicitly via cp_def["canon_offset"] (in beats).
-            canon_offset = cp_def.get("canon_offset", 0)
+            canon_offset = cp_model.canon_offset
             if canon_offset > 0:
                 for cn in cp_notes:
                     cn.start_beat += canon_offset
@@ -909,32 +969,24 @@ def generate_piece(
             ))
 
         # Drums (optional — only if section defines it)
-        if "drums" in section_dict:
-            drum_config = section_dict.get("drums", "four_on_floor")
-
-            # Handle both string and dict forms
-            if isinstance(drum_config, str):
-                pattern = drum_config
-            else:
-                pattern = drum_config.get("pattern", "four_on_floor")
-
-            # Drums rhythm params: prefer harmony_rhythm overrides when defined,
-            # falling back to section-level groove/swing.  The HR block is already
-            # normalised — read it directly here rather than re-deriving locals.
-            _hr_blk = section_dict.get("harmony_rhythm", {})
-            _hr_blk = _hr_blk if isinstance(_hr_blk, dict) else {"rhythm": _hr_blk}
-            drums_density = _hr_blk.get("density", density)
-            drums_groove  = _hr_blk.get("groove",  groove)
-            drums_swing   = float(_hr_blk.get("swing", swing))
+        drum_model = section_model.drums
+        if drum_model is not None:
+            # DrumModel.resolve() applies section-level density/groove/swing
+            # as fallbacks for any field left as None on the model.
+            drums_density, drums_groove, drums_swing = drum_model.resolve(
+                section_density=density,
+                section_groove=section_model.groove,
+                section_swing=section_model.swing,
+            )
 
             drum_hits = generate_drums(
                 total_beats=total_beats,
                 bass_notes=bass_notes,
-                pattern=pattern,
+                pattern=drum_model.pattern,
                 density=drums_density,
                 groove=drums_groove,
                 swing=drums_swing,
-                beats_per_bar=int(section_dict.get("beats_per_bar", 4)),
+                beats_per_bar=section_model.beats_per_bar,
                 seed=base_seed + i * 10,
             )
 

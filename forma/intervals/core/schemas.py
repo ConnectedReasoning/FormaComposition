@@ -154,10 +154,30 @@ class DrumModel(BaseModel):
     Corresponds to section["drums"].
     Accepts either the bare string form ("four_on_floor") or a full dict.
     Both are normalised by the SectionModel field_validator below.
+
+    density / groove / swing default to None, meaning "inherit from the
+    parent SectionModel".  The generator calls DrumModel.resolve() to get
+    concrete values, passing the section-level defaults as fallbacks.
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    pattern: str = "four_on_floor"
+    pattern: str                         = "four_on_floor"
+    density: Optional[DensityLiteral]    = None   # None → inherit from section
+    groove:  Optional[str]               = None   # None → inherit from section
+    swing:   Optional[float]             = None   # None → inherit from section
+
+    def resolve(
+        self,
+        section_density: str,
+        section_groove: Optional[str],
+        section_swing: float,
+    ) -> tuple[str, Optional[str], float]:
+        """Return (density, groove, swing) with section-level fallbacks applied."""
+        return (
+            self.density if self.density is not None else section_density,
+            self.groove  if self.groove  is not None else section_groove,
+            self.swing   if self.swing   is not None else section_swing,
+        )
 
 
 class MotifModel(BaseModel):
