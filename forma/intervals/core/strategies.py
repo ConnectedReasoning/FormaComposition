@@ -26,6 +26,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
+from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing,
@@ -178,6 +179,10 @@ class RhythmContext:
     """
     Everything a RhythmStrategy needs to produce melody + bass rhythm events.
     Constructed once per section from validated section/theme data.
+
+    musical_time holds the section's start position as a MusicalTime, giving
+    strategies bar-aware context (e.g. "are we on bar 4?") without manual
+    float modulo math.
     """
     source: str                        # "pattern" | "motif" | "free"
     total_beats: float
@@ -195,6 +200,16 @@ class RhythmContext:
     swing: float = 0.0
     beats_per_bar: int = 4
     seed: int = 42
+
+    # MusicalTime for this section's start position (optional — defaults to beat 0)
+    musical_time: Optional[MusicalTime] = None
+
+    @property
+    def section_start(self) -> MusicalTime:
+        """Section start as MusicalTime. Defaults to bar 0, beat 0 if not provided."""
+        if self.musical_time is not None:
+            return self.musical_time
+        return MusicalTime(bar=0, beat=0.0, beats_per_bar=self.beats_per_bar)
 
 
 @dataclass(frozen=True)
@@ -240,6 +255,11 @@ class HarmonyChordContext:
     Returned event tuple format:
         (abs_beat: float, kind: str, note: int, vel: int, channel: int)
     where kind is 'on' or 'off'.
+
+    musical_time is the absolute position of this chord's downbeat expressed
+    as MusicalTime. Strategy subclasses can query t.is_downbeat(), t.is_beat(3),
+    t.is_bar_mod(2), etc. to build position-aware articulation rules without
+    any float modulo arithmetic.
     """
     chord: VoicedChord                 # chord whose notes are voiced
     harmony_rhythm_ctx: HarmonyRhythmContext
@@ -253,10 +273,28 @@ class HarmonyChordContext:
     base_velocity: int = 65
     channel: int = _CHANNEL_HARMONY
 
+    # Optional MusicalTime for the chord's absolute onset position.
+    # When present, strategies can use bar-aware predicates directly.
+    musical_time: Optional[MusicalTime] = None
+
     @property
     def h_swing(self) -> float:
         """Convenience accessor — swing lives on the rhythm context."""
         return self.harmony_rhythm_ctx.swing
+
+    @property
+    def onset(self) -> MusicalTime:
+        """The chord's absolute onset as MusicalTime.
+
+        Falls back to computing from global_beat + beat_offset_local when
+        musical_time is not explicitly provided (backward compatible).
+        """
+        if self.musical_time is not None:
+            return self.musical_time
+        return MusicalTime.from_beats(
+            self.global_beat + self.beat_offset_local,
+            beats_per_bar=self.harmony_rhythm_ctx.beats_per_bar,
+        )
 
 
 @dataclass(frozen=True)
@@ -924,14 +962,25 @@ def build_harmony_chord_context(
     arc: str,
     base_velocity: int = 65,
     channel: int = _CHANNEL_HARMONY,
+    musical_time: Optional[MusicalTime] = None,
 ) -> HarmonyChordContext:
     """
     Construct a HarmonyChordContext for one chord in the section loop.
     Called once per chord by the generate_piece loop.
 
+    musical_time, when provided, becomes ctx.onset — a MusicalTime representing
+    the chord's absolute position. If omitted, ctx.onset computes it lazily from
+    global_beat + beat_offset_local (backward compatible).
+
     swing is no longer a direct parameter — it is read from harmony_rhythm_ctx
     via the h_swing property so the caller has zero manual HR field handling.
     """
+    # If caller didn't supply musical_time, derive it from the float offsets.
+    if musical_time is None:
+        musical_time = MusicalTime.from_beats(
+            global_beat + beat_offset_local,
+            beats_per_bar=harmony_rhythm_ctx.beats_per_bar,
+        )
     return HarmonyChordContext(
         chord=chord,
         harmony_rhythm_ctx=harmony_rhythm_ctx,
@@ -940,6 +989,7 @@ def build_harmony_chord_context(
         arc=arc,
         base_velocity=base_velocity,
         channel=channel,
+        musical_time=musical_time,
     )
 
 
