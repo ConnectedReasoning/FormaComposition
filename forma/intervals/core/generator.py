@@ -602,9 +602,8 @@ def _expand_song_form(piece: dict) -> list[dict]:
     {
       "form_type": "song",
       "form": [
-        { "section": "verse_A", "variation": 0.0 },
-        { "section": "verse_A", "variation": 0.2 },
-        { "section": "chorus", "variation": 0.0 },
+        { "section": "verse_A" },
+        { "section": "chorus" },
         ...
       ],
       "sections": {
@@ -614,7 +613,11 @@ def _expand_song_form(piece: dict) -> list[dict]:
       }
     }
 
-    Returns: Flattened list of section dicts with variation applied
+    Each form entry may also be a plain string: "verse_A".
+    Repeated references to the same section produce deterministic output
+    because generation is fully seed-driven (base_seed + section_index offset).
+
+    Returns: Flattened list of section dicts (shallow copies of the base defs).
     """
     form_array = piece.get("form", [])
     section_defs = piece.get("sections", {})
@@ -626,94 +629,19 @@ def _expand_song_form(piece: dict) -> list[dict]:
 
     expanded = []
     for form_item in form_array:
+        # Accept both plain strings ("verse_A") and dicts ({"section": "verse_A"})
         if isinstance(form_item, str):
-            # Simple string reference: "verse_A"
             section_name = form_item
-            variation = 0.0
         else:
-            # Dict with section name and variation
             section_name = form_item.get("section")
-            variation = form_item.get("variation", 0.0)
 
         if section_name not in section_defs:
             raise ValueError(f"Song form references undefined section: '{section_name}'")
 
-        # Get base section definition
-        base_section = section_defs[section_name]
-
-        # Apply variation
-        if variation > 0.0:
-            section = _apply_variation(base_section, variation)
-        else:
-            section = dict(base_section)  # Exact copy for 0.0 variation
-
-        expanded.append(section)
+        # Shallow copy so that per-section generation cannot mutate the master def.
+        expanded.append(dict(section_defs[section_name]))
 
     return expanded
-
-
-def _apply_variation(section: dict, variation: float) -> dict:
-    """
-    Apply variation to a section (0.0 = exact, 1.0 = maximum change).
-
-    Variation affects:
-    - 0.0-0.2:   Melody might shift slightly (sparse→lyrical)
-    - 0.3-0.5:   Density might increase, melody behavior changes
-    - 0.6-1.0:   Major changes: behavior, density, add/remove counterpoint
-    """
-    import random
-    import copy
-
-    varied = copy.deepcopy(section)
-
-    if variation <= 0.0:
-        return varied
-
-    # Local RNG instance seeded by variation — no global state mutation.
-    rng = random.Random(int(variation * 1000))
-
-    # Melody behavior shifts (higher variation = more change)
-    melody_behaviors = ["sparse", "generative", "lyrical", "develop"]
-    original_melody = varied.get("melody", "generative")
-
-    if variation > 0.15:
-        # Slight shift in melody behavior
-        if original_melody in melody_behaviors:
-            idx = melody_behaviors.index(original_melody)
-            # Shift by 1 position (circular)
-            new_idx = (idx + rng.randint(0, 1)) % len(melody_behaviors)
-            if new_idx != idx:
-                varied["melody"] = melody_behaviors[new_idx]
-
-    # Density might shift with higher variation
-    if variation > 0.4:
-        densities = ["sparse", "medium", "full"]
-        original_density = varied.get("density", "medium")
-        if original_density in densities:
-            idx = densities.index(original_density)
-            if variation > 0.6 and idx < len(densities) - 1:
-                # Increase density slightly
-                varied["density"] = densities[idx + 1]
-
-    # Arc might shift
-    if variation > 0.5:
-        arcs = ["fade_in", "swell", "breath", "fade_out"]
-        original_arc = varied.get("arc", "swell")
-        if original_arc in arcs and variation > 0.7:
-            idx = arcs.index(original_arc)
-            if idx < len(arcs) - 1:
-                varied["arc"] = arcs[idx + 1]
-
-    # Add counterpoint if none exists, high variation
-    if variation > 0.7 and "counterpoint" not in varied:
-        varied["counterpoint"] = {
-            "species": "free",
-            "register": "below",
-            "dissonance": "passing",
-            "velocity": 54
-        }
-
-    return varied
 
 
 # ---------------------------------------------------------------------------
