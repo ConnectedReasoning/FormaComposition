@@ -61,7 +61,19 @@ from intervals.core.strategies import (
     _motif_rhythm_to_events,
     _slice_events_into_window,
 )
-from intervals.core.schemas import SectionModel, ThemeModel, PieceModel
+from intervals.core.schemas import (
+    SectionModel,
+    ThemeModel,
+    PieceModel,
+    # Exported Literal sets — replaces VALID_DENSITY etc. defined below
+    VALID_DENSITY,
+    VALID_MELODY_BEH,
+    VALID_BASS_STYLE,
+    VALID_ARC,
+    VALID_RHYTHM_SOURCE,
+    VALID_HARMONY_RHYTHM_SOURCE,
+    VALID_TRANSFORMS,
+)
 from intervals.core.strategies_typed import (
     build_rhythm_context_from_model,
     build_harmony_rhythm_context_from_model,
@@ -699,259 +711,6 @@ def _apply_variation(section: dict, variation: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Validator
-# ---------------------------------------------------------------------------
-
-VALID_SECTION_KEYS = {
-    "name", "bars", "chord_bars", "progression", "density", "melody",
-    "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
-    "swing", "counterpoint", "notes", "percussion", "drums",
-    "rhythm_pattern", "harmony_pattern", "fugal_techniques",
-    "rhythm", "rest_probability",
-}
-
-# Explicit rhythm source declarations — no cascade, no defaults
-VALID_RHYTHM_SOURCE         = {"motif", "pattern", "free"}
-VALID_HARMONY_RHYTHM_SOURCE = {"motif", "pattern", "sustain", "free"}
-
-OBSOLETE_THEME_KEYS = {"palette"}
-
-VALID_DENSITY    = {"low", "medium", "high", "sparse", "full"}
-VALID_MELODY_BEH = {"lyrical", "generative", "motif", "sparse", "rhythmic", "develop"}
-VALID_BASS_STYLE = {"root_fifth", "walking", "pedal", "arpeggiated", "sparse", "root_only", "melodic", "steady", "pulse"}
-VALID_ARC        = {"swell", "fade", "build", "plateau", "decay", "fade_in", "fade_out", "breath"}
-
-
-def validate_piece(theme: dict, piece: dict) -> list[str]:
-    """
-    Validate a theme + piece pair before generation.
-
-    Returns a list of error/warning strings.
-    Empty list means all clear.
-    Errors are prefixed with [ERROR], warnings with [WARN].
-    """
-    issues = []
-
-    # Unwrap if nested under "theme" / "piece" keys
-    t = theme.get("theme", theme)
-    p = piece.get("piece", piece)
-    for key in OBSOLETE_THEME_KEYS:
-        if key in t:
-            issues.append(f"[WARN] theme has obsolete field '{key}' — remove it (instruments live in Logic)")
-
-    if "motif" not in t and "motifs" not in t:
-        issues.append("[WARN] theme has no motif or motifs defined — melodic identity will be purely generative")
-    if "motif" in t and "motifs" in t:
-        issues.append("[WARN] theme has both 'motif' and 'motifs' — 'motifs' array takes precedence; 'motif' is ignored")
-    motifs_raw = t.get("motifs")
-    if motifs_raw is not None:
-        if not isinstance(motifs_raw, list) or len(motifs_raw) == 0:
-            issues.append("[ERROR] theme 'motifs' must be a non-empty array of motif objects")
-        else:
-            for i, m in enumerate(motifs_raw):
-                if isinstance(m, dict) and "intervals" not in m:
-                    issues.append(f"[ERROR] theme motifs[{i}]: missing 'intervals' field")
-
-    # --- rhythm_phrase prerequisite check ------------------------------
-    # rhythm_phrase drives the rhythmic template for all voices.
-    # It is a separate tool from phrase (pitch contour only).
-    # The CMU pronouncing dictionary MUST be available for rhythm_phrase
-    # to produce valid output. Without it, every syllable is treated as
-    # primary stress, making the rhythm template fictional.
-    if t.get("prosodic_rhythm") or t.get("rhythm_phrase"):
-        issues.append(
-            "[ERROR] prosodic rhythm ('prosodic_rhythm', 'rhythm_phrase') has been removed. "
-            "Use a motif with a 'rhythm' field instead."
-        )
-
-    # --- Piece-level checks ---
-    if "tempo" not in p and "tempo" not in t:
-        issues.append("[WARN] piece has no tempo — will use theme midpoint")
-
-    # Validate transform_sequence if present
-    transform_seq = p.get("transform_sequence")
-    if transform_seq is not None:
-        if not isinstance(transform_seq, list):
-            issues.append("[ERROR] transform_sequence must be a list of transform names")
-        else:
-            valid_transforms = {
-                "original", "inversion", "retrograde", "retrograde_inversion",
-                "augmentation", "diminution", "transpose_up", "transpose_down",
-                "shuffle", "expand", "compress",
-            }
-            for i, xfm in enumerate(transform_seq):
-                if xfm not in valid_transforms:
-                    issues.append(
-                        f"[ERROR] transform_sequence[{i}]: '{xfm}' is not a valid transform. "
-                        f"Valid values: {sorted(valid_transforms)}"
-                    )
-            form_type = p.get("form_type", "narrative")
-            n_sections = len(p.get("form", [])) if form_type == "song" else len(p.get("sections", []))
-            if len(transform_seq) < n_sections:
-                issues.append(
-                    f"[WARN] transform_sequence has {len(transform_seq)} entries "
-                    f"but piece has {n_sections} sections — sequence wraps (repeats from start)"
-                )
-
-    form_type = p.get("form_type", "narrative")
-
-    if form_type == "song":
-        # Song form: validate form array references sections
-        form = p.get("form", [])
-        section_defs = p.get("sections", {})
-        if not form:
-            issues.append("[ERROR] form_type is 'song' but no 'form' array defined")
-        if not section_defs:
-            issues.append("[ERROR] form_type is 'song' but no 'sections' dict defined")
-        for item in form:
-            name = item.get("section") if isinstance(item, dict) else item
-            if name and name not in section_defs:
-                issues.append(f"[ERROR] form references undefined section '{name}'")
-        sections = list(section_defs.values())
-    else:
-        # Narrative form
-        sections = p.get("sections", [])
-        if not sections:
-            issues.append("[ERROR] piece has no sections")
-
-    # --- Section-level checks ---
-    for i, section in enumerate(sections):
-        label = section.get("name", f"section[{i}]")
-
-        # Unknown keys
-        unknown = set(section.keys()) - VALID_SECTION_KEYS
-        if unknown:
-            issues.append(f"[WARN] {label}: unknown field(s) {sorted(unknown)} — typo?")
-
-        # progression required
-        if "progression" not in section:
-            issues.append(f"[ERROR] {label}: missing 'progression'")
-            continue
-
-        prog = section["progression"]
-        chord_bars = section.get("chord_bars")
-        bars = section.get("bars")
-
-        # chord_bars length must match progression
-        if chord_bars is not None:
-            if len(chord_bars) != len(prog):
-                issues.append(
-                    f"[ERROR] {label}: chord_bars has {len(chord_bars)} entries "
-                    f"but progression has {len(prog)} chords"
-                )
-            # bars declared but doesn't match sum(chord_bars)
-            if bars is not None:
-                derived = sum(float(b) for b in chord_bars)
-                if abs(derived - bars) > 0.01:
-                    issues.append(
-                        f"[WARN] {label}: declared bars={bars} but sum(chord_bars)={derived} — "
-                        f"'bars' is ignored when chord_bars is present; consider removing it"
-                    )
-        else:
-            if bars is None:
-                issues.append(f"[WARN] {label}: no 'bars' or 'chord_bars' — defaulting to 8 bars")
-
-        # Enum validation
-        density = section.get("density")
-        if density and density not in VALID_DENSITY:
-            issues.append(f"[ERROR] {label}: density='{density}' — must be one of {sorted(VALID_DENSITY)}")
-
-        melody_beh = section.get("melody")
-        if melody_beh and melody_beh not in VALID_MELODY_BEH:
-            issues.append(f"[ERROR] {label}: melody='{melody_beh}' — must be one of {sorted(VALID_MELODY_BEH)}")
-
-        bass_style = section.get("bass_style")
-        if bass_style and bass_style not in VALID_BASS_STYLE:
-            issues.append(f"[ERROR] {label}: bass_style='{bass_style}' — must be one of {sorted(VALID_BASS_STYLE)}")
-
-        arc = section.get("arc")
-        if arc and arc not in VALID_ARC:
-            issues.append(f"[ERROR] {label}: arc='{arc}' — must be one of {sorted(VALID_ARC)}")
-
-        rp = section.get("rest_probability")
-        if rp is not None and not (0.0 <= rp <= 1.0):
-            issues.append(f"[ERROR] {label}: rest_probability={rp} — must be 0.0–1.0")
-
-        # rhythm source — required, explicit, no defaults
-        rhythm_source = section.get("rhythm")
-        if rhythm_source is None:
-            issues.append(
-                f"[ERROR] {label}: missing 'rhythm' field — "
-                f"must be one of {sorted(VALID_RHYTHM_SOURCE)}"
-            )
-        elif rhythm_source not in VALID_RHYTHM_SOURCE:
-            issues.append(
-                f"[ERROR] {label}: rhythm='{rhythm_source}' — "
-                f"must be one of {sorted(VALID_RHYTHM_SOURCE)}"
-            )
-        else:
-            # Cross-validate against available resources.
-            # theme_motif_has_rhythm = True if any motif source (motif or motifs[0]) has rhythm
-            _primary_motif = t.get("motif") if isinstance(t.get("motif"), dict) else None
-            _motifs_arr = t.get("motifs")
-            if not _primary_motif and _motifs_arr and isinstance(_motifs_arr, list):
-                _primary_motif = _motifs_arr[0] if _motifs_arr else None
-            _theme_has_rhythm = bool(_primary_motif and _primary_motif.get("rhythm"))
-
-            if rhythm_source == "motif":
-                if not _theme_has_rhythm:
-                    issues.append(
-                        f"[ERROR] {label}: rhythm='motif' but theme motif has "
-                        f"no 'rhythm' field"
-                    )
-            elif rhythm_source == "pattern":
-                if not section.get("rhythm_pattern"):
-                    issues.append(
-                        f"[ERROR] {label}: rhythm='pattern' but no rhythm_pattern "
-                        f"block in section"
-                    )
-
-        # harmony_rhythm block — rhythm field required when block is present
-        hr = section.get("harmony_rhythm", {})
-        if hr:
-            # Guard: harmony_rhythm must be a dict, not a bare string.
-            if isinstance(hr, str):
-                issues.append(
-                    f"[ERROR] {label}: harmony_rhythm must be an object, not a string. "
-                    f"Use: harmony_rhythm: {{\"rhythm\": \"{hr}\"}}"
-                )
-            else:
-                h_rhythm = hr.get("rhythm")
-                if h_rhythm is None:
-                    issues.append(
-                        f"[ERROR] {label}: harmony_rhythm block present but missing "
-                        f"'rhythm' field — must be one of {sorted(VALID_HARMONY_RHYTHM_SOURCE)}"
-                    )
-                elif h_rhythm not in VALID_HARMONY_RHYTHM_SOURCE:
-                    issues.append(
-                        f"[ERROR] {label}: harmony_rhythm.rhythm='{h_rhythm}' — "
-                        f"must be one of {sorted(VALID_HARMONY_RHYTHM_SOURCE)}"
-                    )
-                else:
-                    if h_rhythm == "motif":
-                        if not _theme_has_rhythm:
-                            issues.append(
-                                f"[ERROR] {label}: harmony_rhythm.rhythm='motif' but "
-                                f"theme motif has no 'rhythm' field"
-                            )
-                    elif h_rhythm == "pattern":
-                        if not section.get("harmony_pattern"):
-                            issues.append(
-                                f"[ERROR] {label}: harmony_rhythm.rhythm='pattern' but "
-                                f"no harmony_pattern block in section"
-                            )
-
-        # Warn if rhythm_phrase present — it no longer does anything
-        if section.get("rhythm_phrase"):
-            issues.append(
-                f"[WARN] {label}: 'rhythm_phrase' is no longer used. "
-                f"Define a motif with a 'rhythm' field in theme.json instead."
-            )
-
-    return issues
-
-
-# ---------------------------------------------------------------------------
 # Harmony rhythm resolution helpers
 # ---------------------------------------------------------------------------
 # _resolve_harmony_rhythm, _slice_events_into_window and _motif_rhythm_to_events
@@ -991,8 +750,10 @@ def generate_piece(
     # we convert to ValueError so callers that catch ValueError still work.
     from pydantic import ValidationError as _PydanticValidationError
     try:
-        ThemeModel.model_validate(theme)
-        PieceModel.model_validate(piece)
+        theme_model = ThemeModel.model_validate(theme)
+        piece_model = PieceModel.model_validate(piece)
+        # Cross-model checks: rhythm='motif' requires theme motif.rhythm, etc.
+        piece_model.validate_against_theme(theme_model)
     except _PydanticValidationError as exc:
         raise ValueError(
             f"Validation failed before generation:\n{exc}"

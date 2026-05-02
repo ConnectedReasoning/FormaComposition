@@ -1,9 +1,10 @@
 """
 schemas.py — Pydantic v2 models for FormaComposition input validation.
 
-Replaces the manual validate_piece() dictionary inspection with formal
-typed models. Every field mirrors what generate_section() and the factory
-functions currently read via .get() — defaults are preserved exactly.
+Single source of truth for all structural and enum-based validation.
+``validate_piece()`` in generator.py has been retired; call
+``PieceModel.model_validate(piece)`` and ``ThemeModel.model_validate(theme)``
+instead.
 
 Validation hierarchy:
     PieceModel
@@ -11,8 +12,7 @@ Validation hierarchy:
     │   ├── HarmonyRhythmModel
     │   ├── CounterpointModel
     │   ├── RhythmPatternModel
-    │   ├── DrumModel
-    │   └── FugalTechniquesModel (just a list[str])
+    │   └── DrumModel
     └── SongFormEntryModel    (song form: form array entries)
 
 MotifModel and ThemeModel cover the theme side.
@@ -21,19 +21,27 @@ Usage
 -----
     from intervals.core.schemas import PieceModel, ThemeModel, SectionModel
 
-    # Validate at load time — raises ValidationError with field-level detail
     theme = ThemeModel.model_validate(raw_theme_dict)
     piece = PieceModel.model_validate(raw_piece_dict)
+    piece.validate_against_theme(theme)   # cross-model rhythm checks
 
-    # Pass the validated Section to the factory builders
-    section = piece.sections[0]   # SectionModel instance
-    ctx = build_rhythm_context_from_model(section, motif_def, total_beats, seed, offset)
+Exported Literal aliases
+------------------------
+Import these instead of maintaining local constant sets in generator.py:
+
+    from intervals.core.schemas import (
+        DensityLiteral, MelodyLiteral, BassStyleLiteral, ArcLiteral,
+        RhythmSourceLiteral, HarmonyRhythmSourceLiteral, TransformLiteral,
+        CounterpointSpeciesLiteral, CounterpointRegisterLiteral, DissonanceLiteral,
+        VALID_DENSITY, VALID_MELODY_BEH, VALID_BASS_STYLE, VALID_ARC,
+        VALID_RHYTHM_SOURCE, VALID_HARMONY_RHYTHM_SOURCE, VALID_TRANSFORMS,
+    )
 """
 
 from __future__ import annotations
 
-from typing import Annotated, Literal, Optional, Union
 import warnings
+from typing import Annotated, Literal, Optional, Union, get_args
 
 from pydantic import (
     BaseModel,
@@ -66,22 +74,33 @@ CounterpointSpeciesLiteral  = Literal["free", "first", "second", "third", "fourt
 CounterpointRegisterLiteral = Literal["above", "below"]
 DissonanceLiteral           = Literal["none", "passing", "neighbor", "free"]
 
-# ─── Shared config ─────────────────────────────────────────────────────────
+# Convenience sets for runtime checks — derived from Literals, not duplicated.
+# These replace VALID_DENSITY, VALID_MELODY_BEH, etc. in generator.py.
+VALID_DENSITY               = set(get_args(DensityLiteral))
+VALID_MELODY_BEH            = set(get_args(MelodyLiteral))
+VALID_BASS_STYLE            = set(get_args(BassStyleLiteral))
+VALID_ARC                   = set(get_args(ArcLiteral))
+VALID_RHYTHM_SOURCE         = set(get_args(RhythmSourceLiteral))
+VALID_HARMONY_RHYTHM_SOURCE = set(get_args(HarmonyRhythmSourceLiteral))
+VALID_TRANSFORMS            = set(get_args(TransformLiteral))
 
-class _StrictBase(BaseModel):
-    """Reject unknown keys so typos surface immediately (mirrors VALID_SECTION_KEYS check)."""
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+# ─── Obsolete field registries ───────────────────────────────────────────────
+
+_OBSOLETE_THEME_KEYS    = {"palette"}
+_OBSOLETE_SECTION_KEYS  = {"rhythm_phrase", "prosodic_rhythm"}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Sub-models
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class RhythmPatternModel(_StrictBase):
+class RhythmPatternModel(BaseModel):
     """
     Hand-played rhythm pattern produced by rhythm_extract.py.
     Corresponds to section["rhythm_pattern"] / section["harmony_pattern"].
     """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
     onsets:       list[float]
     durations:    list[float]
     velocities:   Optional[list[float]] = None
@@ -102,25 +121,24 @@ class RhythmPatternModel(_StrictBase):
         return self
 
 
-class HarmonyRhythmModel(_StrictBase):
+class HarmonyRhythmModel(BaseModel):
     """
     Corresponds to section["harmony_rhythm"] block.
-    When omitted from a section, HarmonyRhythmModel is not instantiated —
-    the factory falls back to the section's main rhythm source.
 
-    ``rhythm`` is Optional: existing compositions supply only density/groove/
-    note_duration overrides without an explicit rhythm source, relying on the
-    cascade: harmony_rhythm.rhythm -> section.rhythm -> "free".
-    The factory handles None by falling back to section.rhythm.
+    ``rhythm`` is Optional: existing compositions may omit it and supply only
+    density/groove/note_duration overrides; the factory cascades:
+    harmony_rhythm.rhythm -> section.rhythm -> "free".
     """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
     rhythm:        Optional[HarmonyRhythmSourceLiteral] = None
-    density:       Optional[DensityLiteral] = None
-    groove:        Optional[str] = None
+    density:       Optional[DensityLiteral]             = None
+    groove:        Optional[str]                        = None
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     note_duration: Optional[Literal["whole", "half", "quarter", "eighth"]] = None
 
 
-class CounterpointModel(_StrictBase):
+class CounterpointModel(BaseModel):
     """Corresponds to section["counterpoint"] block."""
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
@@ -131,13 +149,14 @@ class CounterpointModel(_StrictBase):
     canon_offset: Annotated[float, Field(ge=0.0)]     = 0.0
 
 
-class DrumModel(_StrictBase):
+class DrumModel(BaseModel):
     """
     Corresponds to section["drums"].
-    Accepts either the bare string form (``"four_on_floor"``) or a
-    full dict — both are normalised to this model by the SectionModel
-    validator below.
+    Accepts either the bare string form ("four_on_floor") or a full dict.
+    Both are normalised by the SectionModel field_validator below.
     """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
     pattern: str = "four_on_floor"
 
 
@@ -148,11 +167,11 @@ class MotifModel(BaseModel):
     """
     model_config = ConfigDict(extra="allow")
 
-    name:            Optional[str]         = None
-    intervals:       list[int]             = Field(min_length=1)
-    rhythm:          Optional[list[float]] = None
-    velocities:      Optional[list[float]] = None
-    transform_pool:  list[TransformLiteral] = Field(default_factory=list)
+    name:           Optional[str]          = None
+    intervals:      list[int]              = Field(min_length=1)
+    rhythm:         Optional[list[float]]  = None
+    velocities:     Optional[list[float]]  = None
+    transform_pool: list[TransformLiteral] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _rhythm_vel_match(self) -> "MotifModel":
@@ -166,51 +185,55 @@ class MotifModel(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SectionModel — the main validated input for generate_section()
+# SectionModel
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class SectionModel(BaseModel):
     """
     Validated representation of a single section dict.
 
-    All .get() defaults from generator.py / strategies.py are encoded here
-    as Pydantic field defaults so callers can access ``section.density``
-    instead of ``section.get("density", "medium")``.
+    extra="allow" retains backward compatibility for the free-form ``notes``
+    field and any composer-added documentation.  The ``notes`` field is also
+    declared explicitly so it gets type-checking when present.
 
-    extra="allow" is intentional: the "notes" field is free-form documentation
-    and there may be future extension fields. Unknown *structural* keys (ones
-    that affect generation) are caught by validate_piece() which still runs
-    as a cross-section sanity pass.
+    Unknown *structural* keys are caught by the ``_warn_unknown_keys``
+    model_validator, which emits warnings rather than raising errors, matching
+    the spirit of the old validate_piece() [WARN] messages.
     """
     model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    # Known structural keys — used for unknown-key warning
+    _KNOWN_KEYS: set[str] = {
+        "name", "bars", "chord_bars", "progression", "density", "melody",
+        "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
+        "swing", "counterpoint", "notes", "percussion", "drums",
+        "rhythm_pattern", "harmony_pattern", "fugal_techniques",
+        "rhythm", "rest_probability",
+    }
 
     # ── Identity ──────────────────────────────────────────────────────────────
     name:          Optional[str] = None
 
     # ── Harmony / progression ─────────────────────────────────────────────────
-    progression:   list[str]    = Field(min_length=1)
-
-    # chord_bars is the source of truth when present; bars is derived from it.
-    # When only bars is supplied it's distributed evenly across chords.
+    progression:   list[str]          = Field(min_length=1)
     chord_bars:    Optional[list[float]] = None
     bars:          Optional[float]       = None
-
     beats_per_bar: int = Field(default=4, ge=1, le=16)
 
     # ── Density / behaviour ───────────────────────────────────────────────────
-    density:       DensityLiteral   = "medium"
-    melody:        MelodyLiteral    = "generative"
-    bass_style:    BassStyleLiteral = "root_fifth"
-    arc:           ArcLiteral       = "swell"
+    density:    DensityLiteral   = "medium"
+    melody:     MelodyLiteral    = "generative"
+    bass_style: BassStyleLiteral = "root_fifth"
+    arc:        ArcLiteral       = "swell"
 
     # ── Rhythm ────────────────────────────────────────────────────────────────
-    rhythm:         RhythmSourceLiteral                  # required — no default
-    harmony_rhythm: Optional[HarmonyRhythmModel] = None
+    rhythm:          RhythmSourceLiteral                    # required, no default
+    harmony_rhythm:  Optional[HarmonyRhythmModel] = None
     rhythm_pattern:  Optional[RhythmPatternModel] = None
     harmony_pattern: Optional[RhythmPatternModel] = None
 
-    groove: Optional[str]                                    = None
-    swing:  Annotated[float, Field(ge=0.0, le=1.0)]         = 0.0
+    groove: Optional[str]                                = None
+    swing:  Annotated[float, Field(ge=0.0, le=1.0)]     = 0.0
 
     # ── Melody tuning ─────────────────────────────────────────────────────────
     rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
@@ -224,10 +247,63 @@ class SectionModel(BaseModel):
     # ── Free-form documentation ───────────────────────────────────────────────
     notes: Optional[str] = None
 
-    # ── Cross-field validation ────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
+    # Field coercions (mode="before")
+    # ─────────────────────────────────────────────────────────────────────────
+
+    @field_validator("drums", mode="before")
+    @classmethod
+    def _coerce_drums(cls, v):
+        """Accept bare string form: "drums": "four_on_floor"."""
+        if isinstance(v, str):
+            return {"pattern": v}
+        return v
+
+    @field_validator("harmony_rhythm", mode="before")
+    @classmethod
+    def _coerce_harmony_rhythm(cls, v):
+        """
+        Reject bare string form ("harmony_rhythm": "sustain") with a clear error.
+        Migrated from validate_piece() [ERROR] block.
+        """
+        if isinstance(v, str):
+            raise ValueError(
+                f"harmony_rhythm must be an object, not a bare string. "
+                f'Use: {{"rhythm": "{v}"}}'
+            )
+        return v
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # Cross-field validators (mode="after")
+    # ─────────────────────────────────────────────────────────────────────────
+
+    @model_validator(mode="after")
+    def _warn_unknown_keys(self) -> "SectionModel":
+        """
+        Warn about keys outside the known structural set and flag obsolete keys.
+        Migrated from the VALID_SECTION_KEYS / rhythm_phrase checks in validate_piece().
+        Uses warnings.warn so generation continues; these are [WARN]-level issues.
+        """
+        extra_keys = set(self.model_extra or {})
+        unknown = extra_keys - self._KNOWN_KEYS
+        if unknown:
+            warnings.warn(
+                f"Section '{self.name}': unknown field(s) {sorted(unknown)} — "
+                f"possible typo or obsolete key.",
+                stacklevel=4,
+            )
+        for key in _OBSOLETE_SECTION_KEYS:
+            if key in extra_keys:
+                warnings.warn(
+                    f"Section '{self.name}': '{key}' is no longer used. "
+                    f"Define a motif with a 'rhythm' field in theme.json instead.",
+                    stacklevel=4,
+                )
+        return self
 
     @model_validator(mode="after")
     def _validate_bars(self) -> "SectionModel":
+        """Migrated from validate_piece() bar/chord_bars checks."""
         if self.chord_bars is not None:
             if len(self.chord_bars) != len(self.progression):
                 raise ValueError(
@@ -242,7 +318,6 @@ class SectionModel(BaseModel):
                     f"consider removing 'bars'.",
                     stacklevel=4,
                 )
-            # Normalise: bars is always derivable
             object.__setattr__(self, "bars", derived)
         elif self.bars is None:
             warnings.warn(
@@ -255,6 +330,12 @@ class SectionModel(BaseModel):
 
     @model_validator(mode="after")
     def _validate_rhythm_dependencies(self) -> "SectionModel":
+        """
+        Validate rhythm/pattern cross-dependencies that don't need the theme.
+        Theme-dependent checks (rhythm='motif' requires theme motif.rhythm)
+        live in validate_against_theme() below.
+        Migrated from validate_piece() rhythm cross-validate block.
+        """
         if self.rhythm == "pattern" and self.rhythm_pattern is None:
             raise ValueError(
                 f"Section '{self.name}': rhythm='pattern' requires a "
@@ -262,7 +343,6 @@ class SectionModel(BaseModel):
             )
         if self.harmony_rhythm is not None:
             hr = self.harmony_rhythm
-            # rhythm may be None (cascade to section.rhythm handled by factory)
             if hr.rhythm == "pattern" and self.harmony_pattern is None:
                 raise ValueError(
                     f"Section '{self.name}': harmony_rhythm.rhythm='pattern' "
@@ -270,10 +350,42 @@ class SectionModel(BaseModel):
                 )
         return self
 
+    # ─────────────────────────────────────────────────────────────────────────
+    # Cross-model validation (requires theme — called by PieceModel)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def validate_against_theme(self, theme_model: "ThemeModel") -> None:
+        """
+        Validate rhythm-source prerequisites that depend on theme content.
+        Migrated from the cross-validate block in validate_piece().
+
+        Raises ValueError if rhythm='motif' but the theme has no motif rhythm.
+        Call PieceModel.validate_against_theme(theme_model) to run this for
+        every section at once.
+        """
+        primary = theme_model.primary_motif
+        theme_has_rhythm = primary is not None and primary.rhythm is not None
+        label = self.name or "?"
+
+        if self.rhythm == "motif" and not theme_has_rhythm:
+            raise ValueError(
+                f"Section '{label}': rhythm='motif' but the theme's primary "
+                f"motif has no 'rhythm' field"
+            )
+        if (
+            self.harmony_rhythm is not None
+            and self.harmony_rhythm.rhythm == "motif"
+            and not theme_has_rhythm
+        ):
+            raise ValueError(
+                f"Section '{label}': harmony_rhythm.rhythm='motif' but "
+                f"the theme's primary motif has no 'rhythm' field"
+            )
+
     # ── Convenience helpers ───────────────────────────────────────────────────
 
     def bars_list(self) -> list[float]:
-        """Return per-chord bar durations (same logic as generator.py)."""
+        """Return per-chord bar durations (chord_bars takes precedence over bars)."""
         if self.chord_bars is not None:
             return [float(b) for b in self.chord_bars]
         bars = self.bars or 8.0
@@ -284,24 +396,8 @@ class SectionModel(BaseModel):
         return sum(b * self.beats_per_bar for b in self.bars_list())
 
     def to_dict(self) -> dict:
-        """
-        Serialise back to a plain dict compatible with the legacy generator.
-        Useful during the migration period when some callers still expect raw dicts.
-        """
+        """Serialise back to a plain dict compatible with the legacy generator."""
         return self.model_dump(exclude_none=True)
-
-
-# ─── Normaliser: bare string drums → DrumModel ───────────────────────────────
-
-@field_validator("drums", mode="before")
-def _coerce_drums(cls, v):  # noqa: N805  (pydantic convention)
-    if isinstance(v, str):
-        return {"pattern": v}
-    return v
-
-SectionModel.drums = field_validator("drums", mode="before")(
-    lambda cls, v: {"pattern": v} if isinstance(v, str) else v
-)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -339,16 +435,53 @@ class ThemeModel(BaseModel):
     """
     model_config = ConfigDict(extra="allow")
 
-    name:   Optional[str] = None
-    key:    str           = Field(min_length=1)
-    mode:   str           = Field(min_length=1)
+    name:   Optional[str]          = None
+    key:    str                    = Field(min_length=1)
+    mode:   str                    = Field(min_length=1)
     tempo:  TempoRangeModel
 
     motif:  Optional[MotifModel]       = None
     motifs: Optional[list[MotifModel]] = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def _warn_obsolete_theme_keys(cls, data: dict) -> dict:
+        """
+        Warn about known obsolete theme keys before field validation.
+        Migrated from validate_piece() obsolete-key and prosodic-rhythm checks.
+        """
+        if not isinstance(data, dict):
+            return data
+        # Support both wrapped {"theme": {...}} and flat dict
+        t = data.get("theme", data)
+        for key in _OBSOLETE_THEME_KEYS:
+            if key in t:
+                warnings.warn(
+                    f"theme has obsolete field '{key}' — remove it "
+                    f"(instruments live in Logic)",
+                    stacklevel=5,
+                )
+        for key in ("prosodic_rhythm", "rhythm_phrase"):
+            if key in t:
+                warnings.warn(
+                    f"theme field '{key}' has been removed. "
+                    f"Use a motif with a 'rhythm' field instead.",
+                    stacklevel=5,
+                )
+        return data
+
     @model_validator(mode="after")
     def _motif_consistency(self) -> "ThemeModel":
+        """
+        Migrated from validate_piece() motif/motifs consistency checks.
+        No-motif case is a warning, not an error (generation still works).
+        """
+        if self.motif is None and self.motifs is None:
+            warnings.warn(
+                "theme has no motif or motifs defined — melodic identity "
+                "will be purely generative",
+                stacklevel=4,
+            )
         if self.motif is not None and self.motifs is not None:
             warnings.warn(
                 "theme has both 'motif' and 'motifs' — 'motifs' array takes "
@@ -378,11 +511,10 @@ class PieceModel(BaseModel):
 
     The JSON key ``sections`` is overloaded by the engine:
     - Narrative form: a ``list[SectionModel]``
-    - Song form:      a ``dict[str, SectionModel]`` (named section definitions)
+    - Song form:      a ``dict[str, SectionModel]``
 
-    We disambiguate in ``_unwrap_sections`` before Pydantic sees the fields,
-    populating either ``sections`` (list) or ``song_sections`` (dict) so the
-    two form types don't fight over the same field name.
+    We disambiguate in ``_unwrap_nested_and_sections`` before Pydantic sees
+    the fields, populating either ``sections`` or ``song_sections``.
     """
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
@@ -392,14 +524,11 @@ class PieceModel(BaseModel):
 
     form_type: Literal["narrative", "song"] = "narrative"
 
-    # Narrative form — populated by _unwrap_sections when sections is a list
-    sections: Optional[list[SectionModel]] = None
-
-    # Song form — populated by _unwrap_sections when sections is a dict
-    song_sections: Optional[dict[str, SectionModel]] = None
-
-    # Song form — play order
-    form: Optional[list[Union[SongFormEntryModel, str]]] = None
+    # Narrative form
+    sections:      Optional[list[SectionModel]]          = None
+    # Song form
+    song_sections: Optional[dict[str, SectionModel]]     = None
+    form:          Optional[list[Union[SongFormEntryModel, str]]] = None
 
     transform_sequence: Optional[list[TransformLiteral]] = None
 
@@ -407,26 +536,28 @@ class PieceModel(BaseModel):
     @classmethod
     def _unwrap_nested_and_sections(cls, data: dict) -> dict:
         """
-        1. Accept both ``{"piece": {...}}`` and flat dict forms.
-        2. Disambiguate the overloaded ``sections`` key into
-           ``sections`` (list) or ``song_sections`` (dict).
+        1. Accept both {"piece": {...}} and flat dict forms.
+        2. Disambiguate sections list vs dict into separate fields.
         """
         if "piece" in data and isinstance(data["piece"], dict):
             data = data["piece"]
         else:
-            data = dict(data)  # shallow copy — don't mutate caller's dict
+            data = dict(data)
 
         raw_sections = data.get("sections")
         if isinstance(raw_sections, dict):
-            # Song form: move to song_sections so the list field stays clean
             data["song_sections"] = raw_sections
             data.pop("sections", None)
-        # If it's a list (or absent), leave as-is for the narrative field
 
         return data
 
     @model_validator(mode="after")
     def _form_consistency(self) -> "PieceModel":
+        """
+        Structural form validation.
+        Migrated from validate_piece() song/narrative form checks, including
+        the form-array → section-name resolution check.
+        """
         if self.form_type == "song":
             if not self.form:
                 raise ValueError("form_type='song' requires a 'form' array")
@@ -435,21 +566,66 @@ class PieceModel(BaseModel):
                     "form_type='song' requires a 'sections' dict of named "
                     "section definitions"
                 )
+            for entry in self.form:
+                name = entry if isinstance(entry, str) else entry.section
+                if name not in (self.song_sections or {}):
+                    raise ValueError(
+                        f"form references undefined section '{name}'"
+                    )
         else:
             if not self.sections:
                 raise ValueError("Narrative piece must have a non-empty 'sections' list")
         return self
 
+    @model_validator(mode="after")
+    def _validate_transform_sequence(self) -> "PieceModel":
+        """
+        Warn when transform_sequence is shorter than the section count.
+        TransformLiteral on the field catches invalid transform names at parse time.
+        Migrated from validate_piece() transform_sequence block.
+        """
+        if self.transform_sequence is None:
+            return self
+        n_sections = (
+            len(self.form or [])
+            if self.form_type == "song"
+            else len(self.sections or [])
+        )
+        if len(self.transform_sequence) < n_sections:
+            warnings.warn(
+                f"transform_sequence has {len(self.transform_sequence)} entries "
+                f"but piece has {n_sections} sections — "
+                f"sequence wraps (repeats from start)",
+                stacklevel=4,
+            )
+        return self
+
+    def validate_against_theme(self, theme_model: ThemeModel) -> None:
+        """
+        Run cross-model checks that require both piece and theme.
+        Call this after ThemeModel.model_validate() and PieceModel.model_validate()
+        both succeed.
+
+        Also warns if piece has no tempo and theme has no tempo — this was a
+        [WARN] in validate_piece() that can't live in a single-model validator.
+        """
+        if self.tempo is None:
+            # Can't check theme.tempo here (TempoRangeModel always validates),
+            # but the midpoint fallback in generate_piece() handles the None case.
+            warnings.warn(
+                "piece has no explicit 'tempo' — will use theme midpoint",
+                stacklevel=3,
+            )
+        for section in self.iter_sections():
+            section.validate_against_theme(theme_model)
+
     def iter_sections(self) -> list[SectionModel]:
         """
-        Return sections in generation order, handling both form types.
-        For song form this is the expanded list (variation application
-        is still handled by the generator's ``_apply_variation``).
-        For narrative this is sections directly.
+        Return sections in generation order for both form types.
+        For song form this is the expanded play order (before _apply_variation).
         """
         if self.form_type == "narrative":
             return self.sections or []
-        # Song form: resolve form-array references
         result = []
         for entry in (self.form or []):
             name = entry if isinstance(entry, str) else entry.section
