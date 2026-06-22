@@ -1,0 +1,74 @@
+{
+  "piece": {
+    "title": "Roule Loop",
+    "tempo": 126,
+    "seed": 1997,
+    "form_type": "song",
+    "form": ["filter_intro", "groove_verse", "chorus_lift", "groove_verse", "filter_break", "chorus_lift", "outro"],
+    "sections": {
+      "filter_intro": {
+        "name": "filter_intro",
+        "bars": 8,
+        "progression": ["i7", "IV7", "bVII7", "v7"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor", "density": "sparse" },
+        "rest_probability": 0.2
+      },
+      "groove_verse": {
+        "name": "groove_verse",
+        "bars": 16,
+        "progression": ["i7", "IV7", "bVII7", "v7"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "steady",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" }
+      },
+      "chorus_lift": {
+        "name": "chorus_lift",
+        "bars": 16,
+        "progression": ["i7", "IV7", "bVII7", "v7"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" },
+        "counterpoint": { "species": "free", "register": "above", "dissonance": "none" }
+      },
+      "filter_break": {
+        "name": "filter_break",
+        "bars": 8,
+        "progression": ["i7", "IV7"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": { "pattern": "minimal" },
+        "rest_probability": 0.4
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["i7", "IV7", "i7"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor", "density": "sparse" }
+      }
+    }
+  }
+}

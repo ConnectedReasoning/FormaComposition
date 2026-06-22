@@ -1,0 +1,137 @@
+{
+  "piece": {
+    "title": "What'd I Say",
+    "tempo": 172,
+    "seed": 44,
+
+    "sections": [
+
+      {
+        "name": "vamp_intro",
+        "notes": "Pure I chord vamp. Bass locks in, harmony comps relentlessly on shuffle. No chord changes — the groove IS the music. This establishes the feel before anything moves.",
+        "bars": 8,
+        "chord_bars": [8],
+        "progression": ["I"],
+        "density": "full",
+        "melody": "sparse",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "call",
+        "notes": "12-bar blues form with the Ray Charles anticipation — IV arrives a half-bar early at bar 3.5 instead of bar 4. That half-beat early hit is the signature. I chord holds long, then IV sneaks in.",
+        "bars": 12,
+        "chord_bars": [3.5, 4.5, 2, 2],
+        "progression": ["I", "IV", "I", "V"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "response",
+        "notes": "The answer phrase. Same progression but melody develops — the call got stated, now the harmony responds. Bass stays locked. Intensity rises.",
+        "bars": 12,
+        "chord_bars": [3.5, 4.5, 2, 2],
+        "progression": ["I", "IV", "I", "V"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "build",
+        "notes": "Harmonic rhythm doubles — now the IV and V chords get shorter windows, changes come faster. The anticipation is still there but compressed. This is where the crowd starts hollering back.",
+        "bars": 8,
+        "chord_bars": [1.5, 2.5, 1, 1, 2],
+        "progression": ["I", "IV", "I", "V", "IV"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "peak",
+        "notes": "Maximum intensity. One-bar changes, full shuffle, melody screaming. V-IV-I turnaround at the end pulls it back to the top. This is the What'd I Say breakdown.",
+        "bars": 8,
+        "chord_bars": [1, 1, 1, 1, 1, 1, 1, 1],
+        "progression": ["I", "IV", "I", "IV", "I", "V", "IV", "I"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "drop",
+        "notes": "Sudden dynamic drop. Ray's trick — after the peak, strip it back to almost nothing. Sparse harmony, pedal bass, just the groove skeleton. Makes the return hit harder.",
+        "bars": 8,
+        "chord_bars": [4, 4],
+        "progression": ["I", "IV"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse",
+          "groove": "shuffle"
+        }
+      },
+
+      {
+        "name": "return",
+        "notes": "Back to the 12-bar with the anticipation hit. Full density restored. The drop made this feel like a new beginning even though it's the same changes.",
+        "bars": 12,
+        "chord_bars": [3.5, 4.5, 2, 2],
+        "progression": ["I", "IV", "I", "V"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "shuffle"
+        }
+      }
+
+    ]
+  }
+}

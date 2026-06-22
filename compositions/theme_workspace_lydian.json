@@ -1,0 +1,17 @@
+{
+  "theme": {
+    "name": "Luminous Workspace",
+    "key": "F",
+    "mode": "lydian",
+    "tempo": {
+      "min": 58,
+      "max": 62
+    },
+    "motif": {
+      "name": "shimmer_anchor",
+      "intervals": [2, 2, 1, -5],
+      "rhythm": [1.0, 1.0, 1.0, 1.0],
+      "transform_pool": ["original", "inversion", "retrograde", "augmentation", "diminution"]
+    }
+  }
+}

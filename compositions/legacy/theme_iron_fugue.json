@@ -1,0 +1,26 @@
+{
+  "theme": {
+    "name": "Iron Fugue",
+    "key": "D",
+    "mode": "harmonic_minor",
+    "tempo": { "min": 116, "max": 124 },
+
+    "motif": {
+      "name": "subject",
+      "intervals": [2, 1, -1, -2, 3, -1],
+      "rhythm":    [0.5, 0.5, 0.5, 0.5, 1.0, 1.0],
+      "velocities": [0.90, 0.65, 0.75, 0.60, 0.95, 0.70],
+      "transform_pool": [
+        "original",
+        "inversion",
+        "retrograde",
+        "augmentation",
+        "diminution",
+        "transpose_up",
+        "transpose_down"
+      ]
+    },
+
+    "notes": "D harmonic minor — raised 7th (C#) gives the authentic cadence pull essential to Baroque. Subject is a 4-beat cell with a rising leap on beat 3 — identifiable through all transforms. Electronic realization: Modular V3 or Juno for subject voice, Moog for continuo bass, Pigments pad underneath. No swing, no shuffle. Strict 16th grid throughout."
+  }
+}

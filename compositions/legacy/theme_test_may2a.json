@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Rhythm DNA Test",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": { "min": 60, "max": 100 },
+    "motif": {
+      "name": "dna_test",
+      "intervals": [2, 2, -3],
+      "rhythm": [1.0, 1.0, 2.0],
+      "transform_pool": ["original"]
+    }
+  }
+}

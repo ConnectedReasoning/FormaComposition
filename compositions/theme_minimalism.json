@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Phase Glass",
+    "key": "A",
+    "mode": "aeolian",
+    "tempo": { "min": 80, "max": 96 },
+    "motif": {
+      "name": "cellular_pattern",
+      "intervals": [0, 3, 2, -5],
+      "rhythm": [0.5, 0.5, 0.5, 0.5],
+      "transform_pool": ["original", "diminution", "retrograde"]
+    }
+  }
+}

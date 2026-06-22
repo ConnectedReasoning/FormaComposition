@@ -1,0 +1,16 @@
+{
+  "theme": {
+    "name": "Return",
+    "key": "D",
+    "mode": "mixolydian",
+    "tempo": { "min": 100, "max": 120 },
+    "motif": {
+      "name": "return",
+      "intervals": [-2, 4, 1, -3],
+      "rhythm": [0.5, 1.0, 0.5, 1.0],
+      "transform_pool": ["inversion", "retrograde", "augmentation"],
+      "notes": "Prosodic root: 'Return' — unstressed prefix (re-) followed by stressed arrival (-turn). Intervals: step down (approach), leap up (arrival), step up, resolution back. Rhythm mirrors: short, long emphasis. This motif is about *arriving* at home."
+    },
+    "notes": "D Mixolydian — major warmth with the C natural (flattened 7) giving bittersweet quality. Not quite home, but close. The motif embodies the two-syllable arrival gesture. Transforms should preserve this arrival quality: augmentation stretches the anticipation, retrograde collapses it, inversion questions it. Perfect for a composition about returning to a place that's familiar but changed."
+  }
+}

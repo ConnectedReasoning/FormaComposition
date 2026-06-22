@@ -1,0 +1,434 @@
+{
+  "piece": {
+    "title": "Shake the Disease (FormaComposition)",
+    "theme": "theme_shake",
+    "tempo": 117,
+    "seed": 1985,
+    "notes": "Structure: Intro \u2192 Verse \u2192 Chorus \u2192 Verse \u2192 Chorus \u2192 Bridge \u2192 Chorus \u2192 Outro. Three peer voices throughout. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm \u2014 the DM signature dark move). Bridge: Bb-C-Bb-C resolving back to Dm.",
+    "logic_instruments": {
+      "voice_1": "Juno-6V \u2014 warm lead, mid register, slight chorus",
+      "voice_2": "Pigments \u2014 bright arpeggiated high voice, fast attack",
+      "voice_3": "Solina V \u2014 counterline, low-mid, legato string pad",
+      "harmony": "ARP 2600 V \u2014 sparse chord stabs, low velocity",
+      "bass": "Mini V4 \u2014 locked pulse bass, mono, heavy filter"
+    },
+    "sections": [
+      {
+        "name": "intro",
+        "bars": 8,
+        "progression": [
+          "i",
+          "VII",
+          "v",
+          "VI"
+        ],
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "rhythm_pattern": null,
+        "beats_per_bar": 4,
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "notes": "Bass pulse only. Voice 1 enters with plea motif fragment. Voices 2 and 3 silent \u2014 sparse counterpoint only.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "sparse",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 58
+          },
+          {
+            "register": "high",
+            "behavior": "sparse",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "none",
+            "rhythm": "free",
+            "velocity": 42
+          },
+          {
+            "register": "low_mid",
+            "behavior": "generative",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "none",
+            "rhythm": "free",
+            "velocity": 38
+          }
+        ]
+      },
+      {
+        "name": "verse_1",
+        "bars": 16,
+        "progression": [
+          "i",
+          "VII",
+          "III",
+          "VI"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
+        "notes": "Dm-C-F-Bb feel. Voice 1 carries plea motif lyrical. Voice 2 begins arpeggio interweave high. Voice 3 counterline below.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "lyrical",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 72
+          },
+          {
+            "register": "high",
+            "behavior": "develop",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 55
+          },
+          {
+            "register": "low_mid",
+            "behavior": "generative",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 48
+          }
+        ]
+      },
+      {
+        "name": "chorus_1",
+        "bars": 12,
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.15,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium"
+        },
+        "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Voice 1 develops plea. Voice 2 arpeggio at full energy. Voice 3 counterline in contrary motion.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "develop",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 80
+          },
+          {
+            "register": "high",
+            "behavior": "develop",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 65
+          },
+          {
+            "register": "low_mid",
+            "behavior": "lyrical",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
+            "velocity": 55
+          }
+        ]
+      },
+      {
+        "name": "verse_2",
+        "bars": 16,
+        "progression": [
+          "i",
+          "VII",
+          "III",
+          "VI"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
+        "notes": "Same as verse 1, motif transform applied. Voice 2 retrograde of arpeggio for variation.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "lyrical",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 70
+          },
+          {
+            "register": "high",
+            "behavior": "develop",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 52
+          },
+          {
+            "register": "low_mid",
+            "behavior": "generative",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 45
+          }
+        ]
+      },
+      {
+        "name": "chorus_2",
+        "bars": 12,
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium"
+        },
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "develop",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 82
+          },
+          {
+            "register": "high",
+            "behavior": "develop",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 68
+          },
+          {
+            "register": "low_mid",
+            "behavior": "develop",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
+            "velocity": 58
+          }
+        ]
+      },
+      {
+        "name": "bridge",
+        "bars": 8,
+        "progression": [
+          "VI",
+          "VII",
+          "VI",
+          "i"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "build",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
+        "notes": "Bb-C-Bb-Dm. Tension and release. Voice 1 sparse, voices 2 and 3 move in contrary motion building toward final chorus.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "lyrical",
+            "motif": "plea",
+            "rhythm": "free",
+            "velocity": 65
+          },
+          {
+            "register": "high",
+            "behavior": "generative",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "none",
+            "rhythm": "free",
+            "velocity": 50
+          },
+          {
+            "register": "low_mid",
+            "behavior": "lyrical",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm": "free",
+            "velocity": 55
+          }
+        ]
+      },
+      {
+        "name": "chorus_final",
+        "bars": 16,
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full"
+        },
+        "notes": "Extended final chorus \u2014 16 bars. All three voices at full intensity, peak interweave.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "develop",
+            "motif": "plea",
+            "rhythm": "motif",
+            "velocity": 88
+          },
+          {
+            "register": "high",
+            "behavior": "develop",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
+            "velocity": 75
+          },
+          {
+            "register": "low_mid",
+            "behavior": "develop",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
+            "velocity": 65
+          }
+        ]
+      },
+      {
+        "name": "outro",
+        "bars": 8,
+        "progression": [
+          "i",
+          "VII",
+          "v",
+          "i"
+        ],
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "notes": "Voices dissolve in reverse order. Bass pedal on D. Plea motif fragments only.",
+        "voices": [
+          {
+            "register": "mid",
+            "behavior": "sparse",
+            "motif": "plea",
+            "rhythm": "free",
+            "velocity": 45
+          },
+          {
+            "register": "high",
+            "behavior": "sparse",
+            "motif": "arpeggio",
+            "species": "free",
+            "dissonance": "none",
+            "rhythm": "free",
+            "velocity": 32
+          },
+          {
+            "register": "low_mid",
+            "behavior": "generative",
+            "motif": "counterline",
+            "species": "free",
+            "dissonance": "none",
+            "rhythm": "free",
+            "velocity": 28
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "theme": {
+    "name": "Aural Anthem",
+    "key": "B",
+    "mode": "aeolian",
+    "tempo": {
+      "min": 112,
+      "max": 120
+    },
+    "motif": {
+      "name": "anthem_rise",
+      "intervals": [2, 3, -2, 5],
+      "rhythm": [2.0, 1.0, 1.0, 4.0],
+      "transform_pool": ["inversion", "augmentation", "retrograde", "expand"]
+    },
+    "notes": "B aeolian. Cinematic/ambient. Inspired by Faltermeyer's Top Gun Anthem bed — sustained synth pad + arpeggio (Logic/Juno-6V) + anthem melody. Guitar layered live at emotional peaks. 20-minute four-movement structure. Motif transforms map to movements: M1=inversion, M2=augmentation, M3=retrograde, M4=expand. Instruments: ARP 2600 V or Modular V3 pad, Mellotron V strings or Mini V melody, Juno-6V arpeggiator external via Logic."
+  }
+}

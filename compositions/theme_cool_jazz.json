@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Blue Dorian",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": { "min": 84, "max": 100 },
+    "motif": {
+      "name": "modal_sketch",
+      "intervals": [2, 1, 2, -3],
+      "rhythm": [1.0, 1.0, 0.5, 1.5],
+      "transform_pool": ["inversion", "transpose_up", "transpose_down"]
+    }
+  }
+}

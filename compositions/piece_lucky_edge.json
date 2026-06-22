@@ -1,0 +1,37 @@
+{
+  "piece": {
+    "title": "Chiming Pocket",
+    "tempo": 116,
+    "seed": 77,
+    "form_type": "song",
+    "form": ["ambient_verse", "chucking_chorus", "ambient_verse", "chucking_chorus"],
+    "sections": {
+      "ambient_verse": {
+        "name": "ambient_verse",
+        "bars": 16,
+        "progression": ["i7", "III7", "v7", "IV7"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.5
+      },
+      "chucking_chorus": {
+        "name": "chucking_chorus",
+        "bars": 16,
+        "progression": ["i7", "III7", "v7", "IV7"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" },
+        "rest_probability": 0.0,
+        "counterpoint": { "species": "free", "register": "above", "dissonance": "none" }
+      }
+    }
+  }
+}

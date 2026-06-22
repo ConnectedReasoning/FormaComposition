@@ -1,0 +1,48 @@
+{
+  "piece": {
+    "title": "Phase Glass",
+    "tempo": 88,
+    "seed": 42,
+    "transform_sequence": ["original", "diminution", "retrograde", "diminution"],
+    "sections": [
+      {
+        "name": "ground",
+        "bars": 32,
+        "progression": ["i", "VI", "i", "v"],
+        "chord_bars": [8, 8, 8, 8],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "steady",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "rest_probability": 0.0
+      },
+      {
+        "name": "shift",
+        "bars": 32,
+        "progression": ["i", "iv", "VI", "v"],
+        "chord_bars": [8, 8, 8, 8],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "rest_probability": 0.0,
+        "counterpoint": { "species": "first", "register": "above", "dissonance": "none" }
+      },
+      {
+        "name": "accumulation",
+        "bars": 32,
+        "progression": ["VI", "v", "VI", "v"],
+        "chord_bars": [8, 8, 8, 8],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "steady",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "rest_probability": 0.0,
+        "counterpoint": { "species": "free", "register": "above", "dissonance": "passing" }
+      }
+    ]
+  }
+}

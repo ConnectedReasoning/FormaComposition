@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Sunken Cathedral",
+    "key": "C",
+    "mode": "whole_tone",
+    "tempo": { "min": 60, "max": 74 },
+    "motif": {
+      "name": "clouds",
+      "intervals": [2, 2, 1, -2],
+      "rhythm": [1.5, 1.5, 1.0, 2.0],
+      "transform_pool": ["inversion", "augmentation"]
+    }
+  }
+}

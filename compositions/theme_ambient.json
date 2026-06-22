@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Terminal Light",
+    "key": "F",
+    "mode": "ionian",
+    "tempo": { "min": 54, "max": 64 },
+    "motif": {
+      "name": "drift",
+      "intervals": [4, -2, 3, -5],
+      "rhythm": [2.0, 1.5, 2.0, 2.5],
+      "transform_pool": ["inversion", "augmentation"]
+    }
+  }
+}

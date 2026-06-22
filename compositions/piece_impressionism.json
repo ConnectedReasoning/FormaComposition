@@ -1,0 +1,46 @@
+{
+  "piece": {
+    "title": "Sunken Cathedral",
+    "tempo": 66,
+    "seed": 1894,
+    "sections": [
+      {
+        "name": "clouds",
+        "bars": 16,
+        "progression": ["I7", "II7", "III7", "II7"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.3
+      },
+      {
+        "name": "refraction",
+        "bars": 20,
+        "progression": ["I", "bIII", "bVI", "I"],
+        "chord_bars": [5, 5, 5, 5],
+        "density": "full",
+        "melody": "sparse",
+        "bass_style": "melodic",
+        "arc": "swell",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.4
+      },
+      {
+        "name": "evaporation",
+        "bars": 16,
+        "progression": ["III7", "II7", "I"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.5
+      }
+    ]
+  }
+}

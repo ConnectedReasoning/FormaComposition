@@ -1,0 +1,69 @@
+{
+  "piece": {
+    "title": "Embers",
+    "tempo": 72,
+    "seed": 11,
+    "form_type": "song",
+    "form": ["intro", "verse", "chorus", "verse", "chorus", "bridge", "chorus", "outro"],
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["I", "IV"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.3
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 16,
+        "progression": ["I", "V", "vi", "IV"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "rhythm": "free",
+        "groove": "straight",
+        "drums": { "pattern": "halftime" }
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 16,
+        "progression": ["IV", "I", "V", "vi"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "steady",
+        "arc": "build",
+        "rhythm": "motif",
+        "drums": { "pattern": "backbeat" }
+      },
+      "bridge": {
+        "name": "bridge",
+        "bars": 12,
+        "progression": ["vi", "IV", "ii", "V"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "breath",
+        "rhythm": "free",
+        "drums": { "pattern": "halftime", "density": "sparse" }
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["I", "IV", "I"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.4
+      }
+    }
+  }
+}

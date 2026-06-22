@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Chiming Pocket",
+    "key": "B",
+    "mode": "dorian",
+    "tempo": { "min": 112, "max": 120 },
+    "motif": {
+      "name": "harmonic_echo",
+      "intervals": [0, 4, 3, -7],
+      "rhythm": [1.0, 1.0, 1.0, 1.0],
+      "transform_pool": ["original", "inversion", "transpose_up"]
+    }
+  }
+}

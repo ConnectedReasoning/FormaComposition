@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Deep Current",
+    "key": "C",
+    "mode": "lydian",
+    "tempo": { "min": 66, "max": 78 },
+    "motif": {
+      "name": "current",
+      "intervals": [2, 3, -1, -2],
+      "rhythm": [1.5, 1.0, 1.5, 2.0],
+      "transform_pool": ["inversion", "transpose_up"]
+    }
+  }
+}

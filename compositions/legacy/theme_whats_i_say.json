@@ -1,0 +1,18 @@
+{
+  "theme": {
+    "name": "What'd I Say",
+    "key": "E",
+    "mode": "mixolydian",
+    "tempo": { "min": 168, "max": 176 },
+
+    "motif": {
+      "name": "call",
+      "intervals": [0, 2, -1, 0, 3],
+      "rhythm":    [0.5, 0.5, 0.5, 0.5, 1.0],
+      "velocities": [0.95, 0.70, 0.80, 0.65, 0.90],
+      "transform_pool": ["retrograde", "inversion"]
+    },
+
+    "notes": "E mixolydian — the flat-7 (D natural) is a chord tone, not tension. Gospel-funk feel. Motif is a short jabbing call phrase designed to be answered."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "theme": {
+    "name": "Xanadu Voyage",
+    "key": "E",
+    "mode": "aeolian",
+    "tempo": { "min": 108, "max": 124 },
+    "motif": {
+      "name": "xanadu_call",
+      "intervals": [5, 3, -4, -2, 1],
+      "rhythm": [0.5, 0.5, 1.0, 0.5, 1.0],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "retrograde_inversion",
+        "augmentation",
+        "diminution",
+        "transpose_up",
+        "transpose_down"
+      ]
+    },
+    "notes": "E aeolian (natural minor). Prog rock / Xanadu-influenced cinematic instrumental. Motif: ascending perfect 4th + minor 3rd, then a falling 3rd + step back up — an 'arrival then question' shape. Transform pool is wide to allow motif to mutate across development sections. Instruments: Mellotron V for the classic prog string/flute texture, ARP 2600 or Mini V for lead. Valhalla Shimmer on harmony, Valhalla Supermassive on counterpoint tail. Logic tempo 116 BPM."
+  }
+}

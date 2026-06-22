@@ -1,0 +1,125 @@
+{
+  "piece": {
+    "title": "Ethereal Flow State",
+    "form_type": "song",
+    "seed": 1968,
+    "form": [
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "quiet_dissolve" },
+
+      { "section": "floating_bed" },
+      { "section": "subtle_rise" },
+      { "section": "floating_bed" },
+      { "section": "quiet_dissolve" },
+      { "section": "quiet_dissolve" }
+    ],
+    "sections": {
+      "floating_bed": {
+        "bars": 16,
+        "progression": ["I", "II", "I", "II"],
+        "density": "sparse",
+        "rhythm": "motif",
+        "melody": "develop",
+        "rest_probability": 0.65,
+        "bass_style": "pedal",
+        "arc": "breath"
+      },
+      "subtle_rise": {
+        "bars": 12,
+        "progression": ["I", "II", "IV", "I"],
+        "density": "medium",
+        "rhythm": "motif",
+        "melody": "lyrical",
+        "rest_probability": 0.50,
+        "bass_style": "pedal",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 45,
+          "canon_offset": 2.0
+        }
+      },
+      "quiet_dissolve": {
+        "bars": 16,
+        "progression": ["I", "II", "I"],
+        "density": "sparse",
+        "rhythm": "free",
+        "melody": "generative",
+        "rest_probability": 0.80,
+        "bass_style": "root_only",
+        "arc": "fade_out"
+      }
+    }
+  }
+}

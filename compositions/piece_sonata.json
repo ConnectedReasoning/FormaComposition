@@ -1,0 +1,78 @@
+{
+  "piece": {
+    "title": "Threshold Sonata",
+    "tempo": 84,
+    "seed": 5,
+    "transform_sequence": ["original", "original", "inversion", "retrograde_inversion", "original", "augmentation"],
+    "sections": [
+      {
+        "name": "exposition_first",
+        "bars": 12,
+        "progression": ["i", "iv", "v", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2
+      },
+      {
+        "name": "exposition_second",
+        "bars": 12,
+        "key": "F",
+        "mode": "ionian",
+        "progression": ["I", "IV", "ii", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "rest_probability": 0.25,
+        "max_motif_repetitions": 3
+      },
+      {
+        "name": "development",
+        "bars": 20,
+        "key": "A",
+        "mode": "mixolydian",
+        "progression": ["I", "v", "IV", "ii", "bVII", "I"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "build",
+        "rhythm": "motif",
+        "rest_probability": 0.15,
+        "max_motif_repetitions": 3,
+        "counterpoint": { "species": "free", "register": "below", "dissonance": "passing", "canon_offset": 2.0 }
+      },
+      {
+        "name": "recapitulation",
+        "bars": 16,
+        "progression": ["i", "iv", "VI", "v", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.45,
+        "max_motif_repetitions": 4,
+        "counterpoint": { "species": "first", "register": "below", "dissonance": "none" }
+      },
+      {
+        "name": "coda",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "chord_bars": [4, 4],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "max_motif_repetitions": 2,
+        "harmony_rhythm": { "rhythm": "sustain" }
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Streetlight Serenade",
+    "key": "A",
+    "mode": "aeolian",
+    "tempo": { "min": 116, "max": 128 },
+    "motif": {
+      "name": "west_end_cell",
+      "intervals": [2, 1, -3, 0],
+      "rhythm": [0.5, 0.5, 1.0, 2.0],
+      "transform_pool": ["transpose_up", "transpose_down", "inversion"]
+    }
+  }
+}

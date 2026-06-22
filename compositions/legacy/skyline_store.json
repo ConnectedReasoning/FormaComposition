@@ -1,0 +1,103 @@
+{
+  "piece": {
+    "title": "Skyline",
+    "theme": "Skyline",
+    "tempo": 66,
+    "form_type": "song",
+    "notes": "An instrumental song about watching the city from above. F major, warm and open. Classic verse-chorus-bridge structure with clear repetition (hooks) and subtle variation (living melody). The chorus is the view—sparse, wide, unchanging. Verses explore the journey. Bridge breaks the pattern. Uses song form to create listener expectation and payoff.",
+    "form": [
+      { "section": "verse_A", "variation": 0.0 },
+      { "section": "verse_A", "variation": 0.15 },
+      { "section": "chorus", "variation": 0.0 },
+      { "section": "verse_B", "variation": 0.0 },
+      { "section": "chorus", "variation": 0.0 },
+      { "section": "bridge", "variation": 0.0 },
+      { "section": "verse_A", "variation": 0.25 },
+      { "section": "chorus_final", "variation": 0.0 }
+    ],
+    "sections": {
+      "verse_A": {
+        "name": "verse_A",
+        "bars": 16,
+        "progression": ["I", "V", "vi", "IV"],
+        "chord_bars": [4, 4, 4, 4],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "harmony_rhythm": {
+          "note_duration": "whole"
+        },
+        "notes": "The climb up. I-V-vi-IV is the classic warm progression. Lyrical melody with root-fifth bass gives forward motion. Whole-note harmony blooms gently."
+      },
+      "verse_B": {
+        "name": "verse_B",
+        "bars": 16,
+        "progression": ["vi", "IV", "I", "V"],
+        "chord_bars": [4, 4, 4, 4],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "harmony_rhythm": {
+          "note_duration": "whole"
+        },
+        "notes": "Minor movement (vi-IV-I-V). Motif develops here. Walking bass adds momentum. Counterpoint enters underneath. This verse takes a different tonal path but lands back where verse_A wanted to go."
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 8,
+        "progression": ["I", "I", "V", "I"],
+        "chord_bars": [2, 2, 2, 2],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "harmony_rhythm": {
+          "note_duration": "whole"
+        },
+        "notes": "The view. I holding for two bars (the vista), then V as breath, back to I. Sparse, wide, open. Pedal bass anchors. This is the hook—same every time. Listener should recognize it immediately on repetition 2."
+      },
+      "chorus_final": {
+        "name": "chorus_final",
+        "bars": 8,
+        "progression": ["I", "I", "V", "I"],
+        "chord_bars": [2, 2, 2, 2],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "harmony_rhythm": {
+          "note_duration": "whole"
+        },
+        "notes": "Final chorus. Same progression and melody as chorus (exact recognition). Root-only bass and fade_out arc signal the end. The view fades as daylight goes."
+      },
+      "bridge": {
+        "name": "bridge",
+        "bars": 12,
+        "progression": ["IV", "I", "IV", "V"],
+        "chord_bars": [3, 3, 3, 3],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 54
+        },
+        "harmony_rhythm": {
+          "note_duration": "whole"
+        },
+        "notes": "The moment of realization. IV-I-IV-V breaks the verse/chorus pattern. Full density builds tension. Developed motif, walking bass, counterpoint rises. This is the 'pause where we see the city lights come on' moment."
+      }
+    }
+  }
+}

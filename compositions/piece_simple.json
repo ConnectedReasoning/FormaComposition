@@ -1,0 +1,20 @@
+{
+      "title": "Simple",
+      "tempo": 120,
+      "transform_sequence": ["original", "inversion", "retrograde"],
+      "sections": [
+          {
+              "name": "opening",
+              "rest_probability": 0.15,
+              "bars": 48,
+              "progression": ["i", "V", "iv"],
+              "density": "medium",
+              "melody": "sparse",
+              "bass_style": "melodic",
+              "arc": "fade_in",
+              "rhythm": "motif",
+              "harmony_rhythm": { "rhythm": "motif" }
+          }
+
+      ]
+  }

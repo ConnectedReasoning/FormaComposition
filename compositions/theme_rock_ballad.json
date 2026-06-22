@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Embers",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": { "min": 66, "max": 78 },
+    "motif": {
+      "name": "embers_hook",
+      "intervals": [2, 2, -1, -2],
+      "rhythm": [1.0, 0.5, 0.5, 2.0],
+      "transform_pool": ["inversion", "retrograde", "augmentation"]
+    }
+  }
+}

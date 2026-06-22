@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Roule Loop",
+    "key": "B",
+    "mode": "dorian",
+    "tempo": { "min": 122, "max": 128 },
+    "motif": {
+      "name": "disco_slice",
+      "intervals": [0, 2, 3, -2],
+      "rhythm": [0.5, 0.5, 0.5, 0.5],
+      "transform_pool": ["original", "transpose_up", "transpose_down"]
+    }
+  }
+}

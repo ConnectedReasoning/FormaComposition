@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Emancipated Row",
+    "key": "C",
+    "mode": "locrian",
+    "tempo": { "min": 80, "max": 105 },
+    "motif": {
+      "name": "prime_row",
+      "intervals": [1, 6, -5, 11, -3, 7, -1, 2, -8, 4, -9],
+      "rhythm": [0.5, 0.75, 0.25, 1.0, 0.5, 0.5, 1.0, 0.25, 0.75, 0.5, 1.0],
+      "transform_pool": ["inversion", "retrograde", "retrograde_inversion"]
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "piece": {
+    "title": "Plastic Heart",
+    "tempo": 120,
+    "seed": 23,
+    "form_type": "song",
+    "form": ["intro", "verse", "chorus", "verse", "chorus", "breakdown", "chorus", "outro"],
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["i", "VI"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "drums": { "pattern": "four_on_floor", "density": "sparse" }
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 16,
+        "progression": ["i", "VI", "III", "VII"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "steady",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "groove": "driving",
+        "drums": { "pattern": "four_on_floor" }
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 16,
+        "progression": ["VI", "VII", "i", "VII"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "steady",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "drums": { "pattern": "backbeat" }
+      },
+      "breakdown": {
+        "name": "breakdown",
+        "bars": 8,
+        "progression": ["i", "VII"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "drums": { "pattern": "minimal" }
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["i", "VI", "i"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "drums": { "pattern": "four_on_floor" }
+      }
+    }
+  }
+}

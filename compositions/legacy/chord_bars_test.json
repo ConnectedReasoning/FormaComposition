@@ -1,0 +1,40 @@
+{
+  "piece": {
+    "title": "Variable Harmonic Rhythm Test",
+    "tempo": 72,
+    "sections": [
+      {
+        "name": "slow_changes",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "chord_bars":  [ 6,    4,    4,    2 ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "syncopated",
+        "swing": 0.62
+      },
+      {
+        "name": "accelerating",
+        "bars": 12,
+        "progression": ["i", "III", "VII", "iv", "v", "i"],
+        "chord_bars":  [ 4,    2,    2,    2,   1,   1 ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "groove": "broken"
+      },
+      {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out"
+      }
+    ]
+  }
+}

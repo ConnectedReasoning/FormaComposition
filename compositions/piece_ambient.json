@@ -1,0 +1,46 @@
+{
+  "piece": {
+    "title": "Terminal Light",
+    "tempo": 58,
+    "seed": 4,
+    "sections": [
+      {
+        "name": "arrival",
+        "bars": 24,
+        "progression": ["I", "IV", "vi", "IV"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.5
+      },
+      {
+        "name": "suspension",
+        "bars": 28,
+        "progression": ["IV", "I", "ii", "vi"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.45
+      },
+      {
+        "name": "dissolve",
+        "bars": 24,
+        "progression": ["vi", "IV", "I"],
+        "chord_bars": [8, 8, 8],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.6
+      }
+    ]
+  }
+}

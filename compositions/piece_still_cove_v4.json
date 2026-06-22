@@ -1,0 +1,262 @@
+{
+  "piece": {
+    "title": "Still Cove",
+    "theme": "Evening Water",
+    "tempo": 68,
+    "notes": "v2 \u2014 same three-movement shape but each movement now has internal sectional variation rather than a single long bar count. Opening builds from breath to arrival; center has a hinge and peak; release dissolves through two stages.",
+    "logic_session": "still_cove_v1.logicx",
+    "logic_instruments": {
+      "track_1_harmony": {
+        "plugin": "JUP-8000 V",
+        "preset": "Trance Bass",
+        "channel": 1,
+        "notes": "Sawtooth OSC1 into resonant filter. Filter envelope gives unexpected techno pulse on the pedal bass. Do NOT fix \u2014 this is the sound. Pull cutoff down slightly if too aggressive."
+      },
+      "track_2_melody": {
+        "plugin": "Pigments",
+        "preset": "A Place to Rest",
+        "channel": 2,
+        "notes": "Wavetable + Sample engine with morph. Long release. Vocal ahh sits deep in baritone. Perfect for harmony track \u2014 chords blur together beautifully with reverb tail."
+      },
+      "track_3_bass": {
+        "plugin": "JUP-8000 V",
+        "preset": "Overcast",
+        "channel": 3,
+        "notes": "Supersaw with detune + tape echo FX. Sparse melody notes with delay trailing off \u2014 ambient guitar shimmer. The tape echo delay should be synced to 68 BPM (882ms quarter note)."
+      },
+      "track_4_counterpoint": {
+        "plugin": "Mini Moog V4",
+        "preset": "Choir Pad",
+        "channel": 4,
+        "notes": "Three oscillators, unison on, long attack/release, noise in mixer. Slow attack swells in underneath. Track 4 is a duplicate of harmony track routed to Moog for pad wash in low-mid bed."
+      }
+    },
+    "sections": [
+      {
+        "name": "opening_breath",
+        "bars": 2,
+        "notes": "Arrival from silence. Nothing stated yet \u2014 harmony barely breathes, melody almost absent. Let the reverb tails from Logic do the work.",
+        "progression": [
+          "i",
+          "VII"
+        ],
+        "density": "medium",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.15
+      },
+      {
+        "name": "awaken",
+        "bars": 8,
+        "notes": "Arrival from silence. Nothing stated yet \u2014 harmony barely breathes, melody almost absent. Let the reverb tails from Logic do the work.",
+        "progression": [
+          "i",
+          "VII"
+        ],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.05
+      },
+      {
+        "name": "opening_motion",
+        "bars": 12,
+        "notes": "First movement enters. Melody starts developing, bass still anchored, counterpoint begins underneath.",
+        "progression": [
+          "i",
+          "VII",
+          "iv",
+          "v"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "opening_arrival",
+        "bars": 10,
+        "notes": "The opening lands. Full texture, melody lyrical, bass moves to root_fifth. This is where the cinematic feeling crystallizes.",
+        "progression": [
+          "i",
+          "VII",
+          "iv",
+          "v"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "opening_motion",
+        "bars": 12,
+        "notes": "First movement enters. Melody starts developing, bass still anchored, counterpoint begins underneath.",
+        "progression": [
+          "i",
+          "VII",
+          "iv",
+          "v"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "opening_arrival",
+        "bars": 10,
+        "notes": "The opening lands. Full texture, melody lyrical, bass moves to root_fifth. This is where the cinematic feeling crystallizes.",
+        "progression": [
+          "i",
+          "VII",
+          "iv",
+          "v"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "center_hinge",
+        "bars": 16,
+        "notes": "Harmonic shift \u2014 III and VII brought forward, creating a brighter dorian color. A moment of openness before the long swell.",
+        "progression": [
+          "i",
+          "III",
+          "VII",
+          "iv"
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "breath",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.05
+      },
+      {
+        "name": "center_swell",
+        "bars": 32,
+        "notes": "The long ascent. Density increases, arc builds steadily. The emotional center of the piece.",
+        "progression": [
+          "i",
+          "III",
+          "VII",
+          "i"
+        ],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.05
+      },
+      {
+        "name": "center_peak",
+        "bars": 32,
+        "notes": "Sustain the peak before the turn. Plateau here \u2014 no crescendo, just fullness. The breath before the release.",
+        "progression": [
+          "i",
+          "III",
+          "VII",
+          "i"
+        ],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.05
+      },
+      {
+        "name": "release_turn",
+        "bars": 24,
+        "notes": "The turn. iv-i darkens the color and begins the dissolution. Bass pulls back to root_only. Counterpoint drops out.",
+        "progression": [
+          "iv",
+          "i",
+          "VII",
+          "i"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "decay",
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "release_dissolve",
+        "bars": 32,
+        "notes": "Final dissolution. Only iv and i remain \u2014 minimal harmonic motion, long chord durations, melody sparse. Let it evaporate.",
+        "progression": [
+          "iv",
+          "i"
+        ],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.5
+      }
+    ]
+  }
+}

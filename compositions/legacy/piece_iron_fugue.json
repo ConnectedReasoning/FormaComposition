@@ -1,0 +1,175 @@
+{
+  "piece": {
+    "title": "Iron Fugue",
+    "tempo": 120,
+    "seed": 33,
+
+    "sections": [
+
+      {
+        "name": "exposition_subject",
+        "notes": "Subject enters alone. Single melodic voice, no harmony comping — just the motif statement over a slow harmonic pad. Bass walks stepwise. This is the fugue announcing itself. Sparse and exposed.",
+        "bars": 8,
+        "chord_bars": [4, 4],
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        }
+      },
+
+      {
+        "name": "exposition_answer",
+        "notes": "Answer enters at the fifth (A minor) while subject continues below. Two independent voices. Harmony rhythm still restrained — the counterpoint IS the texture. Bass continues walking. Medium density now that two voices are active.",
+        "bars": 8,
+        "chord_bars": [2, 2, 4],
+        "progression": ["v", "i", "iv"],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "walking",
+        "arc": "build",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "exposition_third",
+        "notes": "Third entry — subject returns in bass register (melodic bass), upper voices free above it. All three layers now active. The pad swells underneath. This is the full exposition completing.",
+        "bars": 8,
+        "chord_bars": [2, 2, 2, 2],
+        "progression": ["i", "VI", "iv", "V"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "episode_1",
+        "notes": "Transitional episode — no full subject statement. Sequences derived from the motif head, descending stepwise through the progression. Walking bass accelerates harmonically. This is the bridge between exposition and middle entries. More harmonic movement, shorter chord windows.",
+        "bars": 8,
+        "chord_bars": [1, 1, 2, 1, 1, 2],
+        "progression": ["i", "VII", "VI", "iv", "V", "i"],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "middle_entry_relative",
+        "notes": "Subject enters in relative major (F major) — the emotional lift of major after all that minor. This is the middle entry in the relative key, standard fugue procedure. Bass stays in D minor underneath creating a bitonal tension. Electronic textures justify this more than acoustic would.",
+        "bars": 8,
+        "chord_bars": [4, 2, 2],
+        "progression": ["III", "VII", "i"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "walking",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "stretto",
+        "notes": "Stretto — subject entries compressed and overlapping. Short chord windows simulate the feeling of voices piling on top of each other before the other has finished. One-bar changes. Maximum harmonic rhythm. This is the fugue's crisis point.",
+        "bars": 8,
+        "chord_bars": [1, 1, 1, 1, 0.5, 0.5, 2],
+        "progression": ["i", "iv", "V", "i", "VII", "V", "i"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "augmentation",
+        "notes": "Subject in augmentation — same intervals, double the note values. Everything slows while the bass carries the theme at half speed. Upper voices continue in normal time creating a layered time feel. Nils Frahm would do this. The pad swells hard.",
+        "bars": 8,
+        "chord_bars": [4, 4],
+        "progression": ["i", "V"],
+        "density": "full",
+        "melody": "sparse",
+        "bass_style": "melodic",
+        "arc": "swell",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+
+      {
+        "name": "coda",
+        "notes": "Pedal point on D. Bass holds the tonic while upper voices resolve all tension above it. Harmony rhythm drops to sustain — no more comping, just the voices finding rest. The electronic pad fades. Strict authentic cadence V-i at the end.",
+        "bars": 8,
+        "chord_bars": [6, 1, 1],
+        "progression": ["i", "V", "i"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "decay",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        }
+      }
+
+    ]
+  }
+}
