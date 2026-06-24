@@ -83,6 +83,8 @@ CHANNEL_MELODY       = 0
 CHANNEL_HARMONY      = 1
 CHANNEL_COUNTERPOINT = 2
 CHANNEL_BASS         = 3
+CHANNEL_COUNTERPOINT_2 = 4
+CHANNEL_COUNTERPOINT_3 = 5
 CHANNEL_DRUMS        = 9
 
 # Program numbers — one unique value per voice so Logic Pro creates
@@ -98,6 +100,8 @@ PROGRAM_DRUMS        = 0   # channel 9 ignores program in GM, but emit for compl
 TRACK_NAME_MELODY       = "Melody"
 TRACK_NAME_HARMONY      = "Harmony"
 TRACK_NAME_COUNTERPOINT = "Counterpoint"
+TRACK_NAME_COUNTERPOINT_2 = "Counterpoint 2"
+TRACK_NAME_COUNTERPOINT_3 = "Counterpoint 3"
 TRACK_NAME_BASS         = "Bass"
 TRACK_NAME_DRUMS        = "Drums"
 
@@ -259,12 +263,21 @@ def build_bass_track(
 def build_counterpoint_track(
     cp_notes: list[CounterpointNote],
     channel: int = CHANNEL_COUNTERPOINT,
+    track_name: str = TRACK_NAME_COUNTERPOINT,
+    program: int = PROGRAM_COUNTERPOINT,
 ) -> MidiTrack:
-    """Build the counterpoint track from a list of CounterpointNote objects."""
+    """
+    Build a counterpoint track from a list of CounterpointNote objects.
+
+    Each independent counterpoint voice gets its own track/channel so they
+    can be routed to separate instruments in Logic, the same way Melody,
+    Harmony, and Bass already are. Callers pass a distinct channel/name
+    per voice when a section defines more than one counterpoint voice.
+    """
     track = MidiTrack()
-    track.append(MetaMessage("track_name", name=TRACK_NAME_COUNTERPOINT, time=0))
-    track.append(Message("program_change", program=PROGRAM_COUNTERPOINT, channel=channel, time=0))
-    print(TRACK_NAME_COUNTERPOINT)
+    track.append(MetaMessage("track_name", name=track_name, time=0))
+    track.append(Message("program_change", program=program, channel=channel, time=0))
+    print(track_name)
 
     events = []
     for cn in cp_notes:
@@ -342,7 +355,18 @@ def _write_events_to_track(track: MidiTrack, events: list[tuple]) -> None:
         current_tick = tick
 
         if kind == "on":
-            track.append(Message("note_on",  note=note, velocity=vel,    channel=channel, time=delta))
+            # Defensive clamp: mido raises ValueError for any data byte outside
+            # 0..127, which crashes the whole render deep inside MIDI writing —
+            # the worst possible place to discover an upstream scaling bug.
+            # The real fix is to stop bad velocities from being produced in the
+            # first place (see MotifModel/RhythmPatternModel validation in
+            # schemas.py); this clamp is just insurance so a stray bad value
+            # degrades gracefully instead of crashing the render.
+            safe_vel = max(1, min(127, int(vel)))
+            if safe_vel != vel:
+                print(f"    WARNING: clamped out-of-range velocity {vel} -> {safe_vel} "
+                      f"(note={note}, beat={abs_beat:.2f}, channel={channel})")
+            track.append(Message("note_on",  note=note, velocity=safe_vel, channel=channel, time=delta))
         else:
             track.append(Message("note_off", note=note, velocity=0,      channel=channel, time=delta))
 
@@ -841,7 +865,10 @@ def generate_piece(
     all_chord_events  = []   # (abs_beat, 'on'/'off', note, vel, channel)
     all_bass_notes    = []
     all_melody_notes  = []
-    all_cp_notes      = []
+    # Keyed by voice index (0, 1, 2) so each independent counterpoint
+    # voice accumulates its own notes across every section, and ends up
+    # on its own MIDI track instead of being merged into one.
+    all_cp_notes: dict[int, list] = {}
     all_drum_hits     = []
 
     global_beat = 0.0
@@ -875,45 +902,84 @@ def generate_piece(
         groove = section_model.groove
         swing  = section_model.swing or 0.0
 
-        # Counterpoint (optional — only if section defines it)
-        cp_model = section_model.counterpoint
-        if cp_model is not None:
-            cp_notes = generate_counterpoint(
-                melody_notes,
-                key=theme["key"],
-                mode=theme["mode"],
-                beats_per_bar=section_model.beats_per_bar,
-                seed=base_seed + i * 10,
-                cp_model=cp_model,
-            )
+        # Counterpoint (optional — only if section defines it).
+        # section_model.counterpoint is a list of 1-3 CounterpointModel
+        # entries (legacy single-object files are normalised to a
+        # one-item list by the schema). Each voice is generated in turn,
+        # checked against the melody AND every counterpoint voice already
+        # generated this section, so a third voice can't silently collide
+        # with the second the way it would if voices were independent.
+        cp_voice_models = section_model.counterpoint
+        if cp_voice_models:
+            # Sounding pitches so far this section: starts with the melody,
+            # then grows as each counterpoint voice is added below.
+            # Kept as a coarse, time-agnostic pool for back-compat / first
+            # species (see generate_first_species docstring).
+            against_notes = [
+                mn.midi_note for mn in melody_notes
+                if not mn.is_rest and mn.midi_note is not None
+            ]
+            # Time-aware pool: actual note lists, so free species can ask
+            # "what is voice X sounding at beat Y" instead of assuming
+            # shared-index alignment with the melody. Section-local time
+            # (pre global_beat offset), same basis as melody_notes.
+            against_voices = [melody_notes]
 
-            # Canon offset: shift counterpoint forward in time.
-            canon_offset = cp_model.canon_offset
-            if canon_offset > 0:
+            for voice_idx, cp_model in enumerate(cp_voice_models):
+                cp_notes = generate_counterpoint(
+                    melody_notes,
+                    key=theme["key"],
+                    mode=theme["mode"],
+                    beats_per_bar=section_model.beats_per_bar,
+                    seed=base_seed + i * 10 + voice_idx,
+                    cp_model=cp_model,
+                    against_notes=against_notes,
+                    against_voices=against_voices,
+                )
+
+                # Canon offset: shift this voice forward in time.
+                canon_offset = cp_model.canon_offset
+                if canon_offset > 0:
+                    for cn in cp_notes:
+                        cn.start_beat += canon_offset
+                    # Trim notes that now extend past section boundary
+                    cp_notes = [cn for cn in cp_notes
+                                if cn.start_beat < total_beats]
+
+                # Record this voice's snapshot under a distinct name so
+                # multiple counterpoint voices don't overwrite each other
+                # in cross-section memory.
+                if sec_ctx is not None:
+                    cp_pitches = [cn.midi_note for cn in cp_notes
+                                  if not cn.is_rest and cn.midi_note is not None]
+                    cp_durations = [cn.duration_beats for cn in cp_notes
+                                    if not cn.is_rest and cn.midi_note is not None]
+                    _tb = sum(b * beats_per_bar for b in bars_list)
+                    voice_name = (
+                        "counterpoint" if len(cp_voice_models) == 1
+                        else f"counterpoint_{voice_idx + 1}"
+                    )
+                    sec_ctx.add_voice(voice_name, compute_voice_snapshot(
+                        pitches=cp_pitches,
+                        durations=cp_durations,
+                        total_beats=_tb,
+                        total_slots=int(_tb * 2),
+                        key=theme["key"], mode=theme["mode"],
+                    ))
+
+                # Feed this voice's pitches forward (both pools) so the
+                # *next* counterpoint voice, if any, avoids colliding with
+                # it too — including by exact time position, not just a
+                # flattened pitch pool.
+                against_notes = against_notes + [
+                    cn.midi_note for cn in cp_notes
+                    if not cn.is_rest and cn.midi_note is not None
+                ]
+                against_voices = against_voices + [cp_notes]
+
                 for cn in cp_notes:
-                    cn.start_beat += canon_offset
-                # Trim notes that now extend past section boundary
-                cp_notes = [cn for cn in cp_notes
-                            if cn.start_beat < total_beats]
-
-            # Record counterpoint snapshot
-            if sec_ctx is not None:
-                cp_pitches = [cn.midi_note for cn in cp_notes
-                              if not cn.is_rest and cn.midi_note is not None]
-                cp_durations = [cn.duration_beats for cn in cp_notes
-                                if not cn.is_rest and cn.midi_note is not None]
-                _tb = sum(b * beats_per_bar for b in bars_list)
-                sec_ctx.add_voice("counterpoint", compute_voice_snapshot(
-                    pitches=cp_pitches,
-                    durations=cp_durations,
-                    total_beats=_tb,
-                    total_slots=int(_tb * 2),
-                    key=theme["key"], mode=theme["mode"],
-                ))
-
-            for cn in cp_notes:
-                cn.start_beat += global_beat
-            all_cp_notes.extend(cp_notes)
+                    cn.start_beat += global_beat
+                all_cp_notes.setdefault(voice_idx, []).extend(cp_notes)
 
         # ── Harmony events — pure strategy dispatch, zero if/else ───────────
         # HarmonyRhythmContext absorbs all HR overrides (density/groove/swing).
@@ -1042,9 +1108,24 @@ def generate_piece(
     # Melody track
     mid.tracks.append(build_melody_track(all_melody_notes))
 
-    # Counterpoint track (only if any sections used it)
-    if all_cp_notes:
-        mid.tracks.append(build_counterpoint_track(all_cp_notes))
+    # Counterpoint tracks — one per independent voice (only if any
+    # sections used counterpoint at all). Voice 0 keeps the original
+    # channel/name ("Counterpoint") so single-voice files render
+    # identically to before this feature existed. Voices 1 and 2 (if
+    # present) get their own channel and a distinguishing track name.
+    _cp_track_specs = [
+        (CHANNEL_COUNTERPOINT,   TRACK_NAME_COUNTERPOINT,   PROGRAM_COUNTERPOINT),
+        (CHANNEL_COUNTERPOINT_2, TRACK_NAME_COUNTERPOINT_2, PROGRAM_COUNTERPOINT),
+        (CHANNEL_COUNTERPOINT_3, TRACK_NAME_COUNTERPOINT_3, PROGRAM_COUNTERPOINT),
+    ]
+    for voice_idx in sorted(all_cp_notes.keys()):
+        notes = all_cp_notes[voice_idx]
+        if not notes:
+            continue
+        channel, track_name, program = _cp_track_specs[voice_idx]
+        mid.tracks.append(build_counterpoint_track(
+            notes, channel=channel, track_name=track_name, program=program,
+        ))
 
     # Harmony track
     harmony_track = MidiTrack()

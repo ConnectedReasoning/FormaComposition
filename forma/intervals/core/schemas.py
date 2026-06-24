@@ -119,6 +119,15 @@ class RhythmPatternModel(BaseModel):
                 f"rhythm_pattern: velocities ({len(self.velocities)}) must match "
                 f"onsets ({len(self.onsets)})"
             )
+        if self.velocities is not None:
+            bad = [v for v in self.velocities if not (0.0 <= v <= 1.0)]
+            if bad:
+                raise ValueError(
+                    f"rhythm_pattern: velocities must be 0.0-1.0 scale multipliers "
+                    f"(they're multiplied directly into a base MIDI velocity downstream), "
+                    f"got out-of-range value(s) {bad}. If you meant raw MIDI velocities "
+                    f"(0-127), divide by 127 first — e.g. 0.8 instead of 80 or 102."
+                )
         return self
 
 
@@ -148,6 +157,12 @@ class CounterpointModel(BaseModel):
     dissonance:   DissonanceLiteral           = "passing"
     velocity:     Annotated[int, Field(ge=1, le=127)] = 58
     canon_offset: Annotated[float, Field(ge=0.0)]     = 0.0
+
+    # Rhythmic independence (free species only — see counterpoint.py).
+    # "first" species stays note-against-note with the cantus firmus by
+    # classical convention regardless of these fields.
+    rhythm_density: Literal["sparse", "medium", "full"] = "medium"
+    groove:         Optional[str]                       = None
 
 
 class VoiceModel(BaseModel):
@@ -242,6 +257,19 @@ class MotifModel(BaseModel):
                     f"motif '{self.name}': velocities length ({len(self.velocities)}) "
                     f"must match rhythm length ({len(self.rhythm)})"
                 )
+        if self.velocities is not None:
+            bad = [v for v in self.velocities if not (0.0 <= v <= 1.0)]
+            if bad:
+                raise ValueError(
+                    f"motif '{self.name}': velocities must be 0.0-1.0 scale "
+                    f"multipliers, not raw MIDI values — they're multiplied directly "
+                    f"into a voice's base velocity (e.g. bass: int(velocity * "
+                    f"velocity_scale)) with no clamp before the chosen value, so "
+                    f"velocities authored on a 0-127 scale silently overflow into "
+                    f"invalid MIDI bytes downstream. Got out-of-range value(s) {bad} "
+                    f"— if these were meant as raw MIDI velocities, divide by 127 "
+                    f"first (e.g. 0.8 instead of 80 or 102)."
+                )
         return self
 
 
@@ -310,10 +338,10 @@ class SectionModel(BaseModel):
 
     # ── Melody tuning ─────────────────────────────────────────────────────────
     rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
-    fugal_techniques: Optional[list[str]]                      = None
+    fugal_techniques: Optional[dict]                            = None
 
     # ── Optional voices ───────────────────────────────────────────────────────
-    counterpoint: Optional[CounterpointModel] = None
+    counterpoint: Optional[list[CounterpointModel]] = None
     voices:       Optional[list[VoiceModel]]  = None   # peer voices (replaces melody+counterpoint)
     drums:        Optional[DrumModel]         = None
     percussion:   Optional[dict]              = None   # future-proofed, untyped
@@ -347,6 +375,31 @@ class SectionModel(BaseModel):
         if v.lower() not in VALID_MODES:
             raise ValueError(f"Section mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}.")
         return v.lower()
+
+    @field_validator("counterpoint", mode="before")
+    @classmethod
+    def _coerce_counterpoint(cls, v):
+        """
+        Accept the legacy bare-object form ("counterpoint": {...}) and
+        normalise it to a one-item list, so every existing composition
+        file keeps validating unchanged. New compositions may instead
+        supply a list directly for 2-3 independent counterpoint voices.
+        """
+        if v is None:
+            return v
+        if isinstance(v, dict):
+            return [v]
+        return v
+
+    @field_validator("counterpoint", mode="after")
+    @classmethod
+    def _validate_counterpoint_count(cls, v):
+        """Cap at three independent counterpoint voices (practical/audible limit)."""
+        if v is not None and len(v) > 3:
+            raise ValueError(
+                f"counterpoint supports at most 3 voices, got {len(v)}"
+            )
+        return v
 
     @field_validator("drums", mode="before")
     @classmethod

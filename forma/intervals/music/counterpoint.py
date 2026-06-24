@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
 from intervals.music.melody import MelodyNote
+from intervals.music.rhythm import get_pattern
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from intervals.core.schemas import CounterpointModel
@@ -176,6 +177,57 @@ def count_hard_violations(violations: list[RuleViolation]) -> int:
 
 def count_soft_violations(violations: list[RuleViolation]) -> int:
     return sum(1 for v in violations if v.severity == "soft")
+
+
+# ---------------------------------------------------------------------------
+# Time-position lookups (for rhythmically independent voices)
+# ---------------------------------------------------------------------------
+#
+# Once a counterpoint voice has its own rhythm grid, "what is the melody
+# (or another voice) doing right now" can no longer be answered by sharing
+# an index into melody_notes — a voice's own onset may fall in the middle
+# of a sustained melody note, in a melody rest, or past the melody's last
+# note. These two helpers answer that by actual beat position instead.
+
+def note_sounding_at(notes: list, beat: float) -> Optional[int]:
+    """
+    Return the MIDI pitch of `notes` (any list of objects exposing
+    midi_note / start_beat / duration_beats / is_rest — MelodyNote or
+    CounterpointNote both qualify) that is actually sounding at `beat`.
+
+    A note is sounding if start_beat <= beat < start_beat + duration_beats.
+    Returns None if the voice is resting, hasn't started, or has already
+    finished its last note by `beat`. Assumes `notes` is sorted ascending
+    by start_beat, which holds for every voice this engine generates.
+    """
+    for n in notes:
+        if n.midi_note is None or n.is_rest:
+            continue
+        start = n.start_beat
+        end = start + n.duration_beats
+        if start - 1e-6 <= beat < end - 1e-6:
+            return n.midi_note
+    return None
+
+
+def last_sounding_before(notes: list, beat: float) -> Optional[int]:
+    """
+    Return the pitch of the most recent note in `notes` that began at or
+    before `beat`, even if it has already finished sounding (i.e. `beat`
+    falls in a gap or rest). Used as a harmonic reference when a
+    rhythmically independent counterpoint onset lands where the melody
+    has gone quiet, so the candidate scorer still has *something* to
+    check consonance against rather than no constraint at all.
+    """
+    last = None
+    for n in notes:
+        if n.midi_note is None or n.is_rest:
+            continue
+        if n.start_beat <= beat + 1e-6:
+            last = n.midi_note
+        else:
+            break
+    return last
 
 
 # ---------------------------------------------------------------------------
@@ -338,10 +390,20 @@ def generate_first_species(
     velocity: int = 60,
     seed: Optional[int] = None,
     against_notes: Optional[list[int]] = None,
+    against_voices: Optional[list[list]] = None,
 ) -> list[CounterpointNote]:
     """
     Generate strict 1st species counterpoint (note against note).
     One counterpoint note per melody note, consonant on every beat.
+
+    Rhythm is intentionally NOT made independent here. Real first-species
+    counterpoint is defined as note-against-note with the cantus firmus —
+    the 1:1 rhythmic lockstep is the species, not a missing feature. Voices
+    that should move independently in time belong in 'free' species (see
+    generate_free_species), which is where FEATURE_REQUEST_counterpoint_
+    rhythmic_independence.md's fix lives. If ratio-based first species
+    (2:1, 4:1 against the cantus firmus) is ever wanted, that's a separate,
+    deliberate addition — not a default.
 
     Args:
         melody_notes:   List of MelodyNote (non-rest) from melody.py
@@ -352,6 +414,13 @@ def generate_first_species(
         velocity:       Base MIDI velocity
         seed:           Random seed
         against_notes:  Sounding pitches from all prior voices (multi-voice awareness)
+        against_voices: Optional list of prior voices' note lists. Accepted for a
+                        uniform call signature with generate_free_species; flattened
+                        into a coarse pitch pool here rather than checked by exact
+                        time position, since this species is rhythmically locked to
+                        the melody anyway (so "what's sounding now" is unambiguous —
+                        it's whatever the prior voice's same-index note is, which a
+                        flattened pool already approximates well enough).
 
     Returns:
         List of CounterpointNote
@@ -360,6 +429,13 @@ def generate_first_species(
         rng = random.Random(seed)
     else:
         rng = random.Random()
+
+    if against_voices:
+        flattened = [
+            n.midi_note for voice in against_voices for n in voice
+            if not n.is_rest and n.midi_note is not None
+        ]
+        against_notes = (against_notes or []) + flattened
 
     # Register ranges
     if register == "below":
@@ -441,23 +517,46 @@ def generate_free_species(
     dissonance: str = "passing",   # 'none' | 'passing' | 'free'
     seed: Optional[int] = None,
     against_notes: Optional[list[int]] = None,
+    against_voices: Optional[list[list]] = None,
+    rhythm_density: str = "medium",
+    groove: Optional[str] = None,
 ) -> list[CounterpointNote]:
     """
     Generate free species counterpoint — mixed note values, passing tones,
     suspensions, and more organic voice leading.
 
+    Unlike 1st species, this voice generates its OWN rhythm grid (onsets
+    and durations) independently of melody_notes, then selects pitches
+    against whatever the melody (and any prior voices) is actually
+    sounding at each of its own onset times. This is what makes the line
+    sound like real counterpoint rather than a harmonized doubling of the
+    melody: notes can land off the melody's beats, rest while the melody
+    moves, and keep moving while the melody holds or rests.
+
     Args:
-        melody_notes:  List of MelodyNote from melody.py
-        key:           Key center
-        mode:          Mode name
-        register:      'above' | 'below'
-        beats_per_bar: Time signature numerator
-        velocity:      Base MIDI velocity
-        dissonance:    How freely to use dissonance:
+        melody_notes:   List of MelodyNote from melody.py
+        key:            Key center
+        mode:           Mode name
+        register:       'above' | 'below'
+        beats_per_bar:  Time signature numerator
+        velocity:       Base MIDI velocity
+        dissonance:     How freely to use dissonance:
                          'none'    — consonances only (like strict 1st species)
                          'passing' — dissonance allowed on weak beats as passing tones
                          'free'    — dissonance with resolution, more expressive
-        seed:          Random seed
+        seed:           Random seed
+        against_notes:  Flat pitch pool from prior voices (coarse, time-agnostic;
+                         kept for back-compat / standalone calls).
+        against_voices: List of prior voices' note lists (MelodyNote or
+                        CounterpointNote). Preferred over against_notes — each
+                        candidate is checked against what every prior voice is
+                        ACTUALLY sounding at this voice's own onset time, via
+                        note_sounding_at(), not a flattened whole-section pool.
+        rhythm_density: 'sparse' | 'medium' | 'full' — passed to
+                        rhythm.get_pattern() to control how many of this
+                        voice's own onsets are active.
+        groove:         Optional named groove (see rhythm.GROOVES) for this
+                        voice's onset pattern. None → ungrooved density grid.
 
     Returns:
         List of CounterpointNote
@@ -473,100 +572,137 @@ def generate_free_species(
         bottom, top = 67, 88
 
     scale_tones = get_scale_tones_in_register(key, mode, bottom, top)
-    sounding = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
+    sounding_melody = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
 
-    if not sounding:
+    if not sounding_melody:
+        return []
+
+    # The melody's full span is the harmonic backdrop this voice plays
+    # against; its own rhythm shouldn't run past it.
+    total_beats = max(n.start_beat + n.duration_beats for n in melody_notes)
+
+    # ── 1. Generate this voice's own rhythm grid, independent of the melody ──
+    rhythm_seed = seed if seed is not None else rng.randint(0, 10_000_000)
+    cp_rhythm = get_pattern(
+        total_beats,
+        density=rhythm_density,
+        voice_type="melody",
+        groove=groove,
+        beats_per_bar=beats_per_bar,
+        seed=rhythm_seed,
+    )
+    # Clip to the melody's span — a groove/density grid tiles past the end.
+    clipped = []
+    for ev in cp_rhythm:
+        if ev.start_beat >= total_beats - 1e-6:
+            continue
+        ev.duration_beats = min(ev.duration_beats, total_beats - ev.start_beat)
+        clipped.append(ev)
+    onsets = [ev for ev in clipped if not ev.is_rest]
+
+    if not onsets:
         return []
 
     result = []
     cp_prev = None
     melody_prev = None
-    total = len(sounding)
-
-    # Track whether previous note was dissonant (for resolution)
+    total = len(onsets)
     prev_was_dissonant = False
 
-    for i, mn in enumerate(sounding):
+    for i, ev in enumerate(onsets):
+        beat = ev.start_beat
         is_final = (i == total - 1)
-        beat = mn.start_beat
         beat_in_bar = beat % beats_per_bar
         is_strong = beat_in_bar < 1.0 or abs(beat_in_bar - beats_per_bar / 2) < 0.01
 
-        # Build candidate pool
-        if dissonance == "none" or is_strong:
-            # Consonances only on strong beats (always for 'none' mode)
-            candidates = [n for n in scale_tones if is_consonant(mn.midi_note, n)]
-        elif dissonance == "passing" and not is_strong:
-            # Allow dissonance on weak beats if it's a passing tone (stepwise approach)
-            if cp_prev is not None:
-                passing = [n for n in scale_tones if abs(n - cp_prev) <= 2]
-                candidates = passing if passing else scale_tones
-            else:
-                candidates = scale_tones
-        else:
-            # 'free' — all scale tones, dissonance must resolve
-            if prev_was_dissonant and cp_prev is not None:
-                # Force resolution: stepwise motion away from dissonance
-                candidates = [n for n in scale_tones if abs(n - cp_prev) <= 2]
-            else:
-                candidates = scale_tones
+        # What is the melody actually doing right now? Not "the i-th melody
+        # note" — this voice has its own clock. If the melody is between
+        # notes or resting, fall back to the last pitch it sounded so we
+        # still have a harmonic reference to check consonance against.
+        melody_now = note_sounding_at(sounding_melody, beat)
+        if melody_now is None:
+            melody_now = last_sounding_before(sounding_melody, beat)
+        if melody_now is None:
+            melody_now = melody_prev  # nothing has sounded yet — rare edge case
 
-        if not candidates:
+        # What are prior voices (melody + any earlier counterpoint voices)
+        # actually sounding at this exact beat, by time position?
+        sounding_others: list[int] = []
+        if against_voices:
+            for voice in against_voices:
+                p = note_sounding_at(voice, beat)
+                if p is not None and p != melody_now:
+                    sounding_others.append(p)
+        if against_notes:
+            sounding_others.extend(against_notes)
+
+        if melody_now is None:
+            # No harmonic reference exists yet at all (only possible if this
+            # voice's rhythm starts before the melody's first note). Don't
+            # fabricate rule checks against nothing — just stay in scale.
             candidates = scale_tones
+        else:
+            # Build candidate pool (same logic as before, now keyed off
+            # melody_now instead of a same-index melody note).
+            if dissonance == "none" or is_strong:
+                candidates = [n for n in scale_tones if is_consonant(melody_now, n)]
+            elif dissonance == "passing" and not is_strong:
+                if cp_prev is not None:
+                    passing = [n for n in scale_tones if abs(n - cp_prev) <= 2]
+                    candidates = passing if passing else scale_tones
+                else:
+                    candidates = scale_tones
+            else:
+                # 'free' — all scale tones, dissonance must resolve
+                if prev_was_dissonant and cp_prev is not None:
+                    candidates = [n for n in scale_tones if abs(n - cp_prev) <= 2]
+                else:
+                    candidates = scale_tones
 
-        # Final note: cadence — prefer consonant approach
-        if is_final:
-            cadence = [n for n in candidates if interval_class(mn.midi_note, n) in {0, 7, 4, 3}]
-            if cadence:
-                candidates = cadence
+            if not candidates:
+                candidates = scale_tones
+
+            # Final note: cadence — prefer consonant approach
+            if is_final:
+                cadence = [n for n in candidates if interval_class(melody_now, n) in {0, 7, 4, 3}]
+                if cadence:
+                    candidates = cadence
 
         # Score candidates
         scored = []
         for c in candidates:
             s = score_candidate(
-                c, mn.midi_note, melody_prev, cp_prev,
+                c, melody_now if melody_now is not None else c,
+                melody_prev, cp_prev,
                 scale_tones, beat, beats_per_bar, register, is_final,
                 rng=rng,
-                against_notes=against_notes,
+                against_notes=sounding_others,
             )
             scored.append((s, c))
 
         scored.sort(key=lambda x: x[0])
         _, best = scored[0]
 
-        violations = check_interval_rules(
-            mn.midi_note, best, melody_prev, cp_prev,
-            beat, beats_per_bar, is_final
-        )
-
-        # Occasional rests for breathing (free species only, not at strong beats)
-        use_rest = (
-            dissonance == "free"
-            and not is_strong
-            and not is_final
-            and rng.random() < 0.12
-        )
-
-        if use_rest:
-            result.append(CounterpointNote(
-                midi_note=None,
-                start_beat=beat,
-                duration_beats=mn.duration_beats,
-                velocity=0,
-                is_rest=True,
-            ))
-            # Don't update cp_prev on rest — voice resumes from same pitch
+        if melody_now is not None:
+            violations = check_interval_rules(
+                melody_now, best, melody_prev, cp_prev,
+                beat, beats_per_bar, is_final
+            )
         else:
-            result.append(CounterpointNote(
-                midi_note=best,
-                start_beat=beat,
-                duration_beats=mn.duration_beats,
-                velocity=velocity,
-                violations=violations,
-            ))
-            prev_was_dissonant = is_dissonant(mn.midi_note, best)
-            cp_prev = best
-            melody_prev = mn.midi_note
+            violations = []
+
+        note_velocity = max(1, min(127, round(velocity * ev.velocity_scale)))
+
+        result.append(CounterpointNote(
+            midi_note=best,
+            start_beat=beat,
+            duration_beats=ev.duration_beats,
+            velocity=note_velocity,
+            violations=violations,
+        ))
+        prev_was_dissonant = melody_now is not None and is_dissonant(melody_now, best)
+        cp_prev = best
+        melody_prev = melody_now
 
     return result
 
@@ -588,6 +724,9 @@ def generate_counterpoint(
     *,
     cp_model: "Optional[CounterpointModel]" = None,
     against_notes: Optional[list[int]] = None,
+    against_voices: Optional[list[list]] = None,
+    rhythm_density: str = "medium",
+    groove: Optional[str] = None,
 ) -> list[CounterpointNote]:
     """
     Generate a counterpoint voice against a melody.
@@ -607,29 +746,47 @@ def generate_counterpoint(
                         the caller does not need to unpack the model manually.
         against_notes:  Sounding pitches from all prior voices in the section.
                         Used to avoid parallel fifths/octaves across all peers,
-                        not just the primary melody.
+                        not just the primary melody. Time-agnostic; kept for
+                        back-compat. Prefer against_voices for free species.
+        against_voices: Note lists (MelodyNote/CounterpointNote) of all prior
+                        voices this section, including the melody. Free species
+                        uses these to check what each prior voice is actually
+                        sounding at THIS voice's own onset time, rather than a
+                        flattened whole-section pool. First species flattens
+                        them internally (rhythm is locked to the melody there,
+                        so exact time-position lookup isn't needed).
+        rhythm_density: "sparse" | "medium" | "full" — free species only;
+                        controls how active this voice's own rhythm grid is.
+        groove:         Optional named groove (rhythm.GROOVES) for free
+                        species' onset pattern. None → ungrooved density grid.
 
     Returns:
         List of CounterpointNote
     """
     # If a typed model is supplied, let it win over individual kwargs.
     if cp_model is not None:
-        species       = cp_model.species
-        register      = cp_model.cp_register
-        beats_per_bar = beats_per_bar  # not on CounterpointModel — caller supplies
-        velocity      = cp_model.velocity
-        dissonance    = cp_model.dissonance
+        species        = cp_model.species
+        register       = cp_model.cp_register
+        beats_per_bar  = beats_per_bar  # not on CounterpointModel — caller supplies
+        velocity       = cp_model.velocity
+        dissonance     = cp_model.dissonance
+        rhythm_density = cp_model.rhythm_density
+        groove         = cp_model.groove
 
     if species == "first":
         return generate_first_species(
             melody_notes, key, mode, register, beats_per_bar, velocity, seed,
             against_notes=against_notes,
+            against_voices=against_voices,
         )
     elif species == "free":
         return generate_free_species(
             melody_notes, key, mode, register, beats_per_bar,
             velocity, dissonance, seed,
             against_notes=against_notes,
+            against_voices=against_voices,
+            rhythm_density=rhythm_density,
+            groove=groove,
         )
     else:
         raise ValueError(f"Unknown species: '{species}'. Choose 'first' or 'free'.")
@@ -719,10 +876,17 @@ if __name__ == "__main__":
             seed=13,
         )
         report = violation_report(cp)
-        rests = sum(1 for n in cp if n.is_rest)
-        print(f"  Notes: {report['total_notes']}  Rests: {rests}  "
+        notes_only = [n for n in cp if not n.is_rest]
+        print(f"  Onsets: {len(cp)}  Notes: {report['total_notes']}  "
               f"Hard violations: {report['hard_violations']}  "
               f"Soft: {report['soft_violations']}")
+
+        # Show first 6 onsets with their own independent timing — no longer
+        # index-paired with the melody, since rhythm is generated separately.
+        for cn in notes_only[:6]:
+            c_name = CHROMATIC[cn.midi_note % 12]
+            print(f"    beat={cn.start_beat:5.2f}  dur={cn.duration_beats:.2f}  "
+                  f"cp={c_name}{cn.midi_note}")
 
         if report["violation_types"]:
             print(f"  Violation types: {report['violation_types']}")
