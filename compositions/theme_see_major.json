@@ -1,8 +1,0 @@
-{
-  "theme":{
-    "name":"See Major",
-    "key": "C",
-    "mode": "ionian",
-    "tempo": { "min":90, "max": 120 }
-  }
-}

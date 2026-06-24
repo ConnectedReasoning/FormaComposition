@@ -12,13 +12,13 @@
         "bars": 8,
         "chord_bars": [4, 4],
         "progression": ["i", "VII"],
-        "density": "sparse",
-        "melody": "sparse",
-        "bass_style": "pedal",
+        "density": "medium",
+        "melody": "medium",
+        "bass_style": "arpeggiated",
         "arc": "fade_in",
-        "rhythm": "free",
+        "rhythm": "motif",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "motif",
           "density": "sparse"
         }
       },
@@ -33,7 +33,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "motif",
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "medium"
@@ -52,7 +52,7 @@
         "arc": "plateau",
         "rhythm": "free",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "motif",
           "density": "full"
         }
       },
@@ -81,7 +81,7 @@
         "progression": ["i", "III", "iv", "VII"],
         "density": "medium",
         "melody": "lyrical",
-        "bass_style": "steady",
+        "bass_style": "arpeggiated",
         "arc": "swell",
         "rhythm": "free",
         "harmony_rhythm": {

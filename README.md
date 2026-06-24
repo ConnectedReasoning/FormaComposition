@@ -168,22 +168,6 @@ First species: strict note-against-note, all consonances. Free species: mixed rh
 
 ---
 
-## Documenting Logic Pro sessions
-
-The piece JSON supports an optional `logic_instruments` field for recording what you assigned in your DAW after generation. This is purely documentation — it has no effect on generation.
-
-```json
-"logic_instruments": {
-  "track_1_harmony": {
-    "plugin": "JUP-8000 V",
-    "preset": "Trance Bass",
-    "notes": "Sawtooth + resonant filter. Filter envelope creates pulse on pedal bass."
-  }
-}
-```
-
----
-
 ## Requirements
 
 - Python 3.10+

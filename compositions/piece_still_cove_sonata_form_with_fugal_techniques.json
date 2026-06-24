@@ -15,6 +15,7 @@
         "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_in",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "first",
           "register": "below",
@@ -32,6 +33,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -48,7 +50,8 @@
         "density": "full",
         "melody": "develop",
         "bass_style": "root_fifth",
-        "arc": "peak",
+        "arc": "build",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "above",
@@ -66,11 +69,12 @@
         "density": "full",
         "melody": "develop",
         "bass_style": "root_fifth",
-        "arc": "peak",
+        "arc": "build",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "below",
-          "dissonance": "dissonant"
+          "dissonance": "free"
         },
         "fugal_techniques": {
           "motif_transform": "retrograde_inversion",
@@ -85,6 +89,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "breath",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -102,6 +107,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -116,9 +122,10 @@
         "bars": 12,
         "progression": ["III", "IV", "i"],
         "density": "medium",
-        "melody": "flowing",
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "fade_out",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -136,6 +143,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "fade_out",
+        "rhythm": "motif",
         "counterpoint": {
           "species": "first",
           "register": "below",

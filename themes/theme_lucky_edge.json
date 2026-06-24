@@ -1,8 +1,8 @@
 {
   "theme": {
     "name": "Chiming Pocket",
-    "key": "B",
-    "mode": "dorian",
+    "key": "D",
+    "mode": "ionian",
     "tempo": { "min": 112, "max": 120 },
     "motif": {
       "name": "harmonic_echo",

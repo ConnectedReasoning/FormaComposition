@@ -4,18 +4,6 @@
     "theme": "Xanadu Voyage",
     "tempo": 116,
     "notes": "Prog rock cinematic instrumental. E aeolian. Seven sections across ~8-9 minutes. Arc: atmosphere → motif birth → building complexity → climax → breakdown → recapitulation → dissolution. Layer Mellotron flutes on counterpoint track in Logic. ARP 2600 or Mini V lead over the melody track. Add a synth arpeggio manually in Logic over the harmony chords — the Xanadu-ish running 16th-note figure the engine cannot generate.",
-    "logic_instruments": {
-      "track_1_melody": "ARP 2600 V — mid-high register lead. Patch: sustained with slight filter envelope. Solo voice, present.",
-      "track_2_counterpoint": "Mellotron V — flutes patch. Low velocity (50-54). Sits beneath the lead, adds the classic prog texture.",
-      "track_3_harmony": "Solina V or Mellotron V strings. Warm, pad-like. Valhalla Shimmer send. Should feel like a bed not a stab.",
-      "track_4_bass": "Mini V bass or Modular V3. Sub-octave weight. Tight attack. Felt more than heard in prelude, more present in development.",
-      "arpeggio_note": "Add a separate ARP 2600 or Juno-6V track manually in Logic for the running arpeggio figure — the Xanadu-ish 16th-note pattern. This is NOT from the engine; play or sequence it by hand over the harmony track chords.",
-      "fx": {
-        "harmony": "Valhalla Shimmer — large, slow modulation",
-        "counterpoint": "Valhalla Supermassive — huge tail, mix 30%",
-        "delay": "Dotted 8th at 116 BPM on lead in development and recapitulation sections"
-      }
-    },
     "sections": [
       {
         "name": "prologue",

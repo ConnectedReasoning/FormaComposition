@@ -5,13 +5,6 @@
     "tempo": 117,
     "seed": 1985,
     "notes": "Structure: Intro \u2192 Verse \u2192 Chorus \u2192 Verse \u2192 Chorus \u2192 Bridge \u2192 Chorus \u2192 Outro. Three peer voices throughout. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm \u2014 the DM signature dark move). Bridge: Bb-C-Bb-C resolving back to Dm.",
-    "logic_instruments": {
-      "voice_1": "Juno-6V \u2014 warm lead, mid register, slight chorus",
-      "voice_2": "Pigments \u2014 bright arpeggiated high voice, fast attack",
-      "voice_3": "Solina V \u2014 counterline, low-mid, legato string pad",
-      "harmony": "ARP 2600 V \u2014 sparse chord stabs, low velocity",
-      "bass": "Mini V4 \u2014 locked pulse bass, mono, heavy filter"
-    },
     "sections": [
       {
         "name": "intro",
@@ -30,7 +23,6 @@
         "rhythm_pattern": null,
         "beats_per_bar": 4,
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
@@ -78,7 +70,6 @@
         "arc": "breath",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -134,7 +125,6 @@
         "arc": "swell",
         "rhythm": "free",
         "rest_probability": 0.15,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -184,7 +174,6 @@
         "arc": "breath",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -240,7 +229,6 @@
         "arc": "swell",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -289,7 +277,6 @@
         "arc": "build",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -345,7 +332,6 @@
         "arc": "swell",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "free",
@@ -395,7 +381,6 @@
         "arc": "fade_out",
         "rhythm": "free",
         "rest_probability": 0.35,
-        "max_motif_repetitions": 2,
         "beats_per_bar": 4,
         "harmony_rhythm": {
           "rhythm": "sustain"

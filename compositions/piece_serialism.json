@@ -5,16 +5,6 @@
     "seed": 1923,
     "transform_sequence": ["original", "inversion", "retrograde", "retrograde_inversion"],
     "notes": "Faux-serial cinematic piece in B locrian. Four chromatic chords rotated across five movements. Transform sequence drives melodic mutation across the arc. Canon counterpoint in movement II. Total ~140 bars, approx 10-12 minutes at 96 BPM.",
-    "logic_instruments": {
-      "melody": "ARP 2600 V — sharp, cutting, mid-high register. Angular attack.",
-      "counterpoint": "Modular V3 — cold, slightly detuned. Canon voice sits above melody.",
-      "harmony": "Juno-6V — sparse pad, slow attack, wide stereo. Valhalla Supermassive send.",
-      "bass": "Mini V — sub register, minimal, root anchoring only.",
-      "fx": {
-        "melody": "Valhalla Shimmer on send — sparse use, only in suspension and dissolution",
-        "counterpoint": "Valhalla Supermassive — large tail, mix 20%"
-      }
-    },
     "sections": [
       {
         "name": "prime_statement",

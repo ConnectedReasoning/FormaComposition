@@ -27,12 +27,6 @@
         "augmentation",
         "transpose_up"
       ]
-    },
-    "palette": {
-      "harmony": "warm_pad",
-      "melody": "vibraphone",
-      "bass": "strings",
-      "counterpoint": "ensemble"
     }
   }
 }

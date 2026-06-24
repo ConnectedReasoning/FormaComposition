@@ -4,25 +4,6 @@
     "theme": "Open Sky",
     "tempo": 60,
     "notes": "F Lydian companion piece to Still Cove. Slower and more luminous. The raised 4th (I-II Lydian shimmer) is the signature. Counterpoint only in rise section. Not yet tested in Logic — try Still Cove instrument palette first as a starting point.",
-    "logic_session": null,
-    "logic_instruments": {
-      "suggested_track_1_harmony": {
-        "plugin": "JUP-8000 V or Pigments",
-        "notes": "F Lydian wants something brighter than D Dorian. Try Juno-106 V or Solina V for shimmer."
-      },
-      "suggested_track_2_melody": {
-        "plugin": "Pigments or CMI V",
-        "notes": "Vibraphone or mallet patch suits the floating Lydian character. A Place to Rest also worth trying."
-      },
-      "suggested_track_3_bass": {
-        "plugin": "Mini Moog V4 or JUP-8000 V",
-        "notes": "Softer than Trance Bass. Walking bass in peak section needs clear note definition."
-      },
-      "suggested_track_4_counterpoint": {
-        "plugin": "Solina V or String Studio",
-        "notes": "Strings for rise section counterpoint only (bars 9-20). Sits below melody."
-      }
-    },
     "sections": [
       {
         "name": "dawn",
@@ -32,6 +13,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
+        "rhythm": "motif",
         "notes": "Pure Lydian shimmer. I-II establishes the raised 4th floating quality immediately."
       },
       {
@@ -48,6 +30,7 @@
           "dissonance": "passing",
           "velocity": 55
         },
+        "rhythm": "motif",
         "notes": "Emotional center. Counterpoint strings enter here."
       },
       {
@@ -58,6 +41,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
+        "rhythm": "motif",
         "notes": "Most harmonic motion. Walking bass + develop melody + full voicings."
       },
       {
@@ -68,6 +52,7 @@
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "fade_out",
+        "rhythm": "motif",
         "notes": "Returns to opening shimmer. Generative melody wanders over Lydian I-II drone."
       }
     ]
