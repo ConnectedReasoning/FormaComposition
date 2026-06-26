@@ -861,6 +861,21 @@ def generate_piece(
     # Optional explicit transform plan from piece JSON
     transform_sequence = piece.get("transform_sequence")
 
+    # Build per-section seed offsets. Song form entries with exact_repeat=True
+    # reuse the seed_offset of the first occurrence of that section name so
+    # generation is identical — same notes, same voicings, same rhythm.
+    if form_type == "song":
+        _first_offset: dict[str, int] = {}
+        seed_offsets: list[int] = []
+        for _i, _entry in enumerate(piece_model.form or []):
+            _name   = _entry if isinstance(_entry, str) else _entry.section
+            _exact  = False if isinstance(_entry, str) else _entry.exact_repeat
+            _offset = _first_offset[_name] if (_exact and _name in _first_offset) else _i * 10
+            _first_offset.setdefault(_name, _offset)
+            seed_offsets.append(_offset)
+    else:
+        seed_offsets = [i * 10 for i in range(len(sections))]
+
     # Accumulate all voice events with beat offsets across sections
     all_chord_events  = []   # (abs_beat, 'on'/'off', note, vel, channel)
     all_bass_notes    = []
@@ -880,10 +895,8 @@ def generate_piece(
         # ══════════════════════════════════════════════════════════
         sec_ctx = piece_ctx.make_section_context(section, i)
 
-        # In song forms, the same section may repeat with variation.
-        # Use section index for seed to ensure variation is deterministic.
         res = generate_section(
-            section, theme, base_seed=base_seed, seed_offset=i * 10,
+            section, theme, base_seed=base_seed, seed_offset=seed_offsets[i],
             sec_ctx=sec_ctx, piece_ctx=piece_ctx,
             transform_sequence=transform_sequence,
         )

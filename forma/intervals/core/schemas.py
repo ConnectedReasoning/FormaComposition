@@ -551,8 +551,9 @@ class SongFormEntryModel(BaseModel):
     """One entry in the piece["form"] array (song form only)."""
     model_config = ConfigDict(extra="forbid")
 
-    section:   str
-    variation: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    section:      str
+    variation:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    exact_repeat: bool = False
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
