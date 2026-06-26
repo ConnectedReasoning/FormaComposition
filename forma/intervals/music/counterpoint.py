@@ -274,6 +274,78 @@ def get_scale_tones_in_register(
     return sorted(set(tones))
 
 
+# Fallback bounds used only when the melody is empty/unavailable (so a
+# register band can still be computed without it).
+_FALLBACK_BOUNDS = {
+    "below": (48, 69),   # C3-A4
+    "above": (67, 88),   # G4-E6
+}
+
+# Minimum width (semitones) a register band is given even when the melody's
+# own range is narrow, so candidate selection always has real room to move
+# rather than collapsing toward a single pitch.
+_MIN_BAND_WIDTH = 14   # a ninth
+
+# Headroom (semitones) kept between the counterpoint band's inner edge and
+# the melody's own range, so "below" doesn't crowd directly under the
+# melody's lowest note, and "above" doesn't crowd directly over its highest.
+_REGISTER_MARGIN = 2
+
+
+def compute_register_bounds(
+    melody_notes: list,
+    register: str,
+) -> tuple[int, int]:
+    """
+    Compute a (bottom, top) MIDI pitch band for a counterpoint voice,
+    relative to the ACTUAL pitch range of this section's melody — rather
+    than a fixed global ceiling/floor that the melody may routinely exceed.
+
+    Previously "below" was hard-capped at MIDI 69 (A4) and "above" at a
+    fixed 67-88 band regardless of where the melody actually sat. When a
+    section's melody climbed well past 69 (common — sections in this
+    catalog regularly reach 82-84), the "below" voice had nowhere left to
+    go and pinned against the ceiling for the whole section (audible as a
+    flat top line in the piano roll).
+
+    The band computed here spans the melody's own min/max (with margin),
+    not a fixed range below/above it: the actual below-vs-above relationship
+    to the melody is enforced separately, per candidate note, against the
+    melody pitch sounding at that exact moment (see the `candidate >=
+    melody_note` / `candidate <= melody_note` checks in scoring below).
+    This function's only job is to make sure the candidate pool offered to
+    that per-note check is wide enough to contain real options across the
+    melody's full range, low notes and high notes alike — a band that sits
+    only below the melody's absolute floor would starve the per-note check
+    of candidates whenever the melody itself is singing low.
+
+    Falls back to the old fixed bounds if there are no sounding melody
+    notes to measure (e.g. a fully-rest section).
+    """
+    sounding_pitches = [
+        n.midi_note for n in melody_notes
+        if not n.is_rest and n.midi_note is not None
+    ]
+    if not sounding_pitches:
+        return _FALLBACK_BOUNDS[register]
+
+    mel_low, mel_high = min(sounding_pitches), max(sounding_pitches)
+
+    # Span the melody's full range plus margin on both sides, so the
+    # per-note above/below check downstream always has real candidates
+    # no matter where in its range the melody currently sits.
+    bottom = mel_low - _REGISTER_MARGIN - 5
+    top = mel_high + _REGISTER_MARGIN + 5
+
+    # Guarantee a minimum usable width even for a narrow melody range.
+    if top - bottom < _MIN_BAND_WIDTH:
+        mid = (top + bottom) // 2
+        bottom = mid - _MIN_BAND_WIDTH // 2
+        top = mid + _MIN_BAND_WIDTH // 2
+
+    return bottom, top
+
+
 def leading_tone(key: str, mode: str) -> int:
     """Return the leading tone pitch class for a key/mode."""
     intervals = MODES[mode.lower()]
@@ -437,11 +509,10 @@ def generate_first_species(
         ]
         against_notes = (against_notes or []) + flattened
 
-    # Register ranges
-    if register == "below":
-        bottom, top = 48, 69   # C3–A4
-    else:
-        bottom, top = 67, 88   # G4–E6
+    # Register ranges — computed relative to this melody's actual pitch
+    # range (see compute_register_bounds), not a fixed global band that
+    # the melody routinely exceeds.
+    bottom, top = compute_register_bounds(melody_notes, register)
 
     scale_tones = get_scale_tones_in_register(key, mode, bottom, top)
     sounding = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
@@ -566,10 +637,10 @@ def generate_free_species(
     else:
         rng = random.Random()
 
-    if register == "below":
-        bottom, top = 48, 69
-    else:
-        bottom, top = 67, 88
+    # Register ranges — computed relative to this melody's actual pitch
+    # range (see compute_register_bounds), not a fixed global band that
+    # the melody routinely exceeds.
+    bottom, top = compute_register_bounds(melody_notes, register)
 
     scale_tones = get_scale_tones_in_register(key, mode, bottom, top)
     sounding_melody = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
