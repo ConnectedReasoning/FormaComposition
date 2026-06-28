@@ -1,0 +1,97 @@
+{
+  "piece": {
+    "title": "Slack Key Sketch",
+    "theme": "Island Porch Evening",
+    "tempo": 74,
+    "seed": 4,
+    "notes": "Approximation of slack key idiom: root_fifth bass_style stands in for the alternating thumb-bass pattern; counterpoint register 'above' carries the syncopated melody/ornament line. Real character will come from guitar patch choice and, eventually, live guitar layered on top per the live-integration pipeline — not from this skeleton alone.",
+    "sections": [
+      {
+        "name": "verse_1",
+        "bars": 8,
+        "progression": ["I", "IV", "I", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "verse_2",
+        "bars": 8,
+        "progression": ["I", "IV", "I", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "bridge",
+        "bars": 8,
+        "progression": ["vi", "IV", "I", "V"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.08
+      },
+      {
+        "name": "breath_1",
+        "bars": 2,
+        "progression": ["I"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.3
+      },
+      {
+        "name": "verse_3",
+        "bars": 8,
+        "progression": ["I", "IV", "I", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "outro",
+        "bars": 4,
+        "progression": ["IV", "I"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.2
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "piece": {
+    "title": "Still Cove",
+    "theme": "Evening Water",
+    "tempo": 68,
+    "notes": "First successful Intervals Engine piece. Unexpectedly cinematic and techno-futuristic rather than pure ambient — emerged from instrument choices against the D Dorian MIDI skeleton. A keeper.",
+    "logic_session": "still_cove_v1.logicx",
+    "sections": [
+      {
+        "name": "opening",
+        "bars": 8,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.25
+      },
+      {
+        "name": "swell",
+        "bars": 12,
+        "progression": ["i", "III", "VII", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.05
+      },
+      {
+        "name": "release",
+        "bars": 8,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+         "rhythm": "free",
+         "rest_probability": 0.05
+      }
+    ]
+  }
+}

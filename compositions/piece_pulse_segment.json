@@ -1,0 +1,174 @@
+{
+  "piece": {
+    "title": "Shake the Disease (FormaComposition)",
+    "theme": "theme_shake",
+    "tempo": 117,
+    "seed": 1985,
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse_1",
+      "chorus_a",
+      "breath",
+      "chorus_b",
+      "verse_2",
+      { "section": "chorus_a", "exact_repeat": true },
+      { "section": "breath", "exact_repeat": true },
+      { "section": "chorus_b", "exact_repeat": true },
+      "bridge",
+      "chorus_final",
+      "outro"
+    ],
+    "notes": "v5: addresses the 'doesn't breathe' problem from v4 by going beyond rest_probability tuning. Three concrete changes \u2014 (1) chorus is split into chorus_a (dense, motif-rhythm harmony, both counterpoint voices active) and chorus_b (thinned: harmony drops to free/sparse, the lower counterpoint voice drops to rhythm_density:sparse) so the ensemble texture itself arcs across the chorus instead of staying flat for 12 bars; (2) counterpoint voices are staggered rather than both running at medium density throughout \u2014 chorus_a keeps both voices active, chorus_b pulls the lower voice back; (3) a scripted 1-bar 'breath' section sits between chorus_a and chorus_b \u2014 no counterpoint at all, melody sparse + high rest_probability, harmony sustained not struck. This is a genuine ensemble pause, not a randomized one, and it repeats identically (exact_repeat) both times the chorus pair appears, same as the chorus halves themselves. chorus_final is left untouched \u2014 it's the deliberate full-intensity climax and stays dense by design; inserting a breath there would undercut the bridge's build into it.",
+    "sections": {
+      "intro": {
+        "bars": 8,
+        "progression": ["i", "VII", "v", "VI"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "rest_probability": 0.75,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here \u2014 sparse texture only. Harmony stays sustained, no strumming yet."
+      },
+      "verse_1": {
+        "bars": 16,
+        "progression": ["i", "VII", "III", "VI"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; counterpoint 2 (counterline character) below.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 55 },
+          { "species": "first", "register": "below", "dissonance": "passing", "velocity": 48 }
+        ]
+      },
+      "chorus_a": {
+        "bars": 6,
+        "chord_bars": [3, 3],
+        "progression": ["i", "iim"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.50,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "First half of the chorus, dense and propulsive \u2014 harmony strikes the full plea-rhythm chord hits, both counterpoint voices active at medium density. This is the hook hitting full force before it's allowed to recede.",
+        "counterpoint": [
+          { "species": "first", "register": "above", "dissonance": "passing", "velocity": 65, "rhythm_density": "medium" },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 55, "rhythm_density": "medium" }
+        ]
+      },
+      "breath": {
+        "bars": 1,
+        "progression": ["iim"],
+        "chord_bars": [1],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.7,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "notes": "Scripted ensemble pause \u2014 deliberately one bar, not a probability roll. No counterpoint block at all (true silence in both counterpoint voices), melody mostly rests, bass holds a low pedal, harmony sustains quietly instead of striking. This is the actual 'breath' \u2014 everyone pulling back together, not random per-note gaps."
+      },
+      "chorus_b": {
+        "bars": 6,
+        "chord_bars": [3, 3],
+        "progression": ["bVI", "VI"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.50,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "notes": "Second half of the chorus, coming out of the breath. Harmony eases off the motif chord-strike pattern (free/sparse instead of motif) so it doesn't immediately refill the space just opened. Lower counterpoint voice drops to rhythm_density:sparse \u2014 staggered against chorus_a rather than both voices running flat-out for the whole 12 bars.",
+        "counterpoint": [
+          { "species": "first", "register": "above", "dissonance": "passing", "velocity": 60, "rhythm_density": "medium" },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 48, "rhythm_density": "sparse" }
+        ]
+      },
+      "verse_2": {
+        "bars": 16,
+        "progression": ["i", "VII", "III", "VI"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 52 },
+          { "species": "first", "register": "below", "dissonance": "passing", "velocity": 45 }
+        ]
+      },
+      "bridge": {
+        "bars": 8,
+        "progression": ["VI", "VII", "VI", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "build",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "Bb-C-Bb-Dm. Tension and release. Counterpoint 1 and 2 move in contrary motion, building toward the final chorus. Left untouched \u2014 the build should stay uninterrupted into chorus_final.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 50 },
+          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 55 }
+        ]
+      },
+      "chorus_final": {
+        "bars": 16,
+        "chord_bars": [4, 4, 4, 4],
+        "progression": ["i", "iim", "bVI", "VI"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "Extended final chorus \u2014 16 bars, intentionally NOT split or thinned. This is the peak \u2014 full intensity, peak interweave, no breath inserted.",
+        "counterpoint": [
+          { "species": "first", "register": "above", "dissonance": "free", "velocity": 75 },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 65 }
+        ]
+      },
+      "outro": {
+        "bars": 8,
+        "progression": ["i", "VII", "v", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "notes": "Voices dissolve in reverse order. Bass pedal on D. Counterpoint 2 drops out first, then counterpoint 1. Harmony returns to sustain, mirroring the intro.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 32 }
+        ]
+      }
+    }
+  }
+}

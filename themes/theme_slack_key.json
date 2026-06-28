@@ -1,0 +1,23 @@
+{
+  "theme": {
+    "name": "Slack Key",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": { "min": 74, "max": 78 },
+    "notes": "G major, slack-key-influenced. Two voices: lyrical melody with neighbor-tone movement over a deliberately static alternating root-fifth bass. Harmony stays diatonic/simple by design (per Manuel: resist Piston-style voice-leading complexity here) — the color is meant to come from open-string ring/patch choice, not from theme-level chord extensions.",
+    "motifs": [
+      {
+        "name": "primary",
+        "intervals": [0, 1, -1, -2, -1, -1],
+        "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
+        "transform_pool": ["inversion", "transpose_up", "transpose_down"]
+      },
+      {
+        "name": "secondary",
+        "intervals": [0, 4, -4, 4],
+        "rhythm": [0.5, 0.5, 0.5, 0.5],
+        "transform_pool": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "piece": {
+    "title": "Still Cove (Tidal Suite)",
+    "theme": "Evening Water",
+    "tempo": 68,
+    "notes": "Long-form extension of the original Still Cove (28 bars / ~1.6 min) to ~20 minutes at the same tempo and key. Structured as a 10-section arc rather than stretched repeats: anchor idea -> two breath sections -> two contrasting darker movements (Undertow, Deep Current) -> varied recall of the opening (Echo of Tide, same progression but different register/bass/density) -> recede back to the original release cadence. ii and VI are introduced in Undertow/Deep Current for harmonic color outside the original i/III/iv/v/VII vocabulary -- verify the roman numeral parser accepts these before a full render. Total 334 bars at 68 BPM / 4-4 = ~19.6 minutes.",
+    "logic_session": "still_cove_tidal_suite_v1.logicx",
+    "sections": [
+      {
+        "name": "tide_in",
+        "bars": 32,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "breath_1",
+        "bars": 8,
+        "progression": ["i", "VII"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.1
+      },
+      {
+        "name": "drift",
+        "bars": 54,
+        "progression": ["i", "III", "VII", "i"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.06
+      },
+      {
+        "name": "undertow",
+        "bars": 44,
+        "progression": ["iv", "ii", "VII", "v"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.12
+      },
+      {
+        "name": "surface",
+        "bars": 32,
+        "progression": ["III", "VII", "i"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.16
+      },
+      {
+        "name": "breath_2",
+        "bars": 8,
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.28
+      },
+      {
+        "name": "deep_current",
+        "bars": 68,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.04
+      },
+      {
+        "name": "echo_of_tide",
+        "bars": 28,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.16
+      },
+      {
+        "name": "receding",
+        "bars": 36,
+        "progression": ["iv", "v", "i"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.14
+      },
+      {
+        "name": "still_cove_reprise",
+        "bars": 24,
+        "progression": ["iv", "i"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.05
+      }
+    ]
+  }
+}
