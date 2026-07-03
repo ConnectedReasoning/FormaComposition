@@ -21,7 +21,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
-from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing
+from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, remap_swing_ratio
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -451,9 +451,10 @@ def generate_melody(
         rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
                                     groove=groove, beats_per_bar=beats_per_bar, seed=seed)
 
-    # Apply swing to melody rhythm
+    # Apply swing to melody rhythm. `swing` here is the public 0.0-1.0 field;
+    # apply_swing() expects the internal 0.5-straight scale, so convert first.
     if swing and swing > 0:
-        rhythm_events = apply_swing(rhythm_events, swing_ratio=swing)
+        rhythm_events = apply_swing(rhythm_events, swing_ratio=remap_swing_ratio(swing))
 
     fn = BEHAVIOR_GENERATORS[behavior]
 

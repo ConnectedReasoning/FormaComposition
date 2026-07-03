@@ -29,7 +29,7 @@ from typing import Optional
 from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
-    apply_velocity_arc, apply_swing,
+    apply_velocity_arc, apply_swing, remap_swing_ratio,
 )
 from intervals.music.melody import generate_melody_for_progression, MelodyNote
 from intervals.music.harmony import VoicedChord
@@ -448,8 +448,10 @@ def _build_chord_events(
 
     This is the single place that knows the output tuple format.
     """
+    # h_swing is the public 0.0-1.0 field; apply_swing() expects the internal
+    # 0.5-straight scale, so convert first (see remap_swing_ratio docstring).
     if h_swing and h_swing > 0:
-        rhythm_events = apply_swing(rhythm_events, swing_ratio=h_swing)
+        rhythm_events = apply_swing(rhythm_events, swing_ratio=remap_swing_ratio(h_swing))
 
     arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=base_velocity)
     arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]

@@ -21,7 +21,7 @@ import random
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.bass import BassNote
-from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing
+from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, remap_swing_ratio
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +173,10 @@ def generate_drums(
         pattern:        Drum pattern name
         density:        "sparse" | "medium" | "full"
         groove:         Optional groove name
-        swing:          Swing ratio (0.0 = straight, 0.67 = triplet)
+        swing:          Public swing amount, 0.0-1.0 (0.0 = off, 1.0 = heaviest).
+                        Converted internally via remap_swing_ratio() before
+                        being applied — do not confuse with the internal
+                        0.5-straight swing_ratio scale used downstream.
         beats_per_bar:  Beats per bar (default 4)
         seed:           Random seed
 
@@ -233,9 +236,10 @@ def generate_drums(
     # Reinforce bass note onsets with soft kick hits
     hits.extend(_reinforce_bass_with_kick(bass_notes, total_beats, max_priority))
 
-    # Apply swing if specified
+    # Apply swing if specified. `swing` here is the public 0.0-1.0 field;
+    # _apply_swing_to_drums() expects the internal 0.5-straight scale.
     if swing > 0.001:
-        hits = _apply_swing_to_drums(hits, swing, beats_per_bar)
+        hits = _apply_swing_to_drums(hits, remap_swing_ratio(swing), beats_per_bar)
 
     # Sort by beat and return
     hits.sort(key=lambda h: h.start_beat)

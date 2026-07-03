@@ -5,7 +5,14 @@ Rhythmic pattern generation with groove templates, density, and swing.
 Three independent axes:
   groove    — where notes land within a bar (the pattern/feel)
   density   — how many slots are active (sparse/medium/full)
-  swing     — timing push on offbeats (0.0 = straight, 0.67 = triplet)
+  swing     — timing push on offbeats. Public-facing field (section.swing,
+              harmony_rhythm.swing, drums.swing) is 0.0-1.0 where 0.0 = off
+              and 1.0 = heaviest swing. That is NOT the same scale apply_swing()
+              and _apply_swing_to_drums() operate on internally (0.5 = straight,
+              0.67 = triplet, 1.0 = heavy) — always convert public swing values
+              through remap_swing_ratio() before passing them in. Passing a raw
+              public swing value (e.g. 0.2) directly as swing_ratio pushes
+              offbeats EARLY instead of late; see remap_swing_ratio() docstring.
 
 Timing humanization (correlated jitter across voices) is handled by the
 groove pass in apply_groove.py, not per-voice. Per-voice independent jitter
@@ -645,10 +652,49 @@ def get_pattern(
 # Swing
 # ---------------------------------------------------------------------------
 
+def remap_swing_ratio(swing: float) -> float:
+    """
+    Convert the public-facing swing amount into the internal swing_ratio
+    scale consumed by apply_swing() and _apply_swing_to_drums().
+
+    Public field (section.swing / harmony_rhythm.swing / drums.swing,
+    schema range 0.0-1.0):
+        0.0 = no swing (off)
+        1.0 = heaviest swing
+
+    Internal swing_ratio scale (what apply_swing/_apply_swing_to_drums
+    actually compute against):
+        0.5 = straight (no-op)
+        0.67 = standard triplet swing
+        1.0 = heavy swing
+
+    These are different scales with different zero-points. Feeding a raw
+    public swing value straight into swing_ratio (e.g. treating 0.2 as
+    "a little swing") computes an offset of 0.2 - 0.5 = -0.3 beats —
+    pushing offbeats EARLY (rushed) instead of late (swung). This was a
+    real bug in earlier piece files that followed the old (now-removed)
+    manual's incorrect 0.0-0.75 guidance.
+
+    This function is the single conversion point. Every caller that takes
+    a public swing value and forwards it to apply_swing() or
+    _apply_swing_to_drums() must route it through here first.
+
+    swing <= 0 maps to 0.5 (straight/no-op) as a safety net, though
+    callers should already be guarding with `if swing > 0` before calling
+    at all.
+    """
+    if swing <= 0:
+        return 0.5
+    return 0.5 + (min(swing, 1.0) * 0.5)
+
+
 def apply_swing(events: list[RhythmEvent], swing_ratio: float = 0.67) -> list[RhythmEvent]:
     """
     Apply swing by delaying offbeat eighth notes.
     swing_ratio: 0.5 = straight, 0.67 = triplet swing, 0.75 = heavy swing.
+    This is the INTERNAL scale — callers holding a public 0.0-1.0 swing
+    value must convert with remap_swing_ratio() first, not pass it here
+    directly.
     """
     if abs(swing_ratio - 0.5) < 0.001:
         return list(events)

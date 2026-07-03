@@ -54,7 +54,7 @@ from pydantic import (
 
 # ─── Literal enum aliases (single source of truth) ───────────────────────────
 
-DensityLiteral     = Literal["low", "sparse", "medium", "high", "full"]
+DensityLiteral     = Literal["low", "sparse", "medium", "full"]
 MelodyLiteral      = Literal["lyrical", "generative", "motif", "sparse", "rhythmic", "develop"]
 BassStyleLiteral   = Literal[
     "root_fifth", "walking", "pedal", "arpeggiated", "sparse",
@@ -144,6 +144,9 @@ class HarmonyRhythmModel(BaseModel):
     rhythm:        Optional[HarmonyRhythmSourceLiteral] = None
     density:       Optional[DensityLiteral]             = None
     groove:        Optional[str]                        = None
+    # 0.0 = off, 1.0 = heaviest swing. Internally remapped via
+    # rhythm.remap_swing_ratio() before use — do not confuse with the
+    # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     note_duration: Optional[Literal["whole", "half", "quarter", "eighth"]] = None
 
@@ -334,6 +337,8 @@ class SectionModel(BaseModel):
     harmony_pattern: Optional[RhythmPatternModel] = None
 
     groove: Optional[str]                                = None
+    # 0.0 = off, 1.0 = heaviest swing — see HarmonyRhythmModel.swing comment
+    # and rhythm.remap_swing_ratio() for the internal conversion.
     swing:  Annotated[float, Field(ge=0.0, le=1.0)]     = 0.0
 
     # ── Melody tuning ─────────────────────────────────────────────────────────

@@ -3,18 +3,18 @@
     "name": "Slack Key",
     "key": "G",
     "mode": "ionian",
-    "tempo": { "min": 74, "max": 78 },
-    "notes": "G major, slack-key-influenced. Two voices: lyrical melody with neighbor-tone movement over a deliberately static alternating root-fifth bass. Harmony stays diatonic/simple by design (per Manuel: resist Piston-style voice-leading complexity here) — the color is meant to come from open-string ring/patch choice, not from theme-level chord extensions.",
+    "tempo": { "min": 95, "max": 102 },
+    "notes": "G major, slack-key-influenced. Two voices: lyrical melody with neighbor-tone movement over a deliberately static alternating root-fifth bass. Harmony stays diatonic/simple by design (per Manuel: resist Piston-style voice-leading complexity here) — the color is meant to come from open-string ring/patch choice, not from theme-level chord extensions. v2: intervals corrected to semitones (per motif.py docstring: 'Semitone steps between successive notes') confirmed against harmony.py ionian scale [0,2,4,5,7,9,11]. Previous version used scale-step counting by mistake; secondary motif was generating a root-third movement instead of root-fifth.",
     "motifs": [
       {
         "name": "primary",
-        "intervals": [0, 1, -1, -2, -1, -1],
+        "intervals": [0, 2, -2, -3, -2, -2],
         "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
         "transform_pool": ["inversion", "transpose_up", "transpose_down"]
       },
       {
         "name": "secondary",
-        "intervals": [0, 4, -4, 4],
+        "intervals": [0, 7, -7, 7],
         "rhythm": [0.5, 0.5, 0.5, 0.5],
         "transform_pool": []
       }
