@@ -164,10 +164,6 @@ Unknown keys outside the known set warn (not error) — good for catching typos.
 
 ---
 
-## Two things worth fixing, not just cataloguing
 
-1. **`density: "high"` is currently dead weight.** In `rhythm.py`'s groove-based path, density is mapped through `DENSITY_PRIORITY = {"sparse": 1, "medium": 2, "full": 3}`. `"high"` isn't a key in that dict, so `DENSITY_PRIORITY.get(density, 2)` silently falls back to 2 — identical behavior to `"medium"`. It's a legal schema value that does nothing distinct. Either wire it up in `rhythm.py` or stop using it in piece files — right now any section marked `"high"` is quietly being treated as `"medium"`.
-
-2. **`"groove": "swing"` will hard-error, not soft-fail.** `swing` was never a groove name — it's the separate 0.0–1.0 float field. If that string is sitting in any piece JSON, it'll throw `Unknown groove: 'swing'` the moment that section renders, not fail silently. Worth a quick grep across your piece files before your next render pass.
 
 The `ii`/`VI` Roman-numeral question in Still Cove is real but different in kind: `progression` is just `list[str]` with no enum validation at the schema layer, so nonstandard numerals pass Pydantic fine and only surface as a problem (or don't) once `harmony.py` tries to parse them into chords. Worth tracing `harmony.py`'s chord-symbol parser directly rather than assuming the schema would have caught it — it wouldn't have.
