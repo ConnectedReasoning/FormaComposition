@@ -13,9 +13,16 @@ Bass styles:
                 The bass is a second melody. Sting, Geddy Lee.
   pulse       — repeated root notes on the beat. Rhythmic, driving.
   pedal       — holds a single pedal tone (tonic) regardless of chord. Eno-ish.
+  motif       — the theme's own motif (intervals + rhythm), re-anchored to
+                each chord's root and sequenced through the changing harmony.
+                Requires a `motif` dict passed through from the caller;
+                falls back to root_only with a warning if none is given.
+                Bach-style: a fixed melodic-rhythmic cell repeated at a new
+                pitch level under each new chord.
 """
 
 import random
+import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
@@ -393,6 +400,100 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
 
 
 # ---------------------------------------------------------------------------
+# Style: motif (Bach-style sequence — the theme's own cell drives the bass)
+# ---------------------------------------------------------------------------
+
+def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
+                velocity=68, key="C", mode="ionian", seed=None,
+                motif=None, **kwargs):
+    """
+    Threads the theme's motif (intervals + rhythm) through the bass line,
+    re-anchoring to each chord's root as the harmony changes — the classic
+    "sequence" technique: a fixed melodic-rhythmic cell repeated at a new
+    pitch level under each new chord, rather than a single continuous line
+    ignoring the chord changes underneath it.
+
+    Per chord:
+      - The first note is always that chord's root (establishes the
+        harmony clearly; the motif's own first interval, conventionally
+        0, is consistent with this anyway).
+      - The motif's remaining intervals/rhythm cycle from there, wrapping
+        around if the chord's duration outlasts one full motif pass.
+      - Each resulting pitch snaps to the nearest chord tone (root/third/
+        fifth) if it's within a whole step of one, otherwise the nearest
+        scale tone — keeps the motif's shape recognizable without
+        clashing against the harmony it's walking through.
+      - Each chord restarts the motif fresh (not threaded continuously
+        across chord boundaries) — this is what keeps the harmony legible
+        under a moving bass line; it does mean the motif does not carry
+        rhythmic phase across a chord change.
+
+    Requires `motif`: a dict with 'intervals' and 'rhythm' keys (pass the
+    section's active_motif_def through). Falls back to root_only with a
+    warning if no motif is provided — a "motif" bass line with no motif
+    to play isn't meaningfully different from a bug.
+    """
+    if not motif or not motif.get("intervals") or not motif.get("rhythm"):
+        warnings.warn(
+            "bass_style 'motif' requires a motif dict with 'intervals' and "
+            "'rhythm' (pass the section's active motif through) — none was "
+            "provided, falling back to root_only.",
+            stacklevel=2,
+        )
+        return style_root_only(chords, bars_per_chord, beats_per_bar, density,
+                                velocity, key=key, mode=mode, seed=seed, **kwargs)
+
+    intervals  = motif["intervals"]
+    rhythm     = motif["rhythm"]
+    velocities = motif.get("velocities")
+    cycle_len  = min(len(intervals), len(rhythm))
+
+    scale = get_bass_scale_tones(key, mode)
+    notes = []
+    beat = 0.0
+
+    for i, chord in enumerate(chords):
+        total = bars_per_chord[i] * beats_per_bar
+        root  = bass_root(chord)
+        fifth = bass_fifth(chord) or root
+        third = bass_third(chord) or root
+        chord_tones = sorted(set([root, third, fifth]))
+
+        current = root
+        t = 0.0
+        step = 0
+
+        while t < total - 0.01:
+            dur = rhythm[step % cycle_len]
+            vel_scale = velocities[step % len(velocities)] if velocities else 1.0
+
+            if step == 0:
+                candidate = root
+            else:
+                interval = intervals[step % cycle_len]
+                candidate = current + interval
+                while candidate < BASS_OCTAVE_BOTTOM:
+                    candidate += 12
+                while candidate > BASS_OCTAVE_TOP:
+                    candidate -= 12
+                nearest_chord_tone = min(chord_tones, key=lambda c: abs(c - candidate))
+                if abs(nearest_chord_tone - candidate) <= 2:
+                    candidate = nearest_chord_tone
+                elif scale:
+                    candidate = nearest_scale_tone(candidate, scale)
+
+            actual_dur = min(dur, total - t)
+            vel = int(velocity * vel_scale)
+            notes.append(BassNote(candidate, beat + t, actual_dur, vel))
+            current = candidate
+            t += actual_dur
+            step += 1
+
+        beat += total
+    return notes
+
+
+# ---------------------------------------------------------------------------
 # Style: pulse
 # ---------------------------------------------------------------------------
 
@@ -443,6 +544,7 @@ BASS_STYLES = {
     "melodic":    style_melodic,
     "pulse":      style_pulse,
     "pedal":      style_pedal,
+    "motif":      style_motif,
 }
 
 
@@ -456,6 +558,7 @@ def generate_bass(
     key: str = "C",
     mode: str = "ionian",
     seed: Optional[int] = None,
+    motif: Optional[dict] = None,
     rhythm_events_override: Optional[list] = None,
     **kwargs,
 ) -> list[BassNote]:
@@ -464,7 +567,7 @@ def generate_bass(
 
     Args:
         chords:                 List of VoicedChord
-        style:                  root_only | root_fifth | walking | steady | melodic | pulse | pedal
+        style:                  root_only | root_fifth | walking | steady | melodic | pulse | pedal | motif
         bars_per_chord:         Float (uniform) or list[float] (per-chord)
         beats_per_bar:          Time signature numerator (default 4)
         density:                "sparse" | "medium" | "full"
@@ -472,6 +575,9 @@ def generate_bass(
         key:                    Key center (for scale-aware styles)
         mode:                   Mode name (for scale-aware styles)
         seed:                   Random seed
+        motif:                  Optional motif dict ({'intervals', 'rhythm', ...}).
+                                 Only consumed by style="motif" — ignored by every
+                                 other style. Pass the section's active_motif_def.
         rhythm_events_override: Optional list of RhythmEvent from _motif_rhythm_to_events.
                                 When provided, bypasses style dispatch entirely and
                                 generates root notes at the specified beat positions.
@@ -487,7 +593,14 @@ def generate_bass(
     # When the motif provides timing, bypass the style functions entirely.
     # Walk the override events, determine which chord is sounding at each
     # beat, and emit a root BassNote at that position.
-    if rhythm_events_override is not None and rhythm_events_override:
+    #
+    # Exception: style="motif" is skipped from this bypass on purpose.
+    # rhythm_events_override gets populated whenever section.rhythm ==
+    # "motif" (the generic melody/bass rhythm cascade), independent of
+    # bass_style. If both are set — rhythm: "motif" AND bass_style:
+    # "motif" — the more specific, explicit instruction (bass_style)
+    # should win, not lose silently to the generic anchor-root behavior.
+    if rhythm_events_override is not None and rhythm_events_override and style != "motif":
         # Build a lookup: beat → chord index
         chord_start_beats = []
         beat = 0.0
@@ -528,4 +641,4 @@ def generate_bass(
 
     fn = BASS_STYLES[style]
     return fn(chords, bars_per_chord, beats_per_bar, density, velocity,
-              key=key, mode=mode, seed=seed, **kwargs)
+              key=key, mode=mode, seed=seed, motif=motif, **kwargs)

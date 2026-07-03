@@ -58,7 +58,7 @@ DensityLiteral     = Literal["low", "sparse", "medium", "full"]
 MelodyLiteral      = Literal["lyrical", "generative", "motif", "sparse", "rhythmic", "develop"]
 BassStyleLiteral   = Literal[
     "root_fifth", "walking", "pedal", "arpeggiated", "sparse",
-    "root_only", "melodic", "steady", "pulse",
+    "root_only", "melodic", "steady", "pulse", "motif",
 ]
 ArcLiteral         = Literal[
     "swell", "fade", "build", "plateau", "decay",

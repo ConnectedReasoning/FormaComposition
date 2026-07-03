@@ -574,6 +574,7 @@ def generate_section(
         key=key,
         mode=mode,
         seed=base_seed + seed_offset,
+        motif=active_motif_def,
         rhythm_events_override=bass_rhythm_events,
     )
 
