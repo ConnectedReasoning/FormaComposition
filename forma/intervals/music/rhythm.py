@@ -214,6 +214,46 @@ def groove_pattern(
         raise ValueError(f"Unknown groove: '{groove}'. Choose from: {VALID_GROOVES}")
 
     template = GROOVES[groove]
+
+    if density == "low":
+        # "low" sits between sparse (priority 1 only, always) and medium
+        # (priority 1+2, always): priority 1 slots are always active;
+        # priority 2 slots are included probabilistically per bar
+        # occurrence rather than deterministically every bar. Priority
+        # is a strict int (1/2/3), so this can't be expressed as a
+        # numeric threshold alone — it needs this per-bar randomization
+        # instead.
+        primary_slots = sorted([s for s in template if s.priority == 1], key=lambda s: s.beat)
+        secondary_slots = sorted([s for s in template if s.priority == 2], key=lambda s: s.beat)
+        if not primary_slots:
+            primary_slots = [template[0]]
+
+        events = []
+        bar_start = 0.0
+
+        while bar_start < total_beats - 0.001:
+            for slot in primary_slots:
+                abs_beat = bar_start + slot.beat
+                if abs_beat >= total_beats - 0.001:
+                    continue
+                dur = min(slot.duration, total_beats - abs_beat)
+                is_rest = rng.random() < rest_probability
+                events.append(RhythmEvent(abs_beat, dur, slot.velocity_scale, is_rest))
+
+            if secondary_slots and rng.random() < 0.4:
+                for slot in secondary_slots:
+                    abs_beat = bar_start + slot.beat
+                    if abs_beat >= total_beats - 0.001:
+                        continue
+                    dur = min(slot.duration, total_beats - abs_beat)
+                    is_rest = rng.random() < rest_probability
+                    events.append(RhythmEvent(abs_beat, dur, slot.velocity_scale, is_rest))
+
+            bar_start += beats_per_bar
+
+        events.sort(key=lambda e: e.start_beat)
+        return events
+
     max_priority = DENSITY_PRIORITY.get(density, 2)
 
     active_slots = [s for s in template if s.priority <= max_priority]
@@ -478,17 +518,79 @@ def pattern_free(total_beats: float, seed: Optional[int] = None, **kwargs) -> li
     return events
 
 
+def pattern_free_low(total_beats: float, seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
+    """Freely varied note lengths, busier than sparse but still non-metronomic.
+    Sits between pattern_free (sparse) and pattern_eighth_sparse (medium):
+    shorter average durations and lower rest probability than sparse, while
+    keeping the free/ambient character rather than locking to the eighth grid."""
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
+    durations = [0.5, 1.0, 1.5, 2.0]
+    weights   = [0.30, 0.40, 0.20, 0.10]
+    events = []
+    beat = 0.0
+    while beat < total_beats - 0.001:
+        dur = rng.choices(durations, weights=weights, k=1)[0]
+        dur = min(dur, total_beats - beat)
+        is_rest = rng.random() < 0.12
+        vel = rng.uniform(0.65, 1.0)
+        events.append(RhythmEvent(beat, dur, vel, is_rest))
+        beat += dur
+    return events
+
+
+def pattern_bar(total_beats: float, **kwargs) -> list[RhythmEvent]:
+    """One note per bar. Sits between pattern_whole (one sustained note for
+    the whole chord span) and pattern_half (one note every 2 beats).
+    Used for bass low density."""
+    bpb = float(kwargs.get("beats_per_bar", 4))
+    return grid(total_beats, subdivision=bpb, rest_probability=0.05,
+                accent_beats=[0.0], **kwargs)
+
+
+def pattern_chord_low(total_beats: float, beats_per_bar: int = 4,
+                       seed: Optional[int] = None, **kwargs) -> list[RhythmEvent]:
+    """Low density chord articulation: bar-boundary re-strikes like sparse,
+    with a softer beat-3 re-touch on roughly 40% of bars (vs. medium's
+    deterministic every-bar beat-3 hit)."""
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    rng = random.Random(seed)
+    events = []
+    beat = 0.0
+    mid = beats_per_bar // 2
+
+    while beat < total_beats - 0.001:
+        remaining = total_beats - beat
+        dur_1 = min(float(beats_per_bar), remaining)
+        vel_1 = 1.0 if beat == 0 else rng.uniform(0.70, 0.85)
+        events.append(RhythmEvent(beat, dur_1, vel_1, is_rest=False))
+
+        if rng.random() < 0.4 and beat + mid < total_beats - 0.001:
+            dur_3 = min(float(beats_per_bar - mid), total_beats - (beat + mid))
+            events.append(RhythmEvent(beat + mid, dur_3, rng.uniform(0.50, 0.65), is_rest=False))
+
+        beat += beats_per_bar
+
+    events.sort(key=lambda e: e.start_beat)
+    return events
+
+
 DENSITY_PATTERNS = {
     # Chord voicing patterns — articulate like a player, not a grid
     ("sparse", "chord"):  pattern_chord_sparse,
+    ("low",    "chord"):  pattern_chord_low,
     ("medium", "chord"):  pattern_chord_medium,
     ("full",   "chord"):  pattern_chord_full,
     # Melody patterns — more active, more rests for breathing
     ("sparse", "melody"): pattern_free,
+    ("low",    "melody"): pattern_free_low,
     ("medium", "melody"): pattern_eighth_sparse,
     ("full",   "melody"): pattern_eighth,
     # Bass patterns — kept simple, bass.py handles the real work
     ("sparse", "bass"):   pattern_whole,
+    ("low",    "bass"):   pattern_bar,
     ("medium", "bass"):   pattern_half,
     ("full",   "bass"):   pattern_quarter,
 }
