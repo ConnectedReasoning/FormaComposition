@@ -1117,8 +1117,18 @@ def generate_piece(
     # Build MIDI file
     mid = MidiFile(type=1, ticks_per_beat=PPQ)
 
+    # Time signature numerator: use the first section's beats_per_bar rather
+    # than the hardcoded default. This is a single top-level meta-event —
+    # if sections genuinely mix time signatures, only the first one is
+    # reflected here. True per-section time signature changes (and real
+    # meter/subdivision awareness generally) are a separate, deferred piece
+    # of work, not something this fixes.
+    sections_for_sig = piece_model.iter_sections()
+    time_sig_num = sections_for_sig[0].beats_per_bar if sections_for_sig else 4
+
     mid.tracks.append(build_metadata_track(
         bpm=bpm,
+        time_sig_numerator=time_sig_num,
         piece_name=piece.get("title", "Intervals Piece")
     ))
 

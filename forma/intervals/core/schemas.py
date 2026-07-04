@@ -559,6 +559,42 @@ class SectionModel(BaseModel):
                 f"the theme's primary motif has no 'rhythm' field"
             )
 
+        # Any of these three consume the theme's motif rhythm directly, whether
+        # or not the section's own `rhythm` field says "motif" — bass_style
+        # "motif" reads the theme's motif independently of the section's
+        # rhythm source, and harmony_rhythm has its own separate switch.
+        uses_motif_rhythm = (
+            self.rhythm == "motif"
+            or (self.harmony_rhythm is not None and self.harmony_rhythm.rhythm == "motif")
+            or self.bass_style == "motif"
+        )
+        if uses_motif_rhythm:
+            # NOTE: section-level `motif`/`motifs` overrides are documented as
+            # restricting the pool for this section, but generator.py's actual
+            # motif resolution never reads them — only the theme's pool is
+            # ever consulted at render time. Checking against the theme's pool
+            # here matches what will actually happen, not what the schema
+            # implies should happen.
+            candidates = list(theme_model.motifs) if theme_model.motifs else (
+                [theme_model.motif] if theme_model.motif else []
+            )
+            for m in candidates:
+                if m is None or m.rhythm is None:
+                    continue
+                total = sum(m.rhythm)
+                remainder = total % self.beats_per_bar
+                if remainder > 1e-6 and abs(remainder - self.beats_per_bar) > 1e-6:
+                    raise ValueError(
+                        f"Section '{label}': motif '{m.name or '?'}' has a rhythm "
+                        f"totaling {total:g} beats, which is not a whole multiple "
+                        f"of this section's beats_per_bar ({self.beats_per_bar}). "
+                        f"{total:g} / {self.beats_per_bar} = {total / self.beats_per_bar:g}. "
+                        f"A motif cycle that doesn't line up with the bar means its "
+                        f"phase drifts relative to the barline on every repeat — "
+                        f"extend or trim the motif's rhythm so its total is a clean "
+                        f"multiple of {self.beats_per_bar}."
+                    )
+
     # ── Convenience helpers ───────────────────────────────────────────────────
 
     def bars_list(self) -> list[float]:
