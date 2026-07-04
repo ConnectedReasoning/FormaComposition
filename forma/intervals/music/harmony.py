@@ -332,6 +332,87 @@ def choose_inversion_for_voice_leading(
 # Public API
 # ---------------------------------------------------------------------------
 
+def _resolve_secondary_chord(
+    roman: str,
+    key: str,
+    mode: str,
+    density: str,
+    prev_chord: Optional[VoicedChord],
+    register_bottom: int,
+    register_top: int,
+    octave: int,
+) -> VoicedChord:
+    """
+    Resolve a secondary/applied chord written as "APPLIED/TARGET", e.g. "V7/ii"
+    (the dominant seventh that tonicizes ii), "V/IV", "vii/V", etc.
+
+    TARGET is only ever used to locate a root — its own quality is resolved
+    and then discarded; it never sounds. APPLIED is built as an absolute
+    chord on top of TARGET's root, not the section's actual tonic. That's
+    what "tonicizing" TARGET means: APPLIED borrows the function it would
+    have if TARGET were briefly the tonic.
+
+    The interval from the mode's tonic to APPLIED's scale degree (reusing
+    the same scale table ordinary chords use) is added on top of TARGET's
+    root rather than the tonic's. This is mode-invariant for 6 of the 7
+    supported modes — V sits at +7 semitones in everything except Locrian,
+    where it's +6 — reusing the existing table keeps that consistent
+    automatically rather than hardcoding a fixed "always a perfect fifth"
+    interval that would be wrong specifically for Locrian.
+
+    APPLIED's quality: an explicit suffix if given ("V7" -> dominant7),
+    else defaults to plain "major" — never the mode's diatonic derivation.
+    A secondary chord is foreign to the diatonic scale by definition; there
+    is no meaningful "natural" mode-derived quality to fall back to.
+
+    Disambiguation: TARGET must parse as a valid Roman numeral. "/" is also
+    standard notation for slash chords / inversions ("C/E", "I/3"), which
+    this engine does not implement. Rather than silently misinterpreting
+    that as a malformed secondary chord (dropping the numerator's meaning
+    the way the old comma-progression bug did), an unrecognized TARGET
+    raises a clear, specific error instead.
+    """
+    applied_str, target_str = roman.split("/", 1)
+    applied_str = applied_str.strip()
+    target_str = target_str.strip()
+
+    try:
+        target_degree, _ = parse_roman(target_str)
+    except ValueError:
+        raise ValueError(
+            f"Cannot resolve '{roman}': '{target_str}' is not a valid Roman "
+            f"numeral. Secondary-dominant notation requires a Roman numeral "
+            f"target ('V7/ii', 'V/IV'). Slash-chord / inversion notation "
+            f"('C/E', 'I/3') is not implemented — if that's what you meant, "
+            f"this piece needs a different approach for now."
+        )
+
+    applied_degree, applied_quality_override = parse_roman(applied_str)
+
+    scale = get_scale(key, mode, octave)
+    tonic_midi = scale[0]
+    target_root_midi = scale[target_degree]
+    applied_offset = scale[applied_degree] - tonic_midi
+    applied_root_midi = target_root_midi + applied_offset
+
+    root_name = CHROMATIC[applied_root_midi % 12]
+    quality = applied_quality_override if applied_quality_override else "major"
+
+    raw_tones = build_chord_tones(applied_root_midi, quality, density)
+    voiced, inversion = choose_inversion_for_voice_leading(
+        raw_tones, prev_chord, register_bottom, register_top
+    )
+
+    return VoicedChord(
+        root_name=root_name,
+        quality=quality,
+        midi_notes=voiced,
+        inversion=inversion,
+        roman=roman,
+        degree=applied_degree,
+    )
+
+
 def resolve_chord(
     roman: str,
     key: str,
@@ -346,7 +427,8 @@ def resolve_chord(
     Resolve a Roman numeral to a fully voiced VoicedChord.
 
     Args:
-        roman:          Roman numeral string e.g. "i", "IV", "iim7"
+        roman:          Roman numeral string e.g. "i", "IV", "iim7", or a
+                         secondary/applied chord "APPLIED/TARGET" e.g. "V7/ii"
         key:            Key center e.g. "D", "F#", "Bb"
         mode:           Mode name e.g. "dorian", "ionian"
         density:        "sparse" | "medium" | "full"
@@ -358,6 +440,11 @@ def resolve_chord(
     Returns:
         VoicedChord with MIDI notes, inversion, quality, root name
     """
+    if "/" in roman:
+        return _resolve_secondary_chord(
+            roman, key, mode, density, prev_chord, register_bottom, register_top, octave
+        )
+
     degree, quality_override = parse_roman(roman)
     scale = get_scale(key, mode, octave)
     root_midi = scale[degree]
