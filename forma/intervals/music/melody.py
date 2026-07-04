@@ -144,6 +144,20 @@ def apply_rhythm_transform(rhythm: list[float], transform: str) -> list[float]:
         return list(rhythm)
 
 
+def apply_rests_transform(rests: Optional[list[bool]], transform: str) -> Optional[list[bool]]:
+    """
+    Keep a rests array aligned with whatever reordering apply_rhythm_transform
+    performs on the paired rhythm array. Only "retrograde" reorders here (this
+    local shuffle implementation, unlike motif.py's canonical one, doesn't
+    reorder rhythm either, so rests correctly stays untouched for shuffle too).
+    """
+    if rests is None:
+        return None
+    if transform == "retrograde":
+        return list(reversed(rests))
+    return list(rests)
+
+
 def motif_to_notes(
     start_midi: int,
     intervals: list[int],
@@ -153,12 +167,19 @@ def motif_to_notes(
     octave_bottom: int,
     octave_top: int,
     snap_to_scale: bool = True,
+    rests: Optional[list[bool]] = None,
 ) -> list[tuple[int, float]]:
     """
     Convert a motif (interval sequence + rhythm) to (midi_note, duration) pairs
     starting from start_midi.
 
-    Returns list of (midi_note, duration_beats).
+    rests: optional, same length as rhythm. True = this slot is silent and is
+    omitted from the returned list entirely (not included as a placeholder).
+    The interval is still applied to the running pitch position underneath a
+    rest, so the melodic shape's trajectory continues correctly once sounding
+    notes resume — a rest pauses the line, it doesn't freeze its contour.
+
+    Returns list of (midi_note, duration_beats), one entry per SOUNDING slot.
     """
     notes = []
     current = start_midi
@@ -166,7 +187,7 @@ def motif_to_notes(
     # Pair up intervals and rhythm (zip to shorter)
     pairs = list(zip(intervals, rhythm))
 
-    for interval, dur in pairs:
+    for idx, (interval, dur) in enumerate(pairs):
         current = current + interval
         # Clamp to register
         while current < octave_bottom:
@@ -176,6 +197,8 @@ def motif_to_notes(
         # Snap to scale
         if snap_to_scale and scale_tones:
             current = nearest_scale_tone(current, scale_tones)
+        if rests is not None and idx < len(rests) and rests[idx]:
+            continue
         notes.append((current, dur))
 
     return notes
@@ -347,6 +370,7 @@ def generate_develop(
 
     intervals = list(motif["intervals"])
     rhythm    = list(motif.get("rhythm", [1.0] * len(intervals)))
+    rests     = list(motif["rests"]) if motif.get("rests") is not None else None
     pool      = motif.get("transform_pool", ["inversion", "retrograde"])
 
     # Pick a random transform
@@ -354,11 +378,12 @@ def generate_develop(
     if transform:
         intervals = apply_transform(intervals, transform, rng=rng)
         rhythm    = apply_rhythm_transform(rhythm, transform)
+        rests     = apply_rests_transform(rests, transform)
 
     start = _pick_start_note(chord_tones, scale_tones, prev_note)
     motif_notes = motif_to_notes(
         start, intervals, rhythm, scale_tones, chord_tones,
-        MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
+        MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rests
     )
 
     notes_out = []

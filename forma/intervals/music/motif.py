@@ -39,6 +39,7 @@ class Motif:
     """
     intervals: list[int]
     rhythm: list[float]
+    rests: Optional[list[bool]] = None
     name: str = "motif"
     transform_pool: list[str] = field(default_factory=lambda: [
         "inversion", "retrograde", "augmentation", "diminution", "transpose_up",
@@ -54,6 +55,13 @@ class Motif:
             self.rhythm = (self.rhythm * ((n // len(self.rhythm)) + 1))[:n]
         elif len(self.rhythm) > n:
             self.rhythm = self.rhythm[:n]
+        # Pad or trim rests to match — default False (sounds) for anything
+        # added by padding, since a rest must be deliberately authored.
+        if self.rests is not None:
+            if len(self.rests) < n:
+                self.rests = self.rests + [False] * (n - len(self.rests))
+            elif len(self.rests) > n:
+                self.rests = self.rests[:n]
 
     def __repr__(self):
         return (f"Motif('{self.name}' gen={self.generation} "
@@ -120,6 +128,7 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
 
     intervals = list(motif.intervals)
     rhythm    = list(motif.rhythm)
+    rests     = list(motif.rests) if motif.rests is not None else None
     name      = f"{motif.name}_{transform_name}"
 
     if transform_name == "inversion":
@@ -128,10 +137,14 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
     elif transform_name == "retrograde":
         intervals = list(reversed(intervals))
         rhythm    = list(reversed(rhythm))
+        if rests is not None:
+            rests = list(reversed(rests))
 
     elif transform_name == "retrograde_inversion":
         intervals = [-i for i in reversed(intervals)]
         rhythm    = list(reversed(rhythm))
+        if rests is not None:
+            rests = list(reversed(rests))
 
     elif transform_name == "augmentation":
         rhythm = [r * 2.0 for r in rhythm]
@@ -146,11 +159,17 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         intervals = [i - 2 for i in intervals]
 
     elif transform_name == "shuffle":
-        combined = list(zip(intervals, rhythm))
-        rng.shuffle(combined)
-        intervals, rhythm = zip(*combined) if combined else ([], [])
-        intervals = list(intervals)
-        rhythm    = list(rhythm)
+        if rests is not None:
+            combined = list(zip(intervals, rhythm, rests))
+            rng.shuffle(combined)
+            intervals, rhythm, rests = zip(*combined) if combined else ([], [], [])
+            intervals, rhythm, rests = list(intervals), list(rhythm), list(rests)
+        else:
+            combined = list(zip(intervals, rhythm))
+            rng.shuffle(combined)
+            intervals, rhythm = zip(*combined) if combined else ([], [])
+            intervals = list(intervals)
+            rhythm    = list(rhythm)
 
     elif transform_name == "expand":
         intervals = [int(round(i * 1.5)) for i in intervals]
@@ -169,6 +188,7 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
     return Motif(
         intervals=intervals,
         rhythm=rhythm,
+        rests=rests,
         name=name,
         transform_pool=list(motif.transform_pool),
         generation=motif.generation + 1,
@@ -352,6 +372,7 @@ def from_dict(d: dict) -> Motif:
     return Motif(
         intervals=d["intervals"],
         rhythm=d.get("rhythm", [1.0] * len(d["intervals"])),
+        rests=d.get("rests"),
         name=d.get("name", "motif"),
         transform_pool=d.get("transform_pool", [
             "inversion", "retrograde", "augmentation",
@@ -362,7 +383,7 @@ def from_dict(d: dict) -> Motif:
 
 def to_dict(motif: Motif) -> dict:
     """Serialise a Motif to a dictionary suitable for JSON output."""
-    return {
+    d = {
         "name":           motif.name,
         "intervals":      motif.intervals,
         "rhythm":         motif.rhythm,
@@ -370,6 +391,9 @@ def to_dict(motif: Motif) -> dict:
         "generation":     motif.generation,
         "parent_name":    motif.parent_name,
     }
+    if motif.rests is not None:
+        d["rests"] = motif.rests
+    return d
 
 
 # ---------------------------------------------------------------------------

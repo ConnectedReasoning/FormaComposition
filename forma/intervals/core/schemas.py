@@ -249,6 +249,7 @@ class MotifModel(BaseModel):
     name:           Optional[str]          = None
     intervals:      list[int]              = Field(min_length=1)
     rhythm:         Optional[list[float]]  = None
+    rests:          Optional[list[bool]]   = None
     velocities:     Optional[list[float]]  = None
     transform_pool: list[TransformLiteral] = Field(default_factory=list)
 
@@ -259,6 +260,13 @@ class MotifModel(BaseModel):
                 raise ValueError(
                     f"motif '{self.name}': velocities length ({len(self.velocities)}) "
                     f"must match rhythm length ({len(self.rhythm)})"
+                )
+        if self.rhythm is not None and self.rests is not None:
+            if len(self.rests) != len(self.rhythm):
+                raise ValueError(
+                    f"motif '{self.name}': rests length ({len(self.rests)}) "
+                    f"must match rhythm length ({len(self.rhythm)}) — each rhythm "
+                    f"slot needs exactly one corresponding rests entry (true/false)."
                 )
         if self.velocities is not None:
             bad = [v for v in self.velocities if not (0.0 <= v <= 1.0)]
@@ -357,6 +365,27 @@ class SectionModel(BaseModel):
     # ─────────────────────────────────────────────────────────────────────────
     # Field coercions (mode="before")
     # ─────────────────────────────────────────────────────────────────────────
+
+    @field_validator("progression", mode="before")
+    @classmethod
+    def _validate_progression_tokens(cls, v):
+        if v is None:
+            return v
+        for entry in v:
+            if isinstance(entry, str) and "," in entry:
+                raise ValueError(
+                    f"progression entry {entry!r} contains a comma. A chord "
+                    f"symbol never legitimately contains one — this almost "
+                    f"always means several chords were written as a single "
+                    f"comma-separated string inside one array element "
+                    f"(e.g. [\"ii, v, i\"]) instead of separate elements "
+                    f"([\"ii\", \"v\", \"i\"]). The single-string form parses "
+                    f"silently as just the first chord, with every chord "
+                    f"after the comma discarded — no error, no chord "
+                    f"changes, and no clue why. Split it into separate "
+                    f"array elements."
+                )
+        return v
 
     @field_validator("key", mode="before")
     @classmethod

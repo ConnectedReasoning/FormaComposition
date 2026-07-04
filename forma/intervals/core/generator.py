@@ -510,10 +510,12 @@ def generate_section(
         melody_rhythm_events = _motif_rhythm_to_events(
             active_motif_def["rhythm"], total_beats_section, "full",
             velocities=active_motif_def.get("velocities"),
+            rests=active_motif_def.get("rests"),
         )
         bass_rhythm_events = _motif_rhythm_to_events(
             active_motif_def["rhythm"], total_beats_section, "anchor",
             velocities=active_motif_def.get("velocities"),
+            rests=active_motif_def.get("rests"),
         )
         cycle = sum(active_motif_def["rhythm"])
         print(f"    Melody rhythm: motif full   ({len(active_motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
@@ -542,6 +544,7 @@ def generate_section(
         harmony_section_events = _motif_rhythm_to_events(
             active_motif_def["rhythm"], total_beats_section, "stressed",
             velocities=active_motif_def.get("velocities"),
+            rests=active_motif_def.get("rests"),
         )
         cycle = sum(active_motif_def["rhythm"])
         print(f"    Harmony rhythm: motif stressed ({len(harmony_section_events)} triggers, {cycle:.1f}b cycle)")

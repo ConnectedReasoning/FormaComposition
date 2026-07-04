@@ -471,6 +471,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
     intervals  = motif["intervals"]
     rhythm     = motif["rhythm"]
     velocities = motif.get("velocities")
+    rests      = motif.get("rests")
     cycle_len  = min(len(intervals), len(rhythm))
 
     scale = get_bass_scale_tones(key, mode)
@@ -489,6 +490,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
         while t < total - 0.01:
             dur = rhythm[step % cycle_len]
             vel_scale = velocities[step % len(velocities)] if velocities else 1.0
+            is_rest = bool(rests) and rests[step % cycle_len]
 
             if step == 0:
                 candidate = root
@@ -506,8 +508,9 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                     candidate = nearest_scale_tone(candidate, scale)
 
             actual_dur = min(dur, total - t)
-            vel = int(velocity * vel_scale)
-            notes.append(BassNote(candidate, beat + t, actual_dur, vel))
+            if not is_rest:
+                vel = int(velocity * vel_scale)
+                notes.append(BassNote(candidate, beat + t, actual_dur, vel))
             current = candidate
             t += actual_dur
             step += 1

@@ -85,6 +85,7 @@ def _motif_rhythm_to_events(
     total_beats: float,
     articulation: str = "full",
     velocities: Optional[list] = None,
+    rests: Optional[list] = None,
 ) -> list[RhythmEvent]:
     """
     Convert a motif rhythm (list of beat durations) to a tiled list of
@@ -94,6 +95,13 @@ def _motif_rhythm_to_events(
       "full"     — every onset (melody)
       "stressed" — onsets >= median duration (harmony)
       "anchor"   — downbeat only (bass)
+
+    rests: optional, same length as rhythm. True = this slot is silent and
+    is excluded from the emitted events regardless of articulation mode —
+    a rest never sounds, whether or not it would otherwise have been kept.
+    The slot's duration still occupies its place in the timing grid (onsets
+    for every other slot are computed exactly as if the rest weren't there),
+    it's just never selected into the output.
     """
     if not rhythm or total_beats <= 0:
         return []
@@ -116,6 +124,9 @@ def _motif_rhythm_to_events(
             keep = [0] + keep
     else:  # "full"
         keep = list(range(len(rhythm)))
+
+    if rests is not None:
+        keep = [i for i in keep if not (i < len(rests) and rests[i])]
 
     if velocities is None or len(velocities) != len(rhythm):
         velocities = [0.8] * len(rhythm)
