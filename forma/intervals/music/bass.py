@@ -92,6 +92,31 @@ def bass_third(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM) -> O
     return note
 
 
+def bass_chord_tones(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
+                      octave_top: int = BASS_OCTAVE_TOP) -> list[int]:
+    """
+    All of the chord's actual voiced tones — root, third, fifth, seventh,
+    any extension resolve_chord produced — placed in the bass register.
+
+    Unlike bass_root()/bass_third()/bass_fifth() (which only ever cover a
+    plain triad), this reflects the chord's real quality. Snap logic that
+    only checks against {root, third, fifth} will treat a chord's 7th (or
+    9th, or any other color tone) as a non-chord-tone and shove it onto
+    the nearest triad tone instead — silently erasing the note that may be
+    the whole harmonic point of the chord (e.g. a dominant 7th's flat-7).
+    """
+    pcs = sorted(set(n % 12 for n in chord.midi_notes))
+    tones = []
+    for pc in pcs:
+        note = octave_bottom + pc
+        while note < octave_bottom:
+            note += 12
+        while note > octave_top:
+            note -= 12
+        tones.append(note)
+    return sorted(set(tones))
+
+
 def get_bass_scale_tones(key: str, mode: str) -> list[int]:
     """All scale tones in the bass register, sorted."""
     intervals = MODES[mode.lower()]
@@ -455,9 +480,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
     for i, chord in enumerate(chords):
         total = bars_per_chord[i] * beats_per_bar
         root  = bass_root(chord)
-        fifth = bass_fifth(chord) or root
-        third = bass_third(chord) or root
-        chord_tones = sorted(set([root, third, fifth]))
+        chord_tones = bass_chord_tones(chord)
 
         current = root
         t = 0.0
