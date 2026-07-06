@@ -55,7 +55,7 @@ from pydantic import (
 # ─── Literal enum aliases (single source of truth) ───────────────────────────
 
 DensityLiteral     = Literal["low", "sparse", "medium", "full"]
-MelodyLiteral      = Literal["lyrical", "generative", "motif", "sparse", "rhythmic", "develop"]
+MelodyLiteral      = Literal["lyrical", "generative", "sparse", "develop"]
 BassStyleLiteral   = Literal[
     "root_fifth", "walking", "pedal", "root_only",
     "melodic", "steady", "pulse", "motif",
@@ -136,8 +136,14 @@ class HarmonyRhythmModel(BaseModel):
     Corresponds to section["harmony_rhythm"] block.
 
     ``rhythm`` is Optional: existing compositions may omit it and supply only
-    density/groove/note_duration overrides; the factory cascades:
+    density/groove overrides; the factory cascades:
     harmony_rhythm.rhythm -> section.rhythm -> "free".
+
+    ``note_duration`` was removed (2026-07): it was schema-legal but consumed
+    nowhere in the harmony path, so setting it silently did nothing. Chord
+    length comes from the rhythm source ("sustain" holds the harmonic span;
+    "motif" takes durations from the motif cell). extra="forbid" now rejects
+    it loudly instead of lying.
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
@@ -148,7 +154,6 @@ class HarmonyRhythmModel(BaseModel):
     # rhythm.remap_swing_ratio() before use — do not confuse with the
     # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
-    note_duration: Optional[Literal["whole", "half", "quarter", "eighth"]] = None
 
 
 class CounterpointModel(BaseModel):

@@ -512,14 +512,18 @@ def generate_section(
             velocities=active_motif_def.get("velocities"),
             rests=active_motif_def.get("rests"),
         )
-        bass_rhythm_events = _motif_rhythm_to_events(
-            active_motif_def["rhythm"], total_beats_section, "anchor",
-            velocities=active_motif_def.get("velocities"),
-            rests=active_motif_def.get("rests"),
-        )
+        # Decouple pass (2026-07): bass_rhythm_events is deliberately NOT
+        # built here anymore. It used to carry the motif's "anchor" grid
+        # into generate_bass(), whose override path bypassed style dispatch
+        # for every bass_style except "motif" — so rhythm: "motif" +
+        # bass_style: "steady" silently produced anchor roots instead of the
+        # declared steady figure. Explicit beats implicit: bass_style always
+        # wins now. (bass_style: "motif" never used this path anyway — it
+        # reads the motif dict directly in style_motif.) Hand-played
+        # "pattern" rhythm still drives the bass above, unchanged.
         cycle = sum(active_motif_def["rhythm"])
         print(f"    Melody rhythm: motif full   ({len(active_motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
-        print(f"    Bass rhythm:   motif anchor ({len(bass_rhythm_events)} triggers, {cycle:.1f}b cycle)")
+        print(f"    Bass rhythm:   from bass_style '{bass_style}' (decoupled from motif cell)")
 
     else:  # "free"
         print(f"    Melody/Bass rhythm: free (density grid)")

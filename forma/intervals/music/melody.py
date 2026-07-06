@@ -30,6 +30,10 @@ from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, remap_
 MELODY_OCTAVE_BOTTOM = 60   # C4
 MELODY_OCTAVE_TOP    = 84   # C6
 
+# "sparse" behavior's own onset scarcity, independent of rest_probability
+# (see generate_sparse docstring for the decoupling rationale).
+SPARSE_PLAY_PROBABILITY = 0.40
+
 # Behavior → how aggressively to follow chord tones vs scale tones
 # (chord_tone_weight, scale_tone_weight, chromatic_weight)
 BEHAVIOR_WEIGHTS = {
@@ -319,19 +323,40 @@ def generate_sparse(
     base_velocity: int,
     seed: Optional[int],
     context: Optional[dict] = None,
-    rest_probability: float = 0.0,          # ← was missing
+    rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
-    """Wide intervals, few notes, lots of space. Very ambient."""
+    """
+    Wide intervals, few notes, lots of space. Very ambient.
+
+    Decoupled (2026-07): rest_probability used to be absorbed into this
+    behavior's own onset-thinning via `max(0.10, 0.40 - rest_probability)`.
+    That mixed two concerns into one number and, worse, silently collapsed:
+    every rest_probability >= 0.30 floored at the same 0.10 play rate, so a
+    section arc that graduates rest_probability upward (e.g. 0.5 -> 0.6 ->
+    0.85 -> 0.9 across a dissolve) produced IDENTICAL melody density at
+    every step instead of actually thinning further.
+
+    Now rest_probability is the same flat per-onset filter every other
+    behavior (generative/lyrical/develop) already uses, applied first.
+    SPARSE_PLAY_PROBABILITY governs only this behavior's own baked-in
+    scarcity, applied independently to whatever onsets survive that filter.
+    The two probabilities compose multiplicatively (independent events), so
+    at rest_probability=0.0 sparse behaves exactly as before (~40% of
+    onsets), and at rest_probability=1.0 the section goes fully silent —
+    matching the other three behaviors' contract instead of floor-locking
+    at 10% no matter how high rest_probability climbs.
+    """
     rng = random.Random(seed) if seed is not None else random.Random()
 
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
-    # Force extra rests — only play ~40% of non-rest slots
-    # rest_probability from section can push this further toward silence
-    play_probability = max(0.10, 0.40 - rest_probability)
 
     for ev in rhythm_events:
-        if ev.is_rest or rng.random() > play_probability:
+        if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
+            notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
+            continue
+
+        if rng.random() > SPARSE_PLAY_PROBABILITY:
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
