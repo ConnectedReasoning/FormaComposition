@@ -69,7 +69,7 @@ HarmonyRhythmSourceLiteral = Literal["motif", "pattern", "sustain", "free"]
 TransformLiteral   = Literal[
     "original", "inversion", "retrograde", "retrograde_inversion",
     "augmentation", "diminution", "transpose_up", "transpose_down",
-    "shuffle", "expand", "compress",
+    "shuffle", "expand", "compress", "sequence",
 ]
 CounterpointSpeciesLiteral  = Literal["free", "first", "second", "third", "fourth", "fifth"]
 CounterpointRegisterLiteral = Literal["above", "below"]

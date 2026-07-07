@@ -106,7 +106,77 @@ def nearest_scale_tone(note: int, scale_tones: list[int]) -> int:
 # Motif engine
 # ---------------------------------------------------------------------------
 
-def apply_transform(intervals: list[int], transform: str, rng=None) -> list[int]:
+def _wrap_degree_diff(raw: int, scale_len: int = 7) -> int:
+    """
+    Wrap a raw scale-degree difference into the smallest-magnitude signed
+    equivalent (e.g. for a 7-note scale: range [-3, 3]).
+
+    A root motion of "down a step" (-4) and "up a fourth" (+3) land on the
+    same pitch class, differing only by a full octave (7 diatonic steps
+    apart). Picking the smaller-magnitude option keeps the sequenced melody
+    in a sensible register instead of leaping an unnecessary octave — it
+    does not change which harmonic motion is being followed, only which
+    octave the answer is voiced in.
+    """
+    half = scale_len // 2
+    return ((raw + half) % scale_len) - half
+
+
+def _sequence_intervals_diatonically(
+    intervals: list[int], scale_tones: list[int], degree_shift: int
+) -> list[int]:
+    """
+    Transpose a motif's interval shape by `degree_shift` diatonic scale
+    steps (not semitones), snapping each note to the scale.
+
+    This is a real/tonal sequence in the Piston sense: the harmony moves by
+    some interval (e.g. the descending-fifths vi-ii-v-I chain), and the
+    melodic cell is restated at the new scale position — same shape, but
+    its exact semitone content adjusts as needed to stay diatonic (a major
+    third from one scale step may become a minor third from another).
+    That's what makes it "tonal" rather than a literal chromatic shift:
+    apply_transform's existing "transpose" moves every interval by a fixed
+    +2 semitones regardless of harmony; this moves the whole shape to a new
+    scale degree and re-derives each interval from there.
+
+    Degree arithmetic is deliberately unbounded (no clamping to
+    `scale_tones`'s register window) — clamping there silently flattened
+    the top of the contour whenever a shift pushed past the window edge
+    (verified: a +3 shift on this piece's motif collapsed four distinct
+    notes to a single repeated pitch). `motif_to_notes` already folds the
+    final absolute pitches into the melody register one octave at a time,
+    so this only needs to get the pitch-class shape right; register
+    placement is someone else's job, correctly, downstream.
+    """
+    if not scale_tones or degree_shift == 0:
+        return list(intervals)
+
+    pcs = sorted(set(t % 12 for t in scale_tones))
+    n = len(pcs)
+    anchor = scale_tones[len(scale_tones) // 2]
+
+    def _pitch_to_degree(p: int) -> int:
+        octave, pc = divmod(p, 12)
+        idx = min(range(n), key=lambda i: min(abs(pcs[i] - pc), 12 - abs(pcs[i] - pc)))
+        return idx + n * octave
+
+    def _degree_to_pitch(d: int) -> int:
+        octave, idx = divmod(d, n)
+        return pcs[idx] + 12 * octave
+
+    abs_pitches = [anchor + iv for iv in intervals]
+    degrees = [_pitch_to_degree(p) for p in abs_pitches]
+    shifted_pitches = [_degree_to_pitch(d + degree_shift) for d in degrees]
+    return [p - shifted_pitches[0] for p in shifted_pitches]
+
+
+def apply_transform(
+    intervals: list[int],
+    transform: str,
+    rng=None,
+    scale_tones: Optional[list[int]] = None,
+    degree_shift: int = 0,
+) -> list[int]:
     """
     Apply a Bach-style transform to an interval sequence.
 
@@ -115,8 +185,14 @@ def apply_transform(intervals: list[int], transform: str, rng=None) -> list[int]
       retrograde   — reverse the sequence
       augmentation — double all durations (applied to rhythm separately)
       diminution   — halve all durations (applied to rhythm separately)
-      transpose    — shift all intervals by +2 (adds variety)
+      transpose    — shift all intervals by +2 (adds variety; NOT harmony-aware)
       shuffle      — randomly reorder intervals
+      sequence     — diatonic (harmony-aware) restatement at a new scale
+                     degree; requires scale_tones + degree_shift from the
+                     caller (see _sequence_intervals_diatonically). Falls
+                     back to a no-op if no harmonic context is available,
+                     rather than guessing — a silent wrong transposition is
+                     worse than no transform at all.
     """
     if rng is None:
         import random as _r
@@ -131,6 +207,8 @@ def apply_transform(intervals: list[int], transform: str, rng=None) -> list[int]
         shuffled = list(intervals)
         rng.shuffle(shuffled)
         return shuffled
+    elif transform == "sequence":
+        return _sequence_intervals_diatonically(intervals, scale_tones, degree_shift)
     else:
         # augmentation / diminution affect rhythm, not intervals
         return list(intervals)
@@ -382,8 +460,27 @@ def generate_develop(
     rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """
-    Applies motif transforms to generate melodic material.
-    Falls back to generative if no motif provided.
+    Builds the melody FROM the motif, using transforms for variety across
+    repetitions. Falls back to generative if no motif provided.
+
+    Rewritten (2026-07): the previous version built exactly one statement
+    of the (transformed) motif per chord and let every onset past the end
+    of that single statement fall through to unrelated rng.choice(chord_tones)
+    filler. For any chord whose rhythm grid spans more than one motif cycle
+    — the common case, since rhythm="motif" tiles the cycle across the
+    whole section — that meant the overwhelming majority of "develop"
+    notes were never motif-derived at all (measured: 87.5% filler on a
+    64-beat chord against an 8-beat cycle). That's not development, it's a
+    single quotation followed by unrelated noise wearing its label.
+
+    Now: the motif is retiled, once per full cycle, for as many
+    repetitions as the chord's onset grid requires. Each repetition picks
+    its own transform independently (never the same transform as the
+    immediately preceding repetition, when the pool has more than one
+    option) — this is the "variety" half of the request: real developing
+    variation restates the cell continuously, changing how each time,
+    rather than reaching for unrelated material once the first statement
+    runs out.
     """
     if motif is None or not motif.get("intervals"):
         return generate_generative(
@@ -393,39 +490,68 @@ def generate_develop(
 
     rng = random.Random(seed) if seed is not None else random.Random()
 
-    intervals = list(motif["intervals"])
-    rhythm    = list(motif.get("rhythm", [1.0] * len(intervals)))
-    rests     = list(motif["rests"]) if motif.get("rests") is not None else None
-    pool      = motif.get("transform_pool", ["inversion", "retrograde"])
+    base_intervals = list(motif["intervals"])
+    base_rhythm    = list(motif.get("rhythm", [1.0] * len(base_intervals)))
+    base_rests     = list(motif["rests"]) if motif.get("rests") is not None else None
+    pool           = motif.get("transform_pool", ["inversion", "retrograde"])
 
-    # Pick a random transform
-    transform = rng.choice(pool) if pool else None
-    if transform:
-        intervals = apply_transform(intervals, transform, rng=rng)
-        rhythm    = apply_rhythm_transform(rhythm, transform)
-        rests     = apply_rests_transform(rests, transform)
+    degree_shift = 0
+    if context and "progression_root_degree" in context:
+        raw = chord.degree - context["progression_root_degree"]
+        degree_shift = _wrap_degree_diff(raw)
 
-    start = _pick_start_note(chord_tones, scale_tones, prev_note)
-    motif_notes = motif_to_notes(
-        start, intervals, rhythm, scale_tones, chord_tones,
-        MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rests
-    )
+    def _transformed_statement(prev_transform: Optional[str]) -> tuple[list[int], list[float], Optional[list[bool]]]:
+        """One retransformed pass of the motif, avoiding an immediate repeat
+        of the previous repetition's transform when the pool allows it."""
+        choices = pool
+        if pool and len(pool) > 1 and prev_transform is not None:
+            choices = [t for t in pool if t != prev_transform] or pool
+        transform = rng.choice(choices) if choices else None
+        if not transform:
+            return base_intervals, base_rhythm, base_rests
+        iv = apply_transform(
+            base_intervals, transform, rng=rng,
+            scale_tones=scale_tones, degree_shift=degree_shift,
+        )
+        rh = apply_rhythm_transform(base_rhythm, transform)
+        rs = apply_rests_transform(base_rests, transform)
+        return iv, rh, rs, transform
 
     notes_out = []
-    motif_idx = 0
+    start = _pick_start_note(chord_tones, scale_tones, prev_note)
+    motif_notes: list[tuple[int, float]] = []
+    statement_idx = 0
+    last_transform: Optional[str] = None
 
     for ev in rhythm_events:
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
 
-        if motif_idx < len(motif_notes):
-            note, _ = motif_notes[motif_idx]
-            motif_idx += 1
-        else:
-            candidates = chord_tones if chord_tones else scale_tones
-            note = rng.choice(candidates) if candidates else 60
+        # Out of pre-built motif notes — retile a fresh (re-transformed)
+        # statement, continuing the pitch line from wherever the last one
+        # ended rather than resetting to the chord tone anchor every time.
+        if statement_idx >= len(motif_notes):
+            result = _transformed_statement(last_transform)
+            iv, rh, rs = result[0], result[1], result[2]
+            last_transform = result[3] if len(result) > 3 else None
+            anchor = motif_notes[-1][0] if motif_notes else start
+            motif_notes = motif_to_notes(
+                anchor, iv, rh, scale_tones, chord_tones,
+                MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rs
+            )
+            statement_idx = 0
+            if not motif_notes:
+                # Degenerate motif (e.g. all-rest) — fall back honestly
+                # rather than looping forever.
+                candidates = chord_tones if chord_tones else scale_tones
+                note = rng.choice(candidates) if candidates else 60
+                vel = int(base_velocity * ev.velocity_scale)
+                notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
+                continue
 
+        note, _ = motif_notes[statement_idx]
+        statement_idx += 1
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
 
@@ -715,6 +841,12 @@ def generate_melody_for_progression(
             "bars_in_this_chord": bpc_list[i],
             "bars_in_next_chord": bpc_list[(i + 1) % len(chords)],
             "section_name": section_name,
+            # Reference point for the "sequence" transform: root motion is
+            # measured against this section's OPENING chord, not the
+            # previous chord, so a repeating progression (e.g. two loops of
+            # vi-ii-v-I) sequences consistently each time rather than
+            # accumulating drift across loops.
+            "progression_root_degree": chords[0].degree,
         }
 
         # Slice rhythm events for this chord's time window
