@@ -583,6 +583,7 @@ def generate_section(
         seed=base_seed + seed_offset,
         motif=active_motif_def,
         rhythm_events_override=bass_rhythm_events,
+        rest_probability=section_model.bass_rest_probability,
     )
 
     # Record bass snapshot so melody/counterpoint can read it
@@ -1028,6 +1029,7 @@ def generate_piece(
                 global_beat=global_beat,
                 beat_offset_local=beat_offset_local,
                 arc=arc,
+                harmony_rest_probability=section_model.harmony_rest_probability,
             )
             all_chord_events.extend(
                 HarmonyStrategyRegistry.resolve(hrctx.source).apply(hctx)

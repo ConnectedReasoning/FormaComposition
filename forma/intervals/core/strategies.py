@@ -21,6 +21,7 @@ Usage (in generate_section):
 
 from __future__ import annotations
 
+import random
 import statistics as _stats
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -289,6 +290,11 @@ class HarmonyChordContext:
     base_velocity: int = 65
     channel: int = _CHANNEL_HARMONY
 
+    # Per-section harmony rest probability. Passed straight into
+    # _build_chord_events, which no-ops it on the "sustain" source and on any
+    # single-onset chord window (see that function's rest-thinning block).
+    harmony_rest_probability: float = 0.0
+
     # Optional MusicalTime for the chord's absolute onset position.
     # When present, strategies can use bar-aware predicates directly.
     musical_time: Optional[MusicalTime] = None
@@ -450,14 +456,23 @@ def _build_chord_events(
     h_swing: float,
     base_velocity: int,
     channel: int,
+    rest_probability: float = 0.0,
+    rest_seed: int = 0,
+    source: str = "",
 ) -> list[tuple]:
     """
     Shared event-building kernel.  Given a list of RhythmEvents for one chord
-    window, apply swing → velocity arc → rearticulation gap, then expand into
-    (abs_beat, 'on'/'off', note, vel, channel) tuples for every MIDI note in
-    the chord.
+    window, apply swing → velocity arc → rest thinning → rearticulation gap,
+    then expand into (abs_beat, 'on'/'off', note, vel, channel) tuples for
+    every MIDI note in the chord.
 
     This is the single place that knows the output tuple format.
+
+    rest_probability thins the chord's onsets: each onset is independently
+    dropped with this probability, seeded from rest_seed for determinism.
+    It is deliberately a no-op when source == "sustain" or when the window
+    has a single onset — a rest roll there would delete the whole chord
+    rather than thin it, which is never the intent for a harmony bed.
     """
     # h_swing is the public 0.0-1.0 field; apply_swing() expects the internal
     # 0.5-straight scale, so convert first (see remap_swing_ratio docstring).
@@ -466,6 +481,16 @@ def _build_chord_events(
 
     arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=base_velocity)
     arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]
+
+    # Per-section harmony rest thinning. Guarded so it only ever thins a
+    # multi-onset window: on "sustain" (or any window that resolved to a
+    # single event) a rest roll would drop the entire chord, so skip it.
+    if rest_probability > 0.0 and source != "sustain" and len(arced_list) > 1:
+        rng = random.Random(rest_seed)
+        arced_list = [
+            (ev, vel) for (ev, vel) in arced_list
+            if rng.random() >= rest_probability
+        ]
 
     events: list[tuple] = []
     for idx_ev, (ev, vel) in enumerate(arced_list):
@@ -529,6 +554,8 @@ class _SustainHarmonyStrategy(HarmonyStrategy):
             rhythm_events, ctx.chord,
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+            rest_probability=ctx.harmony_rest_probability,
+            rest_seed=rctx.seed, source=rctx.source,
         )
 
 
@@ -574,6 +601,8 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
             rhythm_events, ctx.chord,
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+            rest_probability=ctx.harmony_rest_probability,
+            rest_seed=rctx.seed, source=rctx.source,
         )
 
 
@@ -617,6 +646,8 @@ class _MotifHarmonyStrategy(HarmonyStrategy):
             rhythm_events, ctx.chord,
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+            rest_probability=ctx.harmony_rest_probability,
+            rest_seed=rctx.seed, source=rctx.source,
         )
 
 
@@ -643,6 +674,8 @@ class _FreeHarmonyStrategy(HarmonyStrategy):
             rhythm_events, ctx.chord,
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
+            rest_probability=ctx.harmony_rest_probability,
+            rest_seed=rctx.seed, source=rctx.source,
         )
 
 
@@ -894,6 +927,7 @@ def build_harmony_chord_context(
     base_velocity: int = 65,
     channel: int = _CHANNEL_HARMONY,
     musical_time: Optional[MusicalTime] = None,
+    harmony_rest_probability: float = 0.0,
 ) -> HarmonyChordContext:
     """
     Construct a HarmonyChordContext for one chord in the section loop.
@@ -921,6 +955,7 @@ def build_harmony_chord_context(
         base_velocity=base_velocity,
         channel=channel,
         musical_time=musical_time,
+        harmony_rest_probability=harmony_rest_probability,
     )
 
 

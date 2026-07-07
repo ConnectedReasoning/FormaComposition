@@ -574,6 +574,33 @@ BASS_STYLES = {
 }
 
 
+# Styles whose lines depend on stepwise continuity into the next chord root.
+# Dropping notes at random breaks the line rather than adding breath, so
+# bass_rest_probability is refused (loudly) for these — see generate_bass.
+_CONTINUOUS_BASS_STYLES = {"walking", "melodic"}
+
+
+def _apply_bass_rests(
+    notes: list[BassNote],
+    rest_probability: float,
+    seed: Optional[int],
+) -> list[BassNote]:
+    """
+    Drop each bass note independently with probability rest_probability,
+    seeded for determinism. A bass rest is simply an omitted note (BassNote
+    has no rest flag). The caller owns the per-style guard; this helper just
+    thins whatever list it's given.
+
+    The RNG is decorrelated from the style functions' own seed stream (which
+    already consumed `seed` for pitch/contour choices) so the rest pattern is
+    independent of the note-selection pattern rather than locked to it.
+    """
+    if rest_probability <= 0.0 or not notes:
+        return notes
+    rng = random.Random((seed or 0) ^ 0x8A5)
+    return [n for n in notes if rng.random() >= rest_probability]
+
+
 def generate_bass(
     chords: list[VoicedChord],
     style: str = "root_fifth",
@@ -586,6 +613,7 @@ def generate_bass(
     seed: Optional[int] = None,
     motif: Optional[dict] = None,
     rhythm_events_override: Optional[list] = None,
+    rest_probability: float = 0.0,
     **kwargs,
 ) -> list[BassNote]:
     """
@@ -659,12 +687,29 @@ def generate_bass(
                 dur = total_section - ev.start_beat
             dur = max(0.25, dur)
             notes.append(BassNote(root, ev.start_beat, dur, vel))
-        return notes
+        # Anchor-root override path: roots are independent (no stepwise
+        # continuity requirement), so rests are always safe here regardless
+        # of the nominal style.
+        return _apply_bass_rests(notes, rest_probability, seed)
 
     # ── Style dispatch (existing behavior) ──────────────────────────
     if style not in BASS_STYLES:
         raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
 
     fn = BASS_STYLES[style]
-    return fn(chords, bars_per_chord, beats_per_bar, density, velocity,
-              key=key, mode=mode, seed=seed, motif=motif, **kwargs)
+    notes = fn(chords, bars_per_chord, beats_per_bar, density, velocity,
+               key=key, mode=mode, seed=seed, motif=motif, **kwargs)
+
+    # Style-path rest guard: walking/melodic lines rely on stepwise motion
+    # into the next chord root, so random note drops break the line rather
+    # than add breath. Refuse the knob loudly instead of silently mangling it.
+    if rest_probability > 0.0 and style in _CONTINUOUS_BASS_STYLES:
+        warnings.warn(
+            f"bass_rest_probability={rest_probability} ignored for "
+            f"style='{style}': walking/melodic lines depend on stepwise "
+            f"continuity and would break if thinned. Use root_only, steady, "
+            f"pedal, pulse, or root_fifth for probabilistic bass rests.",
+            stacklevel=2,
+        )
+        return notes
+    return _apply_bass_rests(notes, rest_probability, seed)

@@ -314,6 +314,7 @@ class SectionModel(BaseModel):
         "swing", "counterpoint", "notes", "percussion", "drums",
         "rhythm_pattern", "harmony_pattern", "fugal_techniques",
         "rhythm", "rest_probability", "key", "mode", "motif", "motifs",
+        "harmony_rest_probability", "bass_rest_probability",
         "voices",
     }
 
@@ -357,6 +358,20 @@ class SectionModel(BaseModel):
     # ── Melody tuning ─────────────────────────────────────────────────────────
     rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     fugal_techniques: Optional[dict]                            = None
+
+    # ── Per-voice rest probability (independent of melody rest_probability) ────
+    # These thin the harmony bed and bass line respectively. They are NOT
+    # coupled to melody rest_probability: the common ambient case is a
+    # continuous pad + steady bass under a melody that leaves space, which a
+    # single shared knob cannot express. Both default off.
+    #   harmony_rest_probability: no-op on the "sustain" harmony source and on
+    #     any single-onset chord window (a rest roll there would delete the
+    #     whole chord, not thin it). Only thins multi-onset windows.
+    #   bass_rest_probability: ignored (with a warning) for the "walking" and
+    #     "melodic" styles, whose lines depend on stepwise continuity — random
+    #     drops break the line rather than add breath.
+    harmony_rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    bass_rest_probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
     # ── Optional voices ───────────────────────────────────────────────────────
     counterpoint: Optional[list[CounterpointModel]] = None
