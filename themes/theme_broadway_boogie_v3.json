@@ -1,0 +1,41 @@
+{
+  "theme": {
+    "name": "broadway_boogie",
+    "key": "F",
+    "mode": "mixolydian",
+    "tempo": {
+      "min": 110,
+      "max": 130
+    },
+    "motif": {
+      "name": "boogie_cell",
+      "intervals": [
+        0,
+        4,
+        7,
+        9,
+        10,
+        9,
+        7,
+        4
+      ],
+      "rhythm": [
+        1.5,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "transform_pool": [
+        "retrograde",
+        "diminution",
+        "augmentation"
+      ],
+      "notes": "Decouple pass (v3): reshaped from flat [0.5]*8 to a shaped 8-beat (2-bar) cell now that only melody (always) and harmony (accumulation/peak sections, via the 'stressed' >=median filter) consume it — the bass no longer reads this cell at all. Contour unchanged: root-3rd-5th-6th-b7-6th-5th-3rd, diatonic F Mixolydian. Melody onsets: 0, 1.5, 2, 3, 4, 4.5, 5, 6 — the off-beat pushes at 1.5/4.5 are the swing carriers. Harmony 'stressed' filter (median dur = 1.0) keeps slots 0,2,3,6,7: onsets 0, 2, 3, 5, 6 with durations 1.5/1/1/1/2 — five varied-length comp chords per 2-bar cycle, ALL on the beat by design, because the harmony path never receives swing (engine plumbing gap, logged) and on-beat chords are identical in straight and swung time. Off-beat comp onsets would flam against the swung melody."
+    },
+    "notes": "Inspired by Mondrian's Broadway Boogie Woogie (1942-43) and its grid of primary color blocks on a yellow ground. Key decisions: F Mixolydian means I7 = F-A-C-Eb — dominant-seventh quality on the tonic. This chord never resolves. It is a color field, not a function. The flat-7 (Eb) gives momentum without resolution anxiety. No bVII, no IV, no modulation. The grid IS the composition; only density, register, and tempo change. Correction: II and V as originally notated implied major qualities requiring B-natural and E-natural, neither in F Mixolydian. Diatonic ii (Gm) and v (Cm) are minor -- use lowercase Roman numerals throughout, plus iii° (Adim/half-dim, passing) and vi (Dm). The vi-ii-v-I descending-fourth chain is the primary harmonic vehicle for high-density movements: functional-sounding motion built entirely from diatonic chords, so it drives without ever resolving to a leading tone. bVII (Eb) is reserved for lower-density/color-block movements (Mondrian color-field concept). DECOUPLE PASS (v3): swing_ratio REMOVED — verified against schemas.py: ThemeModel is extra=\"allow\" and no code reads any theme-level swing field, so the v2 fix was a dead letter (the render was still straight). Swing is a SECTION-level field (SectionModel.swing, 0.0-1.0, remapped internally via remap_swing_ratio); every section in piece v3 now sets swing: 0.34 (public scale; = 0.67 internal triplet ratio after remap_swing_ratio). It reaches the melody path only — bass and harmony never receive swing (gap logged as deferred) — which is survivable because the steady bass figures and the kept harmony onsets are all on-beat."
+  }
+}

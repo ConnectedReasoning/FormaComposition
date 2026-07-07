@@ -1,14 +1,46 @@
 {
   "piece": {
-    "title": "Slack Key Sketch",
+    "title": "Slack Key Suite",
     "theme": "Island Porch Evening",
     "tempo": 74,
     "seed": 4,
-    "notes": "Approximation of slack key idiom: root_fifth bass_style stands in for the alternating thumb-bass pattern; counterpoint register 'above' carries the syncopated melody/ornament line. Real character will come from guitar patch choice and, eventually, live guitar layered on top per the live-integration pipeline — not from this skeleton alone.",
+    "notes": "Long-form expansion of 'Slack Key Sketch' (38 bars / ~2 min) to ~30 minutes at the same tempo and key. Structured as a 10-section arc rather than stretched repeats, following the Still Cove Tidal Suite model: anchor idea -> breath -> contrasting movement -> further contrast -> recede -> breath -> deepest movement -> varied recall of the opening -> recede -> reprise. Harmony stays within I/ii/IV/V/vi throughout (no borrowed chords), per the theme's diatonic-by-design constraint. Total 555 bars at 74 BPM / 4-4 = ~30.0 minutes (bar = 4 beats at 74bpm = ~3.24s).",
     "sections": [
       {
-        "name": "verse_1",
-        "bars": 8,
+        "name": "porch_open",
+        "bars": 4,
+        "progression": ["I", "IV", "I", "V"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "build",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "porch_open",
+        "bars": 30,
+        "progression": ["I", "IV", "I", "V"],
+        "density": "low",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.15
+      },
+      {
+        "name": "porch_step",
+        "bars": 30,
         "progression": ["I", "IV", "I", "V"],
         "density": "medium",
         "melody": "lyrical",
@@ -20,12 +52,23 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.1
+        "rest_probability": 0.15
       },
       {
-        "name": "verse_2",
+        "name": "breath_1",
         "bars": 8,
-        "progression": ["I", "IV", "I", "V"],
+        "progression": ["I"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.3
+      },
+      {
+        "name": "afternoon_light",
+        "bars": 90,
+        "progression": ["I", "vi", "IV", "V"],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -39,9 +82,9 @@
         "rest_probability": 0.1
       },
       {
-        "name": "bridge",
-        "bars": 8,
-        "progression": ["vi", "IV", "I", "V"],
+        "name": "evening_breeze",
+        "bars": 70,
+        "progression": ["IV", "V", "vi", "I"],
         "density": "medium",
         "melody": "develop",
         "bass_style": "root_fifth",
@@ -55,19 +98,51 @@
         "rest_probability": 0.08
       },
       {
-        "name": "breath_1",
-        "bars": 2,
-        "progression": ["I"],
+        "name": "porch_recede",
+        "bars": 60,
+        "progression": ["vi", "IV", "I"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.18
+      },
+      {
+        "name": "breath_2",
+        "bars": 8,
+        "progression": ["I", "IV"],
         "density": "sparse",
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.3
+        "rest_probability": 0.28
       },
       {
-        "name": "verse_3",
-        "bars": 8,
+        "name": "night_porch",
+        "bars": 100,
+        "progression": ["I", "ii", "IV", "V", "vi", "IV", "I"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.06
+      },
+      {
+        "name": "porch_echo",
+        "bars": 70,
         "progression": ["I", "IV", "I", "V"],
         "density": "medium",
         "melody": "lyrical",
@@ -79,18 +154,34 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.1
+        "rest_probability": 0.12
       },
       {
-        "name": "outro",
-        "bars": 4,
+        "name": "receding",
+        "bars": 50,
+        "progression": ["IV", "V", "I"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.16
+      },
+      {
+        "name": "porch_reprise",
+        "bars": 39,
         "progression": ["IV", "I"],
         "density": "sparse",
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.2
+        "rest_probability": 0.05
       }
     ]
   }

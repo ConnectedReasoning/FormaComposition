@@ -1,0 +1,89 @@
+{
+  "piece": {
+    "title": "Broadway Boogie Woogie",
+    "theme": "broadway_boogie",
+    "tempo": 98,
+    "seed": 1943,
+    "notes": "45-minute suite in F Mixolydian. Static I7 harmonic field throughout — no resolution, no modulation. Structure is additive then subtractive: voices accumulate across movements I-IV, then dissolve in reverse order through V-VII. Tempo steps at movement boundaries (110 → 116 → 122 → 130) — set via Logic tempo track, not in the engine. Canon in movement III: after import, duplicate counterpoint MIDI region to a second track and offset 2 beats right. Harmonic correction (applied): original II/V implied major qualities not present in F Mixolydian (no B natural, no E natural). Replaced with five diatonic progression cells built from ii(Gm), iii°(Adim/half-dim), IV(unused here), v(Cm), vi(Dm), bVII(Eb), I(F): V1 ii-v-I (grid/return), V3 I-bVII-ii-v (accumulation/dissolve, Mondrian color-block motion), V4 ii-iii°-v-I (canon movements, diatonic passing dissonance), V5 vi-ii-v-I (peak movements, descending-fourths chain — functional-sounding but never touches a leading tone, so it drives without resolving). DECOUPLE PASS (v3): the v2 all-motif configuration was one onset grid filtered three ways (melody=full, harmony=stressed, bass=anchor), not a band. Coherence now comes from the scaffold — tempo, meter, harmonic rhythm — not a shared cell. Melody keeps rhythm: motif and is the cell's sole owner; bass=steady everywhere (pedal kept in the coda); harmony varies by movement: sustain for the grid/canon/fade/return bookends, motif (stressed) comping for accumulation, all four peak pairs, dissolve-full, dissolve-sparse (dying comp mirrors II), and fast-sparse. CORRECTIONS to v2 notes: (1) 'swing must be set at the theme level (swing_ratio)' was WRONG — no code reads it; swing: 0.34 is now set per section, the field the engine actually consumes (melody path only). Calibration: the public field remaps via remap_swing_ratio (0.5 + 0.5x), so public 0.34 -> internal 0.67 = classic triplet swing; the intended '0.67' from v2 was an internal-scale number and would have rendered as a 0.835 lurching shuffle if set publicly. (2) Shipping this required one engine change beyond the note_duration deletion: generator.py no longer builds the anchor-grid bass override when rhythm='motif', because that override silently bypassed every non-motif bass_style — bass_style: 'steady' would have produced whole-note anchor roots, not the steady figure. Verified empirically before and after.",
+    "sections": [
+      {
+        "name": "m1_grid_1",
+        "bars": 4,
+        "progression": [
+          "ii",
+          "v",
+          "I"
+        ],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "melodic",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "rest_probability": 0.25,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse",
+          "groove": "syncopated"
+        },
+        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "swing": 0.34
+      },
+      {
+        "name": "m1_grid_1",
+        "bars": 24,
+        "progression": [
+          "ii",
+          "v",
+          "I",
+          "ii",
+          "v",
+          "I",
+          "ii",
+          "v",
+          "I",
+          "ii",
+          "v",
+          "I",
+          "ii",
+          "v",
+          "I"
+        ],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "melodic",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "rest_probability": 0.25,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse",
+          "groove": "syncopated"
+        },
+        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "swing": 0.34
+      },
+      {
+        "name": "m1_grid_1",
+        "bars": 4,
+        "progression": [
+          "ii",
+          "v",
+          "I"
+        ],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "melodic",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "rest_probability": 0.25,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse",
+          "groove": "syncopated"
+        },
+        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "swing": 0.34
+      }
+    ]
+  }
+}

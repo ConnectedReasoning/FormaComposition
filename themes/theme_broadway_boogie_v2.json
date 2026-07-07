@@ -1,0 +1,42 @@
+{
+  "theme": {
+    "name": "broadway_boogie",
+    "key": "F",
+    "mode": "mixolydian",
+    "tempo": {
+      "min": 110,
+      "max": 130
+    },
+    "motif": {
+      "name": "boogie_cell",
+      "intervals": [
+        0,
+        4,
+        7,
+        9,
+        10,
+        9,
+        7,
+        4
+      ],
+      "rhythm": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "transform_pool": [
+        "retrograde",
+        "diminution",
+        "augmentation"
+      ],
+      "notes": "Reshaped from irregular long/short cell to straight 8-to-the-bar ostinato (root-3rd-5th-6th-b7-6th-5th-3rd), all diatonic to F Mixolydian. Swing comes from swing_ratio, not from the rhythm values themselves — keep rhythm straight, let swing do the shuffle."
+    },
+    "notes": "Inspired by Mondrian's Broadway Boogie Woogie (1942-43) and its grid of primary color blocks on a yellow ground. Key decisions: F Mixolydian means I7 = F-A-C-Eb — dominant-seventh quality on the tonic. This chord never resolves. It is a color field, not a function. The flat-7 (Eb) gives momentum without resolution anxiety. No bVII, no IV, no modulation. The grid IS the composition; only density, register, and tempo change. Correction: II and V as originally notated implied major qualities requiring B-natural and E-natural, neither in F Mixolydian. Diatonic ii (Gm) and v (Cm) are minor -- use lowercase Roman numerals throughout, plus iii° (Adim/half-dim, passing) and vi (Dm). The vi-ii-v-I descending-fourth chain is the primary harmonic vehicle for high-density movements: functional-sounding motion built entirely from diatonic chords, so it drives without ever resolving to a leading tone. bVII (Eb) is reserved for lower-density/color-block movements (Mondrian color-field concept). FIX PASS (post-mortem + Jeeves & Wooster reference): added swing_ratio (0.67, approximating the triplet-swing feel Anne Dudley marks explicitly in her score) -- this piece never declared swing, which is likely the single biggest reason it didn't feel like a boogie-woogie regardless of harmony. Motif reshaped to a straight 8-to-the-bar chord-tone ostinato rather than an irregular rubato-like cell -- previous rhythm didn't read as boogie-idiomatic even swung. VERIFY 'swing_ratio' against schemas.py before running -- field name is inferred from the remap_swing_ratio fix, not confirmed.",
+    "swing_ratio": 0.67
+  }
+}

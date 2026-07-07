@@ -14,7 +14,7 @@
         "progression": ["i", "VII"],
         "density": "medium",
         "melody": "medium",
-        "bass_style": "arpeggiated",
+        "bass_style": "motif",
         "arc": "fade_in",
         "rhythm": "motif",
         "harmony_rhythm": {
@@ -81,7 +81,7 @@
         "progression": ["i", "III", "iv", "VII"],
         "density": "medium",
         "melody": "lyrical",
-        "bass_style": "arpeggiated",
+        "bass_style": "motif",
         "arc": "swell",
         "rhythm": "free",
         "harmony_rhythm": {

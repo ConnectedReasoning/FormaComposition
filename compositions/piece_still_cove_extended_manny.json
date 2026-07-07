@@ -3,14 +3,14 @@
     "title": "Still Cove (Tidal Suite)",
     "theme": "Evening Water",
     "tempo": 68,
-    "notes": "Rework of the 456-bar extension. Constraints applied per request: every section bar count is a multiple of 8, no section exceeds 48 bars, total runtime ~30 minutes. The previous version repeated deep_current 5x with only density changing and the same 7-chord progression each time -- that has been fixed here: every repeated movement (tide_in, drift, undertow, deep_current) now carries a real chord-order change, an added/removed passing chord, or a register/species swap on each pass, not just a density label. breath_2 is the one section repeated verbatim by design, functioning as a recurring structural refrain between deep_current passes -- flag if a varied breath is preferred instead. echo_of_tide and still_cove_reprise intentionally mirror the opening material as the called-for recall/cadence, not accidental repetition. ii and VI roman numerals appear in undertow and deep_current -- verify the parser accepts these before a full render. Total 512 bars at 68 BPM / 4-4 = ~30.1 minutes.",
-    "logic_session": "still_cove_tidal_suite_v2.logicx",
+    "notes": "Long-form extension of the original Still Cove (28 bars / ~1.6 min) to ~20 minutes at the same tempo and key. Structured as a 10-section arc rather than stretched repeats: anchor idea -> two breath sections -> two contrasting darker movements (Undertow, Deep Current) -> varied recall of the opening (Echo of Tide, same progression but different register/bass/density) -> recede back to the original release cadence. ii and VI are introduced in Undertow/Deep Current for harmonic color outside the original i/III/iv/v/VII vocabulary -- verify the roman numeral parser accepts these before a full render. Total 334 bars at 68 BPM / 4-4 = ~19.6 minutes.",
+    "logic_session": "still_cove_tidal_suite_v1.logicx",
     "sections": [
       {
-        "name": "tide_in_a",
-        "bars": 24,
+        "name": "tide_in",
+        "bars": 4,
         "progression": ["i", "VII", "iv", "v"],
-        "density": "sparse",
+        "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_in",
@@ -20,11 +20,11 @@
           "dissonance": "none"
         },
         "rhythm": "free",
-        "rest_probability": 0.20
+        "rest_probability": 0.25
       },
       {
-        "name": "tide_in_b",
-        "bars": 24,
+        "name": "tide_in",
+        "bars": 16,
         "progression": ["i", "VII", "iv", "v"],
         "density": "medium",
         "melody": "develop",
@@ -33,29 +33,29 @@
         "counterpoint": {
           "species": "first",
           "register": "below",
-          "dissonance": "passing"
+          "dissonance": "none"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.35
+      },
+      {
+        "name": "tide_in",
+        "bars": 16,
+        "progression": ["i", "VII", "iv", "v"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "counterpoint": {
+          "species": "first",
+          "register": "below",
+          "dissonance": "none"
         },
         "rhythm": "free",
         "rest_probability": 0.15
       },
       {
-        "name": "tide_in_c",
-        "bars": 24,
-        "progression": ["i", "VII", "iv", "v"],
-        "density": "full",
-        "melody": "develop",
-        "bass_style": "root_fifth",
-        "arc": "fade_in",
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "passing"
-        },
-        "rhythm": "free",
-        "rest_probability": 0.10
-      },
-      {
-        "name": "breath_1a",
+        "name": "breath_1",
         "bars": 8,
         "progression": ["i", "VII"],
         "density": "sparse",
@@ -63,10 +63,10 @@
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.20
+        "rest_probability": 0.1
       },
       {
-        "name": "drift_a",
+        "name": "drift",
         "bars": 16,
         "progression": ["i", "III", "VII", "i"],
         "density": "medium",
@@ -79,10 +79,10 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.05
+        "rest_probability": 0.06
       },
       {
-        "name": "breath_1b",
+        "name": "breath_1",
         "bars": 8,
         "progression": ["i", "VII"],
         "density": "sparse",
@@ -93,24 +93,24 @@
         "rest_probability": 0.1
       },
       {
-        "name": "drift_b",
-        "bars": 40,
-        "progression": ["i", "VII", "III", "i"],
+        "name": "drift",
+        "bars": 24,
+        "progression": ["i", "III", "VII", "i"],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "first",
+          "species": "free",
           "register": "below",
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.10
+        "rest_probability": 0.06
       },
       {
-        "name": "undertow_a",
-        "bars": 32,
+        "name": "undertow",
+        "bars": 24,
         "progression": ["iv", "ii", "VII", "v"],
         "density": "medium",
         "melody": "develop",
@@ -122,27 +122,27 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.20
+        "rest_probability": 0.12
       },
       {
-        "name": "undertow_b",
-        "bars": 40,
-        "progression": ["iv", "ii", "VII", "v", "i"],
+        "name": "undertow",
+        "bars": 24,
+        "progression": ["iv", "ii", "VII", "v"],
         "density": "full",
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "first",
           "register": "below",
-          "dissonance": "none"
+          "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.12
       },
       {
-        "name": "surface_a",
-        "bars": 16,
+        "name": "surface",
+        "bars": 8,
         "progression": ["III", "VII", "i"],
         "density": "sparse",
         "melody": "lyrical",
@@ -150,27 +150,27 @@
         "arc": "fade_out",
         "counterpoint": {
           "species": "free",
-          "register": "below",
+          "register": "above",
           "dissonance": "none"
         },
         "rhythm": "free",
-        "rest_probability": 0.10
+        "rest_probability": 0.16
       },
       {
-        "name": "surface_b",
-        "bars": 40,
-        "progression": ["VII", "III", "i"],
+        "name": "surface",
+        "bars": 16,
+        "progression": ["III", "VII", "i"],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_out",
         "counterpoint": {
-          "species": "first",
+          "species": "free",
           "register": "below",
-          "dissonance": "passing"
+          "dissonance": "none"
         },
         "rhythm": "free",
-        "rest_probability": 0.2
+        "rest_probability": 0.16
       },
       {
         "name": "breath_2",
@@ -181,11 +181,11 @@
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.25
+        "rest_probability": 0.28
       },
       {
-        "name": "deep_current_a",
-        "bars": 32,
+        "name": "deep_current",
+        "bars": 24,
         "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
         "density": "medium",
         "melody": "develop",
@@ -197,34 +197,23 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.05
+        "rest_probability": 0.04
       },
       {
-        "name": "breath_2",
-        "bars": 8,
-        "progression": ["i", "iv"],
+        "name": "deep_current",
+        "bars": 24,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
         "density": "sparse",
-        "melody": "develop",
-        "bass_style": "pedal",
-        "arc": "fade_out",
-        "rhythm": "free",
-        "rest_probability": 0.28
-      },
-      {
-        "name": "deep_current_b",
-        "bars": 40,
-        "progression": ["i", "iv", "VII", "VI", "III", "v", "i"],
-        "density": "full",
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "first",
+          "species": "free",
           "register": "below",
-          "dissonance": "none"
+          "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.06
+        "rest_probability": 0.04
       },
       {
         "name": "breath_2",
@@ -238,9 +227,9 @@
         "rest_probability": 0.28
       },
       {
-        "name": "deep_current_c",
-        "bars": 40,
-        "progression": ["i", "iv", "ii", "VII", "III", "VI", "v", "i"],
+        "name": "deep_current",
+        "bars": 24,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
         "density": "full",
         "melody": "develop",
         "bass_style": "root_fifth",
@@ -251,7 +240,88 @@
           "dissonance": "passing"
         },
         "rhythm": "free",
-        "rest_probability": 0.02
+        "rest_probability": 0.04
+      },
+      {
+        "name": "breath_2",
+        "bars": 8,
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.28
+      },
+      {
+        "name": "deep_current",
+        "bars": 24,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.04
+      },
+      {
+        "name": "breath_2",
+        "bars": 8,
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.28
+      },
+      {
+        "name": "deep_current",
+        "bars": 24,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.04
+      },
+      {
+        "name": "breath_2",
+        "bars": 8,
+        "progression": ["i", "iv"],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.28
+      },
+      {
+        "name": "deep_current",
+        "bars": 24,
+        "progression": ["i", "iv", "VII", "III", "VI", "v", "i"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing"
+        },
+        "rhythm": "free",
+        "rest_probability": 0.04
       },
       {
         "name": "breath_2",
@@ -266,7 +336,7 @@
       },
       {
         "name": "echo_of_tide",
-        "bars": 32,
+        "bars": 24,
         "progression": ["i", "VII", "iv", "v"],
         "density": "medium",
         "melody": "develop",
