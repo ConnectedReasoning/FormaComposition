@@ -230,6 +230,51 @@ def last_sounding_before(notes: list, beat: float) -> Optional[int]:
     return last
 
 
+def chord_tones_as_voices(
+    chords: list,
+    bars_list: list[float],
+    beats_per_bar: int = 4,
+    max_voices: int = 4,
+) -> list[list["CounterpointNote"]]:
+    """
+    Adapt the section's chord progression into up to `max_voices` synthetic
+    voices, so generate_free_species / generate_counterpoint can check
+    consonance against the actual sounding harmony via against_voices — the
+    same note_sounding_at() mechanism already used for melody and prior
+    counterpoint voices, just applied to VoicedChord.midi_notes instead of a
+    real generated line.
+
+    Without this, counterpoint only ever sees melody: chord-tone-biased most
+    of the time, but a stale or misleading proxy exactly at passing tones,
+    melody rests (falls back to last_sounding_before, which can predate a
+    chord change), and melody notes sustained across a chord boundary. This
+    hands it the real thing directly instead of inferring it secondhand.
+
+    Each synthetic voice i holds chord.midi_notes[i] for that chord's full
+    beat span. Chords with fewer than i+1 tones leave that voice resting for
+    that span rather than doubling another tone into it. interval_class()
+    already reduces to mod-12, so the exact register/octave used here has no
+    effect on consonance math — these are reference pitches for a lookup,
+    not a real performable line, and are never rendered to MIDI themselves.
+    """
+    voices: list[list[CounterpointNote]] = [[] for _ in range(max_voices)]
+    beat = 0.0
+    for chord, bars in zip(chords, bars_list):
+        dur = bars * beats_per_bar
+        tones = chord.midi_notes
+        for i in range(max_voices):
+            if i < len(tones):
+                voices[i].append(CounterpointNote(
+                    midi_note=tones[i], start_beat=beat, duration_beats=dur,
+                ))
+            else:
+                voices[i].append(CounterpointNote(
+                    midi_note=None, start_beat=beat, duration_beats=dur, is_rest=True,
+                ))
+        beat += dur
+    return voices
+
+
 # ---------------------------------------------------------------------------
 # Data class
 # ---------------------------------------------------------------------------
@@ -589,6 +634,7 @@ def generate_free_species(
     seed: Optional[int] = None,
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
+    chord_voices: Optional[list[list]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
@@ -625,6 +671,20 @@ def generate_free_species(
                         candidate is checked against what every prior voice is
                         ACTUALLY sounding at this voice's own onset time, via
                         note_sounding_at(), not a flattened whole-section pool.
+        chord_voices:   Synthetic per-chord-tone voices from
+                        chord_tones_as_voices() — the actual sounding harmony,
+                        not a real melodic voice. Deliberately kept separate
+                        from against_voices: a candidate should be pairwise
+                        interval-consonant with another melodic line, but that
+                        same test is nearly impossible to satisfy against every
+                        member of a stacked chord at once (a 7th chord's own
+                        root-to-7th is a 7th, not a consonance). The correct
+                        test for harmony is membership — is this candidate
+                        itself one of the chord's tones — not pairwise
+                        consonance with each one individually. On 'none'/
+                        strong beats, candidates are required to be melody-
+                        consonant AND a member of the sounding chord, falling
+                        back to melody-only if that intersection is empty.
         rhythm_density: 'sparse' | 'medium' | 'full' — passed to
                         rhythm.get_pattern() to control how many of this
                         voice's own onsets are active.
@@ -711,6 +771,17 @@ def generate_free_species(
         if against_notes:
             sounding_others.extend(against_notes)
 
+        # What is the actual sounding chord right now, as a set of pitch
+        # classes? (chord_voices are synthetic — see chord_tones_as_voices —
+        # so "sounding" here means the chord this beat falls under, not a
+        # real performed note.)
+        sounding_chord_pcs: set[int] = set()
+        if chord_voices:
+            for v in chord_voices:
+                p = note_sounding_at(v, beat)
+                if p is not None:
+                    sounding_chord_pcs.add(p % 12)
+
         if melody_now is None:
             # No harmonic reference exists yet at all (only possible if this
             # voice's rhythm starts before the melody's first note). Don't
@@ -720,7 +791,17 @@ def generate_free_species(
             # Build candidate pool (same logic as before, now keyed off
             # melody_now instead of a same-index melody note).
             if dissonance == "none" or is_strong:
+                # "none"/strong-beat consonance should mean consonant with
+                # melody AND actually a member of the sounding chord — not
+                # merely pairwise-consonant with every stacked chord tone,
+                # which a 7th chord's own root-to-7th interval would already
+                # fail. Fall back to melody-only if the intersection is
+                # empty (e.g. no scale tone happens to satisfy both).
                 candidates = [n for n in scale_tones if is_consonant(melody_now, n)]
+                if sounding_chord_pcs:
+                    chord_matched = [n for n in candidates if n % 12 in sounding_chord_pcs]
+                    if chord_matched:
+                        candidates = chord_matched
             elif dissonance == "passing" and not is_strong:
                 if cp_prev is not None:
                     passing = [n for n in scale_tones if abs(n - cp_prev) <= 2]
@@ -800,6 +881,7 @@ def generate_counterpoint(
     cp_model: "Optional[CounterpointModel]" = None,
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
+    chord_voices: Optional[list[list]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
@@ -869,6 +951,7 @@ def generate_counterpoint(
             velocity, dissonance, seed,
             against_notes=against_notes,
             against_voices=against_voices,
+            chord_voices=chord_voices,
             rhythm_density=rhythm_density,
             groove=groove,
             note_length_range=note_length_range,

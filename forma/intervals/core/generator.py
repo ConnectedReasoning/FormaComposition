@@ -30,7 +30,7 @@ from mido import MidiFile, MidiTrack, Message, MetaMessage
 from intervals.music.harmony  import resolve_progression, VoicedChord, CHROMATIC
 from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import generate_melody_for_progression, MelodyNote
-from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
+from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
 from intervals.music.rhythm   import RhythmEvent
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
@@ -959,6 +959,18 @@ def generate_piece(
             # (pre global_beat offset), same basis as melody_notes.
             against_voices = [melody_notes]
 
+            # The actual sounding harmony, as synthetic per-chord-tone
+            # voices — kept separate from against_voices (see
+            # generate_free_species docstring): a candidate needs to
+            # actually BE a chord tone, not be pairwise-consonant with
+            # every stacked chord tone at once, which a 7th chord doesn't
+            # even satisfy against itself. Without this, counterpoint only
+            # ever inferred the chord secondhand through melody's own
+            # chord-tone bias — accurate most of the time, but wrong
+            # exactly at passing tones, melody rests, and notes held
+            # across a chord change.
+            chord_voices = chord_tones_as_voices(chords, bars_list, beats_per_bar)
+
             # Section-level note-length range default; each cp voice can
             # override it via its own cp_model.note_length_range.
             _sec_nlr_model = section_model.note_length_range
@@ -975,6 +987,7 @@ def generate_piece(
                     cp_model=cp_model,
                     against_notes=against_notes,
                     against_voices=against_voices,
+                    chord_voices=chord_voices,
                     note_length_range=_sec_nlr,
                     note_length_quantum=_sec_nlr_q,
                 )
