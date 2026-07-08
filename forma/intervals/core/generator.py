@@ -606,6 +606,13 @@ def generate_section(
         print(f"    Motif pool: {len(motif_pool)} motifs "
               f"({', '.join(m.get('name', '?') for m in motif_pool)})")
 
+    # Note-length range (melody + free-species counterpoint). Resolve the
+    # section-level model to a (min,max) tuple + quantum once; counterpoint
+    # voices may override it per-voice via their own cp_model field.
+    nlr_model = section_model.note_length_range
+    section_nlr = nlr_model.as_tuple() if nlr_model is not None else None
+    section_nlr_quantum = nlr_model.quantum if nlr_model is not None else 0.25
+
     melody_notes = generate_melody_for_progression(
         chords, key, mode,
         behavior=melody_beh,
@@ -623,6 +630,8 @@ def generate_section(
         rest_probability=section_model.rest_probability,
         piece_ctx=piece_ctx,
         arc=section_model.arc,
+        note_length_range=section_nlr,
+        note_length_quantum=section_nlr_quantum,
     )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -947,6 +956,12 @@ def generate_piece(
             # (pre global_beat offset), same basis as melody_notes.
             against_voices = [melody_notes]
 
+            # Section-level note-length range default; each cp voice can
+            # override it via its own cp_model.note_length_range.
+            _sec_nlr_model = section_model.note_length_range
+            _sec_nlr = _sec_nlr_model.as_tuple() if _sec_nlr_model is not None else None
+            _sec_nlr_q = _sec_nlr_model.quantum if _sec_nlr_model is not None else 0.25
+
             for voice_idx, cp_model in enumerate(cp_voice_models):
                 cp_notes = generate_counterpoint(
                     melody_notes,
@@ -957,6 +972,8 @@ def generate_piece(
                     cp_model=cp_model,
                     against_notes=against_notes,
                     against_voices=against_voices,
+                    note_length_range=_sec_nlr,
+                    note_length_quantum=_sec_nlr_q,
                 )
 
                 # Canon offset: shift this voice forward in time.

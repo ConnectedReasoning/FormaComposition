@@ -591,6 +591,8 @@ def generate_free_species(
     against_voices: Optional[list[list]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
+    note_length_range: Optional[tuple[float, float]] = None,
+    note_length_quantum: float = 0.25,
 ) -> list[CounterpointNote]:
     """
     Generate free species counterpoint — mixed note values, passing tones,
@@ -661,6 +663,8 @@ def generate_free_species(
         groove=groove,
         beats_per_bar=beats_per_bar,
         seed=rhythm_seed,
+        note_length_range=note_length_range,
+        note_length_quantum=note_length_quantum,
     )
     # Clip to the melody's span — a groove/density grid tiles past the end.
     clipped = []
@@ -798,9 +802,14 @@ def generate_counterpoint(
     against_voices: Optional[list[list]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
+    note_length_range: Optional[tuple[float, float]] = None,
+    note_length_quantum: float = 0.25,
 ) -> list[CounterpointNote]:
     """
     Generate a counterpoint voice against a melody.
+
+    note_length_range is the section-level default (free species only). A
+    CounterpointModel with its own note_length_range overrides it per-voice.
 
     Args:
         melody_notes:   List of MelodyNote from melody.py
@@ -843,6 +852,10 @@ def generate_counterpoint(
         dissonance     = cp_model.dissonance
         rhythm_density = cp_model.rhythm_density
         groove         = cp_model.groove
+        # Per-voice range override wins over the section-level default.
+        if cp_model.note_length_range is not None:
+            note_length_range   = cp_model.note_length_range.as_tuple()
+            note_length_quantum = cp_model.note_length_range.quantum
 
     if species == "first":
         return generate_first_species(
@@ -858,6 +871,8 @@ def generate_counterpoint(
             against_voices=against_voices,
             rhythm_density=rhythm_density,
             groove=groove,
+            note_length_range=note_length_range,
+            note_length_quantum=note_length_quantum,
         )
     else:
         raise ValueError(f"Unknown species: '{species}'. Choose 'first' or 'free'.")

@@ -589,6 +589,8 @@ def generate_melody(
     context: Optional[dict] = None,
     rhythm_events_override: Optional[list] = None,
     rest_probability: float = 0.0,
+    note_length_range: Optional[tuple[float, float]] = None,
+    note_length_quantum: float = 0.25,
 ) -> list[MelodyNote]:
     """
     Generate a melodic line over a single chord.
@@ -625,7 +627,9 @@ def generate_melody(
         rhythm_events = rhythm_events_override
     else:
         rhythm_events = get_pattern(total_beats, density=density, voice_type="melody",
-                                    groove=groove, beats_per_bar=beats_per_bar, seed=seed)
+                                    groove=groove, beats_per_bar=beats_per_bar, seed=seed,
+                                    note_length_range=note_length_range,
+                                    note_length_quantum=note_length_quantum)
 
     # Apply swing to melody rhythm. `swing` here is the public 0.0-1.0 field;
     # apply_swing() expects the internal 0.5-straight scale, so convert first.
@@ -718,6 +722,8 @@ def generate_melody_for_progression(
     rest_probability: float = 0.0,
     piece_ctx: Optional[object] = None,
     arc: Optional[str] = None,
+    note_length_range: Optional[tuple[float, float]] = None,
+    note_length_quantum: float = 0.25,
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -883,6 +889,8 @@ def generate_melody_for_progression(
             context=chord_context,
             rhythm_events_override=chord_rhythm,
             rest_probability=rest_probability,
+            note_length_range=note_length_range,
+            note_length_quantum=note_length_quantum,
         )
         # Offset beat positions
         for n in notes:

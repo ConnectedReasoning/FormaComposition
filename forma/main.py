@@ -19,6 +19,7 @@ from typing import Optional
 
 from intervals.core.generator import generate_piece, load_theme, load_piece, bpm_to_tempo, PPQ
 from intervals.core.schemas import ThemeModel, PieceModel
+from intervals.core.lint import lint_piece, format_report
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.rhythm import VALID_GROOVES
 from intervals.music.percussion import VALID_DRUM_PATTERNS
@@ -153,13 +154,20 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
     from pydantic import ValidationError as _PydanticValidationError
     try:
         ThemeModel.model_validate(theme)
-        PieceModel.model_validate(piece)
+        piece_model = PieceModel.model_validate(piece)
     except _PydanticValidationError as exc:
         print(f"  ERRORS in '{piece_path}':")
         for error in exc.errors():
             loc = " → ".join(str(l) for l in error["loc"]) if error["loc"] else "piece"
             print(f"    • {loc}: {error['msg']}")
         return False
+
+    # Consumption lint: surface any setting the engine will silently ignore.
+    # Non-fatal — generation still runs; this just makes the ignored settings
+    # visible instead of leaving them as silent no-ops.
+    report = format_report(lint_piece(piece_model))
+    if report:
+        print(report)
 
     if info_only:
         display_info(theme, piece)

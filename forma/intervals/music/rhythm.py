@@ -584,6 +584,74 @@ def pattern_chord_low(total_beats: float, beats_per_bar: int = 4,
     return events
 
 
+# ---------------------------------------------------------------------------
+# Note-length range sampler (melody / counterpoint only)
+# ---------------------------------------------------------------------------
+# Decouples note *length* from density. When a section sets note_length_range,
+# duration is sampled freely within [min, max] instead of being pinned to the
+# density grid — while density keeps its separate job of governing how busy the
+# line is, via the rest-probability map below. The two are now orthogonal knobs.
+#
+# Only ever reached for voice_type == "melody" (melody + free-species
+# counterpoint). Bass and chord never sample here — see get_pattern's gate.
+
+# density still means "how busy": more density → fewer rests → busier line.
+# Values chosen so the range sampler spans the same busy↔sparse feel the old
+# melody grid had, without touching duration (which the range now owns).
+_RANGE_REST_PROB = {
+    "sparse": 0.20,   # matches pattern_free's breathing
+    "low":    0.12,   # matches pattern_free_low
+    "medium": 0.08,   # busier — mostly continuous, occasional gap
+    "full":   0.04,   # near-continuous
+}
+
+
+def pattern_range(
+    total_beats: float,
+    min_len: float,
+    max_len: float,
+    rest_probability: float = 0.08,
+    quantum: float = 0.25,
+    seed: Optional[int] = None,
+    **kwargs,
+) -> list[RhythmEvent]:
+    """
+    Tile the span with notes whose lengths are sampled from [min_len, max_len],
+    snapped to `quantum` so durations stay grid-legible in the DAW rather than
+    landing on arbitrary floats. quantum is the freedom dial: 0.5 → eighth-note
+    legible, 0.25 → sixteenth, smaller → more fluid.
+
+    Duration variety comes from here; how many notes / how much rest comes from
+    rest_probability (fed by density upstream). Deterministic given seed.
+    """
+    if seed is None:
+        raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
+    if quantum <= 0:
+        raise ValueError(f"quantum must be > 0, got {quantum}")
+
+    # Build the quantized candidate set, snapping the bounds inward/outward to
+    # the grid. Guarantee at least one candidate even if min==max or the range
+    # is narrower than one quantum.
+    lo = max(quantum, round(min_len / quantum) * quantum)
+    hi = max(lo, round(max_len / quantum) * quantum)
+    steps = int(round((hi - lo) / quantum))
+    candidates = [round(lo + i * quantum, 6) for i in range(steps + 1)]
+
+    rng = random.Random(seed)
+    events: list[RhythmEvent] = []
+    beat = 0.0
+    while beat < total_beats - 0.001:
+        dur = rng.choice(candidates)
+        dur = min(dur, total_beats - beat)
+        if dur < 0.001:
+            break
+        is_rest = rng.random() < rest_probability
+        vel = rng.uniform(0.65, 1.0)
+        events.append(RhythmEvent(beat, dur, vel, is_rest))
+        beat += dur
+    return events
+
+
 DENSITY_PATTERNS = {
     # Chord voicing patterns — articulate like a player, not a grid
     ("sparse", "chord"):  pattern_chord_sparse,
@@ -614,12 +682,16 @@ def get_pattern(
     groove: Optional[str] = None,
     beats_per_bar: int = 4,
     seed: Optional[int] = None,
+    note_length_range: Optional[tuple[float, float]] = None,
+    note_length_quantum: float = 0.25,
 ) -> list[RhythmEvent]:
     """
     Get a rhythm pattern for a given density and voice type.
 
-    If groove is specified, uses the groove template system.
-    Otherwise falls through to the original density-based grid patterns.
+    Precedence for melody/counterpoint duration:
+        groove  >  note_length_range  >  density grid
+    A groove fully specifies onsets and durations, so it wins outright; when a
+    groove is set, note_length_range is ignored (the lint surfaces this).
 
     Args:
         total_beats:    Total beats to fill
@@ -628,6 +700,11 @@ def get_pattern(
         groove:         Optional groove name. Overrides grid patterns when set.
         beats_per_bar:  Beats per bar (used by groove templates)
         seed:           Optional random seed
+        note_length_range:  Optional (min, max) beats. Melody/counterpoint only:
+            when set (and no groove), duration is sampled in-range instead of
+            from the density grid; density then only governs rest probability.
+            Ignored for chord/bass voice types — those stay grid-disciplined.
+        note_length_quantum:  Grid-snap for range sampling (default 0.25).
 
     Returns:
         List of RhythmEvent
@@ -638,6 +715,20 @@ def get_pattern(
             total_beats, groove=groove, density=density,
             beats_per_bar=beats_per_bar,
             rest_probability=rest_prob, seed=seed,
+        )
+
+    # Free note-length range — melody/counterpoint only. Harmony and bass are
+    # deliberately excluded so they stay grid-disciplined (design decision:
+    # restrictions are right for accompaniment, freedom for the lead voices).
+    if note_length_range is not None and voice_type == "melody":
+        min_len, max_len = note_length_range
+        rest_prob = _RANGE_REST_PROB.get(density, 0.08)
+        return pattern_range(
+            total_beats,
+            min_len=min_len, max_len=max_len,
+            rest_probability=rest_prob,
+            quantum=note_length_quantum,
+            seed=seed,
         )
 
     key = (density, voice_type)

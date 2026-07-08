@@ -156,6 +156,42 @@ class HarmonyRhythmModel(BaseModel):
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
 
+class NoteLengthRangeModel(BaseModel):
+    """
+    Decouples note length from density for melody / free-species counterpoint.
+
+    When present on a section (or a counterpoint voice), note durations are
+    sampled freely within [min, max] beats instead of being pinned to the
+    density grid. Density still controls how busy the line is (rest frequency);
+    this controls only how long each note is. The two become independent axes.
+
+    Applies to melody and free-species counterpoint only — harmony and bass
+    stay grid-disciplined by design. Ignored when a groove is set (groove
+    fully specifies durations) or when the section's rhythm source is
+    "pattern"/"motif" (those supply their own onset grid). The lint surfaces
+    both no-op cases.
+
+    quantum snaps sampled lengths to a grid so they stay legible in the DAW:
+    0.5 = eighth-legible, 0.25 = sixteenth (default), smaller = more fluid.
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    min:     Annotated[float, Field(gt=0.0)]
+    max:     Annotated[float, Field(gt=0.0)]
+    quantum: Annotated[float, Field(gt=0.0)] = 0.25
+
+    @model_validator(mode="after")
+    def _check_bounds(self) -> "NoteLengthRangeModel":
+        if self.max < self.min:
+            raise ValueError(
+                f"note_length_range.max ({self.max}) must be >= min ({self.min})"
+            )
+        return self
+
+    def as_tuple(self) -> tuple[float, float]:
+        return (self.min, self.max)
+
+
 class CounterpointModel(BaseModel):
     """Corresponds to section["counterpoint"] block."""
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -171,6 +207,10 @@ class CounterpointModel(BaseModel):
     # classical convention regardless of these fields.
     rhythm_density: Literal["sparse", "medium", "full"] = "medium"
     groove:         Optional[str]                       = None
+    # Per-voice note-length range override (free species only). When set, this
+    # voice samples its durations in-range independently of the section-level
+    # setting; when None it inherits the section's note_length_range (if any).
+    note_length_range: Optional[NoteLengthRangeModel]   = None
 
 
 class VoiceModel(BaseModel):
@@ -358,6 +398,14 @@ class SectionModel(BaseModel):
     # ── Melody tuning ─────────────────────────────────────────────────────────
     rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     fugal_techniques: Optional[dict]                            = None
+
+    # Note-length range (melody + free-species counterpoint). Decouples note
+    # length from density: when set, durations are sampled in [min, max] beats
+    # and density governs only rest frequency. Applies to ALL melody behaviors
+    # (lyrical/generative/sparse/develop) since it operates at the rhythm layer
+    # below behavior. Harmony/bass are untouched by design. No-op under a groove
+    # or a "pattern"/"motif" rhythm source (lint flags both).
+    note_length_range: Optional[NoteLengthRangeModel]           = None
 
     # ── Per-voice rest probability (independent of melody rest_probability) ────
     # These thin the harmony bed and bass line respectively. They are NOT
