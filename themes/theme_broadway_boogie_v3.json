@@ -2,7 +2,7 @@
   "theme": {
     "name": "broadway_boogie",
     "key": "F",
-    "mode": "mixolydian",
+    "mode": "ionian",
     "tempo": {
       "min": 110,
       "max": 130

@@ -46,8 +46,12 @@
           "I",
           "ii",
           "v",
-          "I"
+          "I",
+          "ii",
+          "v"
+
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -69,12 +73,9 @@
           "I",
           "v7",
           "ii",
-          "v7",
-          "I",
-          "v7",
-          "ii",
           "v7"
         ],
+        "chord_bars":[0.5, 0.5, 0.5, 0.5],
         "density": "medium",
         "melody": "sparse",
         "bass_style": "steady",
@@ -102,6 +103,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "low",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -109,7 +111,7 @@
         "rhythm": "motif",
         "rest_probability": 0.3,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "low",
           "groove": "straight"
         },
@@ -124,6 +126,7 @@
           "iii°",
           "v"
         ],
+        "chord_bars":[4, 2, 2],
         "density": "medium",
         "melody": "develop",
         "bass_style": "steady",
@@ -156,6 +159,7 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "medium",
         "melody": "develop",
         "bass_style": "steady",
@@ -183,6 +187,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -190,7 +195,7 @@
         "rhythm": "motif",
         "rest_probability": 0.15,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "sparse",
           "groove": "straight"
         },
@@ -215,21 +220,22 @@
           "v",
           "I"
         ],
-        "density": "full",
+        "chord_bars": [1,1,1,1,1,1,1,1],
+        "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "plateau",
         "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
-          "rhythm": "motif",
-          "density": "sparse",
+          "rhythm": "sustain",
+          "density": "medium",
           "groove": "straight"
         },
         "counterpoint": {
           "species": "free",
-          "register": "above",
-          "dissonance": "passing"
+          "register": "below",
+          "dissonance": "none"
         },
         "notes": "IV. Full Grid (hold) — all voices sustained at peak. | Harmony fix: V5 (vi-ii-v-I) x3 — descending-fourths chain, strongest driving motion at peak density. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle — its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.34
@@ -242,6 +248,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -249,7 +256,7 @@
         "rhythm": "motif",
         "rest_probability": 0.2,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "straight"
         },
@@ -274,14 +281,15 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1 ],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "motif",
+        "rhythm": "free",
         "rest_probability": 0.25,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "straight"
         },
@@ -301,14 +309,15 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "straight"
         },
@@ -333,6 +342,7 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -340,7 +350,7 @@
         "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -360,6 +370,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -367,7 +378,7 @@
         "rhythm": "motif",
         "rest_probability": 0.35,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -392,14 +403,15 @@
           "v",
           "I"
         ],
+        "chord_bars": [1, 1, 1, 1, 1, 1, 1, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "motif",
+        "rhythm": "free",
         "rest_probability": 0.25,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -413,20 +425,21 @@
       },
       {
         "name": "m4_peak_build_5",
-        "bars": 20,
+        "bars": 40,
         "progression": [
           "vi",
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "free",
         "rest_probability": 0.15,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -451,6 +464,7 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -458,7 +472,7 @@
         "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -478,14 +492,15 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "motif",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "full",
           "groove": "offbeat"
         },
@@ -510,6 +525,7 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -532,6 +548,7 @@
           "bVII",
           "ii"
         ],
+        "chord_bars":[2, 2, 2],
         "density": "low",
         "melody": "sparse",
         "bass_style": "steady",
@@ -539,7 +556,7 @@
         "rhythm": "motif",
         "rest_probability": 0.6,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "sparse",
           "groove": "offbeat"
         },
@@ -559,6 +576,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "low",
         "melody": "sparse",
         "bass_style": "steady",
@@ -566,7 +584,7 @@
         "rhythm": "motif",
         "rest_probability": 0.5,
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "sustain",
           "density": "low",
           "groove": "offbeat"
         },
@@ -581,6 +599,7 @@
           "iii°",
           "v"
         ],
+        "chord_bars":[1, 2, 1],
         "density": "medium",
         "melody": "develop",
         "bass_style": "steady",
@@ -613,6 +632,7 @@
           "ii",
           "v"
         ],
+        "chord_bars":[1, 1, 1, 1, 1, 1, 1, 1],
         "density": "medium",
         "melody": "sparse",
         "bass_style": "steady",
@@ -635,6 +655,8 @@
           "v",
           "I"
         ],
+        "chord_bars":[1, 2, 1],
+
         "density": "medium",
         "melody": "sparse",
         "bass_style": "pedal",
