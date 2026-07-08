@@ -29,7 +29,10 @@ from mido import MidiFile, MidiTrack, Message, MetaMessage
 
 from intervals.music.harmony  import resolve_progression, VoicedChord, CHROMATIC
 from intervals.music.bass     import generate_bass, BassNote
-from intervals.music.melody   import generate_melody_for_progression, MelodyNote
+from intervals.music.melody   import (
+    generate_melody_for_progression, MelodyNote,
+    MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
+)
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
 from intervals.music.rhythm   import RhythmEvent
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
@@ -446,6 +449,28 @@ def generate_section(
     groove       = section_model.groove
     swing        = section_model.swing
 
+    # ── Peer-voices lead ──────────────────────────────────────────────────
+    # When section.voices is present, the FIRST voice is the lead line and
+    # drives the "melody" generation below (behavior, register, velocity,
+    # rest probability, motif). Remaining voices are generated as peer
+    # tracks in generate_piece(). This keeps one code path for the lead
+    # line — everything downstream (bass snapshot, harmony, counterpoint
+    # against_voices) still reads melody_notes — while letting voices[0]
+    # specify an absolute register the plain `melody` field can't.
+    lead_voice = section_model.voices[0] if section_model.voices else None
+    lead_octave_bottom = MELODY_OCTAVE_BOTTOM
+    lead_octave_top    = MELODY_OCTAVE_TOP
+    lead_velocity      = 72
+    lead_rest_prob     = section_model.rest_probability
+    if lead_voice is not None:
+        melody_beh = lead_voice.behavior
+        lead_velocity = lead_voice.velocity
+        if lead_voice.rest_probability is not None:
+            lead_rest_prob = lead_voice.rest_probability
+        lb = lead_voice.bounds()
+        if lb is not None:
+            lead_octave_bottom, lead_octave_top = lb
+
     # Per-chord bar durations — model helper handles chord_bars vs bars logic
     bars_list = section_model.bars_list()
 
@@ -628,9 +653,12 @@ def generate_section(
         swing=swing,
         seed=base_seed + seed_offset,
         section_name=section_model.name or "",
+        octave_bottom=lead_octave_bottom,
+        octave_top=lead_octave_top,
+        base_velocity=lead_velocity,
         rhythm_events_override=melody_rhythm_events,
         fugal_techniques=section_model.fugal_techniques,
-        rest_probability=section_model.rest_probability,
+        rest_probability=lead_rest_prob,
         piece_ctx=piece_ctx,
         arc=section_model.arc,
         note_length_range=section_nlr,
@@ -936,6 +964,108 @@ def generate_piece(
         groove = section_model.groove
         swing  = section_model.swing or 0.0
 
+        # ── Peer voices (section.voices) ──────────────────────────────────
+        # Supersedes section.counterpoint. voices[0] already drove the lead
+        # melody (melody_notes) in generate_section; here we generate
+        # voices[1:] as independent peer tracks. Each peer is either a
+        # counterpoint voice (species present) or a melody-path generative
+        # line (species absent), placed in its own absolute SATB register.
+        # Peers thread through the same against_voices/chord_voices machinery
+        # counterpoint uses, so later peers avoid colliding with earlier ones
+        # and every peer stays chord-aware.
+        if section_model.voices and len(section_model.voices) > 1:
+            lead_b = section_model.voices[0].bounds() or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
+            lead_center = (lead_b[0] + lead_b[1]) / 2
+
+            against_notes = [
+                mn.midi_note for mn in melody_notes
+                if not mn.is_rest and mn.midi_note is not None
+            ]
+            against_voices = [melody_notes]
+            chord_voices = chord_tones_as_voices(chords, bars_list, beats_per_bar)
+            _sec_nlr_model = section_model.note_length_range
+            _sec_nlr = _sec_nlr_model.as_tuple() if _sec_nlr_model is not None else None
+            _sec_nlr_q = _sec_nlr_model.quantum if _sec_nlr_model is not None else 0.25
+
+            for voice_idx, v in enumerate(section_model.voices[1:]):
+                vb = v.bounds()
+                # above/below relationship for counterpoint peers is derived
+                # from where this voice's register sits relative to the lead:
+                # a register centered at or above the lead is a descant
+                # ("above"), one below is a lower voice ("below").
+                if vb is not None:
+                    v_center = (vb[0] + vb[1]) / 2
+                    rel = "above" if v_center >= lead_center else "below"
+                else:
+                    rel = v.v_register if v.v_register in ("above", "below") else "below"
+
+                v_rest = (v.rest_probability if v.rest_probability is not None
+                          else section_model.rest_probability)
+
+                if v.species is not None:
+                    peer_notes = generate_counterpoint(
+                        melody_notes,
+                        key=theme["key"], mode=theme["mode"],
+                        species=v.species, register=rel,
+                        beats_per_bar=section_model.beats_per_bar,
+                        velocity=v.velocity, dissonance=v.dissonance,
+                        seed=base_seed + i * 10 + voice_idx,
+                        against_notes=against_notes,
+                        against_voices=against_voices,
+                        chord_voices=chord_voices,
+                        register_bounds=vb,
+                        note_length_range=_sec_nlr,
+                        note_length_quantum=_sec_nlr_q,
+                    )
+                else:
+                    # Melody-path peer: an independent generative/motif line
+                    # in this voice's own register. Named motifs from the
+                    # theme pool aren't resolved here yet (Phase 1) — an
+                    # inline motif dict works; a name falls back to the
+                    # voice's plain behavior.
+                    m_lo, m_hi = vb or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
+                    inline_motif = v.motif if isinstance(v.motif, dict) else None
+                    peer_notes = generate_melody_for_progression(
+                        chords, theme["key"], theme["mode"],
+                        behavior=v.behavior, density=density,
+                        bars_per_chord=bars_list, beats_per_bar=beats_per_bar,
+                        motif=inline_motif,
+                        seed=base_seed + i * 10 + voice_idx,
+                        octave_bottom=m_lo, octave_top=m_hi,
+                        base_velocity=v.velocity,
+                        rest_probability=v_rest,
+                    )
+
+                # Canon offset (shift forward, trim past section end).
+                if v.canon_offset > 0:
+                    for n in peer_notes:
+                        n.start_beat += v.canon_offset
+                    peer_notes = [n for n in peer_notes if n.start_beat < total_beats]
+
+                # Snapshot under a distinct name for cross-section memory.
+                if sec_ctx is not None:
+                    p_pitches = [n.midi_note for n in peer_notes
+                                 if not n.is_rest and n.midi_note is not None]
+                    p_durs = [n.duration_beats for n in peer_notes
+                              if not n.is_rest and n.midi_note is not None]
+                    _tb = sum(b * beats_per_bar for b in bars_list)
+                    sec_ctx.add_voice(f"voice_{voice_idx + 1}", compute_voice_snapshot(
+                        pitches=p_pitches, durations=p_durs,
+                        total_beats=_tb, total_slots=int(_tb * 2),
+                        key=theme["key"], mode=theme["mode"],
+                    ))
+
+                # Feed forward so later peers avoid this one.
+                against_notes = against_notes + [
+                    n.midi_note for n in peer_notes
+                    if not n.is_rest and n.midi_note is not None
+                ]
+                against_voices = against_voices + [peer_notes]
+
+                for n in peer_notes:
+                    n.start_beat += global_beat
+                all_cp_notes.setdefault(voice_idx, []).extend(peer_notes)
+
         # Counterpoint (optional — only if section defines it).
         # section_model.counterpoint is a list of 1-3 CounterpointModel
         # entries (legacy single-object files are normalised to a
@@ -943,7 +1073,8 @@ def generate_piece(
         # checked against the melody AND every counterpoint voice already
         # generated this section, so a third voice can't silently collide
         # with the second the way it would if voices were independent.
-        cp_voice_models = section_model.counterpoint
+        # Skipped entirely when section.voices is in use (voices supersedes).
+        cp_voice_models = None if section_model.voices else section_model.counterpoint
         if cp_voice_models:
             # Sounding pitches so far this section: starts with the melody,
             # then grows as each counterpoint voice is added below.

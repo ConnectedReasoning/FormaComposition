@@ -360,7 +360,9 @@ def generate_lyrical(
     next_chord_tones = chord_tones
     if context and context.get("next_chord"):
         next_chord_tones = get_chord_tones_in_register(
-            context["next_chord"], MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
+            context["next_chord"],
+            context.get("octave_bottom", MELODY_OCTAVE_BOTTOM),
+            context.get("octave_top", MELODY_OCTAVE_TOP),
         )
 
     for i, ev in enumerate(rhythm_events):
@@ -717,6 +719,8 @@ def generate_melody_for_progression(
     swing: float = 0.0,
     seed: Optional[int] = None,
     section_name: str = "",
+    octave_bottom: int = MELODY_OCTAVE_BOTTOM,
+    octave_top: int = MELODY_OCTAVE_TOP,
     rhythm_events_override: Optional[list] = None,
     fugal_techniques: Optional[dict] = None,
     rest_probability: float = 0.0,
@@ -853,6 +857,11 @@ def generate_melody_for_progression(
             # vi-ii-v-I) sequences consistently each time rather than
             # accumulating drift across loops.
             "progression_root_degree": chords[0].degree,
+            # Register bounds for this voice, so per-note lookups (e.g.
+            # generate_lyrical's next-chord biasing) stay inside the voice's
+            # actual range instead of the global melody default.
+            "octave_bottom": octave_bottom,
+            "octave_top": octave_top,
         }
 
         # Slice rhythm events for this chord's time window
@@ -882,6 +891,8 @@ def generate_melody_for_progression(
             base_velocity=base_velocity,
             prev_note=prev_note,
             motif=chord_motif,
+            octave_bottom=octave_bottom,
+            octave_top=octave_top,
             groove=groove,
             beats_per_bar=beats_per_bar,
             swing=swing,

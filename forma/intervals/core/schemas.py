@@ -82,7 +82,33 @@ TransformLiteral   = Literal[
 CounterpointSpeciesLiteral  = Literal["free", "first", "second", "third", "fourth", "fifth"]
 CounterpointRegisterLiteral = Literal["above", "below"]
 DissonanceLiteral           = Literal["none", "passing", "neighbor", "free"]
-VoiceRegisterLiteral        = Literal["high", "mid", "low_mid", "low", "above", "below"]
+VoiceRegisterLiteral        = Literal[
+    # Traditional SATB names (canonical, preferred)
+    "soprano", "alto", "tenor", "bass",
+    # Legacy register names — kept as aliases so existing pieces validate
+    "high", "mid", "low_mid", "low",
+    # Counterpoint-relative aliases (resolved against the lead voice)
+    "above", "below",
+]
+
+# Absolute (bottom, top) MIDI bounds per register name. SATB names use
+# generous instrumental-friendly ranges that overlap by ~a fifth at the
+# seams (correct for real four-part writing). Legacy names keep their
+# originally-documented bands so pre-SATB pieces render unchanged.
+# 'above'/'below' are intentionally absent — they are relative, not
+# absolute, and resolved by the generator against the lead voice.
+REGISTER_BOUNDS: dict[str, tuple[int, int]] = {
+    # Traditional SATB (canonical)
+    "soprano": (60, 81),   # C4–A5
+    "alto":    (53, 74),   # F3–D5
+    "tenor":   (48, 69),   # C3–A4
+    "bass":    (40, 60),   # E2–C4
+    # Legacy aliases (unchanged bands)
+    "high":    (67, 88),   # G4–E6
+    "mid":     (60, 81),   # C4–A5  (== soprano)
+    "low_mid": (48, 69),   # C3–A4  (== tenor)
+    "low":     (36, 57),   # C2–A3
+}
 
 # Convenience sets for runtime checks — derived from Literals, not duplicated.
 # These replace VALID_DENSITY, VALID_MELODY_BEH, etc. in generator.py.
@@ -259,6 +285,19 @@ class VoiceModel(BaseModel):
 
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
+
+    def bounds(self) -> "Optional[tuple[int, int]]":
+        """
+        Absolute (bottom, top) MIDI range for this voice's register, or None
+        for the counterpoint-relative aliases ('above'/'below'), which have
+        no fixed band — they position relative to the lead voice and are
+        resolved by the generator, not here.
+        """
+        return REGISTER_BOUNDS.get(self.v_register)
+
+    def is_relative(self) -> bool:
+        """True for 'above'/'below' — positioned relative to the lead voice."""
+        return self.v_register in ("above", "below")
 
 
 class DrumModel(BaseModel):

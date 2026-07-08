@@ -340,11 +340,22 @@ _REGISTER_MARGIN = 2
 def compute_register_bounds(
     melody_notes: list,
     register: str,
+    explicit_bounds: "Optional[tuple[int, int]]" = None,
 ) -> tuple[int, int]:
     """
-    Compute a (bottom, top) MIDI pitch band for a counterpoint voice,
-    relative to the ACTUAL pitch range of this section's melody — rather
-    than a fixed global ceiling/floor that the melody may routinely exceed.
+    Compute a (bottom, top) MIDI pitch band for a counterpoint voice.
+
+    If explicit_bounds is given (an absolute SATB band from the voices
+    system — e.g. tenor=48-69), it is used directly: the voice sings in
+    that fixed register regardless of where the melody sits. The
+    above/below independence relationship is still enforced per-note by
+    the scorer against the melody pitch sounding at each moment, so an
+    absolute band and a below/above relationship coexist — the band says
+    *where*, the relationship says *how it moves* against the melody.
+
+    Without explicit_bounds (the classic 'above'/'below' path), the band
+    is derived from the melody's own min/max as before — see the detailed
+    rationale below.
 
     Previously "below" was hard-capped at MIDI 69 (A4) and "above" at a
     fixed 67-88 band regardless of where the melody actually sat. When a
@@ -367,6 +378,9 @@ def compute_register_bounds(
     Falls back to the old fixed bounds if there are no sounding melody
     notes to measure (e.g. a fully-rest section).
     """
+    if explicit_bounds is not None:
+        return explicit_bounds
+
     sounding_pitches = [
         n.midi_note for n in melody_notes
         if not n.is_rest and n.midi_note is not None
@@ -508,6 +522,7 @@ def generate_first_species(
     seed: Optional[int] = None,
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
+    register_bounds: Optional[tuple[int, int]] = None,
 ) -> list[CounterpointNote]:
     """
     Generate strict 1st species counterpoint (note against note).
@@ -557,7 +572,7 @@ def generate_first_species(
     # Register ranges — computed relative to this melody's actual pitch
     # range (see compute_register_bounds), not a fixed global band that
     # the melody routinely exceeds.
-    bottom, top = compute_register_bounds(melody_notes, register)
+    bottom, top = compute_register_bounds(melody_notes, register, register_bounds)
 
     scale_tones = get_scale_tones_in_register(key, mode, bottom, top)
     sounding = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
@@ -635,6 +650,7 @@ def generate_free_species(
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
     chord_voices: Optional[list[list]] = None,
+    register_bounds: Optional[tuple[int, int]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
@@ -702,7 +718,7 @@ def generate_free_species(
     # Register ranges — computed relative to this melody's actual pitch
     # range (see compute_register_bounds), not a fixed global band that
     # the melody routinely exceeds.
-    bottom, top = compute_register_bounds(melody_notes, register)
+    bottom, top = compute_register_bounds(melody_notes, register, register_bounds)
 
     scale_tones = get_scale_tones_in_register(key, mode, bottom, top)
     sounding_melody = [n for n in melody_notes if not n.is_rest and n.midi_note is not None]
@@ -882,6 +898,7 @@ def generate_counterpoint(
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
     chord_voices: Optional[list[list]] = None,
+    register_bounds: Optional[tuple[int, int]] = None,
     rhythm_density: str = "medium",
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
@@ -944,6 +961,7 @@ def generate_counterpoint(
             melody_notes, key, mode, register, beats_per_bar, velocity, seed,
             against_notes=against_notes,
             against_voices=against_voices,
+            register_bounds=register_bounds,
         )
     elif species == "free":
         return generate_free_species(
@@ -952,6 +970,7 @@ def generate_counterpoint(
             against_notes=against_notes,
             against_voices=against_voices,
             chord_voices=chord_voices,
+            register_bounds=register_bounds,
             rhythm_density=rhythm_density,
             groove=groove,
             note_length_range=note_length_range,
