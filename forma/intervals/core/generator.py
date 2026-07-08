@@ -437,7 +437,7 @@ def generate_section(
     if motif_def is None and motif_pool:
         motif_def = motif_pool[0]
 
-    progression  = section_model.progression
+    progression  = section_model.resolved_progression()  # tiled when chord_bars is a repeating cell
     bars         = section_model.bars or 8.0
     density      = section_model.density
     melody_beh   = section_model.melody
@@ -531,6 +531,18 @@ def generate_section(
     # ── Harmony section events (explicit switch on harmony_rhythm.rhythm) ─
     h_rhythm_source = (_hr_model.rhythm if _hr_model is not None else None) or rhythm_source
 
+    # "motif" is no longer a valid harmony_rhythm.rhythm value (see schemas.py),
+    # so an explicit harmony_rhythm block can never produce it here. But when
+    # harmony_rhythm is omitted entirely (or its .rhythm is unset), this line
+    # falls back to the section's top-level `rhythm` — which is "motif" for
+    # nearly every melodic section. Left unguarded, that's the exact same bug
+    # re-entering through the back door. Coerce it to "free" instead of
+    # silently reproducing the retired behavior, and say so in the log.
+    if h_rhythm_source == "motif":
+        h_rhythm_source = "free"
+        print(f"    Harmony rhythm: 'motif' inherited from section rhythm — "
+              f"not valid for harmony, defaulting to 'free'")
+
     harmony_section_events = None  # None → free; "sustain" → sustain sentinel
 
     if h_rhythm_source == "sustain":
@@ -543,15 +555,6 @@ def generate_section(
             hp = hp_model.model_dump(exclude_none=True)
             harmony_section_events = rhythm_pattern_to_events(hp, total_beats=total_beats_section)
             print(f"    Harmony rhythm: hand-played pattern ({len(hp['onsets'])} onsets)")
-
-    elif h_rhythm_source == "motif":
-        harmony_section_events = _motif_rhythm_to_events(
-            active_motif_def["rhythm"], total_beats_section, "stressed",
-            velocities=active_motif_def.get("velocities"),
-            rests=active_motif_def.get("rests"),
-        )
-        cycle = sum(active_motif_def["rhythm"])
-        print(f"    Harmony rhythm: motif stressed ({len(harmony_section_events)} triggers, {cycle:.1f}b cycle)")
 
     else:  # "free"
         harmony_section_events = None

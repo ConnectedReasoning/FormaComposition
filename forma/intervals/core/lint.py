@@ -51,6 +51,17 @@ CONTINUOUS_BASS_STYLES: frozenset[str] = frozenset({"walking", "melodic"})
 # there would delete the whole chord, not thin it — the field is a no-op.
 SUSTAIN_HARMONY_SOURCE: str = "sustain"
 
+# Unlike the gates above (verified engine facts — a field IS or ISN'T read
+# under some condition), this one is a heuristic. Nothing is silently dropped
+# here; a value is silently *derived*: SectionModel.bars_list() divides `bars`
+# evenly across len(progression) whenever chord_bars is omitted, so the count
+# of chords you chose to write becomes the divisor that sets how long each one
+# is held. A short split (e.g. 2 bars/chord) is almost always intended; this
+# threshold exists so the check only fires on splits long enough to plausibly
+# be an accidental stretch rather than a deliberate slow harmonic rhythm.
+# Tune freely — it's a judgment call, not a fact about the engine.
+LONG_EVEN_SPLIT_BARS_THRESHOLD: float = 4.0
+
 
 # A plain-language registry of every gate the linter knows about. This table is
 # itself the answer to "which settings depend on which other settings?" — read
@@ -68,6 +79,10 @@ COUPLINGS: list[str] = [
     "fully specifies note durations — groove wins).",
     "section.note_length_range  is ignored when rhythm is 'pattern' or 'motif' "
     "(those sources supply their own onset/duration grid). Needs rhythm='free'.",
+    "section.bars, without chord_bars, is split evenly across every chord in "
+    "the progression — the chord *count* silently becomes the duration "
+    "divisor. Heuristic: flagged only when the resulting split exceeds "
+    f"{LONG_EVEN_SPLIT_BARS_THRESHOLD} bars/chord.",
 ]
 
 # Rhythm sources that supply their own onset+duration grid, so the free
@@ -216,6 +231,43 @@ def _check_note_length_range_vs_rhythm(section: SectionModel) -> Iterator[Contra
         )
 
 
+def _check_even_chord_split(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    chord_bars, not bars, is what actually controls each chord's duration.
+
+    Omit chord_bars and SectionModel.bars_list() gives every chord in the
+    progression an equal share of `bars` (bars / len(progression)) — so the
+    number of chords you chose to write becomes the divisor that decides how
+    long each one is held, even though "which chords" and "how long each one
+    lasts" are independent musical decisions. A short progression dropped
+    into a long section is silently stretched, with nothing in the render
+    log to say so.
+
+    Heuristic, not a hard gate (see LONG_EVEN_SPLIT_BARS_THRESHOLD): only
+    fires when the even split works out to more than the threshold, since a
+    short split (e.g. 2 bars/chord) is almost always exactly what was meant.
+    Also skipped for a single-chord progression — there's nothing to split.
+    """
+    if section.chord_bars is not None:
+        return
+    n = len(section.progression)
+    if n <= 1:
+        return
+    bars = section.bars or 8.0
+    even = bars / n
+    if even <= LONG_EVEN_SPLIT_BARS_THRESHOLD:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"bars={bars} with {n} chords in progression",
+        cause=f"no chord_bars — bars is split evenly across all {n} chords",
+        effect=f"every chord is held for {even:.1f} bars, regardless of "
+               f"whether that pacing was intended",
+        fix=f"set chord_bars explicitly (a {n}-entry list) to control each "
+            f"chord's duration independent of how many chords are listed.",
+    )
+
+
 CHECKS = [
     _check_voice_motif,
     _check_section_motif_override,
@@ -223,6 +275,7 @@ CHECKS = [
     _check_bass_rest_on_continuous,
     _check_note_length_range_vs_groove,
     _check_note_length_range_vs_rhythm,
+    _check_even_chord_split,
 ]
 
 

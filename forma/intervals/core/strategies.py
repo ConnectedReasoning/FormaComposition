@@ -810,7 +810,11 @@ HarmonyStrategyRegistry = _StrategyRegistry(
     strategies=[
         _SustainHarmonyStrategy(),
         _PatternHarmonyStrategy(),
-        _MotifHarmonyStrategy(),
+        # _MotifHarmonyStrategy retired 2026-07 (see schemas.py note on
+        # HarmonyRhythmSourceLiteral). Class left defined below in case it's
+        # ever wanted again, but deliberately unregistered: any code path
+        # that still produces source=="motif" should hit registry.resolve()
+        # and raise a clear KeyError, not silently succeed.
         _FreeHarmonyStrategy(),
     ],
     name="harmony source",

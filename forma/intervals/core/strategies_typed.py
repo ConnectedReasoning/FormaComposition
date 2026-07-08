@@ -128,9 +128,25 @@ def build_harmony_rhythm_context_from_model(
     hr = section.harmony_rhythm
 
     # Determine effective harmony rhythm source:
-    # - If harmony_rhythm block is present, use its .rhythm field.
-    # - Otherwise fall back to the section's main rhythm source.
-    h_source = hr.rhythm if hr is not None else section.rhythm
+    # - If harmony_rhythm block is present AND sets .rhythm, use it.
+    # - Otherwise (block absent, or present but .rhythm unset — e.g. a
+    #   harmony_rhythm block that only overrides density/groove) fall back
+    #   to the section's main rhythm source. Pre-existing bug fixed here:
+    #   `hr.rhythm if hr is not None else section.rhythm` only fell back
+    #   when the whole block was absent, not when it was present with
+    #   .rhythm left None — silently producing h_source=None (and later a
+    #   KeyError at dispatch) for any harmony_rhythm block that set
+    #   density/groove without also setting rhythm.
+    h_source = (hr.rhythm if hr is not None else None) or section.rhythm
+
+    # "motif" is not a valid harmony rhythm source (retired 2026-07 — see
+    # schemas.py). An explicit harmony_rhythm.rhythm can never be "motif"
+    # anymore (schema forbids it), but this line still inherits it from
+    # section.rhythm when harmony_rhythm is absent/unset — nearly every
+    # melodic section sets rhythm="motif". Coerce here rather than let it
+    # dispatch to a retired strategy.
+    if h_source == "motif":
+        h_source = "free"
 
     # Harmony-specific overrides (groove / density come from the hr block when set)
     density = (hr.density if hr is not None and hr.density is not None

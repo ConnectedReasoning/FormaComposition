@@ -41,6 +41,7 @@ Import these instead of maintaining local constant sets in generator.py:
 
 from __future__ import annotations
 
+import math
 import warnings
 from typing import Annotated, Literal, Optional, Union, get_args
 
@@ -65,7 +66,14 @@ ArcLiteral         = Literal[
     "fade_in", "fade_out", "breath",
 ]
 RhythmSourceLiteral        = Literal["motif", "pattern", "free"]
-HarmonyRhythmSourceLiteral = Literal["motif", "pattern", "sustain", "free"]
+# "motif" retired from harmony_rhythm.rhythm (2026-07): it never built an
+# independent harmony pattern — it borrowed the melody's motif rhythm
+# verbatim (filtered to "stressed" onsets) and silently ignored this
+# block's own density/groove fields, since _motif_rhythm_to_events takes
+# neither. Any piece JSON with "rhythm": "motif" inside harmony_rhythm now
+# fails validation instead of silently misbehaving. Use "free" (honors
+# density/groove) or "pattern" (hand-authored onsets) instead.
+HarmonyRhythmSourceLiteral = Literal["pattern", "sustain", "free"]
 TransformLiteral   = Literal[
     "original", "inversion", "retrograde", "retrograde_inversion",
     "augmentation", "diminution", "transpose_up", "transpose_down",
@@ -548,22 +556,62 @@ class SectionModel(BaseModel):
 
     @model_validator(mode="after")
     def _validate_bars(self) -> "SectionModel":
-        """Migrated from validate_piece() bar/chord_bars checks."""
+        """
+        Migrated from validate_piece() bar/chord_bars checks, extended with
+        cell-tiling: chord_bars + progression can describe one short cycle
+        (a "cell") that repeats to fill `bars`, rather than the complete,
+        one-entry-per-chord sequence for the whole section.
+
+        Which mode is in effect is inferred, not declared: if the cell's own
+        total is shorter than `bars`, it's a cell meant to repeat — bars is
+        left as authored (it's the tiled *total*, not a mismatch to resolve).
+        Otherwise this is the original behavior: chord_bars is the complete
+        sequence, and it wins outright over `bars` (with a warning if they
+        disagree). No new field needed to distinguish the two: a cell must be
+        shorter than bars to tile, and a complete sequence is never shorter
+        than the total it's describing, so the two cases can't collide.
+
+        Tiling requires an exact whole-number fit — no partial final cycle —
+        and fails loudly with the nearest valid bar counts if it doesn't.
+        """
         if self.chord_bars is not None:
             if len(self.chord_bars) != len(self.progression):
                 raise ValueError(
                     f"chord_bars has {len(self.chord_bars)} entries but "
                     f"progression has {len(self.progression)} chords"
                 )
-            derived = sum(self.chord_bars)
-            if self.bars is not None and abs(derived - self.bars) > 0.01:
-                warnings.warn(
-                    f"Section '{self.name}': bars={self.bars} but "
-                    f"sum(chord_bars)={derived}. chord_bars wins; "
-                    f"consider removing 'bars'.",
-                    stacklevel=4,
-                )
-            object.__setattr__(self, "bars", derived)
+            cell_bars = sum(self.chord_bars)
+
+            if self.bars is not None and cell_bars < self.bars - 0.01:
+                # Tiling case: this is a cell, not the whole thing.
+                reps = self.bars / cell_bars
+                rounded = round(reps)
+                if rounded < 1 or abs(rounded * cell_bars - self.bars) > 0.01:
+                    lo = math.floor(reps) * cell_bars
+                    hi = math.ceil(reps) * cell_bars
+                    raise ValueError(
+                        f"Section '{self.name}': chord_bars cell totals "
+                        f"{cell_bars:g} bars ({len(self.chord_bars)} chords) "
+                        f"but bars={self.bars:g} is not a whole multiple of "
+                        f"it ({reps:.3f} cycles). Nearest exact fits: "
+                        f"bars={lo:g} ({math.floor(reps):g} cycles) or "
+                        f"bars={hi:g} ({math.ceil(reps):g} cycles)."
+                    )
+                # bars stays as authored — it's the tiled total, not a
+                # mismatch. resolved_progression()/bars_list() do the tiling.
+
+            else:
+                # Original behavior: chord_bars is the complete sequence.
+                derived = cell_bars
+                if self.bars is not None and abs(derived - self.bars) > 0.01:
+                    warnings.warn(
+                        f"Section '{self.name}': bars={self.bars} but "
+                        f"sum(chord_bars)={derived}. chord_bars wins; "
+                        f"consider removing 'bars'.",
+                        stacklevel=4,
+                    )
+                object.__setattr__(self, "bars", derived)
+
         elif self.bars is None:
             warnings.warn(
                 f"Section '{self.name}': no 'bars' or 'chord_bars' — "
@@ -665,10 +713,39 @@ class SectionModel(BaseModel):
 
     # ── Convenience helpers ───────────────────────────────────────────────────
 
+    def _progression_cycles(self) -> int:
+        """
+        How many times the (progression, chord_bars) cell repeats to fill
+        `bars`. Always 1 except in the tiling case — a chord_bars cell whose
+        own total is shorter than `bars` — which _validate_bars has already
+        confirmed divides evenly, so this is a plain, safe division.
+        """
+        if self.chord_bars is None or self.bars is None:
+            return 1
+        cell_bars = sum(self.chord_bars)
+        if cell_bars >= self.bars - 0.01:
+            return 1
+        return round(self.bars / cell_bars)
+
+    def resolved_progression(self) -> list[str]:
+        """
+        progression, tiled to match bars_list() when chord_bars describes a
+        shorter repeating cell rather than the section's complete sequence.
+        Callers building chords from `progression` should use this instead of
+        the raw field whenever they also consume bars_list() — the two must
+        stay the same length, one entry per chord.
+        """
+        return list(self.progression) * self._progression_cycles()
+
     def bars_list(self) -> list[float]:
-        """Return per-chord bar durations (chord_bars takes precedence over bars)."""
+        """
+        Return per-chord bar durations (chord_bars takes precedence over
+        bars). Tiled to fill `bars` when chord_bars is a shorter repeating
+        cell (see _progression_cycles) — length always matches
+        resolved_progression().
+        """
         if self.chord_bars is not None:
-            return [float(b) for b in self.chord_bars]
+            return [float(b) for b in self.chord_bars] * self._progression_cycles()
         bars = self.bars or 8.0
         even = bars / len(self.progression)
         return [even] * len(self.progression)
