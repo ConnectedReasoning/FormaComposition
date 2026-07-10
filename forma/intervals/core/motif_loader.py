@@ -131,6 +131,39 @@ def save_motif(motif: Motif, motifs_dir: Optional[str] = None) -> str:
 # Backward compatibility helper
 # ---------------------------------------------------------------------------
 
+def resolve_motif_value(motif_value, motifs_dir: Optional[str] = None) -> Optional[Motif]:
+    """
+    Resolve a single motif *value* -- a string name (library lookup) or an
+    embedded dict -- into a Motif object.
+
+    This is the same two-form logic resolve_motif_from_theme uses for
+    theme["motif"], factored out so any other schema-legal motif reference
+    (a specific voice's ``motif`` field, ``harmony_rhythm.motif``, etc.) can
+    reuse it directly instead of each caller re-implementing the
+    str-vs-dict branch. resolve_motif_from_theme is now a thin wrapper
+    around this for the theme-dict case.
+
+    Args:
+        motif_value: None, a motif name (str), or an embedded motif dict.
+                     This is the value itself -- NOT a container dict with
+                     a "motif" key inside it.
+        motifs_dir:  Motif library directory (see load_motif)
+
+    Returns:
+        Motif object, or None if motif_value is None.
+    """
+    if motif_value is None:
+        return None
+    if isinstance(motif_value, str):
+        return load_motif(motif_value, motifs_dir)
+    if isinstance(motif_value, dict):
+        return motif_from_dict(motif_value)
+    raise TypeError(
+        f"motif value must be a string (library reference) or dict "
+        f"(embedded motif), got {type(motif_value).__name__}"
+    )
+
+
 def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> Optional[Motif]:
     """
     Resolve a motif from a theme dict, supporting both old and new formats.
@@ -152,20 +185,9 @@ def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> O
     Returns:
         Motif object, or None if no motif defined
     """
-
-    # Priority 1: Explicit motif (embedded dict or name reference)
-    if "motif" in theme:
-        motif_value = theme["motif"]
-
-        # New format: string reference to motif library
-        if isinstance(motif_value, str):
-            return load_motif(motif_value, motifs_dir)
-
-        # Old format: embedded dict
-        elif isinstance(motif_value, dict):
-            return motif_from_dict(motif_value)
-
-    return None
+    if "motif" not in theme:
+        return None
+    return resolve_motif_value(theme["motif"], motifs_dir)
 
 
 def resolve_motif_pool_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> list:

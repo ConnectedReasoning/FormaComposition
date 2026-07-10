@@ -38,7 +38,7 @@ from intervals.music.rhythm   import RhythmEvent
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
 
-from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme
+from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme, resolve_motif_value
 from intervals.core.context import (
     PieceContext,
     SectionContext,
@@ -518,6 +518,28 @@ def generate_section(
         else:
             print(f"    Motif transform: original")
 
+    # ── Independent per-voice motif override (melody) ──────────────────────
+    # The lead voice's own `motif` field (section.melody in dict form, or
+    # voices[0]) replaces the theme's motif for melody generation only —
+    # bass and harmony are untouched here. Omitted -> falls back to the
+    # section's active (theme + transform resolved) motif, so existing
+    # pieces that never set voice.motif keep working unchanged.
+    melody_motif_def = active_motif_def
+    melody_motif_pool = motif_pool if len(motif_pool) > 1 else None
+    if lead_voice is not None and lead_voice.motif is not None:
+        _lead_motif_obj = resolve_motif_value(lead_voice.motif)
+        melody_motif_def = motif_to_dict(_lead_motif_obj) if _lead_motif_obj else None
+        # An explicit per-voice motif replaces the theme's motif outright.
+        # The theme's variety pool (motif_pool) is a theme-level mechanism
+        # that doesn't make sense layered under a voice deliberately using
+        # something else, and the transform machinery above is keyed to
+        # the theme's primary motif's transform_pool, not an arbitrary
+        # named motif — it's intentionally not reapplied here either.
+        melody_motif_pool = None
+        _lead_motif_desc = (lead_voice.motif if isinstance(lead_voice.motif, str)
+                             else "(inline motif)")
+        print(f"    Melody motif: independent override '{_lead_motif_desc}'")
+
     # ── Melody + bass rhythm (explicit switch on section.rhythm) ────
     melody_rhythm_events = None
     bass_rhythm_events   = None
@@ -532,10 +554,16 @@ def generate_section(
                   f"({len(rp['onsets'])} onsets, {rp.get('length_beats','?')}b)")
 
     elif rhythm_source == "motif":
+        if not melody_motif_def or not melody_motif_def.get("rhythm"):
+            raise ValueError(
+                f"Section '{section_model.name}': rhythm='motif' but no "
+                f"motif with a 'rhythm' field is available (neither the "
+                f"lead voice's own 'motif' override nor the theme's motif)"
+            )
         melody_rhythm_events = _motif_rhythm_to_events(
-            active_motif_def["rhythm"], total_beats_section, "full",
-            velocities=active_motif_def.get("velocities"),
-            rests=active_motif_def.get("rests"),
+            melody_motif_def["rhythm"], total_beats_section, "full",
+            velocities=melody_motif_def.get("velocities"),
+            rests=melody_motif_def.get("rests"),
         )
         # Decouple pass (2026-07): bass_rhythm_events is deliberately NOT
         # built here anymore. It used to carry the motif's "anchor" grid
@@ -544,26 +572,33 @@ def generate_section(
         # bass_style: "steady" silently produced anchor roots instead of the
         # declared steady figure. Explicit beats implicit: bass_style always
         # wins now. (bass_style: "motif" never used this path anyway — it
-        # reads the motif dict directly in style_motif.) Hand-played
-        # "pattern" rhythm still drives the bass above, unchanged.
-        cycle = sum(active_motif_def["rhythm"])
-        print(f"    Melody rhythm: motif full   ({len(active_motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
+        # reads the motif dict directly in style_motif, always from the
+        # theme, unaffected by the melody's independent motif override
+        # above.) Hand-played "pattern" rhythm still drives the bass above,
+        # unchanged.
+        cycle = sum(melody_motif_def["rhythm"])
+        print(f"    Melody rhythm: motif full   ({len(melody_motif_def['rhythm'])} notes, {cycle:.1f}b cycle)")
         print(f"    Bass rhythm:   from bass_style '{bass_style}' (decoupled from motif cell)")
 
     else:  # "free"
         print(f"    Melody/Bass rhythm: free (density grid)")
 
     # ── Harmony section events (explicit switch on harmony_rhythm.rhythm) ─
-    h_rhythm_source = (_hr_model.rhythm if _hr_model is not None else None) or rhythm_source
+    _explicit_h_rhythm = _hr_model.rhythm if _hr_model is not None else None
+    h_rhythm_source = _explicit_h_rhythm or rhythm_source
 
-    # "motif" is no longer a valid harmony_rhythm.rhythm value (see schemas.py),
-    # so an explicit harmony_rhythm block can never produce it here. But when
-    # harmony_rhythm is omitted entirely (or its .rhythm is unset), this line
-    # falls back to the section's top-level `rhythm` — which is "motif" for
-    # nearly every melodic section. Left unguarded, that's the exact same bug
-    # re-entering through the back door. Coerce it to "free" instead of
-    # silently reproducing the retired behavior, and say so in the log.
-    if h_rhythm_source == "motif":
+    # "motif" is a valid harmony_rhythm.rhythm value again (reintroduced
+    # 2026-07 as an independent mechanism — see schemas.py
+    # HarmonyRhythmSourceLiteral) but only when set EXPLICITLY on the
+    # harmony_rhythm block itself. When harmony_rhythm is omitted entirely
+    # (or its .rhythm is unset), this line falls back to the section's
+    # top-level `rhythm` — which is "motif" for nearly every melodic
+    # section. Left unguarded, that inheritance would activate harmony's
+    # independent motif mechanism on every such section whether or not it
+    # was asked for — the exact back door "motif" was retired for the
+    # first time. Coerce the *inherited* case to "free"; the *explicit*
+    # case falls through to the branch below.
+    if h_rhythm_source == "motif" and _explicit_h_rhythm != "motif":
         h_rhythm_source = "free"
         print(f"    Harmony rhythm: 'motif' inherited from section rhythm — "
               f"not valid for harmony, defaulting to 'free'")
@@ -580,6 +615,57 @@ def generate_section(
             hp = hp_model.model_dump(exclude_none=True)
             harmony_section_events = rhythm_pattern_to_events(hp, total_beats=total_beats_section)
             print(f"    Harmony rhythm: hand-played pattern ({len(hp['onsets'])} onsets)")
+
+    elif h_rhythm_source == "motif":
+        # Harmony's own motif, independent of melody's. Omitted ->
+        # falls back to the section's active (theme + transform resolved)
+        # motif, same "zero extra effort" default as the melody override.
+        _hr_motif_value = _hr_model.motif if _hr_model is not None else None
+        if _hr_motif_value is not None:
+            _harmony_motif_obj = resolve_motif_value(_hr_motif_value)
+            harmony_motif_def = motif_to_dict(_harmony_motif_obj) if _harmony_motif_obj else None
+            _hr_motif_desc = (_hr_motif_value if isinstance(_hr_motif_value, str)
+                               else "(inline motif)")
+        else:
+            harmony_motif_def = active_motif_def
+            _hr_motif_desc = "theme (shared default)"
+
+        if not harmony_motif_def or not harmony_motif_def.get("rhythm"):
+            raise ValueError(
+                f"Section '{section_model.name}': harmony_rhythm.rhythm="
+                f"'motif' but no motif with a 'rhythm' field is available "
+                f"(neither harmony_rhythm.motif nor the theme's motif)"
+            )
+
+        # density selects onset articulation — full/stressed/anchor, the
+        # same subsetting _motif_rhythm_to_events already offers melody
+        # and bass — so density has a real, audible effect here instead
+        # of being silently ignored the way the retired version left it.
+        # groove is intentionally NOT consulted: the motif cell already
+        # IS the rhythm, same as melody's "motif" rhythm source. lint.py
+        # flags harmony_rhythm.groove set alongside this as a no-op.
+        _h_density = (_hr_model.density if _hr_model is not None and _hr_model.density
+                      else density)
+        _articulation = {
+            "low": "anchor", "sparse": "anchor",
+            "medium": "stressed", "full": "full",
+        }.get(_h_density, "stressed")
+
+        # Tiled across the WHOLE section (not per chord) so the onset
+        # stream runs continuously through chord changes — the "its own
+        # syncopated life against the bass" behavior the theme file asks
+        # for. _enrich_chords_with_rhythm (below) slices this into each
+        # chord's local window; _MotifHarmonyStrategy in strategies.py
+        # consumes those slices exactly like _PatternHarmonyStrategy does.
+        harmony_section_events = _motif_rhythm_to_events(
+            harmony_motif_def["rhythm"], total_beats_section, _articulation,
+            velocities=harmony_motif_def.get("velocities"),
+            rests=harmony_motif_def.get("rests"),
+        )
+        cycle = sum(harmony_motif_def["rhythm"])
+        print(f"    Harmony rhythm: motif {_articulation} ({len(harmony_section_events)} "
+              f"onsets, {cycle:.1f}b cycle, density={_h_density}, motif={_hr_motif_desc}) "
+              f"— continuous across chord changes")
 
     else:  # "free"
         harmony_section_events = None
@@ -630,9 +716,9 @@ def generate_section(
     # MELODY — generates second, can read bass snapshot
     # ══════════════════════════════════════════════════════════════
 
-    if motif_pool and len(motif_pool) > 1:
-        print(f"    Motif pool: {len(motif_pool)} motifs "
-              f"({', '.join(m.get('name', '?') for m in motif_pool)})")
+    if melody_motif_pool and len(melody_motif_pool) > 1:
+        print(f"    Motif pool: {len(melody_motif_pool)} motifs "
+              f"({', '.join(m.get('name', '?') for m in melody_motif_pool)})")
 
     # Note-length range (melody + free-species counterpoint). Resolve the
     # section-level model to a (min,max) tuple + quantum once; counterpoint
@@ -647,8 +733,8 @@ def generate_section(
         density=density,
         bars_per_chord=bars_list,
         beats_per_bar=beats_per_bar,
-        motif=active_motif_def,
-        motif_pool=motif_pool if len(motif_pool) > 1 else None,
+        motif=melody_motif_def,
+        motif_pool=melody_motif_pool,
         groove=groove,
         swing=swing,
         seed=base_seed + seed_offset,

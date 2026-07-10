@@ -66,14 +66,32 @@ ArcLiteral         = Literal[
     "fade_in", "fade_out", "breath",
 ]
 RhythmSourceLiteral        = Literal["motif", "pattern", "free"]
-# "motif" retired from harmony_rhythm.rhythm (2026-07): it never built an
-# independent harmony pattern — it borrowed the melody's motif rhythm
-# verbatim (filtered to "stressed" onsets) and silently ignored this
-# block's own density/groove fields, since _motif_rhythm_to_events takes
-# neither. Any piece JSON with "rhythm": "motif" inside harmony_rhythm now
-# fails validation instead of silently misbehaving. Use "free" (honors
-# density/groove) or "pattern" (hand-authored onsets) instead.
-HarmonyRhythmSourceLiteral = Literal["pattern", "sustain", "free"]
+# "motif" was retired from harmony_rhythm.rhythm for one release (2026-07)
+# because the old implementation never built independent harmony content:
+# it silently borrowed melody's motif rhythm verbatim (filtered to
+# "stressed" onsets) and ignored this block's own density/groove fields,
+# since _motif_rhythm_to_events took neither.
+#
+# Reintroduced (2026-07, same release) as a real, independent mechanism:
+#   - harmony_rhythm.motif names its own motif (string ref or embedded
+#     dict), independent of melody's. Omitted -> falls back to the
+#     section's active theme motif, same as before this field existed.
+#   - The motif's rhythm cell is tiled across the WHOLE SECTION as one
+#     continuous onset stream, then sliced per chord window (see
+#     generator.py's _enrich_chords_with_rhythm / strategies.py
+#     _MotifHarmonyStrategy) -- so the comping pattern keeps its own
+#     life independent of chord-change points, instead of resetting at
+#     every chord like a per-chord retile would.
+#   - density is honored for real this time: it selects the onset
+#     articulation (full / stressed / anchor -- the same subsetting
+#     _motif_rhythm_to_events already does for melody/bass motif
+#     rhythm), so "sparse" thins the comping pattern and "full" plays
+#     every onset.
+#   - groove remains intentionally inert here, same as it already is for
+#     melody's "motif" rhythm source: the motif cell IS the rhythm, there
+#     is no grid for a groove to shape. lint.py flags harmony_rhythm.groove
+#     set alongside rhythm="motif" as a no-op rather than leaving it silent.
+HarmonyRhythmSourceLiteral = Literal["pattern", "sustain", "free", "motif"]
 TransformLiteral   = Literal[
     "original", "inversion", "retrograde", "retrograde_inversion",
     "augmentation", "diminution", "transpose_up", "transpose_down",
@@ -187,12 +205,18 @@ class HarmonyRhythmModel(BaseModel):
     length comes from the rhythm source ("sustain" holds the harmonic span;
     "motif" takes durations from the motif cell). extra="forbid" now rejects
     it loudly instead of lying.
+
+    ``motif`` (string library reference or embedded dict) names harmony's
+    own motif when ``rhythm == "motif"``. Omitted -> falls back to the
+    section's active theme motif. Ignored (see lint.py) when rhythm isn't
+    "motif" -- there's nothing for it to feed.
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     rhythm:        Optional[HarmonyRhythmSourceLiteral] = None
     density:       Optional[DensityLiteral]             = None
     groove:        Optional[str]                        = None
+    motif:         Optional[Union[str, dict]]            = None
     # 0.0 = off, 1.0 = heaviest swing. Internally remapped via
     # rhythm.remap_swing_ratio() before use — do not confuse with the
     # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
@@ -269,13 +293,21 @@ class VoiceModel(BaseModel):
     engine generates them sequentially; each voice reads the snapshots of
     all previously generated voices so it can avoid collisions.
 
-    Deliberately minimal (2026-07 simplification): earlier revisions also
-    carried ``motif`` and ``rhythm`` fields, but neither was ever actually
-    read by the generator for peer voices — they validated cleanly and did
-    nothing, the same silent-gap pattern found and fixed elsewhere in this
-    engine (see the harmony-motif retirement). Removed rather than left as
-    dead weight; a section that still has them will now fail validation
-    loudly instead of silently ignoring them.
+    2026-07 history: an earlier revision carried ``motif`` and ``rhythm``
+    fields, but neither was ever actually read by the generator for peer
+    voices — they validated cleanly and did nothing, so they were removed
+    rather than left as dead weight (same silent-gap pattern found and
+    fixed elsewhere in this engine; see the harmony-motif retirement note
+    on HarmonyRhythmSourceLiteral). ``rhythm`` stays removed — still
+    unconsumed. ``motif`` is reinstated here, properly wired this time:
+    the LEAD voice's ``motif`` (section.melody given in dict form, or
+    voices[0]) overrides the theme's motif for melody generation only —
+    see generator.py's melody_motif_def resolution. It is a string
+    (library reference) or an embedded dict; omitted -> falls back to the
+    theme's motif, zero extra effort. Non-lead peer voices may still set
+    it schema-legally but it is currently only consumed for the lead
+    voice — see lint.py's _check_voice_motif for the pitch-shaping gate
+    (behavior must be "develop") that applies regardless of voice position.
 
     ``register`` maps to MIDI pitch ranges — see REGISTER_BOUNDS above.
     ``above`` / ``below`` are relative aliases accepted for counterpoint compat.
@@ -285,6 +317,10 @@ class VoiceModel(BaseModel):
     v_register: VoiceRegisterLiteral = Field(default="mid", alias="register")
     behavior:   MelodyLiteral                               = "lyrical"
     velocity:   Annotated[int, Field(ge=1, le=127)]         = 64
+
+    # Independent per-voice motif override (string ref or embedded dict).
+    # See class docstring — currently wired for the lead voice only.
+    motif:      Optional[Union[str, dict]]                   = None
 
     # Species — present → counterpoint.py path; absent → melody.py path.
     # Confirmed working end-to-end (chord-aware consonance filtering,
@@ -389,6 +425,27 @@ class MotifModel(BaseModel):
 # ═══════════════════════════════════════════════════════════════════════════════
 # SectionModel
 # ═══════════════════════════════════════════════════════════════════════════════
+
+def _resolve_motif_value_safe(value: Optional[Union[str, dict]]):
+    """
+    Resolve a voice/harmony_rhythm motif override value (string ref or
+    embedded dict) for cross-model validation in SectionModel.
+    validate_against_theme. Wraps motif_loader errors (bad name, malformed
+    file) into ValueError so a bad override surfaces with the same
+    exception type as every other check in that method, rather than a bare
+    FileNotFoundError bubbling up from a different module.
+
+    Returns None for a None value — that's the "not overridden, fall back
+    to the theme" case, not an error.
+    """
+    if value is None:
+        return None
+    from intervals.core.motif_loader import resolve_motif_value
+    try:
+        return resolve_motif_value(value)
+    except (FileNotFoundError, ValueError, TypeError) as exc:
+        raise ValueError(f"could not resolve motif override: {exc}") from exc
+
 
 class SectionModel(BaseModel):
     """
@@ -705,33 +762,51 @@ class SectionModel(BaseModel):
         Validate rhythm-source prerequisites that depend on theme content.
         Migrated from the cross-validate block in validate_piece().
 
-        Raises ValueError if rhythm='motif' but the theme has no motif rhythm.
-        Call PieceModel.validate_against_theme(theme_model) to run this for
-        every section at once.
+        Raises ValueError if rhythm='motif' but neither the theme nor the
+        relevant independent override (voice.motif / harmony_rhythm.motif)
+        supplies a motif rhythm. Call PieceModel.validate_against_theme(
+        theme_model) to run this for every section at once.
         """
         primary = theme_model.primary_motif
         theme_has_rhythm = primary is not None and primary.rhythm is not None
         label = self.name or "?"
 
-        if self.rhythm == "motif" and not theme_has_rhythm:
+        lead = self.lead_voice()
+        voice_motif_value    = lead.motif if lead is not None else None
+        harmony_motif_value  = (
+            self.harmony_rhythm.motif if self.harmony_rhythm is not None else None
+        )
+        voice_motif    = _resolve_motif_value_safe(voice_motif_value)
+        harmony_motif  = _resolve_motif_value_safe(harmony_motif_value)
+        voice_has_rhythm   = voice_motif is not None and voice_motif.rhythm is not None
+        harmony_has_rhythm = harmony_motif is not None and harmony_motif.rhythm is not None
+
+        if self.rhythm == "motif" and not theme_has_rhythm and not voice_has_rhythm:
             raise ValueError(
-                f"Section '{label}': rhythm='motif' but the theme's primary "
-                f"motif has no 'rhythm' field"
+                f"Section '{label}': rhythm='motif' but neither the theme's "
+                f"primary motif nor the lead voice's own 'motif' override "
+                f"has a 'rhythm' field"
             )
         if (
             self.harmony_rhythm is not None
             and self.harmony_rhythm.rhythm == "motif"
             and not theme_has_rhythm
+            and not harmony_has_rhythm
         ):
             raise ValueError(
                 f"Section '{label}': harmony_rhythm.rhythm='motif' but "
-                f"the theme's primary motif has no 'rhythm' field"
+                f"neither the theme's primary motif nor harmony_rhythm's "
+                f"own 'motif' override has a 'rhythm' field"
             )
 
         # Any of these three consume the theme's motif rhythm directly, whether
         # or not the section's own `rhythm` field says "motif" — bass_style
         # "motif" reads the theme's motif independently of the section's
         # rhythm source, and harmony_rhythm has its own separate switch.
+        # (bass never reads voice.motif / harmony_rhythm.motif — those two
+        # overrides are melody- and harmony-scoped only — so bass_style
+        # "motif" is checked against the theme pool exclusively, same as
+        # before this feature existed.)
         uses_motif_rhythm = (
             self.rhythm == "motif"
             or (self.harmony_rhythm is not None and self.harmony_rhythm.rhythm == "motif")
@@ -748,21 +823,48 @@ class SectionModel(BaseModel):
                 [theme_model.motif] if theme_model.motif else []
             )
             for m in candidates:
-                if m is None or m.rhythm is None:
+                if m is None:
                     continue
-                total = sum(m.rhythm)
-                remainder = total % self.beats_per_bar
-                if remainder > 1e-6 and abs(remainder - self.beats_per_bar) > 1e-6:
-                    raise ValueError(
-                        f"Section '{label}': motif '{m.name or '?'}' has a rhythm "
-                        f"totaling {total:g} beats, which is not a whole multiple "
-                        f"of this section's beats_per_bar ({self.beats_per_bar}). "
-                        f"{total:g} / {self.beats_per_bar} = {total / self.beats_per_bar:g}. "
-                        f"A motif cycle that doesn't line up with the bar means its "
-                        f"phase drifts relative to the barline on every repeat — "
-                        f"extend or trim the motif's rhythm so its total is a clean "
-                        f"multiple of {self.beats_per_bar}."
-                    )
+                self._check_bar_alignment(m.name, m.rhythm, label)
+
+        # Independent per-voice / per-harmony motif rhythm-alignment checks.
+        # A voice or harmony_rhythm that names its own motif (rather than
+        # falling back to the theme's) can have a rhythm cell whose own
+        # total doesn't line up with the bar either — same failure mode as
+        # the theme-pool loop above, just against a different motif source,
+        # and one the loop above can't see since it only reads the theme.
+        if voice_motif is not None:
+            self._check_bar_alignment(voice_motif.name, voice_motif.rhythm, label, where="voice.motif")
+        if harmony_motif is not None:
+            self._check_bar_alignment(harmony_motif.name, harmony_motif.rhythm, label, where="harmony_rhythm.motif")
+
+    def _check_bar_alignment(
+        self,
+        motif_name: Optional[str],
+        motif_rhythm: Optional[list[float]],
+        label: str,
+        where: str = "motif",
+    ) -> None:
+        """
+        Shared by the theme-pool loop and the independent voice/harmony
+        motif checks in validate_against_theme — raises if a motif's
+        rhythm cell total isn't a whole multiple of beats_per_bar.
+        """
+        if motif_rhythm is None:
+            return
+        total = sum(motif_rhythm)
+        remainder = total % self.beats_per_bar
+        if remainder > 1e-6 and abs(remainder - self.beats_per_bar) > 1e-6:
+            raise ValueError(
+                f"Section '{label}': {where} '{motif_name or '?'}' has a rhythm "
+                f"totaling {total:g} beats, which is not a whole multiple "
+                f"of this section's beats_per_bar ({self.beats_per_bar}). "
+                f"{total:g} / {self.beats_per_bar} = {total / self.beats_per_bar:g}. "
+                f"A motif cycle that doesn't line up with the bar means its "
+                f"phase drifts relative to the barline on every repeat — "
+                f"extend or trim the motif's rhythm so its total is a clean "
+                f"multiple of {self.beats_per_bar}."
+            )
 
     # ── Convenience helpers ───────────────────────────────────────────────────
 

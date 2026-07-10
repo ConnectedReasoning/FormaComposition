@@ -69,6 +69,11 @@ LONG_EVEN_SPLIT_BARS_THRESHOLD: float = 4.0
 COUPLINGS: list[str] = [
     "voice.motif       is heard only when voice.behavior == 'develop' "
     "(other behaviors ignore the motif's pitch shape).",
+    "harmony_rhythm.motif  is heard only when harmony_rhythm.rhythm == "
+    "'motif' (any other harmony source never resolves or reads it).",
+    "harmony_rhythm.groove  is a no-op when harmony_rhythm.rhythm == "
+    "'motif' — the motif cell supplies its own fixed onset grid, same as "
+    "melody's 'motif' rhythm source.",
     "section.motif / section.motifs  are not read at render time; only the "
     "theme's motif pool is consulted. Section-level overrides do nothing.",
     "section.harmony_rest_probability  is a no-op on harmony source 'sustain' "
@@ -149,6 +154,48 @@ def _check_voice_motif(section: SectionModel) -> Iterator[Contradiction]:
             fix="set this voice's behavior to 'develop' to hear the motif, "
                 "or drop the motif field if the free line is intended.",
         )
+
+
+def _check_harmony_motif_without_motif_rhythm(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    harmony_rhythm.motif names a motif for harmony, but it's only resolved
+    and rendered when harmony_rhythm.rhythm == 'motif'. Any other harmony
+    source (sustain/pattern/free, or an unset .rhythm that falls back to
+    the section's rhythm) never looks at .motif at all.
+    """
+    hr = section.harmony_rhythm
+    if hr is None or hr.motif is None:
+        return
+    if hr.rhythm == "motif":
+        return
+    motif_desc = hr.motif if isinstance(hr.motif, str) else "inline motif"
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"harmony_rhythm.motif={motif_desc!r} is set",
+        cause=f"harmony_rhythm.rhythm={hr.rhythm!r} (not 'motif')",
+        effect="the named motif is never resolved or heard in harmony",
+        fix="set harmony_rhythm.rhythm='motif' to hear it, or drop "
+            "harmony_rhythm.motif.",
+    )
+
+
+def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    groove is inert once harmony_rhythm.rhythm == 'motif': the motif cell
+    supplies its own fixed onset grid tiled across the section, the same
+    way melody's 'motif' rhythm source already ignores groove.
+    """
+    hr = section.harmony_rhythm
+    if hr is None or hr.rhythm != "motif" or hr.groove is None:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"harmony_rhythm.groove={hr.groove!r}",
+        cause="harmony_rhythm.rhythm='motif' supplies its own fixed onset cell",
+        effect="groove is never consulted for this harmony source",
+        fix="drop harmony_rhythm.groove, or switch to rhythm='free' to use "
+            "grooves.",
+    )
 
 
 def _check_section_motif_override(section: SectionModel) -> Iterator[Contradiction]:
@@ -270,6 +317,8 @@ def _check_even_chord_split(section: SectionModel) -> Iterator[Contradiction]:
 
 CHECKS = [
     _check_voice_motif,
+    _check_harmony_motif_without_motif_rhythm,
+    _check_harmony_motif_groove_noop,
     _check_section_motif_override,
     _check_harmony_rest_on_sustain,
     _check_bass_rest_on_continuous,

@@ -608,11 +608,28 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
 
 class _MotifHarmonyStrategy(HarmonyStrategy):
     """
-    Harmony source: "motif" (stressed articulation — strong beats only)
+    Harmony source: "motif" — reintroduced 2026-07 as an independent
+    per-section onset stream (see the HarmonyRhythmSourceLiteral comment
+    in schemas.py for the full history/design rationale).
 
-    Priority dispatch mirrors _PatternHarmonyStrategy:
+    generator.py's generate_section() resolves harmony's own motif
+    (harmony_rhythm.motif, falling back to the section's active theme
+    motif) and tiles its rhythm across the WHOLE section — independent of
+    chord-change points — into harmony_section_events, honoring density
+    via onset articulation (full/stressed/anchor). _enrich_chords_with_rhythm
+    then slices that continuous stream into each chord's local window and
+    attaches it as chord.rhythm_events (the DNA path below), so a comping
+    pattern keeps its own life through a chord change rather than
+    resetting at every chord boundary.
+
+    Priority dispatch mirrors _PatternHarmonyStrategy — same consumption
+    shape, different upstream source for the section-wide event list:
       1. chord.rhythm_events       — DNA: pre-enriched chord-local events.
-      2. rctx.precomputed_events   — global motif stencil, sliced on demand.
+      2. rctx.precomputed_events   — global motif stencil, sliced on demand
+                                      (legacy path — DNA should cover every
+                                      chord once enrichment runs, but this
+                                      stays as the same escape hatch
+                                      _PatternHarmonyStrategy keeps).
       3. Single sustain event      — fallback.
     """
 
@@ -810,11 +827,7 @@ HarmonyStrategyRegistry = _StrategyRegistry(
     strategies=[
         _SustainHarmonyStrategy(),
         _PatternHarmonyStrategy(),
-        # _MotifHarmonyStrategy retired 2026-07 (see schemas.py note on
-        # HarmonyRhythmSourceLiteral). Class left defined below in case it's
-        # ever wanted again, but deliberately unregistered: any code path
-        # that still produces source=="motif" should hit registry.resolve()
-        # and raise a clear KeyError, not silently succeed.
+        _MotifHarmonyStrategy(),
         _FreeHarmonyStrategy(),
     ],
     name="harmony source",
@@ -891,7 +904,18 @@ def build_harmony_rhythm_context(
     _hr_block: dict = {"rhythm": _hr_raw} if isinstance(_hr_raw, str) else _hr_raw
 
     rhythm_fallback = section.get("rhythm", "free")
-    h_source   = _hr_block.get("rhythm",   rhythm_fallback)
+    _explicit_h_rhythm = _hr_block.get("rhythm")
+    h_source   = _explicit_h_rhythm or rhythm_fallback
+
+    # "motif" is only a legitimate harmony rhythm source when explicitly
+    # set on the harmony_rhythm block itself. Inheriting it from
+    # section.rhythm (the fallback above) would reopen the exact back door
+    # "motif" was retired for — nearly every melodic section sets
+    # rhythm="motif", so an omitted harmony_rhythm block must still default
+    # to "free", not silently activate the independent harmony-motif
+    # mechanism nobody asked for. See schemas.py HarmonyRhythmSourceLiteral.
+    if h_source == "motif" and _explicit_h_rhythm != "motif":
+        h_source = "free"
 
     # HR block can override density, groove, and swing per-section.
     # Falls back to the section-level values so omitting the field is safe.

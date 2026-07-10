@@ -105,6 +105,9 @@ def display_info(theme: dict, piece: dict) -> None:
                 hr_parts.append(f"swing={hr['swing']}")
             if hr.get("note_duration"):
                 hr_parts.append(f"note_duration={hr['note_duration']}")
+            if hr.get("motif"):
+                hr_motif = hr["motif"]
+                hr_parts.append(f"motif={hr_motif if isinstance(hr_motif, str) else '(inline)'}")
             if hr_parts:
                 print(f"      harmony_rhythm: {', '.join(hr_parts)}")
 

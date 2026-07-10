@@ -137,15 +137,19 @@ def build_harmony_rhythm_context_from_model(
     #   .rhythm left None — silently producing h_source=None (and later a
     #   KeyError at dispatch) for any harmony_rhythm block that set
     #   density/groove without also setting rhythm.
-    h_source = (hr.rhythm if hr is not None else None) or section.rhythm
+    _explicit_h_rhythm = hr.rhythm if hr is not None else None
+    h_source = _explicit_h_rhythm or section.rhythm
 
-    # "motif" is not a valid harmony rhythm source (retired 2026-07 — see
-    # schemas.py). An explicit harmony_rhythm.rhythm can never be "motif"
-    # anymore (schema forbids it), but this line still inherits it from
-    # section.rhythm when harmony_rhythm is absent/unset — nearly every
-    # melodic section sets rhythm="motif". Coerce here rather than let it
-    # dispatch to a retired strategy.
-    if h_source == "motif":
+    # "motif" is a valid harmony rhythm source again (reintroduced 2026-07,
+    # see schemas.py HarmonyRhythmSourceLiteral) — but only when set
+    # explicitly on the harmony_rhythm block itself. This line still
+    # inherits section.rhythm when harmony_rhythm is absent/unset, and
+    # nearly every melodic section sets rhythm="motif" — letting that
+    # inheritance activate harmony's independent motif mechanism would
+    # reopen the exact back door "motif" was retired for the first time.
+    # Coerce the *inherited* case to "free"; the *explicit* case dispatches
+    # to _MotifHarmonyStrategy normally.
+    if h_source == "motif" and _explicit_h_rhythm != "motif":
         h_source = "free"
 
     # Harmony-specific overrides (groove / density come from the hr block when set)
