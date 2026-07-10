@@ -443,21 +443,21 @@ def generate_section(
     progression  = section_model.resolved_progression()  # tiled when chord_bars is a repeating cell
     bars         = section_model.bars or 8.0
     density      = section_model.density
-    melody_beh   = section_model.melody
+    melody_beh   = section_model.melody_behavior()
     bass_style   = section_model.bass_style
     beats_per_bar= section_model.beats_per_bar
     groove       = section_model.groove
     swing        = section_model.swing
 
     # ── Peer-voices lead ──────────────────────────────────────────────────
-    # When section.voices is present, the FIRST voice is the lead line and
-    # drives the "melody" generation below (behavior, register, velocity,
-    # rest probability, motif). Remaining voices are generated as peer
-    # tracks in generate_piece(). This keeps one code path for the lead
-    # line — everything downstream (bass snapshot, harmony, counterpoint
-    # against_voices) still reads melody_notes — while letting voices[0]
-    # specify an absolute register the plain `melody` field can't.
-    lead_voice = section_model.voices[0] if section_model.voices else None
+    # The lead voice may come from section.voices[0] (true multi-voice
+    # section) or from section.melody given in dict form ({behavior,
+    # register, velocity} instead of a bare behavior string) — lead_voice()
+    # resolves whichever was actually used. Remaining voices (if any) are
+    # generated as peer tracks in generate_piece(). This keeps one code
+    # path for the lead line — everything downstream (bass snapshot,
+    # harmony, counterpoint against_voices) still reads melody_notes.
+    lead_voice = section_model.lead_voice()
     lead_octave_bottom = MELODY_OCTAVE_BOTTOM
     lead_octave_top    = MELODY_OCTAVE_TOP
     lead_velocity      = 72
@@ -1019,17 +1019,12 @@ def generate_piece(
                     )
                 else:
                     # Melody-path peer: an independent generative/motif line
-                    # in this voice's own register. Named motifs from the
-                    # theme pool aren't resolved here yet (Phase 1) — an
-                    # inline motif dict works; a name falls back to the
-                    # voice's plain behavior.
+                    # in this voice's own register.
                     m_lo, m_hi = vb or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
-                    inline_motif = v.motif if isinstance(v.motif, dict) else None
                     peer_notes = generate_melody_for_progression(
                         chords, theme["key"], theme["mode"],
                         behavior=v.behavior, density=density,
                         bars_per_chord=bars_list, beats_per_bar=beats_per_bar,
-                        motif=inline_motif,
                         seed=base_seed + i * 10 + voice_idx,
                         octave_bottom=m_lo, octave_top=m_hi,
                         base_velocity=v.velocity,

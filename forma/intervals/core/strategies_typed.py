@@ -211,7 +211,7 @@ def build_melody_context_from_model(
     bars_list = section.bars_list()
 
     return MelodyContext(
-        behavior=section.melody,
+        behavior=section.melody_behavior(),
         chords=chords,
         key=key,
         mode=mode,
