@@ -2,23 +2,14 @@
   "theme": {
     "name": "broadway_boogie",
     "key": "F",
-    "mode": "ionian",
+    "mode": "mixolydian",
     "tempo": {
       "min": 110,
       "max": 130
     },
     "motif": {
       "name": "boogie_cell",
-      "intervals": [
-        0,
-        4,
-        7,
-        9,
-        10,
-        9,
-        7,
-        4
-      ],
+      "intervals": [0, 4, 3, 2, 1, -1, -2, -3],
       "rhythm": [
         1.5,
         0.5,
@@ -31,8 +22,8 @@
       ],
       "transform_pool": [
         "retrograde",
-        "diminution",
-        "augmentation"
+        "inversion",
+        "sequence"
       ],
       "notes": "Decouple pass (v3): reshaped from flat [0.5]*8 to a shaped 8-beat (2-bar) cell now that only melody (always) and harmony (accumulation/peak sections, via the 'stressed' >=median filter) consume it — the bass no longer reads this cell at all. Contour unchanged: root-3rd-5th-6th-b7-6th-5th-3rd, diatonic F Mixolydian. Melody onsets: 0, 1.5, 2, 3, 4, 4.5, 5, 6 — the off-beat pushes at 1.5/4.5 are the swing carriers. Harmony 'stressed' filter (median dur = 1.0) keeps slots 0,2,3,6,7: onsets 0, 2, 3, 5, 6 with durations 1.5/1/1/1/2 — five varied-length comp chords per 2-bar cycle, ALL on the beat by design, because the harmony path never receives swing (engine plumbing gap, logged) and on-beat chords are identical in straight and swung time. Off-beat comp onsets would flam against the swung melody."
     },
