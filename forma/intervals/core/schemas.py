@@ -151,7 +151,6 @@ VALID_TRANSFORMS            = set(get_args(TransformLiteral))
 
 _OBSOLETE_THEME_KEYS    = {"palette"}
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Sub-models
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -191,7 +190,6 @@ class RhythmPatternModel(BaseModel):
                 )
         return self
 
-
 class HarmonyRhythmModel(BaseModel):
     """
     Corresponds to section["harmony_rhythm"] block.
@@ -221,7 +219,6 @@ class HarmonyRhythmModel(BaseModel):
     # rhythm.remap_swing_ratio() before use — do not confuse with the
     # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
-
 
 class NoteLengthRangeModel(BaseModel):
     """
@@ -258,7 +255,6 @@ class NoteLengthRangeModel(BaseModel):
     def as_tuple(self) -> tuple[float, float]:
         return (self.min, self.max)
 
-
 class CounterpointModel(BaseModel):
     """Corresponds to section["counterpoint"] block."""
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -278,7 +274,6 @@ class CounterpointModel(BaseModel):
     # voice samples its durations in-range independently of the section-level
     # setting; when None it inherits the section's note_length_range (if any).
     note_length_range: Optional[NoteLengthRangeModel]   = None
-
 
 class VoiceModel(BaseModel):
     """
@@ -345,7 +340,6 @@ class VoiceModel(BaseModel):
         """True for 'above'/'below' — positioned relative to the lead voice."""
         return self.v_register in ("above", "below")
 
-
 class DrumModel(BaseModel):
     """
     Corresponds to section["drums"].
@@ -375,7 +369,6 @@ class DrumModel(BaseModel):
             self.groove  if self.groove  is not None else section_groove,
             self.swing   if self.swing   is not None else section_swing,
         )
-
 
 class MotifModel(BaseModel):
     """
@@ -421,7 +414,6 @@ class MotifModel(BaseModel):
                 )
         return self
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # SectionModel
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -445,7 +437,6 @@ def _resolve_motif_value_safe(value: Optional[Union[str, dict]]):
         return resolve_motif_value(value)
     except (FileNotFoundError, ValueError, TypeError) as exc:
         raise ValueError(f"could not resolve motif override: {exc}") from exc
-
 
 class SectionModel(BaseModel):
     """
@@ -940,7 +931,6 @@ class SectionModel(BaseModel):
         """Serialise back to a plain dict compatible with the legacy generator."""
         return self.model_dump(exclude_none=True)
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # Song-form models
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -952,7 +942,6 @@ class SongFormEntryModel(BaseModel):
     section:      str
     variation:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     exact_repeat: bool = False
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ThemeModel
@@ -968,7 +957,6 @@ class TempoRangeModel(BaseModel):
         if self.min > self.max:
             raise ValueError(f"tempo.min ({self.min}) must be ≤ tempo.max ({self.max})")
         return self
-
 
 class ThemeModel(BaseModel):
     """
@@ -1033,7 +1021,6 @@ class ThemeModel(BaseModel):
         if self.motifs:
             return self.motifs[0]
         return self.motif
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PieceModel
