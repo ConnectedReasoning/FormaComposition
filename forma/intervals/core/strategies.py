@@ -287,6 +287,12 @@ class HarmonyChordContext:
 
     # Articulation / expression
     arc: str                           # velocity arc shape (e.g. "swell")
+    # This chord's normalised position within its SECTION: 0.0 at the section's
+    # first chord, 1.0 at its last. The arc curve advances across these, so a
+    # section's dynamic shape spans the whole section rather than restarting at
+    # every chord. Computed by generate_piece()'s harmony loop, which is the
+    # only place that knows the section's chord layout.
+    arc_t: float = 0.0
     base_velocity: int = 65
     channel: int = _CHANNEL_HARMONY
 
@@ -459,6 +465,7 @@ def _build_chord_events(
     rest_probability: float = 0.0,
     rest_seed: int = 0,
     source: str = "",
+    arc_t: float = 0.0,
 ) -> list[tuple]:
     """
     Shared event-building kernel.  Given a list of RhythmEvents for one chord
@@ -479,7 +486,9 @@ def _build_chord_events(
     if h_swing and h_swing > 0:
         rhythm_events = apply_swing(rhythm_events, swing_ratio=remap_swing_ratio(h_swing))
 
-    arced = apply_velocity_arc(rhythm_events, arc=arc, base_velocity=base_velocity)
+    arced = apply_velocity_arc(
+        rhythm_events, arc=arc, base_velocity=base_velocity, arc_t=arc_t,
+    )
     arced_list = [(ev, vel) for ev, vel in arced if not ev.is_rest]
 
     # Per-section harmony rest thinning. Guarded so it only ever thins a
@@ -555,7 +564,7 @@ class _SustainHarmonyStrategy(HarmonyStrategy):
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
             rest_probability=ctx.harmony_rest_probability,
-            rest_seed=rctx.seed, source=rctx.source,
+            rest_seed=rctx.seed, source=rctx.source, arc_t=ctx.arc_t,
         )
 
 
@@ -602,7 +611,7 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
             rest_probability=ctx.harmony_rest_probability,
-            rest_seed=rctx.seed, source=rctx.source,
+            rest_seed=rctx.seed, source=rctx.source, arc_t=ctx.arc_t,
         )
 
 
@@ -664,7 +673,7 @@ class _MotifHarmonyStrategy(HarmonyStrategy):
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
             rest_probability=ctx.harmony_rest_probability,
-            rest_seed=rctx.seed, source=rctx.source,
+            rest_seed=rctx.seed, source=rctx.source, arc_t=ctx.arc_t,
         )
 
 
@@ -692,7 +701,7 @@ class _FreeHarmonyStrategy(HarmonyStrategy):
             ctx.global_beat, ctx.beat_offset_local,
             ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
             rest_probability=ctx.harmony_rest_probability,
-            rest_seed=rctx.seed, source=rctx.source,
+            rest_seed=rctx.seed, source=rctx.source, arc_t=ctx.arc_t,
         )
 
 
@@ -952,6 +961,7 @@ def build_harmony_chord_context(
     global_beat: float,
     beat_offset_local: float,
     arc: str,
+    arc_t: float = 0.0,
     base_velocity: int = 65,
     channel: int = _CHANNEL_HARMONY,
     musical_time: Optional[MusicalTime] = None,
@@ -980,6 +990,7 @@ def build_harmony_chord_context(
         global_beat=global_beat,
         beat_offset_local=beat_offset_local,
         arc=arc,
+        arc_t=arc_t,
         base_velocity=base_velocity,
         channel=channel,
         musical_time=musical_time,

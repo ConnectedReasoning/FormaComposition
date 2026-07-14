@@ -34,7 +34,9 @@ from intervals.music.melody   import (
     MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
 )
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
-from intervals.music.rhythm   import RhythmEvent
+from intervals.music.rhythm   import (
+    RhythmEvent, arc_multiplier, VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
+)
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
 
@@ -163,52 +165,28 @@ def bpm_to_tempo(bpm: float) -> int:
 # Arc-driven velocity envelopes (composer behavior)
 # ---------------------------------------------------------------------------
 
-# Velocity clamp range applied after the arc multiplier (MIDI velocity units)
-VELOCITY_CLAMP_MIN = 40
-VELOCITY_CLAMP_MAX = 120
+# VELOCITY_CLAMP_MIN / VELOCITY_CLAMP_MAX now live in rhythm.py alongside
+# arc_multiplier() and are imported above — one clamp range for every voice
+# that shapes velocity by arc, rather than melody and harmony each declaring
+# their own.
 
 
 def velocity_envelope(arc: str, bar_index: int, total_bars: int) -> float:
     """
-    Return a velocity multiplier (0.6–1.25) for a bar position within a
-    section, shaped by the section's declared arc. This is what makes
-    "arc" an audible dynamic curve rather than a label.
+    Melody's time base for the shared arc curve: which *bar* of the section
+    this note falls in. Returns a velocity multiplier (0.6–1.25).
 
-    Curves (t = 0.0 at first bar, 1.0 at final bar):
-      swell:    0.75 → 1.10, quadratic rise
-      build:    0.70 → 1.20, quadratic rise steeper than swell
-      fade_out / fade: 1.00 → 0.65, linear fall
-      fade_in:  0.65 → 1.00, linear rise
-      breath:   arch — 0.85 at the edges, peaking 1.15 at midpoint
-      plateau:  flat 1.0
-      decay:    0.95 → 0.70, gradual linear fall
-      anything else: 1.0 (neutral — guarantees no change for unknown arcs)
+    The curve shapes themselves live in rhythm.arc_multiplier() — this
+    function's only job is melody's t computation (t = 0.0 at the first bar,
+    1.0 at the final bar). Harmony computes its own t from chord onsets in
+    generate_piece()'s harmony loop and calls the same curve.
     """
     if total_bars <= 1:
         t = 0.0
     else:
         t = bar_index / (total_bars - 1)
-    t = max(0.0, min(1.0, t))
 
-    if arc == "swell":
-        m = 0.75 + 0.35 * (t ** 2)
-    elif arc == "build":
-        m = 0.70 + 0.50 * (t ** 2)
-    elif arc in ("fade_out", "fade"):
-        m = 1.00 - 0.35 * t
-    elif arc == "fade_in":
-        m = 0.65 + 0.35 * t
-    elif arc == "breath":
-        import math as _math
-        m = 0.85 + 0.30 * _math.sin(_math.pi * t)
-    elif arc == "plateau":
-        m = 1.0
-    elif arc == "decay":
-        m = 0.95 - 0.25 * t
-    else:
-        m = 1.0
-
-    return max(0.6, min(1.25, m))
+    return arc_multiplier(arc, t)
 
 
 # ---------------------------------------------------------------------------
@@ -1256,8 +1234,19 @@ def generate_piece(
         arc = res.section_model.arc
         beat_offset_local = 0.0
 
+        # Harmony's time base for the shared arc curve (rhythm.arc_multiplier).
+        # t is the chord's onset offset within THIS section, normalised so the
+        # section's final chord lands exactly on t=1.0 — hence the denominator
+        # is the final chord's start offset, not the section's total length.
+        # This mirrors melody's velocity_envelope(), which normalises by the
+        # last bar's index (total_bars - 1), not the bar count. A single-chord
+        # section gives a zero span and pins t=0.0, matching melody's
+        # total_bars <= 1 case.
+        arc_span = total_beats - (bars_list[-1] * beats_per_bar) if bars_list else 0.0
+
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
+            arc_t = (beat_offset_local / arc_span) if arc_span > 0 else 0.0
 
             hrctx = build_harmony_rhythm_context_from_model(
                 section=section_model,
@@ -1274,6 +1263,7 @@ def generate_piece(
                 global_beat=global_beat,
                 beat_offset_local=beat_offset_local,
                 arc=arc,
+                arc_t=arc_t,
                 harmony_rest_probability=section_model.harmony_rest_probability,
             )
             all_chord_events.extend(

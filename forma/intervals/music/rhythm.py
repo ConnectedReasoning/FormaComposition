@@ -811,34 +811,86 @@ def apply_swing(events: list[RhythmEvent], swing_ratio: float = 0.67) -> list[Rh
 # Velocity shaping over time (arc)
 # ---------------------------------------------------------------------------
 
+# Velocity clamp range applied after the arc multiplier (MIDI velocity units).
+# Shared by every voice that shapes velocity by arc — melody's write-time
+# envelope in generator.py and harmony's chord-event builder both clamp here,
+# so one arc value means one dynamic range across the whole ensemble.
+VELOCITY_CLAMP_MIN = 40
+VELOCITY_CLAMP_MAX = 120
+
+
+def arc_multiplier(arc: str, t: float) -> float:
+    """
+    The single source of truth for what a declared `arc` means as a dynamic
+    curve. Returns a velocity multiplier (0.6–1.25) for a normalised position
+    `t` within a section (0.0 at the section's start, 1.0 at its end).
+
+    Every voice shares these curves; each voice computes its own `t` from
+    whatever time unit it naturally advances in (melody: bar index within the
+    section; harmony: chord onset offset within the section). That split is
+    deliberate — the *curve* is a shared musical decision, the *time base* is
+    a per-voice implementation detail.
+
+    Curves:
+      swell:    0.75 → 1.10, quadratic rise
+      build:    0.70 → 1.20, quadratic rise steeper than swell
+      fade_out / fade: 1.00 → 0.65, linear fall
+      fade_in:  0.65 → 1.00, linear rise
+      breath:   arch — 0.85 at the edges, peaking 1.15 at midpoint
+      plateau:  flat 1.0 — intentionally a strict no-op, not an unimplemented
+                branch; a section declaring `plateau` wants no dynamic shaping.
+      decay:    0.95 → 0.70, gradual linear fall
+      anything else: 1.0 (neutral — guarantees no change for unknown arcs)
+    """
+    t = max(0.0, min(1.0, t))
+
+    if arc == "swell":
+        m = 0.75 + 0.35 * (t ** 2)
+    elif arc == "build":
+        m = 0.70 + 0.50 * (t ** 2)
+    elif arc in ("fade_out", "fade"):
+        m = 1.00 - 0.35 * t
+    elif arc == "fade_in":
+        m = 0.65 + 0.35 * t
+    elif arc == "breath":
+        m = 0.85 + 0.30 * math.sin(math.pi * t)
+    elif arc == "plateau":
+        m = 1.0
+    elif arc == "decay":
+        m = 0.95 - 0.25 * t
+    else:
+        m = 1.0
+
+    return max(0.6, min(1.25, m))
+
+
 def apply_velocity_arc(
     events: list[RhythmEvent],
     arc: str = "flat",
     base_velocity: int = 70,
+    arc_t: float = 0.0,
 ) -> list[tuple[RhythmEvent, int]]:
-    """Apply a velocity arc across events. Returns (event, velocity) pairs."""
-    n = len(events)
-    if n == 0:
+    """
+    Apply the section's velocity arc to one chord window's events.
+    Returns (event, velocity) pairs.
+
+    `arc_t` is this chord window's normalised position within its *section*
+    (0.0 at the section's first chord, 1.0 at its last), supplied by the
+    caller. It is deliberately NOT derived from the event index: these events
+    belong to a single chord window, so an index-derived t would restart the
+    curve at every chord — which is exactly the bug this signature replaces.
+    All events in one window share the window's multiplier; the curve advances
+    chord to chord, giving harmony a genuinely section-wide shape.
+    """
+    if not events:
         return []
 
-    result = []
-    for i, ev in enumerate(events):
-        t = i / max(n - 1, 1)
-        if arc == "flat":
-            arc_scale = 1.0
-        elif arc == "swell":
-            arc_scale = 1.0 - abs(t - 0.5) * 0.6
-        elif arc == "fade_in":
-            arc_scale = 0.5 + t * 0.5
-        elif arc == "fade_out":
-            arc_scale = 1.0 - t * 0.5
-        elif arc == "breath":
-            arc_scale = 0.75 + 0.25 * math.sin(t * 2 * math.pi)
-        else:
-            arc_scale = 1.0
+    arc_scale = arc_multiplier(arc, arc_t)
 
+    result = []
+    for ev in events:
         vel = int(base_velocity * ev.velocity_scale * arc_scale)
-        vel = max(20, min(127, vel))
+        vel = max(VELOCITY_CLAMP_MIN, min(VELOCITY_CLAMP_MAX, vel))
         result.append((ev, vel))
 
     return result
