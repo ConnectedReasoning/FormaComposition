@@ -452,17 +452,6 @@ class SectionModel(BaseModel):
     """
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
-    # Known structural keys — used for unknown-key warning
-    _KNOWN_KEYS: set[str] = {
-        "name", "bars", "chord_bars", "progression", "density", "melody",
-        "bass_style", "arc", "harmony_rhythm", "beats_per_bar", "groove",
-        "swing", "counterpoint", "notes", "percussion", "drums",
-        "rhythm_pattern", "harmony_pattern", "fugal_techniques",
-        "rhythm", "rest_probability", "key", "mode", "motif", "motifs",
-        "harmony_rest_probability", "bass_rest_probability",
-        "voices",
-    }
-
     # ── Identity ──────────────────────────────────────────────────────────────
     name:          Optional[str] = None
 
@@ -641,12 +630,17 @@ class SectionModel(BaseModel):
     @model_validator(mode="after")
     def _warn_unknown_keys(self) -> "SectionModel":
         """
-        Warn about keys outside the known structural set and flag obsolete keys.
-        Migrated from the VALID_SECTION_KEYS / rhythm_phrase checks in validate_piece().
-        Uses warnings.warn so generation continues; these are [WARN]-level issues.
+        Warn about section keys this model doesn't declare — typos, or keys
+        from an older schema version. Uses warnings.warn so generation
+        continues; these are [WARN]-level issues, not errors.
+
+        `model_extra` is exactly the set we want: because model_config is
+        extra="allow", Pydantic binds every declared field itself and leaves
+        only unrecognised keys here. So the field list IS the known-key list —
+        no separate roster to hand-maintain, and no way for a newly added
+        field to be flagged by mistake.
         """
-        extra_keys = set(self.model_extra or {})
-        unknown = extra_keys - self._KNOWN_KEYS
+        unknown = set(self.model_extra or {})
         if unknown:
             warnings.warn(
                 f"Section '{self.name}': unknown field(s) {sorted(unknown)} — "
