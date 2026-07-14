@@ -60,8 +60,7 @@ def display_info(theme: dict, piece: dict) -> None:
         for form_item in piece.get("form", []):
             if isinstance(form_item, dict):
                 section_name = form_item.get("section", "?")
-                variation = form_item.get("variation", 0.0)
-                print(f"    - {section_name} (variation={variation})")
+                print(f"    - {section_name}")
             else:
                 print(f"    - {form_item}")
         print(f"  Section definitions:")

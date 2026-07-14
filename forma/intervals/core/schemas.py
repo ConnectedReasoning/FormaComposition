@@ -940,7 +940,6 @@ class SongFormEntryModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     section:      str
-    variation:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     exact_repeat: bool = False
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1144,7 +1143,10 @@ class PieceModel(BaseModel):
     def iter_sections(self) -> list[SectionModel]:
         """
         Return sections in generation order for both form types.
-        For song form this is the expanded play order (before _apply_variation).
+        For song form this is the expanded play order: each `form` entry
+        resolved to its section definition, in sequence. Repeated entries
+        resolve to the same definition — they diverge at generation time via
+        per-repetition seed offsetting (see generator.py), not here.
         """
         if self.form_type == "narrative":
             return self.sections or []
