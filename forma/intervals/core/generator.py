@@ -674,6 +674,7 @@ def generate_section(
         mode=mode,
         seed=base_seed + seed_offset,
         motif=active_motif_def,
+        swing=swing,
         rhythm_events_override=bass_rhythm_events,
         rest_probability=section_model.bass_rest_probability,
     )

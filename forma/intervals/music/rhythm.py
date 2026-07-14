@@ -779,6 +779,34 @@ def remap_swing_ratio(swing: float) -> float:
     return 0.5 + (min(swing, 1.0) * 0.5)
 
 
+def swing_offset(start_beat: float, swing_ratio: float = 0.67) -> float:
+    """
+    The timing displacement, in beats, that swing applies to ONE onset.
+    Returns 0.0 for any onset swing doesn't touch.
+
+    This is the single definition of what swing does to a note. Swing delays
+    offbeat eighth notes (the "&") and leaves everything else alone, so an
+    all-on-beat line is identical straight or swung — there is nothing to move.
+
+    Exists as a per-onset primitive, not just inside apply_swing(), because
+    voices that build their own note placement (bass) need to consult the same
+    rule while deciding where a note goes, rather than having a blanket
+    transform run over their finished output. Shared math, per-voice decisions.
+
+    swing_ratio is the INTERNAL scale (0.5 = straight, 0.67 = triplet swing).
+    Callers holding a public 0.0-1.0 swing value must convert with
+    remap_swing_ratio() first.
+    """
+    if abs(swing_ratio - 0.5) < 0.001:
+        return 0.0
+    # Detect offbeat eighth notes: position is at the half-beat subdivision.
+    # Use modulo on the eighth-note grid (0.5 beats) rather than raw % 1.0
+    # so future time signatures don't silently break swing detection.
+    if abs((start_beat % 1.0) - 0.5) < 0.01:
+        return swing_ratio - 0.5
+    return 0.0
+
+
 def apply_swing(events: list[RhythmEvent], swing_ratio: float = 0.67) -> list[RhythmEvent]:
     """
     Apply swing by delaying offbeat eighth notes.
@@ -786,22 +814,21 @@ def apply_swing(events: list[RhythmEvent], swing_ratio: float = 0.67) -> list[Rh
     This is the INTERNAL scale — callers holding a public 0.0-1.0 swing
     value must convert with remap_swing_ratio() first, not pass it here
     directly.
-    """
-    if abs(swing_ratio - 0.5) < 0.001:
-        return list(events)
 
+    A blanket post-pass over a finished event list. Voices that make their own
+    placement decisions per note (see bass.py) call swing_offset() directly
+    instead — same rule, applied at generation time rather than after.
+    """
     swung = []
     for ev in events:
-        beat = ev.start_beat
-        # Detect offbeat eighth notes: position is at the half-beat subdivision.
-        # Use modulo on the eighth-note grid (0.5 beats) rather than raw % 1.0
-        # so future time signatures don't silently break swing detection.
-        frac = beat % 1.0
-        if abs(frac - 0.5) < 0.01:
-            offset = swing_ratio - 0.5
-            new_beat = beat + offset
-            new_dur = max(0.1, ev.duration_beats - offset)
-            swung.append(RhythmEvent(new_beat, new_dur, ev.velocity_scale, ev.is_rest))
+        offset = swing_offset(ev.start_beat, swing_ratio)
+        if offset:
+            swung.append(RhythmEvent(
+                ev.start_beat + offset,
+                max(0.1, ev.duration_beats - offset),
+                ev.velocity_scale,
+                ev.is_rest,
+            ))
         else:
             swung.append(ev)
     return swung

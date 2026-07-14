@@ -26,6 +26,7 @@ import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
+from intervals.music.rhythm import remap_swing_ratio, swing_offset
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -175,7 +176,7 @@ def scale_neighbors(note: int, scale_tones: list[int], direction: int = 0) -> li
 # ---------------------------------------------------------------------------
 
 def style_root_only(chords, bars_per_chord, beats_per_bar=4, density="sparse",
-                    velocity=70, **kwargs):
+                    velocity=70, swing_ratio: float = 0.5, **kwargs):
     """One root note per chord, held for full duration."""
     notes = []
     beat = 0.0
@@ -191,7 +192,7 @@ def style_root_only(chords, bars_per_chord, beats_per_bar=4, density="sparse",
 # ---------------------------------------------------------------------------
 
 def style_root_fifth(chords, bars_per_chord, beats_per_bar=4, density="medium",
-                     velocity=70, **kwargs):
+                     velocity=70, swing_ratio: float = 0.5, **kwargs):
     """Alternates root and fifth within each chord's duration."""
     notes = []
     beat = 0.0
@@ -211,7 +212,8 @@ def style_root_fifth(chords, bars_per_chord, beats_per_bar=4, density="medium",
 # ---------------------------------------------------------------------------
 
 def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
-                  velocity=72, key="C", mode="ionian", seed=None, **kwargs):
+                  velocity=72, key="C", mode="ionian", seed=None,
+                  swing_ratio: float = 0.5, **kwargs):
     """
     Classic walking bass: quarter notes on scale tones.
 
@@ -286,7 +288,8 @@ STEADY_FIGURES = [
 
 
 def style_steady(chords, bars_per_chord, beats_per_bar=4, density="medium",
-                 velocity=70, key="C", mode="ionian", seed=None, **kwargs):
+                 velocity=70, key="C", mode="ionian", seed=None,
+                 swing_ratio: float = 0.5, **kwargs):
     """
     A locked bass figure that repeats per chord.
     Picks one figure for the section and tiles it.
@@ -334,7 +337,8 @@ def style_steady(chords, bars_per_chord, beats_per_bar=4, density="medium",
 # ---------------------------------------------------------------------------
 
 def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
-                  velocity=72, key="C", mode="ionian", seed=None, **kwargs):
+                  velocity=72, key="C", mode="ionian", seed=None,
+                  swing_ratio: float = 0.5, **kwargs):
     """
     Expressive bass line through scale tones with its own contour.
 
@@ -416,8 +420,24 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 vel = velocity - 4 if (t % beats_per_bar) < 0.01 else max(55, velocity - 10)
 
             actual_dur = min(dur, remaining)
-            notes.append(BassNote(n, beat + t, actual_dur, vel))
+            # Swing-aware placement (L1). This line's only offbeat content is
+            # the occasional eighth-note pair above; in a swung section the
+            # second of that pair belongs late (long-short), not on the straight
+            # half-beat. Consult the ensemble's shared swing rule per note —
+            # every other onset here is on the beat and comes back untouched,
+            # so this is a decision, not a blanket transform.
+            onset = beat + t
+            off = swing_offset(onset, swing_ratio)
+            notes.append(BassNote(
+                n,
+                onset + off,
+                max(0.1, actual_dur - off) if off else actual_dur,
+                vel,
+            ))
             current = n
+            # The underlying grid does NOT move — only the onset is displaced,
+            # exactly as apply_swing does for melody. Advancing t by the swung
+            # offset would drift the whole line late.
             t += actual_dur
 
         beat += total
@@ -430,7 +450,7 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
 
 def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 velocity=68, key="C", mode="ionian", seed=None,
-                motif=None, **kwargs):
+                motif=None, swing_ratio: float = 0.5, **kwargs):
     """
     Threads the theme's motif (intervals + rhythm) through the bass line,
     re-anchoring to each chord's root as the harmony changes — the classic
@@ -510,8 +530,23 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
             actual_dur = min(dur, total - t)
             if not is_rest:
                 vel = int(velocity * vel_scale)
-                notes.append(BassNote(candidate, beat + t, actual_dur, vel))
+                # Swing-aware placement (M1). This style plays the SAME cell the
+                # melody plays, and that cell carries its groove in its offbeat
+                # pushes. If melody swings them and bass doesn't, the two voices
+                # land ~0.17 beats apart on the same gesture — a flam, not a
+                # groove. So bass's placement decision here is to lock: consult
+                # the same shared swing rule, displacing the identical onsets by
+                # the identical amount, so the shared cell reads as one gesture.
+                onset = beat + t
+                off = swing_offset(onset, swing_ratio)
+                notes.append(BassNote(
+                    candidate,
+                    onset + off,
+                    max(0.1, actual_dur - off) if off else actual_dur,
+                    vel,
+                ))
             current = candidate
+            # Grid advances unswung — only onsets are displaced (see style_melodic).
             t += actual_dur
             step += 1
 
@@ -524,7 +559,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
 # ---------------------------------------------------------------------------
 
 def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
-                velocity=75, subdivision=1.0, **kwargs):
+                velocity=75, subdivision=1.0, swing_ratio: float = 0.5, **kwargs):
     """Repeated root notes on every subdivision."""
     notes = []
     beat = 0.0
@@ -545,7 +580,7 @@ def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
 # ---------------------------------------------------------------------------
 
 def style_pedal(chords, bars_per_chord, beats_per_bar=4, density="sparse",
-                velocity=65, tonic_midi=None, **kwargs):
+                velocity=65, tonic_midi=None, swing_ratio: float = 0.5, **kwargs):
     """Holds a single pedal tone (tonic) throughout."""
     notes = []
     beat = 0.0
@@ -612,6 +647,7 @@ def generate_bass(
     mode: str = "ionian",
     seed: Optional[int] = None,
     motif: Optional[dict] = None,
+    swing: float = 0.0,
     rhythm_events_override: Optional[list] = None,
     rest_probability: float = 0.0,
     **kwargs,
@@ -697,8 +733,16 @@ def generate_bass(
         raise ValueError(f"Unknown bass style: '{style}'. Choose from {list(BASS_STYLES.keys())}.")
 
     fn = BASS_STYLES[style]
+    # `swing` is the public 0.0-1.0 section field; the placement rule
+    # (rhythm.swing_offset) works on the internal 0.5-straight scale, so convert
+    # once here — the same conversion melody does before calling apply_swing.
+    # Every style accepts swing_ratio; only those that can actually place a note
+    # off the beat (melodic, motif) consult it. For the rest it is inert because
+    # their onsets are all on the beat, where straight and swung are identical.
+    swing_ratio = remap_swing_ratio(swing) if swing and swing > 0 else 0.5
     notes = fn(chords, bars_per_chord, beats_per_bar, density, velocity,
-               key=key, mode=mode, seed=seed, motif=motif, **kwargs)
+               key=key, mode=mode, seed=seed, motif=motif,
+               swing_ratio=swing_ratio, **kwargs)
 
     # Style-path rest guard: walking/melodic lines rely on stepwise motion
     # into the next chord root, so random note drops break the line rather
