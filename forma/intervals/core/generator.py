@@ -573,8 +573,17 @@ def generate_section(
     # dumping harmony_pattern's Pydantic model to a plain dict.
     _explicit_h_rhythm = _hr_model.rhythm if _hr_model is not None else None
 
+    # harmony_pattern is its own independent SectionModel field (schemas.py:489)
+    # — schema-legal even with no harmony_rhythm block at all (section.rhythm
+    # inherits to "pattern", harmony_pattern set on its own). The original
+    # switchboard read section_model.harmony_pattern unconditionally, with no
+    # dependency on _hr_model's presence; gating this on `_hr_model is not
+    # None` was a bug introduced during the ST-2b move, caught by a probe
+    # built specifically for the inherited-pattern-with-no-harmony_rhythm-
+    # block case (see session notes) — silently dropped a declared pattern
+    # and fell back to "free" for any section using it.
     _hr_harmony_pattern = None
-    if _hr_model is not None and section_model.harmony_pattern is not None:
+    if section_model.harmony_pattern is not None:
         _hr_harmony_pattern = section_model.harmony_pattern.model_dump(exclude_none=True)
 
     _harmony_motif_def, _harmony_motif_desc = None, "theme (shared default)"
