@@ -256,7 +256,7 @@ class MusicalTime:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Convenience helpers used by rhythm.py and strategies.py
+# Convenience helpers used by rhythm.py and harmony.py
 # ─────────────────────────────────────────────────────────────────────────────
 
 def beats_to_bar_and_local(

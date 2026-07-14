@@ -27,7 +27,10 @@ from typing import Optional
 import mido
 from mido import MidiFile, MidiTrack, Message, MetaMessage
 
-from intervals.music.harmony  import resolve_progression, VoicedChord, CHROMATIC
+from intervals.music.harmony  import (
+    resolve_progression, VoicedChord, CHROMATIC,
+    HarmonyStrategyRegistry, HarmonyRhythmContext, build_harmony_chord_context,
+)
 from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import (
     generate_melody_for_progression, MelodyNote,
@@ -48,11 +51,6 @@ from intervals.core.context import (
     SectionContext,
     VoiceSnapshot,
     compute_voice_snapshot,
-)
-from intervals.core.strategies import (
-    HarmonyStrategyRegistry,
-    HarmonyRhythmContext,
-    build_harmony_chord_context,
 )
 from intervals.core.schemas import (
     SectionModel,

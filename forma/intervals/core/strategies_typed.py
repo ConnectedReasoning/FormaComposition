@@ -1,23 +1,17 @@
 """
-strategies_typed.py — SectionModel-aware context factory.
+strategies_typed.py — SectionModel-aware context factory for harmony.
 
-Builds harmony's rhythm context from a validated SectionModel rather than a raw
+Builds HarmonyRhythmContext from a validated SectionModel rather than a raw
 dict, so there are no silent key-name typos or missing defaults.
-
-Item 9 / ST-0 note: this module also held typed builders for RhythmContext and
-MelodyContext. Neither was ever called — generator.py imported them and never
-used them, and the contexts they built belonged to the dead strategy registries.
-Both are deleted; harmony's builder is the one that is genuinely live.
 """
 
 from __future__ import annotations
 
 from typing import Optional
 
-from intervals.music.harmony import VoicedChord
+from intervals.music.harmony import VoicedChord, HarmonyRhythmContext
 from intervals.music.rhythm import RhythmEvent
 from intervals.core.schemas import SectionModel
-from intervals.core.strategies import HarmonyRhythmContext
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
