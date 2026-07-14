@@ -14,7 +14,7 @@ from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing, remap_swing_ratio,
-    _slice_events_into_window,
+    _slice_events_into_window, rhythm_pattern_to_events, _motif_rhythm_to_events,
 )
 
 # ---------------------------------------------------------------------------
@@ -1022,3 +1022,132 @@ def build_harmony_chord_context(
         musical_time=musical_time,
         harmony_rest_probability=harmony_rest_probability,
     )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Section-level rhythm source resolution — relocated from generator.py (item 9, ST-2b)
+# ═════════════════════════════════════════════════════════════════════════════
+#
+# This is harmony's other rhythm decision, distinct from build_harmony_chord_context
+# above: which source (sustain/pattern/motif/free) applies to the WHOLE section,
+# and what section-wide event stream (if any) that source produces. Formerly an
+# inline switchboard in generate_piece() — moved here so harmony owns both halves
+# of its rhythm decision in one module, matching build_harmony_chord_context's
+# per-chord half.
+#
+# Deliberately NOT moved here: resolving harmony's motif (harmony_rhythm.motif vs
+# the theme's active_motif_def fallback) and dumping harmony_pattern's Pydantic
+# model to a plain dict. Both are declared-config reads keyed off SectionModel,
+# same translation-layer work generate_piece() already does for melody's motif —
+# keeping them there avoids harmony.py importing schemas.py (a music -> core
+# import this module has never needed) and motif_loader.py (a further core ->
+# music zigzag). This function receives the resolved results as plain values.
+
+def resolve_harmony_section_events(
+    explicit_source: Optional[str],
+    melody_rhythm_source: str,
+    section_name: str,
+    total_beats_section: float,
+    density: str,
+    harmony_pattern: Optional[dict],
+    hr_density: Optional[str],
+    harmony_motif_def: Optional[dict],
+    harmony_motif_desc: str,
+) -> tuple:
+    """
+    Resolve harmony's rhythm source for one section into a section-wide event
+    stream (or sentinel), plus a description of what was chosen.
+
+    Returns (harmony_section_events, description):
+      harmony_section_events — "sustain" | list[RhythmEvent] | None.
+        None means "free": the _FreeHarmonyStrategy density grid handles it,
+        including the case where "pattern" was declared but no harmony_pattern
+        was actually supplied (silent no-op, preserved from the original
+        switchboard rather than "fixed" here — a relocation, not a bug hunt).
+      description — a ready-to-print string, possibly containing an embedded
+        newline (the inherited-motif coercion case produces two lines, exactly
+        as the original two separate print() calls did), or None when nothing
+        should be printed. This function never prints; the caller owns that
+        (item 9 ST-2b decision — voice modules return text, generate_piece()
+        prints it, matching how every other voice's summary line works).
+
+    explicit_source: harmony_rhythm.rhythm if a harmony_rhythm block is present
+      and set, else None. melody_rhythm_source: the section's top-level rhythm
+      (harmony's fallback when explicit_source is unset).
+    """
+    source = explicit_source or melody_rhythm_source
+
+    # "motif" is only valid for harmony when set EXPLICITLY on harmony_rhythm
+    # itself. Falling back to the section's top-level `rhythm` — "motif" for
+    # nearly every melodic section — would silently activate harmony's
+    # independent motif mechanism on every such section whether or not it was
+    # asked for. Coerce the inherited case to "free"; the explicit case is
+    # untouched. Falls through to the "free" branch below (not a separate
+    # return) so the two print lines the original produced — the coercion
+    # notice, then "free"'s own line — are both preserved.
+    lines = []
+    if source == "motif" and explicit_source != "motif":
+        source = "free"
+        lines.append("    Harmony rhythm: 'motif' inherited from section rhythm — "
+                      "not valid for harmony, defaulting to 'free'")
+
+    if source == "sustain":
+        lines.append("    Harmony rhythm: sustain")
+        return "sustain", "\n".join(lines)
+
+    if source == "pattern":
+        if harmony_pattern:
+            events = rhythm_pattern_to_events(harmony_pattern, total_beats=total_beats_section)
+            lines.append(f"    Harmony rhythm: hand-played pattern "
+                          f"({len(harmony_pattern['onsets'])} onsets)")
+            return events, "\n".join(lines)
+        # harmony_rhythm.rhythm == "pattern" but no harmony_pattern block was
+        # supplied. Original switchboard fell all the way through with no
+        # events, no print, no error — same here.
+        return None, ("\n".join(lines) if lines else None)
+
+    if source == "motif":
+        # Harmony's own motif, independent of melody's. Resolution (which
+        # motif, with what fallback) already happened in generate_piece();
+        # this function only validates the RESULT and decides what to do
+        # with it, which is a harmony-domain judgment, not a config read.
+        if not harmony_motif_def or not harmony_motif_def.get("rhythm"):
+            raise ValueError(
+                f"Section '{section_name}': harmony_rhythm.rhythm="
+                f"'motif' but no motif with a 'rhythm' field is available "
+                f"(neither harmony_rhythm.motif nor the theme's motif)"
+            )
+
+        # density selects onset articulation — full/stressed/anchor, the same
+        # subsetting _motif_rhythm_to_events already offers melody and bass —
+        # so density has a real, audible effect here instead of being
+        # silently ignored the way the retired version left it. groove is
+        # intentionally NOT consulted: the motif cell already IS the rhythm,
+        # same as melody's "motif" rhythm source. lint.py flags
+        # harmony_rhythm.groove set alongside this as a no-op.
+        h_density = hr_density if hr_density else density
+        articulation = {
+            "low": "anchor", "sparse": "anchor",
+            "medium": "stressed", "full": "full",
+        }.get(h_density, "stressed")
+
+        # Tiled across the WHOLE section (not per chord) so the onset stream
+        # runs continuously through chord changes — the "its own syncopated
+        # life against the bass" behavior the theme file asks for.
+        # _enrich_chords_with_rhythm slices this into each chord's local
+        # window; _MotifHarmonyStrategy consumes those slices exactly like
+        # _PatternHarmonyStrategy does.
+        events = _motif_rhythm_to_events(
+            harmony_motif_def["rhythm"], total_beats_section, articulation,
+            velocities=harmony_motif_def.get("velocities"),
+            rests=harmony_motif_def.get("rests"),
+        )
+        cycle = sum(harmony_motif_def["rhythm"])
+        lines.append(f"    Harmony rhythm: motif {articulation} ({len(events)} "
+                      f"onsets, {cycle:.1f}b cycle, density={h_density}, "
+                      f"motif={harmony_motif_desc}) — continuous across chord changes")
+        return events, "\n".join(lines)
+
+    # "free"
+    lines.append("    Harmony rhythm: free (density grid)")
+    return None, "\n".join(lines)
