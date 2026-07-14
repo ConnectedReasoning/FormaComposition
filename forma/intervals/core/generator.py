@@ -37,6 +37,7 @@ from intervals.music.counterpoint import generate_counterpoint, CounterpointNote
 from intervals.music.rhythm   import (
     RhythmEvent, arc_multiplier, blended_arc_multiplier, arc_blend_bars,
     VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
+    rhythm_pattern_to_events, _motif_rhythm_to_events, _slice_events_into_window,
 )
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
@@ -52,10 +53,6 @@ from intervals.core.strategies import (
     HarmonyStrategyRegistry,
     HarmonyRhythmContext,
     build_harmony_chord_context,
-    # Re-imported here so external callers (main.py, tests) don't need to change
-    rhythm_pattern_to_events,
-    _motif_rhythm_to_events,
-    _slice_events_into_window,
 )
 from intervals.core.schemas import (
     SectionModel,
@@ -363,10 +360,12 @@ def _write_events_to_track(track: MidiTrack, events: list[tuple]) -> None:
 # Hand-played rhythm pattern support
 # ---------------------------------------------------------------------------
 
-# rhythm_pattern_to_events, _motif_rhythm_to_events, and _slice_events_into_window
-# have been moved to intervals/core/strategies.py to avoid circular imports.
-# They are re-imported above and remain accessible from this module for
-# backward compatibility with any external callers.
+# rhythm_pattern_to_events, _motif_rhythm_to_events and _slice_events_into_window
+# now live in intervals/music/rhythm.py, alongside the other shared primitives.
+# They were parked in strategies.py only because that module could import
+# rhythm.py without a cycle — an import-graph accident, not a home. Imported
+# directly from rhythm above; the old re-export shim served no external caller
+# (grep-confirmed) and is gone.
 
 
 # ---------------------------------------------------------------------------
@@ -861,9 +860,8 @@ def _expand_song_form(piece: dict) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Harmony rhythm resolution helpers
 # ---------------------------------------------------------------------------
-# _resolve_harmony_rhythm, _slice_events_into_window and _motif_rhythm_to_events
-# have been moved to intervals/core/strategies.py to break circular imports.
-# They are re-imported at the top of this file and remain callable here.
+# _slice_events_into_window and _motif_rhythm_to_events now live in
+# intervals/music/rhythm.py (imported at the top of this file).
 # _resolve_harmony_rhythm has been removed — its logic now lives entirely
 # in the HarmonyStrategy subclasses (_SustainHarmonyStrategy, _FreeHarmonyStrategy,
 # _PatternHarmonyStrategy, _MotifHarmonyStrategy), dispatched via HarmonyStrategyRegistry.

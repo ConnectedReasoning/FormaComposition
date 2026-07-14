@@ -16,16 +16,11 @@ relocate it into harmony.py:
   HarmonyChordContext   — one chord's slice of it, plus the arc state
   HarmonyStrategy       — abstract base; one subclass per harmony rhythm source
   HarmonyStrategyRegistry — source label → strategy lookup
-
-Plus three voice-agnostic tiling helpers (rhythm_pattern_to_events,
-_motif_rhythm_to_events, _slice_events_into_window) that are shared by melody
-and harmony and live here only to avoid a circular import with generator.
 """
 
 from __future__ import annotations
 
 import random
-import statistics as _stats
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
@@ -34,6 +29,7 @@ from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing, remap_swing_ratio,
+    _slice_events_into_window,
 )
 from intervals.music.harmony import VoicedChord
 
@@ -41,147 +37,6 @@ from intervals.music.harmony import VoicedChord
 # Defined here so HarmonyStrategy subclasses don't import generator (circular).
 _CHANNEL_HARMONY = 1
 _REARTIC_GAP = 0.03   # beats — inaudible gap prevents note-off/on overlap
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Rhythm utility functions — live here to avoid circular imports with generator
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def rhythm_pattern_to_events(pattern: dict, total_beats: float) -> list[RhythmEvent]:
-    """
-    Convert a rhythm_pattern dict (from rhythm_extract.py) into a tiled
-    list of RhythmEvent covering total_beats.
-
-    The pattern is repeated as many times as needed to fill the section.
-    Last repetition is trimmed at the section boundary.
-    """
-    onsets = pattern["onsets"]
-    durations = pattern["durations"]
-    velocities = pattern.get("velocities", [0.7] * len(onsets))
-    cycle_length = pattern.get("length_beats", 8.0)
-
-    if not onsets or cycle_length <= 0:
-        return []
-
-    events = []
-    offset = 0.0
-    while offset < total_beats:
-        for i in range(len(onsets)):
-            abs_onset = offset + onsets[i]
-            if abs_onset >= total_beats:
-                break
-            dur = durations[i] if i < len(durations) else 0.5
-            dur = min(dur, total_beats - abs_onset)
-            vel = velocities[i] if i < len(velocities) else 0.7
-            events.append(RhythmEvent(
-                start_beat=abs_onset,
-                duration_beats=max(0.25, dur),
-                velocity_scale=vel,
-                is_rest=False,
-            ))
-        offset += cycle_length
-    return events
-
-
-def _motif_rhythm_to_events(
-    rhythm: list,
-    total_beats: float,
-    articulation: str = "full",
-    velocities: Optional[list] = None,
-    rests: Optional[list] = None,
-) -> list[RhythmEvent]:
-    """
-    Convert a motif rhythm (list of beat durations) to a tiled list of
-    RhythmEvent covering total_beats.
-
-    articulation controls onset density per voice:
-      "full"     — every onset (melody)
-      "stressed" — onsets >= median duration (harmony)
-      "anchor"   — downbeat only (bass)
-
-    rests: optional, same length as rhythm. True = this slot is silent and
-    is excluded from the emitted events regardless of articulation mode —
-    a rest never sounds, whether or not it would otherwise have been kept.
-    The slot's duration still occupies its place in the timing grid (onsets
-    for every other slot are computed exactly as if the rest weren't there),
-    it's just never selected into the output.
-    """
-    if not rhythm or total_beats <= 0:
-        return []
-    cycle_length = sum(rhythm)
-    if cycle_length <= 0:
-        return []
-
-    onsets = []
-    t = 0.0
-    for dur in rhythm:
-        onsets.append(t)
-        t += dur
-
-    if articulation == "anchor":
-        keep = [0]
-    elif articulation == "stressed":
-        median_dur = _stats.median(rhythm)
-        keep = [i for i, d in enumerate(rhythm) if d >= median_dur]
-        if 0 not in keep:
-            keep = [0] + keep
-    else:  # "full"
-        keep = list(range(len(rhythm)))
-
-    if rests is not None:
-        keep = [i for i in keep if not (i < len(rests) and rests[i])]
-
-    if velocities is None or len(velocities) != len(rhythm):
-        velocities = [0.8] * len(rhythm)
-
-    events = []
-    offset = 0.0
-    while offset < total_beats:
-        for i in keep:
-            abs_onset = offset + onsets[i]
-            if abs_onset >= total_beats:
-                break
-            dur = min(rhythm[i], total_beats - abs_onset)
-            if dur < 0.25:
-                continue
-            events.append(RhythmEvent(
-                start_beat=abs_onset,
-                duration_beats=dur,
-                velocity_scale=velocities[i],
-                is_rest=False,
-            ))
-        offset += cycle_length
-    return events
-
-
-def _slice_events_into_window(
-    events: list,
-    window_start: float,
-    window_length: float,
-    min_duration: float = 0.25,
-) -> list[RhythmEvent]:
-    """
-    Extract RhythmEvents whose start falls inside [window_start, window_start +
-    window_length), translated to window-local coordinates.
-
-    Events trimmed shorter than min_duration at the boundary are dropped.
-    """
-    window_end = window_start + window_length
-    sliced = []
-    for ev in events:
-        if ev.start_beat < window_start or ev.start_beat >= window_end:
-            continue
-        local_start = ev.start_beat - window_start
-        local_dur = min(ev.duration_beats, window_length - local_start)
-        if local_dur < min_duration:
-            continue
-        sliced.append(RhythmEvent(
-            start_beat=local_start,
-            duration_beats=local_dur,
-            velocity_scale=ev.velocity_scale,
-            is_rest=ev.is_rest,
-        ))
-    return sliced
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
