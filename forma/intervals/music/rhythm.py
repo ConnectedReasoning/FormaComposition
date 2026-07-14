@@ -891,11 +891,65 @@ def arc_multiplier(arc: str, t: float) -> float:
     return max(0.6, min(1.25, m))
 
 
+def arc_blend_bars(total_bars: float) -> float:
+    """
+    How many bars a section spends easing out of the previous section's ending
+    dynamic and into its own arc. 4 bars, capped at 25% of the section.
+
+    The 4 is a floor on *resolution*, not a taste call: harmony's arc advances
+    one sample per chord, and v7's chords are one bar, so a blend shorter than
+    ~4 bars gives the interpolator too few samples to read as a ramp — it just
+    relocates the section-boundary step a bar or two later. The 25% cap is the
+    counterweight: an 8-bar section would otherwise spend half its length
+    climbing out of its predecessor instead of stating its own shape.
+    """
+    return min(4.0, max(0.0, total_bars) * 0.25)
+
+
+def blended_arc_multiplier(
+    arc: str,
+    t: float,
+    prev_end: Optional[float] = None,
+    blend_t: float = 0.0,
+) -> float:
+    """
+    arc_multiplier(), but entering from wherever the previous section left off
+    instead of snapping to this arc's own starting value at the bar line.
+
+    At t=0 this returns `prev_end` exactly — the boundary is continuous by
+    construction. Over the first `blend_t` (a normalised span, i.e. the blend's
+    length expressed in this voice's own t units) it crossfades linearly to the
+    section's declared curve, and past that point the curve is untouched. A
+    section's *shape* is therefore always its own; only its entry is negotiated.
+
+    `prev_end=None` means there is no previous section (the first entry in the
+    form) — the curve starts at its own value, unblended.
+
+    Both voices call this with the same musical blend length; each converts it
+    into its own t units (melody: bars; harmony: beats). That's what keeps the
+    two voices easing across the boundary together rather than at their own
+    independent rates.
+    """
+    own = arc_multiplier(arc, t)
+
+    if prev_end is None or blend_t <= 0.0:
+        return own
+
+    t = max(0.0, min(1.0, t))
+    if t >= blend_t:
+        return own
+
+    w = t / blend_t                      # 0.0 at the boundary → 1.0 at blend end
+    return prev_end * (1.0 - w) + own * w
+
+
 def apply_velocity_arc(
     events: list[RhythmEvent],
     arc: str = "flat",
     base_velocity: int = 70,
     arc_t: float = 0.0,
+    prev_arc_end: Optional[float] = None,
+    arc_blend_t: float = 0.0,
 ) -> list[tuple[RhythmEvent, int]]:
     """
     Apply the section's velocity arc to one chord window's events.
@@ -912,7 +966,7 @@ def apply_velocity_arc(
     if not events:
         return []
 
-    arc_scale = arc_multiplier(arc, arc_t)
+    arc_scale = blended_arc_multiplier(arc, arc_t, prev_arc_end, arc_blend_t)
 
     result = []
     for ev in events:

@@ -35,7 +35,8 @@ from intervals.music.melody   import (
 )
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
 from intervals.music.rhythm   import (
-    RhythmEvent, arc_multiplier, VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
+    RhythmEvent, arc_multiplier, blended_arc_multiplier, arc_blend_bars,
+    VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
 )
 from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
 from intervals.music.percussion import generate_drums, DrumHit
@@ -171,22 +172,32 @@ def bpm_to_tempo(bpm: float) -> int:
 # their own.
 
 
-def velocity_envelope(arc: str, bar_index: int, total_bars: int) -> float:
+def velocity_envelope(
+    arc: str,
+    bar_index: int,
+    total_bars: int,
+    prev_arc_end: Optional[float] = None,
+    blend_bars: float = 0.0,
+) -> float:
     """
     Melody's time base for the shared arc curve: which *bar* of the section
     this note falls in. Returns a velocity multiplier (0.6–1.25).
 
-    The curve shapes themselves live in rhythm.arc_multiplier() — this
-    function's only job is melody's t computation (t = 0.0 at the first bar,
-    1.0 at the final bar). Harmony computes its own t from chord onsets in
-    generate_piece()'s harmony loop and calls the same curve.
+    The curve shapes themselves live in rhythm.arc_multiplier() /
+    rhythm.blended_arc_multiplier() — this function's only job is melody's t
+    computation (t = 0.0 at the first bar, 1.0 at the final bar) and converting
+    a blend length expressed in BARS into melody's own t units. Harmony does the
+    same conversion from beats in generate_piece()'s harmony loop, so both voices
+    ease across a section boundary over the same musical duration.
     """
     if total_bars <= 1:
         t = 0.0
+        blend_t = 0.0
     else:
         t = bar_index / (total_bars - 1)
+        blend_t = blend_bars / (total_bars - 1)
 
-    return arc_multiplier(arc, t)
+    return blended_arc_multiplier(arc, t, prev_arc_end, blend_t)
 
 
 # ---------------------------------------------------------------------------
@@ -1002,6 +1013,14 @@ def generate_piece(
 
     global_beat = 0.0
 
+    # Cross-section arc continuity. Carries the multiplier the previous section
+    # ENDED on (always arc_multiplier(prev_arc, 1.0) — melody's last bar and
+    # harmony's last chord both land on t=1.0) into the next section, so a
+    # section eases out of its predecessor's dynamic instead of snapping to its
+    # own arc's starting value at the bar line. None until the first section
+    # completes: the opening section has nothing to ease from.
+    prev_arc_end: Optional[float] = None
+
     for i, section in enumerate(sections):
 
         # ══════════════════════════════════════════════════════════
@@ -1245,6 +1264,13 @@ def generate_piece(
         # total_bars <= 1 case.
         arc_span = total_beats - (bars_list[-1] * beats_per_bar) if bars_list else 0.0
 
+        # Cross-section blend, expressed in harmony's t units. Same musical
+        # length as melody's (arc_blend_bars of the section), converted through
+        # harmony's own denominator rather than melody's.
+        section_bars = total_beats / beats_per_bar if beats_per_bar else 0.0
+        blend_bars = arc_blend_bars(section_bars)
+        arc_blend_t = ((blend_bars * beats_per_bar) / arc_span) if arc_span > 0 else 0.0
+
         for ci, chord in enumerate(chords):
             total_per_chord = bars_list[ci] * beats_per_bar
             arc_t = (beat_offset_local / arc_span) if arc_span > 0 else 0.0
@@ -1265,6 +1291,8 @@ def generate_piece(
                 beat_offset_local=beat_offset_local,
                 arc=arc,
                 arc_t=arc_t,
+                prev_arc_end=prev_arc_end,
+                arc_blend_t=arc_blend_t,
                 harmony_rest_probability=section_model.harmony_rest_probability,
             )
             all_chord_events.extend(
@@ -1287,11 +1315,15 @@ def generate_piece(
         # unknown arc) is a strict no-op so existing output is unchanged.
         section_arc = res.section_model.arc
         env_total_bars = max(1, int(round(total_beats / beats_per_bar)))
+        melody_blend_bars = arc_blend_bars(env_total_bars)
         for mn in melody_notes:
             vel = mn.velocity
             if not mn.is_rest and mn.midi_note is not None:
                 bar_index = int(mn.start_beat // beats_per_bar)
-                mult = velocity_envelope(section_arc, bar_index, env_total_bars)
+                mult = velocity_envelope(
+                    section_arc, bar_index, env_total_bars,
+                    prev_arc_end, melody_blend_bars,
+                )
                 if mult != 1.0:
                     vel = int(round(vel * mult))
                     vel = max(VELOCITY_CLAMP_MIN, min(VELOCITY_CLAMP_MAX, vel))
@@ -1333,6 +1365,14 @@ def generate_piece(
                     duration_beats=dh.duration_beats,
                     velocity=dh.velocity,
                 ))
+
+        # This section's ending dynamic becomes the next section's entry point.
+        # Deliberately the section's OWN curve value at t=1.0, not the blended
+        # one: the blend only negotiates a section's entry, so what it hands
+        # forward is the shape it actually declared, not an artifact of how it
+        # got there. Otherwise a chain of short sections would drag each other's
+        # entry values along and no section would ever reach its own arc.
+        prev_arc_end = arc_multiplier(res.section_model.arc, 1.0)
 
         global_beat += total_beats
 
