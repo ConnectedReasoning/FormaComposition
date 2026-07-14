@@ -49,8 +49,6 @@ from intervals.core.context import (
     compute_voice_snapshot,
 )
 from intervals.core.strategies import (
-    RhythmStrategyRegistry,
-    MelodyStrategyRegistry,
     HarmonyStrategyRegistry,
     HarmonyRhythmContext,
     build_harmony_chord_context,
@@ -72,11 +70,7 @@ from intervals.core.schemas import (
     VALID_HARMONY_RHYTHM_SOURCE,
     VALID_TRANSFORMS,
 )
-from intervals.core.strategies_typed import (
-    build_rhythm_context_from_model,
-    build_harmony_rhythm_context_from_model,
-    build_melody_context_from_model,
-)
+from intervals.core.strategies_typed import build_harmony_rhythm_context_from_model
 
 # ---------------------------------------------------------------------------
 # Constants

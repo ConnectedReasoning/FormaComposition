@@ -1,22 +1,25 @@
 """
-strategies.py — Strategy Pattern for rhythm and melody behavior selection.
+strategies.py — translation layer between a validated section and harmony's generation.
 
-Replaces the if/elif/else switchboards in generate_section with a clean
-dispatch mechanism. Each strategy is a self-contained unit that knows how
-to produce rhythm events or melody notes for one specific source/behavior.
+Scope note (item 9, ST-0): this module used to advertise a Strategy Pattern for
+EVERY voice — RhythmStrategy/MelodyStrategy registries meant to replace the
+if/elif switchboards in generate_section(). Those were never wired up: the
+registries had no callers, and the melody wrappers turned out to hold no logic
+at all (generator.py calls melody.py directly). They have been deleted rather
+than reconnected — per-voice dispatch belongs inside each voice module, the way
+counterpoint.py and bass.py already do it, not centralised in core/.
 
-Architecture:
-  RhythmContext       — immutable data bundle passed to every rhythm strategy
-  RhythmStrategy      — abstract base; concrete subclasses own one rhythm source
-  MelodyContext       — immutable data bundle passed to every melody strategy
-  MelodyBehaviorStrategy — abstract base; thin wrappers over generate_melody_for_progression
+What remains is harmony's path only, and only until item 9's later sub-tasks
+relocate it into harmony.py:
 
-Usage (in generate_section):
-  ctx = RhythmContext(...)
-  melody_events, bass_events = RhythmStrategyRegistry.resolve(rhythm_source).apply(ctx)
+  HarmonyRhythmContext  — section-scoped harmony rhythm config
+  HarmonyChordContext   — one chord's slice of it, plus the arc state
+  HarmonyStrategy       — abstract base; one subclass per harmony rhythm source
+  HarmonyStrategyRegistry — source label → strategy lookup
 
-  mctx = MelodyContext(...)
-  notes = MelodyStrategyRegistry.resolve(melody_beh).apply(mctx)
+Plus three voice-agnostic tiling helpers (rhythm_pattern_to_events,
+_motif_rhythm_to_events, _slice_events_into_window) that are shared by melody
+and harmony and live here only to avoid a circular import with generator.
 """
 
 from __future__ import annotations
@@ -32,7 +35,6 @@ from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing, remap_swing_ratio,
 )
-from intervals.music.melody import generate_melody_for_progression, MelodyNote
 from intervals.music.harmony import VoicedChord
 
 # MIDI channel for harmony voice — mirrors the constant in generator.py.
@@ -186,43 +188,6 @@ def _slice_events_into_window(
 # Data bundles — keep strategies decoupled from the raw section dict
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@dataclass(frozen=True)
-class RhythmContext:
-    """
-    Everything a RhythmStrategy needs to produce melody + bass rhythm events.
-    Constructed once per section from validated section/theme data.
-
-    musical_time holds the section's start position as a MusicalTime, giving
-    strategies bar-aware context (e.g. "are we on bar 4?") without manual
-    float modulo math.
-    """
-    source: str                        # "pattern" | "motif" | "free"
-    total_beats: float
-    density: str
-
-    # Hand-played pattern (used by PatternRhythmStrategy)
-    rhythm_pattern: Optional[dict] = None
-
-    # Motif rhythm (used by MotifRhythmStrategy)
-    motif_rhythm: Optional[list[float]] = None
-    motif_velocities: Optional[list[float]] = None
-
-    # Grid fallback parameters (used by FreeRhythmStrategy)
-    groove: Optional[str] = None
-    swing: float = 0.0
-    beats_per_bar: int = 4
-    seed: int = 42
-
-    # MusicalTime for this section's start position (optional — defaults to beat 0)
-    musical_time: Optional[MusicalTime] = None
-
-    @property
-    def section_start(self) -> MusicalTime:
-        """Section start as MusicalTime. Defaults to bar 0, beat 0 if not provided."""
-        if self.musical_time is not None:
-            return self.musical_time
-        return MusicalTime(bar=0, beat=0.0, beats_per_bar=self.beats_per_bar)
-
 
 @dataclass(frozen=True)
 class HarmonyRhythmContext:
@@ -328,130 +293,6 @@ class HarmonyChordContext:
             self.global_beat + self.beat_offset_local,
             beats_per_bar=self.harmony_rhythm_ctx.beats_per_bar,
         )
-
-
-@dataclass(frozen=True)
-class MelodyContext:
-    """
-    Everything a MelodyBehaviorStrategy needs to generate melody notes.
-    """
-    behavior: str
-    chords: list[VoicedChord]
-    key: str
-    mode: str
-    density: str
-    bars_per_chord: list[float]
-    beats_per_bar: int
-    motif: Optional[dict]
-    motif_pool: Optional[list[dict]]
-    groove: Optional[str]
-    swing: float
-    seed: int
-    section_name: str
-    rhythm_events_override: Optional[list[RhythmEvent]]
-    fugal_techniques: Optional[list]
-    rest_probability: float
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Rhythm strategies
-# ═══════════════════════════════════════════════════════════════════════════════
-
-class RhythmStrategy(ABC):
-    """
-    Abstract base: produce melody and bass rhythm event lists for a section.
-
-    Both lists cover the full section length (total_beats). The caller
-    passes them as rhythm_events_override into the bass and melody generators.
-    Returning None means "let the generator use its own density grid."
-    """
-
-    @abstractmethod
-    def apply(self, ctx: RhythmContext) -> tuple[
-        Optional[list[RhythmEvent]],   # melody rhythm
-        Optional[list[RhythmEvent]],   # bass rhythm
-    ]:
-        ...
-
-    @property
-    @abstractmethod
-    def label(self) -> str:
-        """Short human-readable name for console logging."""
-        ...
-
-
-class PatternRhythmStrategy(RhythmStrategy):
-    """
-    Rhythm source: "pattern"
-    Uses a hand-played RhythmExtract pattern (onsets / durations / velocities)
-    tiled to fill the section. Same events for melody and bass — the pattern
-    is the performance groove the user played in.
-    """
-
-    @property
-    def label(self) -> str:
-        return "pattern"
-
-    def apply(self, ctx: RhythmContext) -> tuple[
-        Optional[list[RhythmEvent]], Optional[list[RhythmEvent]]
-    ]:
-        rp = ctx.rhythm_pattern
-        if not rp:
-            return None, None
-
-        events = rhythm_pattern_to_events(rp, total_beats=ctx.total_beats)
-        n_onsets = len(rp.get("onsets", []))
-        length_b = rp.get("length_beats", "?")
-        print(f"    Melody/Bass rhythm: hand-played pattern ({n_onsets} onsets, {length_b}b)")
-        return events, events
-
-
-class MotifRhythmStrategy(RhythmStrategy):
-    """
-    Rhythm source: "motif"
-    Derives rhythm from the active motif's rhythm list, articulated at
-    different densities per voice:
-      melody → "full"   (every onset)
-      bass   → "anchor" (downbeat only)
-    """
-
-    @property
-    def label(self) -> str:
-        return "motif"
-
-    def apply(self, ctx: RhythmContext) -> tuple[
-        Optional[list[RhythmEvent]], Optional[list[RhythmEvent]]
-    ]:
-        rhythm = ctx.motif_rhythm
-        if not rhythm:
-            return None, None
-
-        mel_events = _motif_rhythm_to_events(
-            rhythm, ctx.total_beats, "full", velocities=ctx.motif_velocities
-        )
-        bass_events = _motif_rhythm_to_events(
-            rhythm, ctx.total_beats, "anchor", velocities=ctx.motif_velocities
-        )
-        cycle = sum(rhythm)
-        print(f"    Melody rhythm: motif full   ({len(rhythm)} notes, {cycle:.1f}b cycle)")
-        print(f"    Bass rhythm:   motif anchor ({len(bass_events)} triggers, {cycle:.1f}b cycle)")
-        return mel_events, bass_events
-
-
-class FreeRhythmStrategy(RhythmStrategy):
-    """
-    Rhythm source: "free"
-    Delegates entirely to the density-based grid inside each voice generator.
-    Returns (None, None) — the downstream generators pick their own patterns.
-    """
-
-    @property
-    def label(self) -> str:
-        return "free"
-
-    def apply(self, ctx: RhythmContext) -> tuple[None, None]:
-        print(f"    Melody/Bass rhythm: free (density grid)")
-        return None, None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -718,91 +559,7 @@ class _FreeHarmonyStrategy(HarmonyStrategy):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Melody behavior strategies
-# ═══════════════════════════════════════════════════════════════════════════════
-
-class MelodyBehaviorStrategy(ABC):
-    """
-    Abstract base: generate melody notes for a section.
-    Concrete subclasses map one-to-one with VALID_MELODY_BEH values.
-    Currently they're thin wrappers — the real logic lives in melody.py.
-    The strategy layer gives us a clean home for per-behavior pre/post hooks
-    (e.g., generative might want a different default rest_probability).
-    """
-
-    @abstractmethod
-    def apply(self, ctx: MelodyContext) -> list[MelodyNote]:
-        ...
-
-    @property
-    @abstractmethod
-    def label(self) -> str:
-        ...
-
-
-class _DelegatingMelodyStrategy(MelodyBehaviorStrategy):
-    """
-    Shared base: all current behaviors delegate to generate_melody_for_progression.
-    Subclasses override `label` and can hook `_pre` / `_post` for customization.
-    """
-
-    def apply(self, ctx: MelodyContext) -> list[MelodyNote]:
-        return generate_melody_for_progression(
-            ctx.chords, ctx.key, ctx.mode,
-            behavior=ctx.behavior,
-            density=ctx.density,
-            bars_per_chord=ctx.bars_per_chord,
-            beats_per_bar=ctx.beats_per_bar,
-            motif=ctx.motif,
-            motif_pool=ctx.motif_pool,
-            groove=ctx.groove,
-            swing=ctx.swing,
-            seed=ctx.seed,
-            section_name=ctx.section_name,
-            rhythm_events_override=ctx.rhythm_events_override,
-            fugal_techniques=ctx.fugal_techniques,
-            rest_probability=ctx.rest_probability,
-        )
-
-
-class LyricalMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "lyrical"
-
-
-class GenerativeMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "generative"
-
-
-class MotifMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "motif"
-
-
-class SparseMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "sparse"
-
-
-class RhythmicMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "rhythmic"
-
-
-class DevelopMelodyStrategy(_DelegatingMelodyStrategy):
-    @property
-    def label(self) -> str:
-        return "develop"
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# Registries — single point of dispatch, no if/elif anywhere else
+# Registry — harmony source label → strategy
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class _StrategyRegistry:
@@ -829,15 +586,6 @@ class _StrategyRegistry:
         self._map[strategy.label] = strategy
 
 
-RhythmStrategyRegistry = _StrategyRegistry(
-    strategies=[
-        PatternRhythmStrategy(),
-        MotifRhythmStrategy(),
-        FreeRhythmStrategy(),
-    ],
-    name="rhythm source",
-)
-
 # ---------------------------------------------------------------------------
 # Active production dispatch path for harmony resolution.
 # HarmonyStrategyRegistry is the sole entry point for selecting how a chord
@@ -854,117 +602,10 @@ HarmonyStrategyRegistry = _StrategyRegistry(
     name="harmony source",
 )
 
-MelodyStrategyRegistry = _StrategyRegistry(
-    strategies=[
-        LyricalMelodyStrategy(),
-        GenerativeMelodyStrategy(),
-        MotifMelodyStrategy(),
-        SparseMelodyStrategy(),
-        RhythmicMelodyStrategy(),
-        DevelopMelodyStrategy(),
-    ],
-    name="melody behavior",
-)
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Context factory — builds typed context objects from the raw section dict
+# Context factory — harmony chord context
 # ═══════════════════════════════════════════════════════════════════════════════
-
-def build_rhythm_context(
-    section: dict,
-    active_motif_def: Optional[dict],
-    total_beats: float,
-    base_seed: int,
-    seed_offset: int,
-) -> RhythmContext:
-    """
-    Construct a RhythmContext from the raw section dict and resolved motif.
-    This is the one place that knows the section dict's key names.
-    """
-    rhythm_source = section.get("rhythm", "free")
-    density = section.get("density", "medium")
-    beats_per_bar = int(section.get("beats_per_bar", 4))
-
-    motif_rhythm = None
-    motif_velocities = None
-    if active_motif_def and rhythm_source == "motif":
-        motif_rhythm = active_motif_def.get("rhythm")
-        motif_velocities = active_motif_def.get("velocities")
-
-    return RhythmContext(
-        source=rhythm_source,
-        total_beats=total_beats,
-        density=density,
-        rhythm_pattern=section.get("rhythm_pattern") if rhythm_source == "pattern" else None,
-        motif_rhythm=motif_rhythm,
-        motif_velocities=motif_velocities,
-        groove=section.get("groove"),
-        swing=float(section.get("swing", 0.0)),
-        beats_per_bar=beats_per_bar,
-        seed=base_seed + seed_offset,
-    )
-
-
-def build_harmony_rhythm_context(
-    section: dict,
-    active_motif_def: Optional[dict],
-    total_beats_section: float,
-    total_per_chord: float,
-    beat_offset: float,
-    precomputed_events,           # list[RhythmEvent] | "sustain" | None
-) -> HarmonyRhythmContext:
-    """
-    Construct a HarmonyRhythmContext for a single chord window.
-
-    Absorbs all harmony_rhythm block overrides (density, groove, swing)
-    so callers never touch the raw section dict for these values.
-    The resolved source field drives HarmonyStrategyRegistry dispatch.
-    """
-    _hr_raw = section.get("harmony_rhythm", {})
-    _hr_block: dict = {"rhythm": _hr_raw} if isinstance(_hr_raw, str) else _hr_raw
-
-    rhythm_fallback = section.get("rhythm", "free")
-    _explicit_h_rhythm = _hr_block.get("rhythm")
-    h_source   = _explicit_h_rhythm or rhythm_fallback
-
-    # "motif" is only a legitimate harmony rhythm source when explicitly
-    # set on the harmony_rhythm block itself. Inheriting it from
-    # section.rhythm (the fallback above) would reopen the exact back door
-    # "motif" was retired for — nearly every melodic section sets
-    # rhythm="motif", so an omitted harmony_rhythm block must still default
-    # to "free", not silently activate the independent harmony-motif
-    # mechanism nobody asked for. See schemas.py HarmonyRhythmSourceLiteral.
-    if h_source == "motif" and _explicit_h_rhythm != "motif":
-        h_source = "free"
-
-    # HR block can override density, groove, and swing per-section.
-    # Falls back to the section-level values so omitting the field is safe.
-    h_density  = _hr_block.get("density",  section.get("density",  "medium"))
-    h_groove   = _hr_block.get("groove",   section.get("groove"))
-    h_swing    = float(_hr_block.get("swing", section.get("swing", 0.0)))
-    beats_per_bar = int(section.get("beats_per_bar", 4))
-
-    motif_rhythm = None
-    motif_velocities = None
-    if active_motif_def and h_source == "motif":
-        motif_rhythm = active_motif_def.get("rhythm")
-        motif_velocities = active_motif_def.get("velocities")
-
-    return HarmonyRhythmContext(
-        source=h_source,
-        total_beats_section=total_beats_section,
-        total_per_chord=total_per_chord,
-        beat_offset=beat_offset,
-        density=h_density,
-        groove=h_groove,
-        swing=h_swing,
-        beats_per_bar=beats_per_bar,
-        harmony_pattern=section.get("harmony_pattern") if h_source == "pattern" else None,
-        motif_rhythm=motif_rhythm,
-        motif_velocities=motif_velocities,
-        precomputed_events=precomputed_events,
-    )
 
 
 def build_harmony_chord_context(
@@ -1011,39 +652,4 @@ def build_harmony_chord_context(
         channel=channel,
         musical_time=musical_time,
         harmony_rest_probability=harmony_rest_probability,
-    )
-
-
-def build_melody_context(
-    section: dict,
-    chords: list[VoicedChord],
-    key: str,
-    mode: str,
-    bars_list: list[float],
-    active_motif_def: Optional[dict],
-    motif_pool: list[dict],
-    melody_rhythm_events: Optional[list[RhythmEvent]],
-    base_seed: int,
-    seed_offset: int,
-) -> MelodyContext:
-    """
-    Construct a MelodyContext from resolved section + voice data.
-    """
-    return MelodyContext(
-        behavior=section.get("melody", "generative"),
-        chords=chords,
-        key=key,
-        mode=mode,
-        density=section.get("density", "medium"),
-        bars_per_chord=bars_list,
-        beats_per_bar=int(section.get("beats_per_bar", 4)),
-        motif=active_motif_def,
-        motif_pool=motif_pool if len(motif_pool) > 1 else None,
-        groove=section.get("groove"),
-        swing=float(section.get("swing", 0.0)),
-        seed=base_seed + seed_offset,
-        section_name=section.get("name", ""),
-        rhythm_events_override=melody_rhythm_events,
-        fugal_techniques=section.get("fugal_techniques"),
-        rest_probability=float(section.get("rest_probability", 0.0)),
     )
