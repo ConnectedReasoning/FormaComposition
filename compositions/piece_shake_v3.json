@@ -14,7 +14,7 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "beats_per_bar": 4,
         "rest_probability": 0.35,
         "harmony_rhythm": { "rhythm": "sustain" },
@@ -28,13 +28,13 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping", "density": "sparse" },
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
         "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; counterpoint 2 (counterline character) below \u2014 both now rhythmically independent. Harmony stays loose/sparse, leaving room under the vocal-style melody.",
         "counterpoint": [
-          { "species": "comping", "register": "above", "dissonance": "passing", "velocity": 55 },
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 55 },
           { "species": "first", "register": "below", "dissonance": "passing", "velocity": 48 }
         ]
       },
@@ -47,14 +47,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping" },
+        "harmony_rhythm": { "rhythm": "motif" },
         "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Primary melody develops the plea motif. Counterpoint 1 (arpeggio) above, counterpoint 2 (counterline) below, both rhythmically independent. Harmony now strikes on the plea motif's own syncopated rhythm (1.0/0.5/0.5/1.0/1.0) instead of sustaining \u2014 real rhythmic propulsion under the borrowed-chord darkness, Ob-La-Di-style chord hits.",
         "counterpoint": [
           { "species": "first", "register": "above", "dissonance": "passing", "velocity": 65 },
-          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 55 }
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 55 }
         ]
       },
       {
@@ -65,13 +65,13 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping", "density": "sparse" },
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
         "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation. Harmony drops back to loose/sparse, same breathing space as verse 1.",
         "counterpoint": [
-          { "species": "comping", "register": "above", "dissonance": "passing", "velocity": 52 },
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 52 },
           { "species": "first", "register": "below", "dissonance": "passing", "velocity": 45 }
         ]
       },
@@ -84,14 +84,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping" },
+        "harmony_rhythm": { "rhythm": "motif" },
         "notes": "Same rhythmic strumming as chorus 1 \u2014 plea motif drives the chord hits.",
         "counterpoint": [
           { "species": "first", "register": "above", "dissonance": "passing", "velocity": 68 },
-          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 58 }
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 58 }
         ]
       },
       {
@@ -102,14 +102,14 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping" },
+        "harmony_rhythm": { "rhythm": "motif" },
         "notes": "Bb-C-Bb-Dm. Tension and release. Primary melody sparse here; counterpoint 1 and 2 move in contrary motion, building toward the final chorus. Harmony switches to motif rhythm here too \u2014 the syncopated strike pattern builds forward momentum into the final chorus rather than coasting on loose density.",
         "counterpoint": [
-          { "species": "comping", "register": "above", "dissonance": "none", "velocity": 50 },
-          { "species": "comping", "register": "below", "dissonance": "passing", "velocity": 55 }
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 50 },
+          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 55 }
         ]
       },
       {
@@ -121,14 +121,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "comping" },
+        "harmony_rhythm": { "rhythm": "motif" },
         "notes": "Extended final chorus \u2014 16 bars. Primary melody and both counterpoint voices at full intensity, peak interweave. Harmony at full rhythmic strumming \u2014 plea motif driving every chord hit, peak propulsion.",
         "counterpoint": [
-          { "species": "first", "register": "above", "dissonance": "comping", "velocity": 75 },
-          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 65 }
+          { "species": "first", "register": "above", "dissonance": "free", "velocity": 75 },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 65 }
         ]
       },
       {
@@ -139,13 +139,13 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": { "rhythm": "sustain" },
         "notes": "Voices dissolve in reverse order. Bass pedal on D. Primary melody (plea motif) fragments only; counterpoint 2 drops out first, then counterpoint 1. Harmony returns to sustain, mirroring the intro \u2014 strumming fades back into stillness.",
         "counterpoint": [
-          { "species": "comping", "register": "above", "dissonance": "none", "velocity": 32 }
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 32 }
         ]
       }
     ]

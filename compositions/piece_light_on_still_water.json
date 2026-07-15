@@ -13,7 +13,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "Pure Lydian shimmer. I-II establishes the raised 4th floating quality immediately."
       },
       {
@@ -25,12 +25,12 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 55
         },
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "Emotional center. Counterpoint strings enter here."
       },
       {
@@ -41,7 +41,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "Most harmonic motion. Walking bass + develop melody + full voicings."
       },
       {
@@ -52,7 +52,7 @@
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "Returns to opening shimmer. Generative melody wanders over Lydian I-II drone."
       }
     ]

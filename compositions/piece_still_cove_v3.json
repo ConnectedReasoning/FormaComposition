@@ -13,7 +13,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "free",
         "counterpoint": {
           "species": "first",
           "register": "below",
@@ -28,9 +28,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing"
         }
@@ -43,7 +43,7 @@
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping"
+        "rhythm": "free"
       }
     ]
   }

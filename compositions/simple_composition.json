@@ -20,7 +20,7 @@
         "harmony_rhythm": {
           "note_duration": "whole"
         },
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name":"second",
@@ -36,7 +36,7 @@
         "harmony_rhythm": {
           "note_duration": "whole"
         },
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name":"third",
@@ -52,7 +52,7 @@
         "harmony_rhythm": {
           "note_duration": "whole"
         },
-        "rhythm": "comping"
+        "rhythm": "free"
       }
     ]
   }

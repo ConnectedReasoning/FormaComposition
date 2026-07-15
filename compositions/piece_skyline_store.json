@@ -25,7 +25,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": {
           "note_duration": "whole"
         },
@@ -40,9 +40,9 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
@@ -61,7 +61,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "harmony_rhythm": {
           "note_duration": "whole"
         },
@@ -76,7 +76,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "harmony_rhythm": {
           "note_duration": "whole"
         },
@@ -91,9 +91,9 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 54

@@ -23,7 +23,7 @@
         "bass_style": "pedal",
         "arc": "fade_in",
         "notes": "Standing at a door. The question mark. Pedal bass holds D (home, but absent). I-V-vi progression is open, unresolved. Melody barely moves — just hints of the motif, fragmented. Long silences. The listener should feel anticipation, not comfort.",
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name": "passage",
@@ -45,13 +45,13 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 54
         },
         "notes": "Walking through the threshold. The crucial moment: V→bVI is the deceptive cadence — 'I expected home (I) but got something else (bVI).' This is the motif's arrival gesture meeting the composition's harmonic surprise. Lyrical melody walks through the space; counterpoint adds texture under the swell. Root-fifth bass gives forward motion. By bar 12, the listener realizes: this isn't the expected return, it's something else.",
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name": "recognition",
@@ -77,7 +77,7 @@
         "bass_style": "melodic",
         "arc": "breath",
         "notes": "In the rooms. The bVII chord (C major) appears for the first time — this is the D Mixolydian color revealed. The place is familiar (I, IV, V anchors), but that C natural makes it foreign. Walking bass drives the motion without urgency. Developed melody (augmentation or inversion of the motif) stretches the arrival gesture into longer phrases. This is where the piece says: 'I'm home, but it's not the home I left.' The breath arc means it swells naturally — no forced climax, just inevitable growth.",
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name": "settling",
@@ -99,7 +99,7 @@
         "bass_style": "root_only",
         "arc": "fade_out",
         "notes": "The arrival is quiet. Sparse texture, single bass notes (root only). The melody barely moves — echoes of the motif, retrograded or inverted. The piece cycles through D→C→G→D, never resolving the Mixolydian ambiguity. By the end, the bittersweet quality (C natural) is just accepted as part of home. Not resolved, not answered — just inhabited. The fade is gradual; the piece doesn't end, it becomes silence.",
-        "rhythm": "comping"
+        "rhythm": "free"
       }
     ]
   }

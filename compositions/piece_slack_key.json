@@ -19,7 +19,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.15
       },
       {
@@ -35,7 +35,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.15
       },
       {
@@ -51,7 +51,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.15
       },
       {
@@ -62,7 +62,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.3
       },
       {
@@ -78,7 +78,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.1
       },
       {
@@ -90,11 +90,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.08
       },
       {
@@ -110,7 +110,7 @@
           "register": "above",
           "dissonance": "none"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.18
       },
       {
@@ -121,7 +121,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.28
       },
       {
@@ -133,11 +133,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.06
       },
       {
@@ -153,7 +153,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.12
       },
       {
@@ -169,7 +169,7 @@
           "register": "above",
           "dissonance": "none"
         },
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.16
       },
       {
@@ -180,7 +180,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.05
       }
     ]

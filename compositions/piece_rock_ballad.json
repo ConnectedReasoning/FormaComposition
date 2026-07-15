@@ -14,7 +14,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.3
       },
@@ -26,9 +26,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "groove": "straight",
-        "drums": { "charted": "halftime" }
+        "drums": { "pattern": "halftime" }
       },
       "chorus": {
         "name": "chorus",
@@ -38,8 +38,8 @@
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "build",
-        "rhythm": "comping",
-        "drums": { "charted": "backbeat" }
+        "rhythm": "motif",
+        "drums": { "pattern": "backbeat" }
       },
       "bridge": {
         "name": "bridge",
@@ -49,8 +49,8 @@
         "melody": "develop",
         "bass_style": "melodic",
         "arc": "breath",
-        "rhythm": "comping",
-        "drums": { "charted": "halftime", "density": "sparse" }
+        "rhythm": "free",
+        "drums": { "pattern": "halftime", "density": "sparse" }
       },
       "outro": {
         "name": "outro",
@@ -60,7 +60,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.4
       }

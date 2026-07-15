@@ -30,7 +30,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -38,7 +38,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -69,7 +69,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -77,7 +77,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -108,7 +108,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -116,7 +116,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -147,7 +147,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -155,7 +155,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -186,7 +186,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -194,7 +194,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -225,7 +225,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -233,7 +233,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -264,7 +264,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -272,7 +272,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -303,7 +303,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -311,7 +311,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -342,7 +342,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -350,7 +350,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -381,7 +381,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -389,7 +389,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -420,7 +420,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -428,7 +428,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -459,7 +459,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -467,7 +467,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -498,7 +498,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -506,7 +506,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -537,7 +537,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -545,7 +545,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -576,7 +576,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -584,7 +584,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -615,7 +615,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -623,7 +623,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -654,7 +654,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -662,7 +662,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -693,7 +693,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -701,7 +701,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -732,7 +732,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -740,7 +740,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -771,7 +771,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -779,7 +779,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -810,7 +810,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -818,7 +818,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -849,7 +849,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -857,7 +857,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -888,7 +888,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -896,7 +896,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -927,7 +927,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -935,7 +935,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -966,7 +966,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -974,7 +974,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1005,7 +1005,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1013,7 +1013,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1044,7 +1044,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1052,7 +1052,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1083,7 +1083,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1091,7 +1091,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1122,7 +1122,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1130,7 +1130,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1161,7 +1161,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1169,7 +1169,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1200,7 +1200,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1208,7 +1208,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1239,7 +1239,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1247,7 +1247,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1278,7 +1278,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1286,7 +1286,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1317,7 +1317,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1325,7 +1325,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1356,7 +1356,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1364,7 +1364,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1395,7 +1395,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1403,7 +1403,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1434,7 +1434,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1442,7 +1442,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1473,7 +1473,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1481,7 +1481,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1512,7 +1512,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1520,7 +1520,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1551,7 +1551,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1559,7 +1559,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1590,7 +1590,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1598,7 +1598,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1629,7 +1629,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1637,7 +1637,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1668,7 +1668,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1676,7 +1676,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1707,7 +1707,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1715,7 +1715,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1746,7 +1746,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1754,7 +1754,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1785,7 +1785,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1793,7 +1793,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1824,7 +1824,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1832,7 +1832,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -1863,7 +1863,7 @@
         "melody": "lyrical",
         "bass_style": "melodic",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "note_length_range":{
           "min": 0.5, "max": 2.0
         },
@@ -1871,7 +1871,7 @@
         "harmony_rest_probability": 0.08,
         "bass_rest_probability": 0.025,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },

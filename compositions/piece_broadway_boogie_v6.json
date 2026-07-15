@@ -31,7 +31,7 @@
         },
         "bass_style": "steady",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -72,7 +72,7 @@
         },
         "bass_style": "steady",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -103,7 +103,7 @@
           "behavior": "lyrical",
           "velocity": 55
         },
-        "rhythm": "comping",
+        "rhythm": "motif",
         "bass_style": "steady",
         "arc": "fade_in",
         "rest_probability": 0.15,
@@ -146,7 +146,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.3,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -177,7 +177,7 @@
         },
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -185,7 +185,7 @@
           "groove": "straight"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -223,7 +223,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.3,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -231,7 +231,7 @@
           "groove": "straight"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -259,7 +259,7 @@
         },
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -267,7 +267,7 @@
           "groove": "straight"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -305,7 +305,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -313,7 +313,7 @@
           "groove": "straight"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "none"
         },
@@ -345,7 +345,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.05,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -353,7 +353,7 @@
           "groove": "backbeat"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -383,7 +383,7 @@
         },
         "bass_style": "root_fifth",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -391,7 +391,7 @@
           "groove": "backbeat"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -421,15 +421,15 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -467,7 +467,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -475,7 +475,7 @@
           "groove": "driving"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -505,15 +505,15 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.35,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "sparse",
           "groove": "shuffle"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -543,7 +543,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -551,7 +551,7 @@
           "groove": "broken"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -581,7 +581,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -589,7 +589,7 @@
           "groove": "offbeat"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -627,7 +627,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -635,7 +635,7 @@
           "groove": "halftime"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -663,7 +663,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -671,7 +671,7 @@
           "groove": "offbeat"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -709,7 +709,7 @@
         },
         "bass_style": "steady",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.2,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -736,7 +736,7 @@
         "melody": "sparse",
         "bass_style": "steady",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.6,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -773,7 +773,7 @@
         "melody": "sparse",
         "bass_style": "steady",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.5,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -804,7 +804,7 @@
         },
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.2,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -812,7 +812,7 @@
           "groove": "offbeat"
         },
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "above",
           "dissonance": "passing"
         },
@@ -846,7 +846,7 @@
         "melody": "sparse",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.85,
         "harmony_rhythm": {
           "rhythm": "sustain",
@@ -873,7 +873,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.9,
         "harmony_rhythm": {
           "rhythm": "sustain",

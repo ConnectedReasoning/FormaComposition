@@ -12,8 +12,8 @@
               "melody": "sparse",
               "bass_style": "melodic",
               "arc": "fade_in",
-              "rhythm": "comping",
-              "harmony_rhythm": { "rhythm": "comping" }
+              "rhythm": "motif",
+              "harmony_rhythm": { "rhythm": "motif" }
           }
 
       ]

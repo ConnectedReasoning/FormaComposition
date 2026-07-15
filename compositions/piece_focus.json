@@ -12,7 +12,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.35
       },
@@ -24,9 +24,9 @@
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "charted": "minimal", "density": "sparse" },
+        "drums": { "pattern": "minimal", "density": "sparse" },
         "rest_probability": 0.3
       },
       {
@@ -37,9 +37,9 @@
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "charted": "minimal", "density": "sparse" },
+        "drums": { "pattern": "minimal", "density": "sparse" },
         "rest_probability": 0.3
       },
       {
@@ -51,7 +51,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.4
       }

@@ -12,7 +12,7 @@
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "She doesn't know it's about to begin. Sparse strings open slowly — single notes, long tones. The I-V-vi-IV progression is deliberately familiar and warm. Pedal bass barely moves. Leave room for silence."
       },
       {
@@ -23,9 +23,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
@@ -40,9 +40,9 @@
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 55
@@ -57,7 +57,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "The emotional peak. The iii chord (B minor in G) appears for the first time — a touch of shadow that makes the resolution back to I feel earned. Full density, developed melody, walking bass. This is the center of the song — where it says what it has been building toward. No counterpoint here; the developed motif carries it."
       },
       {
@@ -68,7 +68,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "A quiet breath after the bloom. Sparse texture, pedal bass, generative melody wanders gently — like watching light move. I-IV-I is a rocking motion, almost lullaby-like. This is where a listener catches their breath before the return."
       },
       {
@@ -79,9 +79,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "none",
           "velocity": 50
@@ -96,7 +96,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "notes": "The piece does not end — it simply becomes quiet. Sparse melody, root-only bass, long slow fade. The I-V-I-IV-I progression is the most resolved thing in tonal music. By the end only the strings remain, then silence. Give this section long reverb tails in Logic."
       }
     ]

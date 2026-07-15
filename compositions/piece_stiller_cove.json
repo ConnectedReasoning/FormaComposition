@@ -24,7 +24,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name": "swell",
@@ -40,11 +40,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "comping",
+          "species": "free",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "comping"
+        "rhythm": "free"
       },
       {
         "name": "release",
@@ -57,7 +57,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "comping"
+        "rhythm": "free"
       }
     ]
   }

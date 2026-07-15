@@ -19,7 +19,7 @@
         "melody": "generative",
         "bass_style": "pulse",
         "arc": "fade_in",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rhythm_pattern": null,
         "beats_per_bar": 4,
         "rest_probability": 0.35,
@@ -32,25 +32,25 @@
             "register": "mid",
             "behavior": "sparse",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 58
           },
           {
             "register": "high",
             "behavior": "sparse",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "none",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 42
           },
           {
             "register": "low_mid",
             "behavior": "generative",
             "motif": "counterline",
-            "species": "comping",
+            "species": "free",
             "dissonance": "none",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 38
           }
         ]
@@ -68,11 +68,11 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "sparse"
         },
         "notes": "Dm-C-F-Bb feel. Voice 1 carries plea motif lyrical. Voice 2 begins arpeggio interweave high. Voice 3 counterline below.",
@@ -81,23 +81,23 @@
             "register": "mid",
             "behavior": "lyrical",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 72
           },
           {
             "register": "high",
             "behavior": "develop",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 55
           },
           {
             "register": "low_mid",
             "behavior": "generative",
             "motif": "counterline",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
             "velocity": 48
           }
@@ -122,11 +122,11 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium"
         },
         "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Voice 1 develops plea. Voice 2 arpeggio at full energy. Voice 3 counterline in contrary motion.",
@@ -135,25 +135,25 @@
             "register": "mid",
             "behavior": "develop",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 80
           },
           {
             "register": "high",
             "behavior": "develop",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 65
           },
           {
             "register": "low_mid",
             "behavior": "lyrical",
             "motif": "counterline",
-            "species": "comping",
-            "dissonance": "comping",
-            "rhythm": "comping",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
             "velocity": 55
           }
         ]
@@ -171,11 +171,11 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "sparse"
         },
         "notes": "Same as verse 1, motif transform applied. Voice 2 retrograde of arpeggio for variation.",
@@ -184,25 +184,25 @@
             "register": "mid",
             "behavior": "lyrical",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 70
           },
           {
             "register": "high",
             "behavior": "develop",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 52
           },
           {
             "register": "low_mid",
             "behavior": "generative",
             "motif": "counterline",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 45
           }
         ]
@@ -226,11 +226,11 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "medium"
         },
         "voices": [
@@ -238,25 +238,25 @@
             "register": "mid",
             "behavior": "develop",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 82
           },
           {
             "register": "high",
             "behavior": "develop",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 68
           },
           {
             "register": "low_mid",
             "behavior": "develop",
             "motif": "counterline",
-            "species": "comping",
-            "dissonance": "comping",
-            "rhythm": "comping",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
             "velocity": 58
           }
         ]
@@ -274,11 +274,11 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "sparse"
         },
         "notes": "Bb-C-Bb-Dm. Tension and release. Voice 1 sparse, voices 2 and 3 move in contrary motion building toward final chorus.",
@@ -287,25 +287,25 @@
             "register": "mid",
             "behavior": "lyrical",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 65
           },
           {
             "register": "high",
             "behavior": "generative",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "none",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 50
           },
           {
             "register": "low_mid",
             "behavior": "lyrical",
             "motif": "counterline",
-            "species": "comping",
+            "species": "free",
             "dissonance": "passing",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 55
           }
         ]
@@ -329,11 +329,11 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
-          "rhythm": "comping",
+          "rhythm": "free",
           "density": "full"
         },
         "notes": "Extended final chorus \u2014 16 bars. All three voices at full intensity, peak interweave.",
@@ -342,25 +342,25 @@
             "register": "mid",
             "behavior": "develop",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "motif",
             "velocity": 88
           },
           {
             "register": "high",
             "behavior": "develop",
             "motif": "arpeggio",
-            "species": "comping",
-            "dissonance": "comping",
-            "rhythm": "comping",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
             "velocity": 75
           },
           {
             "register": "low_mid",
             "behavior": "develop",
             "motif": "counterline",
-            "species": "comping",
-            "dissonance": "comping",
-            "rhythm": "comping",
+            "species": "free",
+            "dissonance": "free",
+            "rhythm": "free",
             "velocity": 65
           }
         ]
@@ -378,7 +378,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "comping",
+        "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": {
@@ -390,25 +390,25 @@
             "register": "mid",
             "behavior": "sparse",
             "motif": "plea",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 45
           },
           {
             "register": "high",
             "behavior": "sparse",
             "motif": "arpeggio",
-            "species": "comping",
+            "species": "free",
             "dissonance": "none",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 32
           },
           {
             "register": "low_mid",
             "behavior": "generative",
             "motif": "counterline",
-            "species": "comping",
+            "species": "free",
             "dissonance": "none",
-            "rhythm": "comping",
+            "rhythm": "free",
             "velocity": 28
           }
         ]

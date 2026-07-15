@@ -14,7 +14,7 @@
         "melody": "develop",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.0
       },
       {
@@ -26,7 +26,7 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.0,
         "counterpoint": { "species": "first", "register": "above", "dissonance": "none" }
       },
@@ -39,9 +39,9 @@
         "melody": "develop",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "comping",
+        "rhythm": "motif",
         "rest_probability": 0.0,
-        "counterpoint": { "species": "comping", "register": "above", "dissonance": "passing" }
+        "counterpoint": { "species": "free", "register": "above", "dissonance": "passing" }
       }
     ]
   }
