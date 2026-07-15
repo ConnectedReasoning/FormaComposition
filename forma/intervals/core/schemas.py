@@ -418,7 +418,7 @@ class MotifModel(BaseModel):
 # SectionModel
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def _resolve_motif_value_safe(value: Optional[Union[str, dict]]):
+def _resolve_motif_value_safe(value: Optional[Union[str, dict]], theme_pool: Optional[list] = None):
     """
     Resolve a voice/harmony_rhythm motif override value (string ref or
     embedded dict) for cross-model validation in SectionModel.
@@ -427,6 +427,13 @@ def _resolve_motif_value_safe(value: Optional[Union[str, dict]]):
     exception type as every other check in that method, rather than a bare
     FileNotFoundError bubbling up from a different module.
 
+    theme_pool (item MT-0): the theme's inline motif pool as a list of dicts,
+    so a string name reference resolves against motifs declared inline in the
+    theme before falling through to the external library — the same
+    resolution order the generator uses. Without it, a name that exists only
+    inline (never as a library file) would fail validation even though the
+    generator can resolve it, splitting the two paths.
+
     Returns None for a None value — that's the "not overridden, fall back
     to the theme" case, not an error.
     """
@@ -434,7 +441,7 @@ def _resolve_motif_value_safe(value: Optional[Union[str, dict]]):
         return None
     from intervals.core.motif_loader import resolve_motif_value
     try:
-        return resolve_motif_value(value)
+        return resolve_motif_value(value, theme_pool=theme_pool)
     except (FileNotFoundError, ValueError, TypeError) as exc:
         raise ValueError(f"could not resolve motif override: {exc}") from exc
 
@@ -761,8 +768,16 @@ class SectionModel(BaseModel):
         harmony_motif_value  = (
             self.harmony_rhythm.motif if self.harmony_rhythm is not None else None
         )
-        voice_motif    = _resolve_motif_value_safe(voice_motif_value)
-        harmony_motif  = _resolve_motif_value_safe(harmony_motif_value)
+        # Inline motif pool (item MT-0): a string motif reference on a voice
+        # or harmony_rhythm resolves against motifs declared inline in the
+        # theme before the external library. model_dump each MotifModel to the
+        # plain-dict shape resolve_motif_value matches names against.
+        theme_pool = None
+        if theme_model.motifs:
+            theme_pool = [m.model_dump(exclude_none=True) for m in theme_model.motifs]
+
+        voice_motif    = _resolve_motif_value_safe(voice_motif_value, theme_pool)
+        harmony_motif  = _resolve_motif_value_safe(harmony_motif_value, theme_pool)
         voice_has_rhythm   = voice_motif is not None and voice_motif.rhythm is not None
         harmony_has_rhythm = harmony_motif is not None and harmony_motif.rhythm is not None
 

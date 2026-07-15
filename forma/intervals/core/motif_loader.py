@@ -131,10 +131,14 @@ def save_motif(motif: Motif, motifs_dir: Optional[str] = None) -> str:
 # Backward compatibility helper
 # ---------------------------------------------------------------------------
 
-def resolve_motif_value(motif_value, motifs_dir: Optional[str] = None) -> Optional[Motif]:
+def resolve_motif_value(
+    motif_value,
+    motifs_dir: Optional[str] = None,
+    theme_pool: Optional[list] = None,
+) -> Optional[Motif]:
     """
-    Resolve a single motif *value* -- a string name (library lookup) or an
-    embedded dict -- into a Motif object.
+    Resolve a single motif *value* -- a string name or an embedded dict --
+    into a Motif object.
 
     This is the same two-form logic resolve_motif_from_theme uses for
     theme["motif"], factored out so any other schema-legal motif reference
@@ -143,11 +147,26 @@ def resolve_motif_value(motif_value, motifs_dir: Optional[str] = None) -> Option
     str-vs-dict branch. resolve_motif_from_theme is now a thin wrapper
     around this for the theme-dict case.
 
+    String resolution (item MT-0):
+      1. theme_pool first — a string name is matched against the names of
+         motifs declared inline in theme["motifs"]. This is the fix for the
+         gap where a theme could DECLARE named motifs inline but nothing
+         could REFERENCE them by name — the reference only ever hit external
+         library files. A theme that declares a name owns that name.
+      2. external library file — falls through to load_motif only when the
+         name isn't in the pool, so genuine library references
+         (compositions/motifs/motif_<name>.json) still work unchanged.
+    An embedded dict resolves directly, pool or no pool.
+
     Args:
         motif_value: None, a motif name (str), or an embedded motif dict.
                      This is the value itself -- NOT a container dict with
                      a "motif" key inside it.
         motifs_dir:  Motif library directory (see load_motif)
+        theme_pool:  The theme's resolved motif pool (list of dicts, each
+                     with a "name") to search a string reference against
+                     before the external library. None/empty -> library only,
+                     i.e. exactly the pre-MT-0 behavior.
 
     Returns:
         Motif object, or None if motif_value is None.
@@ -155,7 +174,24 @@ def resolve_motif_value(motif_value, motifs_dir: Optional[str] = None) -> Option
     if motif_value is None:
         return None
     if isinstance(motif_value, str):
-        return load_motif(motif_value, motifs_dir)
+        if theme_pool:
+            for m in theme_pool:
+                if isinstance(m, dict) and m.get("name") == motif_value:
+                    return motif_from_dict(m)
+        # Not an inline-pool name — try the external library. If that also
+        # misses, load_motif raises FileNotFoundError; augment its message so
+        # the pool names the composer DID declare are visible, since "not in
+        # the library" is only half the story once inline pools exist.
+        try:
+            return load_motif(motif_value, motifs_dir)
+        except FileNotFoundError as exc:
+            pool_names = [m.get("name") for m in (theme_pool or [])
+                          if isinstance(m, dict) and m.get("name")]
+            if pool_names:
+                raise FileNotFoundError(
+                    f"{exc} Inline theme motifs available: {pool_names}."
+                ) from None
+            raise
     if isinstance(motif_value, dict):
         return motif_from_dict(motif_value)
     raise TypeError(

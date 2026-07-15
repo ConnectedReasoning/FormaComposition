@@ -508,7 +508,7 @@ def generate_section(
     melody_motif_def = active_motif_def
     melody_motif_pool = motif_pool if len(motif_pool) > 1 else None
     if lead_voice is not None and lead_voice.motif is not None:
-        _lead_motif_obj = resolve_motif_value(lead_voice.motif)
+        _lead_motif_obj = resolve_motif_value(lead_voice.motif, theme_pool=motif_pool)
         melody_motif_def = motif_to_dict(_lead_motif_obj) if _lead_motif_obj else None
         # An explicit per-voice motif replaces the theme's motif outright.
         # The theme's variety pool (motif_pool) is a theme-level mechanism
@@ -589,7 +589,7 @@ def generate_section(
     _harmony_motif_def, _harmony_motif_desc = None, "theme (shared default)"
     _hr_motif_value = _hr_model.motif if _hr_model is not None else None
     if _hr_motif_value is not None:
-        _resolved_h_motif = resolve_motif_value(_hr_motif_value)
+        _resolved_h_motif = resolve_motif_value(_hr_motif_value, theme_pool=motif_pool)
         _harmony_motif_def = motif_to_dict(_resolved_h_motif) if _resolved_h_motif else None
         _harmony_motif_desc = (_hr_motif_value if isinstance(_hr_motif_value, str)
                                  else "(inline motif)")
