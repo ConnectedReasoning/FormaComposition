@@ -12,7 +12,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "breath",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.3
       },
@@ -25,7 +25,7 @@
         "melody": "sparse",
         "bass_style": "melodic",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.4
       },
@@ -37,7 +37,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": { "rhythm": "sustain" },
         "rest_probability": 0.5
       }

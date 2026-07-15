@@ -15,7 +15,7 @@
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.2
       },
       "solo_verse": {
@@ -27,7 +27,7 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "breath",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.35
       },
       "solo_bridge": {
@@ -41,7 +41,7 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.3
       },
       "head_out": {
@@ -53,7 +53,7 @@
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.2
       }
     }

@@ -15,7 +15,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.55,
         "beats_per_bar": 4
       },
@@ -29,7 +29,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "breath",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4
       },
@@ -43,7 +43,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.25,
         "beats_per_bar": 4
       },
@@ -57,11 +57,11 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
@@ -77,7 +77,7 @@
         "melody": "generative",
         "bass_style": "root_fifth",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.45,
         "beats_per_bar": 4
       },
@@ -91,7 +91,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "plateau",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.65,
         "beats_per_bar": 4
       },
@@ -105,7 +105,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "fade_in",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.30,
         "beats_per_bar": 4
       },
@@ -119,11 +119,11 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 50
@@ -139,7 +139,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.55,
         "beats_per_bar": 4
       }

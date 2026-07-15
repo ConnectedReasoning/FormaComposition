@@ -14,8 +14,8 @@
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "plateau",
-        "rhythm": "motif",
-        "counterpoint": { "species": "free", "register": "below", "dissonance": "passing", "canon_offset": 1.0 }
+        "rhythm": "comping",
+        "counterpoint": { "species": "comping", "register": "below", "dissonance": "passing", "canon_offset": 1.0 }
       },
       "episode_one": {
         "name": "episode_one",
@@ -27,7 +27,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
-        "rhythm": "motif"
+        "rhythm": "comping"
       },
       "episode_two": {
         "name": "episode_two",
@@ -39,8 +39,8 @@
         "melody": "develop",
         "bass_style": "melodic",
         "arc": "breath",
-        "rhythm": "motif",
-        "counterpoint": { "species": "free", "register": "above", "dissonance": "passing", "canon_offset": 2.0 }
+        "rhythm": "comping",
+        "counterpoint": { "species": "comping", "register": "above", "dissonance": "passing", "canon_offset": 2.0 }
       }
     }
   }

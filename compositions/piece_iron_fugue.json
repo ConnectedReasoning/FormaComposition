@@ -16,7 +16,7 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "fade_in",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         }
@@ -33,14 +33,14 @@
         "bass_style": "walking",
         "arc": "build",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "medium",
           "groove": "straight"
         }
@@ -57,14 +57,14 @@
         "bass_style": "melodic",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "medium",
           "groove": "straight"
         }
@@ -81,14 +81,14 @@
         "bass_style": "walking",
         "arc": "plateau",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "medium",
           "groove": "straight"
         }
@@ -104,9 +104,9 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "build",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "full",
           "groove": "straight"
         }
@@ -123,14 +123,14 @@
         "bass_style": "walking",
         "arc": "plateau",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 52
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "full",
           "groove": "straight"
         }
@@ -146,9 +146,9 @@
         "melody": "sparse",
         "bass_style": "melodic",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "full",
           "groove": "straight"
         }
@@ -164,7 +164,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "decay",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         }

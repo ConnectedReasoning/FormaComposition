@@ -13,7 +13,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35
       },
       {
@@ -26,7 +26,7 @@
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "plateau",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.25
       },
       {
@@ -39,9 +39,9 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "build",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.15,
-        "counterpoint": { "species": "free", "register": "below", "dissonance": "passing", "canon_offset": 2.0 }
+        "counterpoint": { "species": "comping", "register": "below", "dissonance": "passing", "canon_offset": 2.0 }
       },
       {
         "name": "recapitulation",
@@ -51,7 +51,7 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.45,
         "counterpoint": { "species": "first", "register": "below", "dissonance": "none" }
       },
@@ -64,7 +64,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "harmony_rhythm": { "rhythm": "sustain" }
       }

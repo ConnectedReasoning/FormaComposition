@@ -28,7 +28,7 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "fade_in",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "beats_per_bar": 4,
         "rest_probability": 0.75,
         "harmony_rhythm": { "rhythm": "sustain" },
@@ -41,13 +41,13 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": { "rhythm": "comping", "density": "sparse" },
         "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; counterpoint 2 (counterline character) below.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 55 },
+          { "species": "comping", "register": "above", "dissonance": "passing", "velocity": 55 },
           { "species": "first", "register": "below", "dissonance": "passing", "velocity": 48 }
         ]
       },
@@ -59,14 +59,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.50,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "motif" },
+        "harmony_rhythm": { "rhythm": "comping" },
         "notes": "First half of the chorus, dense and propulsive \u2014 harmony strikes the full plea-rhythm chord hits, both counterpoint voices active at medium density. This is the hook hitting full force before it's allowed to recede.",
         "counterpoint": [
           { "species": "first", "register": "above", "dissonance": "passing", "velocity": 65, "rhythm_density": "medium" },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 55, "rhythm_density": "medium" }
+          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 55, "rhythm_density": "medium" }
         ]
       },
       "breath": {
@@ -77,7 +77,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "breath",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.7,
         "beats_per_bar": 4,
         "harmony_rhythm": { "rhythm": "sustain" },
@@ -91,14 +91,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.50,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": { "rhythm": "comping", "density": "sparse" },
         "notes": "Second half of the chorus, coming out of the breath. Harmony eases off the motif chord-strike pattern (free/sparse instead of motif) so it doesn't immediately refill the space just opened. Lower counterpoint voice drops to rhythm_density:sparse \u2014 staggered against chorus_a rather than both voices running flat-out for the whole 12 bars.",
         "counterpoint": [
           { "species": "first", "register": "above", "dissonance": "passing", "velocity": 60, "rhythm_density": "medium" },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 48, "rhythm_density": "sparse" }
+          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 48, "rhythm_density": "sparse" }
         ]
       },
       "verse_2": {
@@ -108,13 +108,13 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "breath",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": { "rhythm": "comping", "density": "sparse" },
         "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 52 },
+          { "species": "comping", "register": "above", "dissonance": "passing", "velocity": 52 },
           { "species": "first", "register": "below", "dissonance": "passing", "velocity": 45 }
         ]
       },
@@ -125,14 +125,14 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "motif" },
+        "harmony_rhythm": { "rhythm": "comping" },
         "notes": "Bb-C-Bb-Dm. Tension and release. Counterpoint 1 and 2 move in contrary motion, building toward the final chorus. Left untouched \u2014 the build should stay uninterrupted into chorus_final.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "none", "velocity": 50 },
-          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 55 }
+          { "species": "comping", "register": "above", "dissonance": "none", "velocity": 50 },
+          { "species": "comping", "register": "below", "dissonance": "passing", "velocity": 55 }
         ]
       },
       "chorus_final": {
@@ -143,14 +143,14 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "motif" },
+        "harmony_rhythm": { "rhythm": "comping" },
         "notes": "Extended final chorus \u2014 16 bars, intentionally NOT split or thinned. This is the peak \u2014 full intensity, peak interweave, no breath inserted.",
         "counterpoint": [
-          { "species": "first", "register": "above", "dissonance": "free", "velocity": 75 },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 65 }
+          { "species": "first", "register": "above", "dissonance": "comping", "velocity": 75 },
+          { "species": "comping", "register": "below", "dissonance": "comping", "velocity": 65 }
         ]
       },
       "outro": {
@@ -160,13 +160,13 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
         "harmony_rhythm": { "rhythm": "sustain" },
         "notes": "Voices dissolve in reverse order. Bass pedal on D. Counterpoint 2 drops out first, then counterpoint 1. Harmony returns to sustain, mirroring the intro.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "none", "velocity": 32 }
+          { "species": "comping", "register": "above", "dissonance": "none", "velocity": 32 }
         ]
       }
     }

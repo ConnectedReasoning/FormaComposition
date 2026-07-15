@@ -18,7 +18,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
@@ -36,7 +36,7 @@
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
@@ -61,7 +61,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.15
       },
       {
@@ -83,7 +83,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.1
       },
       {
@@ -105,7 +105,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.15
       },
       {
@@ -127,7 +127,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.1
       },
       {
@@ -145,11 +145,11 @@
         "bass_style": "root_fifth",
         "arc": "breath",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       },
       {
@@ -167,11 +167,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       },
       {
@@ -189,11 +189,11 @@
         "bass_style": "root_fifth",
         "arc": "plateau",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       },
       {
@@ -210,7 +210,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "decay",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.15
       },
       {
@@ -225,7 +225,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         },

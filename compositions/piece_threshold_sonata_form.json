@@ -15,7 +15,7 @@
         "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
           "species": "first",
           "register": "below",
@@ -34,9 +34,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 65
@@ -53,9 +53,9 @@
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "above",
           "dissonance": "passing",
           "velocity": 62
@@ -74,11 +74,11 @@
         "melody": "develop",
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
-          "dissonance": "free",
+          "dissonance": "comping",
           "velocity": 70
         },
         "fugal_techniques": {
@@ -95,11 +95,11 @@
         "melody": "sparse",
         "bass_style": "steady",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "above",
-          "dissonance": "free",
+          "dissonance": "comping",
           "velocity": 72
         },
         "fugal_techniques": {
@@ -115,7 +115,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "breath",
-        "rhythm": "free",
+        "rhythm": "comping",
         "counterpoint": {
           "species": "first",
           "register": "below",
@@ -135,9 +135,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 64
@@ -154,9 +154,9 @@
         "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing",
           "velocity": 62
@@ -173,7 +173,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "counterpoint": {
           "species": "first",
           "register": "below",

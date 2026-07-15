@@ -19,7 +19,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       },
       {
@@ -31,11 +31,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       },
       {
@@ -46,7 +46,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-         "rhythm": "free",
+         "rhythm": "comping",
          "rest_probability": 0.05
       }
     ]

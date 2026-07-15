@@ -14,9 +14,9 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "plateau",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor", "density": "sparse" },
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "medium", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor", "density": "sparse" },
         "rest_probability": 0.2
       },
       "groove_verse": {
@@ -27,9 +27,9 @@
         "melody": "develop",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" }
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "medium", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" }
       },
       "chorus_lift": {
         "name": "chorus_lift",
@@ -39,10 +39,10 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "plateau",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" },
-        "counterpoint": { "species": "free", "register": "above", "dissonance": "none" }
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "full", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" },
+        "counterpoint": { "species": "comping", "register": "above", "dissonance": "none" }
       },
       "filter_break": {
         "name": "filter_break",
@@ -52,9 +52,9 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "plateau",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "pattern": "minimal" },
+        "drums": { "charted": "minimal" },
         "rest_probability": 0.4
       },
       "outro": {
@@ -65,9 +65,9 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "plateau",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor", "density": "sparse" }
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "medium", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor", "density": "sparse" }
       }
     }
   }

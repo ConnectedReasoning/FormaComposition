@@ -19,7 +19,7 @@
           "register": "above",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.25
       },
       {
@@ -35,7 +35,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.35
       },
       {
@@ -51,7 +51,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.15
       },
       {
@@ -62,7 +62,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.1
       },
       {
@@ -74,11 +74,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.06
       },
       {
@@ -89,7 +89,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.1
       },
       {
@@ -101,11 +101,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.06
       },
       {
@@ -121,7 +121,7 @@
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.12
       },
       {
@@ -137,7 +137,7 @@
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.12
       },
       {
@@ -149,11 +149,11 @@
         "bass_style": "pedal",
         "arc": "fade_out",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "above",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.16
       },
       {
@@ -165,11 +165,11 @@
         "bass_style": "pedal",
         "arc": "fade_out",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.16
       },
       {
@@ -180,7 +180,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -192,11 +192,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -208,11 +208,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -223,7 +223,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -235,11 +235,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -250,7 +250,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -262,11 +262,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -277,7 +277,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -289,11 +289,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -304,7 +304,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -316,11 +316,11 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "counterpoint": {
-          "species": "free",
+          "species": "comping",
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.04
       },
       {
@@ -331,7 +331,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -347,7 +347,7 @@
           "register": "below",
           "dissonance": "passing"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.16
       },
       {
@@ -358,7 +358,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.28
       },
       {
@@ -374,7 +374,7 @@
           "register": "below",
           "dissonance": "none"
         },
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.14
       },
       {
@@ -385,7 +385,7 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "rhythm": "free",
+        "rhythm": "comping",
         "rest_probability": 0.05
       }
     ]

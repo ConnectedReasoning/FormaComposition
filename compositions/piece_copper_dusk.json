@@ -16,9 +16,9 @@
         "melody": "medium",
         "bass_style": "motif",
         "arc": "fade_in",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "comping",
           "density": "sparse"
         }
       },
@@ -33,9 +33,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "medium"
         }
       },
@@ -50,9 +50,9 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "plateau",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "motif",
+          "rhythm": "comping",
           "density": "full"
         }
       },
@@ -67,9 +67,9 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "breath",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "motif"
+          "rhythm": "comping"
         }
       },
 
@@ -83,9 +83,9 @@
         "melody": "lyrical",
         "bass_style": "motif",
         "arc": "swell",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": {
-          "rhythm": "free",
+          "rhythm": "comping",
           "density": "medium",
           "groove": "push"
         }
@@ -101,7 +101,7 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_out",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "harmony_rhythm": {
           "rhythm": "sustain"
         }

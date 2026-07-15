@@ -14,9 +14,9 @@
         "melody": "sparse",
         "bass_style": "pulse",
         "arc": "fade_in",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" },
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "full", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" },
         "rest_probability": 0.4
       },
       "verse": {
@@ -27,9 +27,9 @@
         "melody": "generative",
         "bass_style": "pulse",
         "arc": "plateau",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" },
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "full", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" },
         "rest_probability": 0.5
       },
       "chorus": {
@@ -40,9 +40,9 @@
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "build",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" }
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "full", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" }
       },
       "middle_eight": {
         "name": "middle_eight",
@@ -52,9 +52,9 @@
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "breath",
-        "rhythm": "free",
+        "rhythm": "comping",
         "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "pattern": "halftime" }
+        "drums": { "charted": "halftime" }
       },
       "outro": {
         "name": "outro",
@@ -64,9 +64,9 @@
         "melody": "sparse",
         "bass_style": "pulse",
         "arc": "fade_out",
-        "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" },
+        "rhythm": "comping",
+        "harmony_rhythm": { "rhythm": "comping", "density": "full", "groove": "offbeat" },
+        "drums": { "charted": "four_on_floor" },
         "rest_probability": 0.4
       }
     }

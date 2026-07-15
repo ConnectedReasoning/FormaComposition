@@ -14,8 +14,8 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "plateau",
-        "rhythm": "motif",
-        "drums": { "pattern": "four_on_floor", "density": "sparse" }
+        "rhythm": "comping",
+        "drums": { "charted": "four_on_floor", "density": "sparse" }
       },
       "verse": {
         "name": "verse",
@@ -25,9 +25,9 @@
         "melody": "develop",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "motif",
+        "rhythm": "comping",
         "groove": "driving",
-        "drums": { "pattern": "four_on_floor" }
+        "drums": { "charted": "four_on_floor" }
       },
       "chorus": {
         "name": "chorus",
@@ -37,8 +37,8 @@
         "melody": "lyrical",
         "bass_style": "steady",
         "arc": "plateau",
-        "rhythm": "motif",
-        "drums": { "pattern": "backbeat" }
+        "rhythm": "comping",
+        "drums": { "charted": "backbeat" }
       },
       "breakdown": {
         "name": "breakdown",
@@ -48,8 +48,8 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "fade_in",
-        "rhythm": "motif",
-        "drums": { "pattern": "minimal" }
+        "rhythm": "comping",
+        "drums": { "charted": "minimal" }
       },
       "outro": {
         "name": "outro",
@@ -59,8 +59,8 @@
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "fade_out",
-        "rhythm": "motif",
-        "drums": { "pattern": "four_on_floor" }
+        "rhythm": "comping",
+        "drums": { "charted": "four_on_floor" }
       }
     }
   }
