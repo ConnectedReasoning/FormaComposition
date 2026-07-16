@@ -520,6 +520,28 @@ def generate_section(
         _lead_motif_desc = (lead_voice.motif if isinstance(lead_voice.motif, str)
                              else "(inline motif)")
         print(f"    Melody motif: independent override '{_lead_motif_desc}'")
+    elif rhythm_source == "motif" and melody_motif_pool is not None:
+        # item MT-3: rhythm="motif" already pins RHYTHM to one resolved
+        # motif (melody_motif_def, above). Without this gate, PITCH stayed
+        # separately live via the pool's per-chord random draw — an
+        # unreconciled collision between "one motif, deterministically" and
+        # "several motifs, randomly," both keyed off the same theme pool.
+        # Default: pin pitch too (Choice A) — a section committing to one
+        # motif's rhythm gets that same motif's pitch shape, cohesive and
+        # recognizable. section.melodic_variation == "isorhythmic" opts
+        # OUT of the pin, restoring the pool for pitch while rhythm stays
+        # anchored — a deliberate, named technique for composers who want
+        # rhythmic and melodic material to diverge on purpose.
+        if section_model.melodic_variation == "isorhythmic":
+            print(f"    Melody motif: rhythm pinned to "
+                  f"'{melody_motif_def.get('name', '?')}', pitch varies "
+                  f"across {len(melody_motif_pool)} motifs (isorhythmic)")
+        else:
+            melody_motif_pool = None
+            print(f"    Melody motif: pinned to "
+                  f"'{melody_motif_def.get('name', '?')}' "
+                  f"(rhythm + pitch, {len(motif_pool)} in pool — "
+                  f"set melodic_variation='isorhythmic' to vary pitch)")
 
     # ── Melody + bass rhythm (explicit switch on section.rhythm) ────
     melody_rhythm_events = None

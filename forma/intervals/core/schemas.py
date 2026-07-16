@@ -517,6 +517,22 @@ class SectionModel(BaseModel):
     rhythm_pattern:  Optional[RhythmPatternModel] = None
     harmony_pattern: Optional[RhythmPatternModel] = None
 
+    # Melody pitch-source strategy when rhythm == "motif" and the theme has
+    # more than one motif in its pool (item MT-3). Default (None): pitch is
+    # PINNED to the same motif driving the rhythm — one motif, fully
+    # committed, both dimensions. "isorhythmic" opts INTO the previously-
+    # unreconciled behavior where rhythm stays anchored to one motif while
+    # pitch contour is redrawn from a different pool member each chord — a
+    # real technique (isorhythm: a fixed talea against a varying color), not
+    # a bug, for composers who want it deliberately.
+    #
+    # No effect when: rhythm != "motif" (nothing to decouple from); the
+    # theme's pool has 0-1 motifs (nothing to vary between); or the lead
+    # voice sets its own explicit motif override (a specific single motif
+    # chosen for the voice already wins outright — see generator.py's
+    # melody_motif_pool resolution). lint.py flags the no-op cases.
+    melodic_variation: Optional[Literal["isorhythmic"]] = None
+
     groove: Optional[str]                                = None
     # 0.0 = off, 1.0 = heaviest swing — see HarmonyRhythmModel.swing comment
     # and rhythm.remap_swing_ratio() for the internal conversion.

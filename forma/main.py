@@ -167,7 +167,7 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
     # Consumption lint: surface any setting the engine will silently ignore.
     # Non-fatal — generation still runs; this just makes the ignored settings
     # visible instead of leaving them as silent no-ops.
-    report = format_report(lint_piece(piece_model))
+    report = format_report(lint_piece(piece_model, theme=theme))
     if report:
         print(report)
 

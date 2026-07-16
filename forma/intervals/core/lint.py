@@ -26,7 +26,7 @@ That's it — the report and main.py wiring pick it up automatically.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterator
+from typing import Iterator, Optional
 
 from intervals.core.schemas import PieceModel, SectionModel, VoiceModel
 
@@ -198,6 +198,51 @@ def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradi
     )
 
 
+def _check_melodic_variation_noop(
+    section: SectionModel, motif_pool_size: int
+) -> Iterator[Contradiction]:
+    """
+    section.melodic_variation ("isorhythmic") only has an effect when ALL of
+    these hold (see generator.py's melody_motif_pool resolution, item MT-3):
+      - section.rhythm == "motif" — otherwise there's no pinned rhythm to
+        decouple pitch from in the first place.
+      - the theme's motif pool has more than one motif — otherwise there's
+        nothing to vary pitch BETWEEN.
+      - the lead voice does NOT set its own motif override — an explicit
+        single motif on the voice already wins outright, before
+        melodic_variation is ever consulted.
+    motif_pool_size is resolved by the caller (lint_piece needs the theme
+    for this, which no other check requires — see lint_piece's signature)
+    and passed in; -1 means "unknown, theme unavailable," which suppresses
+    the pool-size reason specifically rather than risking a false positive.
+    """
+    if section.melodic_variation is None:
+        return
+    lead = section.lead_voice()
+    reasons = []
+    if section.rhythm != "motif":
+        reasons.append(f"rhythm={section.rhythm!r} (needs 'motif')")
+    if motif_pool_size != -1 and motif_pool_size <= 1:
+        reasons.append(
+            f"the theme has only {motif_pool_size} motif(s) in its pool (needs >1)"
+        )
+    if lead is not None and lead.motif is not None:
+        reasons.append(
+            "the lead voice sets its own motif override, which wins outright"
+        )
+    if not reasons:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"melodic_variation={section.melodic_variation!r}",
+        cause="; ".join(reasons),
+        effect="melodic_variation is never consulted — pitch behaves exactly "
+               "as if it were unset",
+        fix="drop melodic_variation, or address the condition(s) above so it "
+            "actually applies.",
+    )
+
+
 def _check_section_motif_override(section: SectionModel) -> Iterator[Contradiction]:
     """
     section.motif / section.motifs are documented as restricting the motif pool
@@ -340,22 +385,40 @@ def lint_section(section: SectionModel) -> list[Contradiction]:
     return found
 
 
-def lint_piece(piece: PieceModel) -> list[Contradiction]:
+def lint_piece(piece: PieceModel, theme: Optional[dict] = None) -> list[Contradiction]:
     """
     Run every check against every *unique* section definition.
 
     Song form expands the same named section many times in play order; we lint
     each definition once (song_sections values) so a repeated chorus doesn't
     report the same contradiction four times.
+
+    theme: optional, needed only for _check_melodic_variation_noop's pool-size
+    condition — no other check requires theme context, so this stays a piece-
+    level addition rather than threading theme through lint_section/CHECKS.
+    Omitted -> the pool-size reason is skipped for that check (motif_pool_size
+    passed as -1), not treated as "pool has 0 or 1 motifs"; an unresolvable
+    pool shouldn't produce a false positive.
     """
     if piece.form_type == "song":
         sections = list((piece.song_sections or {}).values())
     else:
         sections = list(piece.sections or [])
 
+    motif_pool_size = -1
+    if theme is not None:
+        try:
+            from intervals.core.motif_loader import resolve_motif_pool_from_theme
+            motif_pool_size = len(resolve_motif_pool_from_theme(theme))
+        except Exception:
+            # Same posture as an omitted theme: unresolvable pool size
+            # suppresses the pool-size reason rather than guessing at it.
+            motif_pool_size = -1
+
     found: list[Contradiction] = []
     for section in sections:
         found.extend(lint_section(section))
+        found.extend(_check_melodic_variation_noop(section, motif_pool_size))
     return found
 
 
