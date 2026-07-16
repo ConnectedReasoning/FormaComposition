@@ -275,6 +275,28 @@ class CounterpointModel(BaseModel):
     # setting; when None it inherits the section's note_length_range (if any).
     note_length_range: Optional[NoteLengthRangeModel]   = None
 
+    # Independent per-voice motif override (string ref or embedded dict),
+    # mirroring VoiceModel.motif's shape exactly (item MT-1, option A).
+    # Resolved via resolve_motif_value with the theme's motif pool, same as
+    # the lead voice's and harmony's own motif overrides — a string checks
+    # theme.motifs by name first, then falls through to the external
+    # library; an embedded dict is used directly.
+    #
+    # RHYTHM ONLY, never pitch (see generate_free_species's
+    # rhythm_events_override in counterpoint.py): consonance/voice-leading
+    # stays fully rule-driven regardless of this field. Only "free" species
+    # can honor it — "first" species is rhythmically locked to the melody by
+    # definition (see generate_first_species's docstring) and silently
+    # ignores it if set; not an error, since the classical species
+    # definition already determines rhythm for that voice.
+    #
+    # Opt-in per voice by construction: unset (the default) means this
+    # voice's rhythm is exactly what it was before this field existed —
+    # its own density/groove grid. No section-level trigger; setting the
+    # section's rhythm to "motif" has no effect on a counterpoint voice
+    # that doesn't independently set this field.
+    motif: Optional[Union[str, dict]] = None
+
 class VoiceModel(BaseModel):
     """
     A single peer voice in the voices array (or the lead voice, if given as

@@ -655,6 +655,7 @@ def generate_free_species(
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
+    rhythm_events_override: Optional[list] = None,
 ) -> list[CounterpointNote]:
     """
     Generate free species counterpoint — mixed note values, passing tones,
@@ -731,17 +732,31 @@ def generate_free_species(
     total_beats = max(n.start_beat + n.duration_beats for n in melody_notes)
 
     # ── 1. Generate this voice's own rhythm grid, independent of the melody ──
+    # rhythm_events_override (item MT-1): when the generator supplies a
+    # pre-tiled RhythmEvent list — this VOICE's own assigned motif, tiled via
+    # _motif_rhythm_to_events, the same shared primitive melody and harmony
+    # use — it REPLACES the density/groove grid below. This is the only thing
+    # a counterpoint voice takes from a motif: its rhythm. Pitch selection in
+    # the loop below is untouched by this branch — the loop reads only
+    # ev.start_beat from whichever grid it gets, never any pitch information,
+    # so consonance/voice-leading stays fully rule-driven either way (MT-1
+    # decision (i): rhythm only, never pitch). Matches generate_bass /
+    # generate_melody_for_progression, which already accept an override on
+    # the same terms.
     rhythm_seed = seed if seed is not None else rng.randint(0, 10_000_000)
-    cp_rhythm = get_pattern(
-        total_beats,
-        density=rhythm_density,
-        voice_type="melody",
-        groove=groove,
-        beats_per_bar=beats_per_bar,
-        seed=rhythm_seed,
-        note_length_range=note_length_range,
-        note_length_quantum=note_length_quantum,
-    )
+    if rhythm_events_override is not None and rhythm_events_override:
+        cp_rhythm = rhythm_events_override
+    else:
+        cp_rhythm = get_pattern(
+            total_beats,
+            density=rhythm_density,
+            voice_type="melody",
+            groove=groove,
+            beats_per_bar=beats_per_bar,
+            seed=rhythm_seed,
+            note_length_range=note_length_range,
+            note_length_quantum=note_length_quantum,
+        )
     # Clip to the melody's span — a groove/density grid tiles past the end.
     clipped = []
     for ev in cp_rhythm:
@@ -903,6 +918,7 @@ def generate_counterpoint(
     groove: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
+    rhythm_events_override: Optional[list] = None,
 ) -> list[CounterpointNote]:
     """
     Generate a counterpoint voice against a melody.
@@ -975,6 +991,7 @@ def generate_counterpoint(
             groove=groove,
             note_length_range=note_length_range,
             note_length_quantum=note_length_quantum,
+            rhythm_events_override=rhythm_events_override,
         )
     else:
         raise ValueError(f"Unknown species: '{species}'. Choose 'first' or 'free'.")

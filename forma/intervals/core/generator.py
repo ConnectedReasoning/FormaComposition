@@ -909,6 +909,47 @@ def generate_piece(
     bpm      = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
     base_seed = piece.get("seed", 42)  # Optional seed parameter, defaults to 42
 
+    # Theme's inline motif pool, resolved once here for counterpoint voices'
+    # own per-voice motif overrides (item MT-1, option A). This is the SAME
+    # pool generate_section resolves internally for melody/harmony — kept as
+    # a separate call here rather than threaded through SectionResult because
+    # it's a pure function of theme alone, not section-specific.
+    _cp_motif_pool = resolve_motif_pool_from_theme(theme)
+
+    def _resolve_voice_motif_rhythm(motif_value, total_beats: float):
+        """
+        Resolve a counterpoint voice's own `motif` field (str ref or embedded
+        dict) into a tiled RhythmEvent list covering total_beats, or None if
+        motif_value is unset. "full" articulation — every onset, same as
+        melody's own motif rhythm gets (harmony instead uses density-based
+        articulation, which doesn't apply here: a counterpoint voice has no
+        density field driving it).
+
+        None in, None out: this is the opt-in gate. A voice that never sets
+        `motif` gets None here, generate_counterpoint's rhythm_events_override
+        stays None, and generate_free_species falls through to its own
+        density/groove grid exactly as if this field didn't exist.
+        """
+        if motif_value is None:
+            return None
+        motif_obj = resolve_motif_value(motif_value, theme_pool=_cp_motif_pool)
+        if motif_obj is None:
+            return None
+        # Convert through motif_to_dict, same as melody's/harmony's own motif
+        # resolution — Motif has no .velocities attribute at all (a
+        # pre-existing gap; to_dict() doesn't emit one either), so reading
+        # from the dict form and .get()-ing a possibly-absent key matches
+        # existing behavior exactly rather than risking an AttributeError
+        # on the raw dataclass.
+        motif_dict = motif_to_dict(motif_obj)
+        if not motif_dict.get("rhythm"):
+            return None
+        return _motif_rhythm_to_events(
+            motif_dict["rhythm"], total_beats, "full",
+            velocities=motif_dict.get("velocities"),
+            rests=motif_dict.get("rests"),
+        )
+
     # Determine form type (song or narrative)
     form_type = piece.get("form_type", "narrative")
 
@@ -1049,6 +1090,8 @@ def generate_piece(
                         register_bounds=vb,
                         note_length_range=_sec_nlr,
                         note_length_quantum=_sec_nlr_q,
+                        rhythm_events_override=_resolve_voice_motif_rhythm(
+                            v.motif, total_beats),
                     )
                 else:
                     # Melody-path peer: an independent generative/motif line
@@ -1149,6 +1192,8 @@ def generate_piece(
                     chord_voices=chord_voices,
                     note_length_range=_sec_nlr,
                     note_length_quantum=_sec_nlr_q,
+                    rhythm_events_override=_resolve_voice_motif_rhythm(
+                        cp_model.motif, total_beats),
                 )
 
                 # Canon offset: shift this voice forward in time.
