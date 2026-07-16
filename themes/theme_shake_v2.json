@@ -1,0 +1,110 @@
+{
+  "theme": {
+    "name": "Shake the Disease",
+    "key": "D",
+    "mode": "aeolian",
+    "tempo": {
+      "min": 112,
+      "max": 120
+    },
+    "notes": "D minor, 117 BPM. Inspired by Depeche Mode 1985. Three interweaving synth voices over locked bass. Signature move: Fm borrowed chord (bIIIm) in chorus darkens the aeolian field.",
+    "motifs": [
+      {
+        "name": "plea",
+        "intervals": [
+          0,
+          2,
+          -1,
+          -2,
+          1
+        ],
+        "rhythm": [
+          1.0,
+          0.5,
+          0.5,
+          1.0,
+          1.0
+        ],
+        "velocities": [
+          0.63,
+          0.55,
+          0.51,
+          0.59,
+          0.47
+        ],
+        "transform_pool": [
+          "inversion",
+          "retrograde",
+          "diminution",
+          "compress"
+        ]
+      },
+      {
+        "name": "arpeggio",
+        "intervals": [
+          3,
+          4,
+          -3,
+          2,
+          -2,
+          -4
+        ],
+        "rhythm": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          1.5
+        ],
+        "velocities": [
+          0.47,
+          0.43,
+          0.46,
+          0.41,
+          0.43,
+          0.39
+        ],
+        "transform_pool": [
+          "inversion",
+          "augmentation",
+          "transpose_up",
+          "transpose_down"
+        ]
+      },
+      {
+        "name": "counterline",
+        "intervals": [
+          -2,
+          -1,
+          3,
+          -3,
+          1,
+          2
+        ],
+        "rhythm": [
+          0.75,
+          0.25,
+          0.5,
+          1.0,
+          0.75,
+          0.75
+        ],
+        "velocities": [
+          0.43,
+          0.39,
+          0.41,
+          0.46,
+          0.39,
+          0.38
+        ],
+        "transform_pool": [
+          "retrograde",
+          "retrograde_inversion",
+          "compress",
+          "expand"
+        ]
+      }
+    ]
+  }
+}

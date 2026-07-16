@@ -69,19 +69,19 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 75
         },
         "bass_style": "steady",
         "arc": "fade_in",
         "rhythm": "motif",
-        "rest_probability": 0.15,
+        "rest_probability": 0.00005,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "sparse",
           "groove": "syncopated"
         },
         "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
-        "swing": 0.3
+        "swing": 0.1
       },
       "m1_grid_2": {
         "name": "m1_grid_2",
@@ -110,7 +110,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "fade_in",
@@ -143,7 +143,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 89
         },
         "rhythm": "motif",
         "bass_style": "steady",
@@ -184,7 +184,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "plateau",
@@ -215,7 +215,7 @@
         "melody": {
           "register": "alto",
           "behavior": "develop",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "swell",
@@ -261,7 +261,7 @@
         "melody": {
           "register": "alto",
           "behavior": "develop",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "plateau",
@@ -297,7 +297,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "swell",
@@ -343,7 +343,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 55
+          "velocity": 89
         },
         "bass_style": "steady",
         "arc": "plateau",

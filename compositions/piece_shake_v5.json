@@ -1,0 +1,138 @@
+{
+  "piece": {
+    "title": "Shake the Disease (FormaComposition) v5",
+    "theme": "theme_shake",
+    "tempo": 117,
+    "seed": 1985,
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse_1",
+      "chorus",
+      "verse_2",
+      { "section": "chorus", "exact_repeat": true },
+      "bridge",
+      "chorus_final",
+      "outro"
+    ],
+    "notes": "Structure: Intro -> Verse -> Chorus -> Verse -> Chorus -> Bridge -> Chorus(final) -> Outro. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm \u2014 the DM signature dark move). Bridge: Bb-C-Bb-Dm. Primary melody carries the 'plea' motif throughout (rhythm:motif). Two counterpoint voices ride above/below: counterpoint 1 (arpeggio character, above) and counterpoint 2 (counterline character, below), each rhythmically independent. v4: chorus is now a single shared definition in song form, repeated via exact_repeat so chorus_1 and chorus_2 are byte-identical \u2014 same seed, same rest_probability, same velocities. chorus_final remains a distinct, larger climactic variant (16 bars, fuller texture) and is NOT a repeat. v5: v4 validated and rendered but never actually exercised per-voice motif assignment (item 9 / MT-1) \u2014 neither counterpoint entry set a motif field anywhere, so both voices rendered with default rule-driven pitch and generic free-species rhythm, no motif involvement at all, despite this piece's own notes describing 'arpeggio character' and 'counterline character'. Added motif: 'arpeggio' to counterpoint 1 and motif: 'counterline' to counterpoint 2 in every section that has a counterpoint block (verse_1, chorus, verse_2, bridge, chorus_final, outro \u2014 intro has none, voices silent there per its own notes). Pitch selection is untouched by this change \u2014 consonance/voice-leading stays fully rule-driven (MT-1 decision (i)); only each voice's RHYTHM now comes from its assigned motif's tiled rhythm instead of a generic groove/density grid. This is the first version of this piece that actually renders the three-named-motif structure theme_shake_v2.json declares.",
+    "sections": {
+      "intro": {
+        "bars": 8,
+        "progression": ["i", "VII", "v", "VI"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "rest_probability": 0.35,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here \u2014 sparse texture only. Harmony stays sustained, no strumming yet."
+      },
+      "verse_1": {
+        "bars": 16,
+        "progression": ["i", "VII", "III", "VI"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; counterpoint 2 (counterline character) below.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 55, "motif": "arpeggio" },
+          { "species": "first", "register": "below", "dissonance": "passing", "velocity": 48, "motif": "counterline" }
+        ]
+      },
+      "chorus": {
+        "bars": 12,
+        "chord_bars": [3, 3, 3, 3],
+        "progression": ["i", "iim", "bVI", "VI"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.15,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Harmony strikes on the plea motif's syncopated rhythm \u2014 Ob-La-Di-style chord hits. This single definition is reused for both choruses via exact_repeat so the hook is identical each time.",
+        "counterpoint": [
+          { "species": "first", "register": "above", "dissonance": "passing", "velocity": 65, "motif": "arpeggio" },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 55, "motif": "counterline" }
+        ]
+      },
+      "verse_2": {
+        "bars": 16,
+        "progression": ["i", "VII", "III", "VI"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "breath",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 52, "motif": "arpeggio" },
+          { "species": "first", "register": "below", "dissonance": "passing", "velocity": 45, "motif": "counterline" }
+        ]
+      },
+      "bridge": {
+        "bars": 8,
+        "progression": ["VI", "VII", "VI", "i"],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "build",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "Bb-C-Bb-Dm. Tension and release. Counterpoint 1 and 2 move in contrary motion, building toward the final chorus.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 50, "motif": "arpeggio" },
+          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 55, "motif": "counterline" }
+        ]
+      },
+      "chorus_final": {
+        "bars": 16,
+        "chord_bars": [4, 4, 4, 4],
+        "progression": ["i", "iim", "bVI", "VI"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif" },
+        "notes": "Extended final chorus \u2014 16 bars, intentionally NOT a repeat of chorus. Primary melody and both counterpoint voices at full intensity, peak interweave.",
+        "counterpoint": [
+          { "species": "first", "register": "above", "dissonance": "free", "velocity": 75, "motif": "arpeggio" },
+          { "species": "free", "register": "below", "dissonance": "free", "velocity": 65, "motif": "counterline" }
+        ]
+      },
+      "outro": {
+        "bars": 8,
+        "progression": ["i", "VII", "v", "i"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "rest_probability": 0.35,
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "notes": "Voices dissolve in reverse order. Bass pedal on D. Counterpoint 2 drops out first, then counterpoint 1. Harmony returns to sustain, mirroring the intro.",
+        "counterpoint": [
+          { "species": "free", "register": "above", "dissonance": "none", "velocity": 32, "motif": "arpeggio" }
+        ]
+      }
+    }
+  }
+}
