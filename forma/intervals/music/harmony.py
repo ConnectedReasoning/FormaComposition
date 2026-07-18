@@ -14,7 +14,8 @@ from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing, remap_swing_ratio,
-    _slice_events_into_window, rhythm_pattern_to_events, _motif_rhythm_to_events,
+    _slice_events_into_window, rhythm_pattern_to_events,
+    _motif_rhythm_to_events_varied,
 )
 
 # ---------------------------------------------------------------------------
@@ -1053,10 +1054,22 @@ def resolve_harmony_section_events(
     hr_density: Optional[str],
     harmony_motif_def: Optional[dict],
     harmony_motif_desc: str,
+    transform_imitation: Optional[str] = None,
+    seed: Optional[int] = None,
 ) -> tuple:
     """
     Resolve harmony's rhythm source for one section into a section-wide event
     stream (or sentinel), plus a description of what was chosen.
+
+    transform_imitation, seed (item 17 / ST-5): only consulted on the
+    "motif" branch. None (default) -> harmony picks its own transform each
+    repetition, independently, from harmony_motif_def's transform_pool,
+    seeded from `seed` for determinism. "strict" -> NOT YET IMPLEMENTED;
+    raises rather than silently falling back to the default or ignoring the
+    setting -- see the ValueError's own message for why (melody's transform
+    choices don't exist yet at the point harmony resolves; the two voices'
+    "repetition" isn't even the same shape -- melody's is chord-scoped and
+    develop-behavior-only, harmony's is a continuous section-wide cycle).
 
     Returns (harmony_section_events, description):
       harmony_section_events — "sustain" | list[RhythmEvent] | None.
@@ -1118,6 +1131,33 @@ def resolve_harmony_section_events(
                 f"(neither harmony_rhythm.motif nor the theme's motif)"
             )
 
+        # item 17 / ST-5: "strict" (harmony inherits melody's transform
+        # choice each repetition) is not yet implemented. Raising here
+        # rather than silently falling back to independent selection or
+        # ignoring the field -- exactly the silent-no-op failure mode this
+        # engine's lint checks exist to catch elsewhere, so the un-built
+        # path shouldn't quietly become one itself. Two open problems
+        # block it, not implementation effort: (1) harmony's rhythm
+        # resolves here, in generate_section, BEFORE melody's actual notes
+        # (and therefore its transform choices) are generated at all --
+        # there is no "melody's choice" yet to inherit at this point in the
+        # pipeline; (2) melody's transform selection only exists for
+        # "develop" behavior, chosen per-chord inside generate_develop,
+        # while harmony's cycling is continuous across the whole section
+        # regardless of behavior or chord boundaries -- the two voices'
+        # "repetition" isn't the same shape, so "the same choice" isn't
+        # well-defined yet even once ordering is solved.
+        if transform_imitation == "strict":
+            raise ValueError(
+                f"Section '{section_name}': harmony_rhythm.transform_imitation="
+                f"'strict' is not yet implemented. Harmony's motif rhythm "
+                f"resolves before melody's notes (and its transform choices) "
+                f"exist, and the two voices' repetition cadence don't "
+                f"currently share a common shape to inherit across. Leave "
+                f"transform_imitation unset for harmony's independent "
+                f"per-repetition transform selection (item 17's shipped fix)."
+            )
+
         # density selects onset articulation — full/stressed/anchor, the same
         # subsetting _motif_rhythm_to_events already offers melody and bass —
         # so density has a real, audible effect here instead of being
@@ -1137,10 +1177,19 @@ def resolve_harmony_section_events(
         # _enrich_chords_with_rhythm slices this into each chord's local
         # window; _MotifHarmonyStrategy consumes those slices exactly like
         # _PatternHarmonyStrategy does.
-        events = _motif_rhythm_to_events(
-            harmony_motif_def["rhythm"], total_beats_section, articulation,
+        #
+        # item 17 / ST-5 fix: each cycle of the tile now gets its own
+        # independently-chosen transform from the motif's transform_pool
+        # (empty/absent pool degrades to exactly the old verbatim-tiling
+        # behavior — see _motif_rhythm_to_events_varied's own docstring),
+        # replacing the confirmed bug where every repetition across the
+        # section was an untransformed clone of the first.
+        events = _motif_rhythm_to_events_varied(
+            harmony_motif_def["rhythm"], total_beats_section,
+            harmony_motif_def.get("transform_pool", []), articulation,
             velocities=harmony_motif_def.get("velocities"),
             rests=harmony_motif_def.get("rests"),
+            seed=seed,
         )
         cycle = sum(harmony_motif_def["rhythm"])
         lines.append(f"    Harmony rhythm: motif {articulation} ({len(events)} "

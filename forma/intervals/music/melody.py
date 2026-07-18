@@ -21,7 +21,10 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
-from intervals.music.rhythm import RhythmEvent, get_pattern, apply_swing, remap_swing_ratio
+from intervals.music.rhythm import (
+    RhythmEvent, get_pattern, apply_swing, remap_swing_ratio,
+    apply_rhythm_transform, apply_rests_transform,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -212,32 +215,6 @@ def apply_transform(
     else:
         # augmentation / diminution affect rhythm, not intervals
         return list(intervals)
-
-
-def apply_rhythm_transform(rhythm: list[float], transform: str) -> list[float]:
-    """Apply time-based transforms to a rhythm sequence."""
-    if transform == "augmentation":
-        return [r * 2.0 for r in rhythm]
-    elif transform == "diminution":
-        return [max(0.25, r * 0.5) for r in rhythm]
-    elif transform == "retrograde":
-        return list(reversed(rhythm))
-    else:
-        return list(rhythm)
-
-
-def apply_rests_transform(rests: Optional[list[bool]], transform: str) -> Optional[list[bool]]:
-    """
-    Keep a rests array aligned with whatever reordering apply_rhythm_transform
-    performs on the paired rhythm array. Only "retrograde" reorders here (this
-    local shuffle implementation, unlike motif.py's canonical one, doesn't
-    reorder rhythm either, so rests correctly stays untouched for shuffle too).
-    """
-    if rests is None:
-        return None
-    if transform == "retrograde":
-        return list(reversed(rests))
-    return list(rests)
 
 
 def motif_to_notes(

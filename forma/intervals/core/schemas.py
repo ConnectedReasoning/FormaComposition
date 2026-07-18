@@ -220,6 +220,23 @@ class HarmonyRhythmModel(BaseModel):
     # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
+    # Item 17 / ST-5: harmony's motif rhythm used to tile the exact same
+    # cell verbatim across a whole section -- untransformed clones, no
+    # variation. Default (None): harmony picks its own transform each
+    # repetition, independently, from the motif's transform_pool -- this is
+    # "free imitation" in counterpoint-theory terms (voices vary
+    # independently), so it needs no literal value of its own; absence
+    # already means it. "strict" opts INTO "strict imitation" instead --
+    # harmony inherits melody's transform choice each repetition and
+    # reapplies it to its own comping shape, staying in lockstep.
+    #
+    # transform_ prefix is deliberate: this is scoped to which TRANSFORM got
+    # picked, not a general "imitation" concept -- melody.py's unrelated
+    # canonic_imitation (fugal_techniques, offset voice entries in time) is
+    # a different mechanism in a different config surface entirely; the two
+    # terms shouldn't be confused for each other.
+    transform_imitation: Optional[Literal["strict"]] = None
+
 class NoteLengthRangeModel(BaseModel):
     """
     Decouples note length from density for melody / free-species counterpoint.

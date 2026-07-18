@@ -628,6 +628,8 @@ def generate_section(
         hr_density=(_hr_model.density if _hr_model is not None else None),
         harmony_motif_def=_harmony_motif_def,
         harmony_motif_desc=_harmony_motif_desc,
+        transform_imitation=(_hr_model.transform_imitation if _hr_model is not None else None),
+        seed=base_seed + seed_offset,
     )
     if _h_desc:
         print(_h_desc)

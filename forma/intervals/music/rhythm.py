@@ -1052,35 +1052,28 @@ def rhythm_pattern_to_events(pattern: dict, total_beats: float) -> list[RhythmEv
     return events
 
 
-def _motif_rhythm_to_events(
+def _tile_one_motif_cycle(
     rhythm: list,
+    articulation: str,
+    velocities: Optional[list],
+    rests: Optional[list],
+    offset: float,
     total_beats: float,
-    articulation: str = "full",
-    velocities: Optional[list] = None,
-    rests: Optional[list] = None,
 ) -> list[RhythmEvent]:
     """
-    Convert a motif rhythm (list of beat durations) to a tiled list of
-    RhythmEvent covering total_beats.
+    Emit ONE cycle's worth of RhythmEvent, starting at `offset`, for the
+    given rhythm/velocities/rests/articulation. Factored out of
+    _motif_rhythm_to_events (item 17 / ST-5) so _motif_rhythm_to_events_varied
+    can recompute onsets/keep/velocities fresh each cycle -- necessary once
+    different cycles can carry different (transformed) rhythm arrays, since
+    onset positions and the "stressed" articulation's median filter both
+    depend on that specific cycle's rhythm values, not a single value fixed
+    for the whole section.
 
-    articulation controls onset density per voice:
-      "full"     — every onset (melody)
-      "stressed" — onsets >= median duration (harmony)
-      "anchor"   — downbeat only (bass)
-
-    rests: optional, same length as rhythm. True = this slot is silent and
-    is excluded from the emitted events regardless of articulation mode —
-    a rest never sounds, whether or not it would otherwise have been kept.
-    The slot's duration still occupies its place in the timing grid (onsets
-    for every other slot are computed exactly as if the rest weren't there),
-    it's just never selected into the output.
+    Same onset/articulation/rest logic as the untransformed tiler; this
+    function doesn't know or care whether its `rhythm` is the original or a
+    transformed cycle -- that decision lives entirely with the caller.
     """
-    if not rhythm or total_beats <= 0:
-        return []
-    cycle_length = sum(rhythm)
-    if cycle_length <= 0:
-        return []
-
     onsets = []
     t = 0.0
     for dur in rhythm:
@@ -1104,22 +1097,133 @@ def _motif_rhythm_to_events(
         velocities = [0.8] * len(rhythm)
 
     events = []
+    for i in keep:
+        abs_onset = offset + onsets[i]
+        if abs_onset >= total_beats:
+            break
+        dur = min(rhythm[i], total_beats - abs_onset)
+        if dur < 0.25:
+            continue
+        events.append(RhythmEvent(
+            start_beat=abs_onset,
+            duration_beats=dur,
+            velocity_scale=velocities[i],
+            is_rest=False,
+        ))
+    return events
+
+
+def _motif_rhythm_to_events(
+    rhythm: list,
+    total_beats: float,
+    articulation: str = "full",
+    velocities: Optional[list] = None,
+    rests: Optional[list] = None,
+) -> list[RhythmEvent]:
+    """
+    Convert a motif rhythm (list of beat durations) to a tiled list of
+    RhythmEvent covering total_beats.
+
+    articulation controls onset density per voice:
+      "full"     — every onset (melody)
+      "stressed" — onsets >= median duration (harmony)
+      "anchor"   — downbeat only (bass)
+
+    rests: optional, same length as rhythm. True = this slot is silent and
+    is excluded from the emitted events regardless of articulation mode —
+    a rest never sounds, whether or not it would otherwise have been kept.
+    The slot's duration still occupies its place in the timing grid (onsets
+    for every other slot are computed exactly as if the rest weren't there),
+    it's just never selected into the output.
+
+    Every cycle re-emits this SAME rhythm/velocities/rests verbatim -- see
+    _motif_rhythm_to_events_varied for the item 17/ST-5 alternative that
+    applies an independently- or melody-selected transform per cycle.
+    """
+    if not rhythm or total_beats <= 0:
+        return []
+    cycle_length = sum(rhythm)
+    if cycle_length <= 0:
+        return []
+
+    events = []
     offset = 0.0
     while offset < total_beats:
-        for i in keep:
-            abs_onset = offset + onsets[i]
-            if abs_onset >= total_beats:
-                break
-            dur = min(rhythm[i], total_beats - abs_onset)
-            if dur < 0.25:
-                continue
-            events.append(RhythmEvent(
-                start_beat=abs_onset,
-                duration_beats=dur,
-                velocity_scale=velocities[i],
-                is_rest=False,
-            ))
+        events.extend(_tile_one_motif_cycle(
+            rhythm, articulation, velocities, rests, offset, total_beats
+        ))
         offset += cycle_length
+    return events
+
+
+def _motif_rhythm_to_events_varied(
+    rhythm: list,
+    total_beats: float,
+    transform_pool: list,
+    articulation: str = "full",
+    velocities: Optional[list] = None,
+    rests: Optional[list] = None,
+    seed: Optional[int] = None,
+) -> list[RhythmEvent]:
+    """
+    Item 17 / ST-5 fix (default mode): like _motif_rhythm_to_events, but each
+    successive cycle gets its OWN independently-chosen transform from
+    transform_pool, applied to the base rhythm/rests before that cycle
+    tiles -- fixing the confirmed bug where harmony's motif rhythm tiled the
+    exact same cell verbatim across a whole section, no variation.
+
+    Selection mirrors melody.py's generate_develop._transformed_statement
+    exactly: a fresh random choice each cycle, EXCLUDING the immediately
+    previous cycle's transform when the pool has more than one option (so a
+    5-cycle run with a 2-item pool alternates rather than only sometimes
+    varying), falling back to the full pool if excluding would leave nothing
+    to choose from. transform_pool entries with no rhythm-domain meaning
+    (inversion, sequence, transpose_up/down, compress, expand,
+    retrograde_inversion) fall through apply_rhythm_transform's default
+    branch as a same-cycle no-op -- picked, tracked as "previous" for the
+    next cycle's exclusion, but audibly identical to the untransformed cell
+    that cycle. This is inherited behavior from apply_rhythm_transform
+    itself, not new here.
+
+    velocities is transformed alongside rhythm and rests (via
+    apply_velocities_transform) so a slot's accent stays paired with the
+    same note under reordering -- augmentation/diminution preserve the
+    rhythm array's LENGTH (only durations change), so a velocities list
+    sized to the untransformed rhythm stays index-valid for those; only
+    retrograde reorders, and it reorders all three (rhythm, rests,
+    velocities) together to keep them aligned.
+
+    No transform_pool (empty or None) degrades to exactly
+    _motif_rhythm_to_events's behavior -- every cycle uses the untransformed
+    cell, since there's nothing to choose between.
+    """
+    if not rhythm or total_beats <= 0:
+        return []
+    if not transform_pool:
+        return _motif_rhythm_to_events(rhythm, total_beats, articulation, velocities, rests)
+
+    rng = random.Random(seed)
+    events = []
+    offset = 0.0
+    prev_transform: Optional[str] = None
+    while offset < total_beats:
+        choices = transform_pool
+        if len(transform_pool) > 1 and prev_transform is not None:
+            choices = [t for t in transform_pool if t != prev_transform] or transform_pool
+        transform = rng.choice(choices)
+
+        cur_rhythm = apply_rhythm_transform(rhythm, transform)
+        cur_rests = apply_rests_transform(rests, transform)
+        cur_velocities = apply_velocities_transform(velocities, transform)
+        cycle_length = sum(cur_rhythm)
+        if cycle_length <= 0:
+            break  # degenerate transformed cycle (shouldn't happen given the transform set, but stay safe rather than loop forever)
+
+        events.extend(_tile_one_motif_cycle(
+            cur_rhythm, articulation, cur_velocities, cur_rests, offset, total_beats
+        ))
+        offset += cycle_length
+        prev_transform = transform
     return events
 
 
@@ -1151,3 +1255,65 @@ def _slice_events_into_window(
             is_rest=ev.is_rest,
         ))
     return sliced
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Rhythm-domain motif transforms — relocated from melody.py (item 17 / ST-5)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Moved here rather than imported harmony.py -> melody.py: this engine's
+# import graph deliberately keeps voice modules from depending on each other
+# (ST-0 severed exactly this kind of edge for strategies.py). Both functions
+# are generic rhythm-array operations with no melody-specific content, so
+# they belong alongside the other shared tiling primitives in this file —
+# melody.py's own usage (develop behavior's per-repetition transform choice)
+# is unaffected, just imports from here now instead of defining locally.
+
+def apply_rhythm_transform(rhythm: list, transform: str) -> list:
+    """Apply time-based transforms to a rhythm sequence."""
+    if transform == "augmentation":
+        return [r * 2.0 for r in rhythm]
+    elif transform == "diminution":
+        return [max(0.25, r * 0.5) for r in rhythm]
+    elif transform == "retrograde":
+        return list(reversed(rhythm))
+    else:
+        return list(rhythm)
+
+
+def apply_rests_transform(rests: Optional[list], transform: str) -> Optional[list]:
+    """
+    Keep a rests array aligned with whatever reordering apply_rhythm_transform
+    performs on the paired rhythm array. Only "retrograde" reorders here (this
+    shuffle implementation, unlike motif.py's canonical one, doesn't reorder
+    rhythm either, so rests correctly stays untouched for shuffle too).
+    """
+    if rests is None:
+        return None
+    if transform == "retrograde":
+        return list(reversed(rests))
+    return list(rests)
+
+
+def apply_velocities_transform(velocities: Optional[list], transform: str) -> Optional[list]:
+    """
+    Keep a velocities array aligned with whatever reordering
+    apply_rhythm_transform performs on the paired rhythm array. Same shape
+    as apply_rests_transform, added alongside it (item 17 / ST-5) rather
+    than an existing precedent -- motif.py's Motif dataclass has no
+    velocities field at all, so nothing in this codebase previously needed
+    an answer for "what happens to per-slot velocity under a rhythm
+    transform." Treating a slot's velocity as part of that note's identity
+    (travels with its duration and rest status under reordering, same as
+    rests does) rather than pinned to absolute slot position was chosen
+    deliberately: the alternative -- velocity fixed by position regardless
+    of which duration/rest content is currently occupying that slot --
+    would decouple "the accent" from "the note it accents" under retrograde,
+    which reads as a bug (a loud downbeat for no musical reason) rather
+    than a deliberate effect.
+    """
+    if velocities is None:
+        return None
+    if transform == "retrograde":
+        return list(reversed(velocities))
+    return list(velocities)

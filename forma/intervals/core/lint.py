@@ -198,6 +198,35 @@ def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradi
     )
 
 
+def _check_counterpoint_motif_species_noop(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    CounterpointModel.motif only has an effect on free-species voices --
+    rhythm_events_override never reaches first-species counterpoint, which
+    is locked to the melody's own onsets by definition (MT-1's verified
+    design; see generate_first_species's docstring in counterpoint.py). A
+    motif assigned to a first-species voice is schema-legal and silently
+    ignored -- confirmed live in a real piece, where species per voice
+    position deliberately varies section to section, so the same motif
+    field was active in some sections and inert in others with no warning.
+    """
+    cp = section.counterpoint
+    if not cp:
+        return
+    for i, c in enumerate(cp):
+        if c.species == "first" and c.motif is not None:
+            yield Contradiction(
+                where=f"section '{section.name or '?'}', counterpoint[{i}]",
+                setting=f"motif={c.motif!r}",
+                cause="species='first' -- rhythmically locked to the melody, "
+                      "no rhythm override path exists for this species",
+                effect="motif is never consulted; this voice's rhythm is "
+                       "exactly the melody's own onsets, unaffected by the "
+                       "assigned motif",
+                fix="drop motif on this voice, or change species to 'free' "
+                    "if independent motif-driven rhythm is what's wanted.",
+            )
+
+
 def _check_melodic_variation_noop(
     section: SectionModel, motif_pool_size: int
 ) -> Iterator[Contradiction]:
@@ -364,6 +393,7 @@ CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
     _check_harmony_motif_groove_noop,
+    _check_counterpoint_motif_species_noop,
     _check_section_motif_override,
     _check_harmony_rest_on_sustain,
     _check_bass_rest_on_continuous,
