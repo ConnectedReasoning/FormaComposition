@@ -100,6 +100,25 @@ TransformLiteral   = Literal[
 CounterpointSpeciesLiteral  = Literal["free", "first", "second", "third", "fourth", "fifth"]
 CounterpointRegisterLiteral = Literal["above", "below"]
 DissonanceLiteral           = Literal["none", "passing", "neighbor", "free"]
+# Grooves are a fixed onset-accent vocabulary defined in rhythm.py's GROOVES
+# dict (verified against source 2026-07). groove was previously plain str
+# at all four of its locations (section, harmony_rhythm, counterpoint,
+# drums) — schema-legal for any typo, only caught (as "Unknown groove:
+# '...'") deep in rhythm.py at render time. Literal-typing it here closes
+# that gap the same way every other music-vocabulary field in this file
+# already is; keep this list in sync with rhythm.py's GROOVES keys by hand
+# (no import — schemas.py doesn't depend on the render modules, matching
+# this file's existing direction of dependency).
+GrooveLiteral = Literal[
+    "straight", "push", "backbeat", "syncopated", "halftime",
+    "shuffle", "broken", "clave", "waltz", "offbeat", "driving",
+]
+# Same story for drums.pattern — plain str, schema-legal for a typo,
+# caught only as "Unknown drum pattern: '...'" at render time in
+# percussion.py. Keep in sync with percussion.py's DRUM_PATTERNS keys.
+DrumPatternLiteral = Literal[
+    "four_on_floor", "backbeat", "halftime", "minimal", "sideclick",
+]
 VoiceRegisterLiteral        = Literal[
     # Traditional SATB(+baritone) names (canonical, preferred)
     "soprano", "alto", "tenor", "baritone", "bass",
@@ -146,6 +165,8 @@ VALID_ARC                   = set(get_args(ArcLiteral))
 VALID_RHYTHM_SOURCE         = set(get_args(RhythmSourceLiteral))
 VALID_HARMONY_RHYTHM_SOURCE = set(get_args(HarmonyRhythmSourceLiteral))
 VALID_TRANSFORMS            = set(get_args(TransformLiteral))
+VALID_GROOVES                = set(get_args(GrooveLiteral))
+VALID_DRUM_PATTERNS          = set(get_args(DrumPatternLiteral))
 
 # ─── Obsolete field registries ───────────────────────────────────────────────
 
@@ -213,7 +234,7 @@ class HarmonyRhythmModel(BaseModel):
 
     rhythm:        Optional[HarmonyRhythmSourceLiteral] = None
     density:       Optional[DensityLiteral]             = None
-    groove:        Optional[str]                        = None
+    groove:        Optional[GrooveLiteral]               = None
     motif:         Optional[Union[str, dict]]            = None
     # 0.0 = off, 1.0 = heaviest swing. Internally remapped via
     # rhythm.remap_swing_ratio() before use — do not confuse with the
@@ -282,11 +303,33 @@ class CounterpointModel(BaseModel):
     velocity:     Annotated[int, Field(ge=1, le=127)] = 58
     canon_offset: Annotated[float, Field(ge=0.0)]     = 0.0
 
+    @field_validator("species", mode="after")
+    @classmethod
+    def _validate_species_implemented(cls, v):
+        """
+        Only 'first' and 'free' species are implemented in counterpoint.py.
+        'second'/'third'/'fourth'/'fifth' are schema-valid *names*
+        (CounterpointSpeciesLiteral accepts all six) but raise ValueError
+        ("Unknown species: ... Choose 'first' or 'free'.") the moment
+        generate_counterpoint() runs — previously only surfaced as a
+        non-blocking lint warning (_check_counterpoint_species_unimplemented),
+        not caught at validation time. lint.py's check still runs — it just
+        can no longer actually fire, since this now blocks first.
+        """
+        if v not in ("first", "free"):
+            raise ValueError(
+                f"species='{v}' is not implemented in counterpoint.py — "
+                f"only 'first' and 'free' are. 'second'/'third'/'fourth'/"
+                f"'fifth' are schema-valid names but raise ValueError at "
+                f"render time."
+            )
+        return v
+
     # Rhythmic independence (free species only — see counterpoint.py).
     # "first" species stays note-against-note with the cantus firmus by
     # classical convention regardless of these fields.
     rhythm_density: Literal["sparse", "medium", "full"] = "medium"
-    groove:         Optional[str]                       = None
+    groove:         Optional[GrooveLiteral]              = None
     # Per-voice note-length range override (free species only). When set, this
     # voice samples its durations in-range independently of the section-level
     # setting; when None it inherits the section's note_length_range (if any).
@@ -363,6 +406,20 @@ class VoiceModel(BaseModel):
     dissonance: DissonanceLiteral                           = "passing"
     canon_offset: Annotated[float, Field(ge=0.0)]           = 0.0
 
+    @field_validator("species", mode="after")
+    @classmethod
+    def _validate_species_implemented(cls, v):
+        """Mirrors CounterpointModel's check — see its docstring. None
+        (the default, meaning "no species — use melody.py") is exempt."""
+        if v is not None and v not in ("first", "free"):
+            raise ValueError(
+                f"species='{v}' is not implemented in counterpoint.py — "
+                f"only 'first' and 'free' are. 'second'/'third'/'fourth'/"
+                f"'fifth' are schema-valid names but raise ValueError at "
+                f"render time."
+            )
+        return v
+
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
 
@@ -391,9 +448,9 @@ class DrumModel(BaseModel):
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    pattern: str                         = "four_on_floor"
+    pattern: DrumPatternLiteral           = "four_on_floor"
     density: Optional[DensityLiteral]    = None   # None → inherit from section
-    groove:  Optional[str]               = None   # None → inherit from section
+    groove:  Optional[GrooveLiteral]      = None   # None → inherit from section
     swing:   Optional[float]             = None   # None → inherit from section
 
     def resolve(
@@ -550,7 +607,7 @@ class SectionModel(BaseModel):
     # melody_motif_pool resolution). lint.py flags the no-op cases.
     melodic_variation: Optional[Literal["isorhythmic"]] = None
 
-    groove: Optional[str]                                = None
+    groove: Optional[GrooveLiteral]                       = None
     # 0.0 = off, 1.0 = heaviest swing — see HarmonyRhythmModel.swing comment
     # and rhythm.remap_swing_ratio() for the internal conversion.
     swing:  Annotated[float, Field(ge=0.0, le=1.0)]     = 0.0
@@ -660,6 +717,25 @@ class SectionModel(BaseModel):
         if v is not None and len(v) > 3:
             raise ValueError(
                 f"counterpoint supports at most 3 voices, got {len(v)}"
+            )
+        return v
+
+    @field_validator("voices", mode="after")
+    @classmethod
+    def _validate_voices_count(cls, v):
+        """
+        Cap at 4 total voices (1 lead + 3 peers). generator.py writes peer
+        voices (section.voices[1:]) to MIDI tracks via a hardcoded 3-entry
+        _cp_track_specs list, indexed by peer position — a 4th peer voice
+        (voices[4], the 5th entry overall) would index past the end of that
+        list and crash with an IndexError deep in MIDI writing, well after
+        generation has already run. Catching it here instead gives a clean
+        error at validation time, before any generation starts, mirroring
+        the existing counterpoint cap above.
+        """
+        if v is not None and len(v) > 4:
+            raise ValueError(
+                f"voices supports at most 4 total (1 lead + 3 peers), got {len(v)}"
             )
         return v
 
@@ -798,6 +874,30 @@ class SectionModel(BaseModel):
                     f"Section '{self.name}': harmony_rhythm.rhythm='pattern' "
                     f"requires a harmony_pattern block"
                 )
+            # harmony_rhythm.transform_imitation='strict' is schema-legal
+            # (Literal["strict"]) but NOT implemented — resolve_harmony_
+            # section_events() in harmony.py raises ValueError whenever it's
+            # combined with an EXPLICIT harmony_rhythm.rhythm='motif' (the
+            # only branch that reads transform_imitation at all; motif
+            # inherited from section.rhythm without an explicit
+            # harmony_rhythm.rhythm is coerced to 'free' before this field
+            # is ever consulted, so that combination is harmless and not
+            # checked here). Catching the live combination at validation
+            # time turns a mid-render crash into an immediate, clear error —
+            # same reasoning as the harmony_pattern check just above.
+            if hr.transform_imitation == "strict" and hr.rhythm == "motif":
+                raise ValueError(
+                    f"Section '{self.name}': harmony_rhythm.transform_imitation="
+                    f"'strict' combined with harmony_rhythm.rhythm='motif' is "
+                    f"not implemented — this will raise ValueError at render "
+                    f"time in harmony.py (melody's transform choices don't "
+                    f"exist yet at the point harmony resolves, and the two "
+                    f"voices' repetition cadence isn't the same shape to "
+                    f"inherit across). Remove transform_imitation (leave it "
+                    f"unset) for harmony's independent per-repetition "
+                    f"transform selection — the only mode currently "
+                    f"implemented."
+                )
         return self
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -892,6 +992,34 @@ class SectionModel(BaseModel):
             self._check_bar_alignment(voice_motif.name, voice_motif.rhythm, label, where="voice.motif")
         if harmony_motif is not None:
             self._check_bar_alignment(harmony_motif.name, harmony_motif.rhythm, label, where="harmony_rhythm.motif")
+
+        # counterpoint[].motif and peer voices[1:].motif — a *different*
+        # crash gap from the two checks just above. The lead voice
+        # (voices[0] / melody-as-dict) and harmony_rhythm.motif are both
+        # resolved here via _resolve_motif_value_safe, which converts a
+        # bad name into this method's clean ValueError. But at render time,
+        # counterpoint[] entries and peer voices route through a different
+        # resolver entirely — generator.py's _resolve_voice_motif_rhythm —
+        # which calls resolve_motif_value() directly with no error handling
+        # at all, and does so unconditionally whenever .motif is set,
+        # regardless of species (even a "first"-species voice, where the
+        # motif is otherwise inert per lint.py, still hits this call). A
+        # typo'd name there previously reached generation as a raw,
+        # uncaught FileNotFoundError instead of this method's ValueError.
+        # voices[0] is skipped here — already covered above via voice_motif
+        # / lead_voice().
+        for cp in (self.counterpoint or []):
+            if cp.motif is not None:
+                cp_motif = _resolve_motif_value_safe(cp.motif, theme_pool)
+                self._check_bar_alignment(
+                    cp_motif.name, cp_motif.rhythm, label, where="counterpoint[].motif"
+                )
+        for peer in (self.voices or [])[1:]:
+            if peer.motif is not None:
+                peer_motif = _resolve_motif_value_safe(peer.motif, theme_pool)
+                self._check_bar_alignment(
+                    peer_motif.name, peer_motif.rhythm, label, where="voices[].motif"
+                )
 
     def _check_bar_alignment(
         self,
@@ -1035,6 +1163,47 @@ class ThemeModel(BaseModel):
 
     motif:  Optional[MotifModel]       = None
     motifs: Optional[list[MotifModel]] = None
+
+    @field_validator("key", mode="before")
+    @classmethod
+    def _validate_theme_key(cls, v):
+        """
+        Mirrors SectionModel._validate_section_key. Theme key/mode were
+        previously plain str (min_length=1 only) — schema-legal for any
+        typo. A section that doesn't override key/mode inherits the
+        theme's value directly into harmony.py's chord resolution, where
+        a bad one only surfaces as "Unknown key: '...'" at render time.
+        Section-level overrides were already caught; the theme's own
+        value wasn't.
+        """
+        if not isinstance(v, str):
+            return v  # let Pydantic's own type check produce its message
+        VALID_KEYS = {
+            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+            "Db", "Eb", "Gb", "Ab", "Bb",
+        }
+        if v not in VALID_KEYS:
+            raise ValueError(
+                f"Theme key '{v}' is not a valid note name. "
+                f"Choose from {sorted(VALID_KEYS)}."
+            )
+        return v
+
+    @field_validator("mode", mode="before")
+    @classmethod
+    def _validate_theme_mode(cls, v):
+        """Mirrors SectionModel._validate_section_mode — see _validate_theme_key."""
+        if not isinstance(v, str):
+            return v
+        VALID_MODES = {
+            "ionian", "dorian", "phrygian", "lydian",
+            "mixolydian", "aeolian", "locrian",
+        }
+        if v.lower() not in VALID_MODES:
+            raise ValueError(
+                f"Theme mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}."
+            )
+        return v.lower()
 
     @model_validator(mode="before")
     @classmethod

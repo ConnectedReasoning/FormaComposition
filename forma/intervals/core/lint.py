@@ -62,6 +62,48 @@ SUSTAIN_HARMONY_SOURCE: str = "sustain"
 # Tune freely — it's a judgment call, not a fact about the engine.
 LONG_EVEN_SPLIT_BARS_THRESHOLD: float = 4.0
 
+# generator.py: the melody-path peer-voice call site (voices[1:] with no
+# species set) never passes a `motif` argument to generate_melody_for_
+# progression at all — not the voice's own override, not even the theme's
+# default. Only the lead voice (voices[0] / section.melody as a dict) is
+# wired to receive one. So behavior="develop" on any other voice index
+# renders exactly as "generative" — no motif, no transform_pool variety.
+DEVELOP_WORKING_VOICE_INDEX: int = 0
+
+# bass.py: BASS_STYLES — every style function accepts a swing_ratio kwarg
+# for signature uniformity, but only style_melodic and style_motif actually
+# call swing_offset() with it. The other 6 (root_only, root_fifth, walking,
+# steady, pulse, pedal) take the parameter and never reference it again.
+BASS_SWING_CONSUMING_STYLES: frozenset[str] = frozenset({"melodic", "motif"})
+
+# counterpoint.py: generate_counterpoint()'s species dispatch only has real
+# branches for "first" and "free" — anything else hits the final `else` and
+# raises ValueError("Unknown species..."). Schema-valid, but a hard crash at
+# render time, not a soft no-op like every other check in this module.
+IMPLEMENTED_COUNTERPOINT_SPECIES: frozenset[str] = frozenset({"first", "free"})
+
+# harmony.py: resolve_harmony_section_events's per-chord seed is derived as
+# (section_index * 10) + chord_index before hashing (generator.py). A section
+# with more than this many chords can derive the same seed as a different
+# chord in another section. Currently only audible for harmony sources whose
+# randomness actually gets consumed ("free"/"motif" — "sustain" and "pattern"
+# don't roll any chord-level randomness from this seed).
+LONG_PROGRESSION_SEED_COLLISION_THRESHOLD: int = 10
+SEED_COLLISION_RISK_HARMONY_SOURCES: frozenset[str] = frozenset({"free", "motif"})
+
+# harmony.py: resolve_harmony_section_events coerces an INHERITED "motif"
+# source (section.rhythm == "motif" with no harmony_rhythm.rhythm set
+# explicitly) to "free" — harmony's own motif mechanism only activates when
+# harmony_rhythm.rhythm is set to "motif" directly on that block. This is
+# printed as a status line at render time, but not surfaced in the lint report.
+#
+# Separately: an inherited "pattern" source (section.rhythm == "pattern",
+# no harmony_rhythm block at all) with no harmony_pattern block produces
+# NO events, no print, no error — the schema's "rhythm='pattern' requires a
+# pattern block" check only fires for an EXPLICIT harmony_rhythm.rhythm=
+# "pattern", not this inherited case.
+
+
 
 # A plain-language registry of every gate the linter knows about. This table is
 # itself the answer to "which settings depend on which other settings?" — read
@@ -88,6 +130,31 @@ COUPLINGS: list[str] = [
     "the progression — the chord *count* silently becomes the duration "
     "divisor. Heuristic: flagged only when the resulting split exceeds "
     f"{LONG_EVEN_SPLIT_BARS_THRESHOLD} bars/chord.",
+    "voices[N].behavior='develop' for N > 0 (any peer voice) never receives "
+    "a motif of any kind — only voices[0] (the lead) is wired to get one. "
+    "Renders identically to 'generative' regardless of this voice's own "
+    "motif field or transform_pool.",
+    "section.swing only reaches the bass line under bass_style 'melodic' or "
+    "'motif' — the other 6 styles accept the field and never consult it.",
+    "counterpoint species other than 'first'/'free' (on counterpoint[] or "
+    "voices[].species) is schema-valid but raises ValueError and aborts the "
+    "render — a hard crash, not a silent no-op.",
+    "harmony_rhythm.transform_imitation='strict' is schema-valid but not yet "
+    "implemented — raises ValueError at render time whenever paired with "
+    "rhythm='motif'. Leave transform_imitation unset.",
+    "progression longer than "
+    f"{LONG_PROGRESSION_SEED_COLLISION_THRESHOLD} chords risks a harmony "
+    "seed collision with a different chord in another section, audible "
+    "under harmony sources 'free'/'motif' (not 'sustain'/'pattern', which "
+    "don't consume that seed).",
+    "harmony_rhythm.rhythm inherited as 'motif' from section.rhythm (i.e. "
+    "no harmony_rhythm.rhythm set explicitly) is coerced to 'free' — "
+    "harmony's own motif mechanism only activates when set explicitly on "
+    "harmony_rhythm itself.",
+    "harmony_rhythm inherited as 'pattern' from section.rhythm, with no "
+    "harmony_pattern block present, produces zero harmony events silently — "
+    "the schema's pattern-requires-a-block check only fires for an "
+    "EXPLICIT harmony_rhythm.rhythm='pattern'.",
 ]
 
 # Rhythm sources that supply their own onset+duration grid, so the free
@@ -389,6 +456,175 @@ def _check_even_chord_split(section: SectionModel) -> Iterator[Contradiction]:
     )
 
 
+def _check_develop_peer_voice_noop(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    behavior='develop' on a peer voice (voices[1:]) never receives a motif —
+    generator.py's peer-voice melody-path call site doesn't pass one at all,
+    not the voice's own override, not the theme's default. Scoped to voices
+    with no `species` set (species present means counterpoint.py, a
+    different code path this gate doesn't apply to).
+    """
+    voices = section.voices or []
+    for i, v in enumerate(voices):
+        if i == DEVELOP_WORKING_VOICE_INDEX:
+            continue
+        if v.species is not None:
+            continue
+        if v.behavior != "develop":
+            continue
+        yield Contradiction(
+            where=f"section '{section.name or '?'}' → {_voice_label(i, v)}",
+            setting="behavior='develop'",
+            cause="only voices[0] (the lead) is wired to receive a motif for "
+                  "develop behavior",
+            effect="this voice renders exactly as behavior='generative' — no "
+                   "motif, no transform_pool variety — regardless of this "
+                   "voice's own motif field",
+            fix="move the developing line to voices[0], or change this "
+                "voice's behavior to 'generative'/'lyrical'/'sparse' to "
+                "reflect what actually happens.",
+        )
+
+
+def _check_bass_swing_noop(section: SectionModel) -> Iterator[Contradiction]:
+    """swing only reaches the bass line for bass_style 'melodic'/'motif'."""
+    if section.swing <= 0.0:
+        return
+    if section.bass_style in BASS_SWING_CONSUMING_STYLES:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"swing={section.swing}",
+        cause=f"bass_style={section.bass_style!r} never consults swing "
+              f"(only 'melodic' and 'motif' do)",
+        effect="the bass line renders perfectly straight regardless of this "
+               "section's swing value, even while melody/harmony/drums in "
+               "the same section do swing",
+        fix="use bass_style 'melodic' or 'motif' if the bass should audibly "
+            "swing, or ignore this if swing is only meant for the other "
+            "voices in this section.",
+    )
+
+
+def _check_counterpoint_species_unimplemented(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    species outside {'first','free'} — on counterpoint[] or voices[] — is
+    schema-valid but raises ValueError at render time. Surfaced here so it
+    shows up in the lint report before a render attempt, not as a raw
+    traceback during one.
+    """
+    for i, c in enumerate(section.counterpoint or []):
+        if c.species not in IMPLEMENTED_COUNTERPOINT_SPECIES:
+            yield Contradiction(
+                where=f"section '{section.name or '?'}', counterpoint[{i}]",
+                setting=f"species={c.species!r}",
+                cause="only 'first' and 'free' species are implemented in "
+                      "generate_counterpoint",
+                effect="this WILL raise ValueError and abort the render — "
+                       "not a soft no-op",
+                fix="change species to 'first' or 'free'.",
+            )
+    for i, v in enumerate(section.voices or []):
+        if v.species is not None and v.species not in IMPLEMENTED_COUNTERPOINT_SPECIES:
+            yield Contradiction(
+                where=f"section '{section.name or '?'}' → {_voice_label(i, v)}",
+                setting=f"species={v.species!r}",
+                cause="only 'first' and 'free' species are implemented in "
+                      "generate_counterpoint",
+                effect="this WILL raise ValueError and abort the render — "
+                       "not a soft no-op",
+                fix="change species to 'first' or 'free'.",
+            )
+
+
+def _check_transform_imitation_unimplemented(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    harmony_rhythm.transform_imitation='strict' is schema-valid but not yet
+    implemented — raises ValueError whenever harmony_rhythm.rhythm='motif'
+    too (the only branch that reads it). Surfaced pre-render, same reasoning
+    as the counterpoint species check above.
+    """
+    hr = section.harmony_rhythm
+    if hr is None or hr.transform_imitation != "strict":
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting="harmony_rhythm.transform_imitation='strict'",
+        cause="not yet implemented in resolve_harmony_section_events",
+        effect="this WILL raise ValueError at render time whenever "
+               "harmony_rhythm.rhythm='motif' — not a soft no-op",
+        fix="drop transform_imitation (leave it unset) for harmony's "
+            "independent per-repetition transform selection — the only "
+            "mode currently implemented.",
+    )
+
+
+def _check_long_progression_seed_collision(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    A section with more than LONG_PROGRESSION_SEED_COLLISION_THRESHOLD chords
+    can derive the same harmony seed as a different chord in another section
+    (see the constant's comment above). Only flagged when the effective
+    harmony source is one that actually consumes chord-level randomness.
+    """
+    n = len(section.progression)
+    if n <= LONG_PROGRESSION_SEED_COLLISION_THRESHOLD:
+        return
+    hr = section.harmony_rhythm
+    explicit = hr.rhythm if hr is not None else None
+    effective = explicit or section.rhythm
+    # Mirror resolve_harmony_section_events's own inherited-"motif"-to-"free"
+    # coercion so this check agrees with what will actually happen.
+    if effective == "motif" and explicit != "motif":
+        effective = "free"
+    if effective not in SEED_COLLISION_RISK_HARMONY_SOURCES:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"progression has {n} chords",
+        cause=f"harmony_rhythm resolves to {effective!r}, which consumes "
+              f"chord-level seeded randomness, and the seed spacing assumes "
+              f"no section exceeds "
+              f"{LONG_PROGRESSION_SEED_COLLISION_THRESHOLD} chords",
+        effect="this section's later chords can derive the same seed as an "
+               "unrelated chord in a different section, silently "
+               "correlating whatever randomness that seed drives",
+        fix=f"keep progressions to "
+            f"{LONG_PROGRESSION_SEED_COLLISION_THRESHOLD} chords or fewer, "
+            f"or switch this section to harmony_rhythm.rhythm='sustain' or "
+            f"'pattern' if it must stay long.",
+    )
+
+
+def _check_harmony_pattern_silently_empty(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    An INHERITED "pattern" harmony source (section.rhythm='pattern', no
+    harmony_rhythm.rhythm set explicitly) with no harmony_pattern block
+    produces zero harmony events: no print, no error, no lint elsewhere.
+    The schema's "pattern needs a block" check only fires for an EXPLICIT
+    harmony_rhythm.rhythm='pattern' — this is the gap it doesn't cover.
+    """
+    hr = section.harmony_rhythm
+    explicit = hr.rhythm if hr is not None else None
+    if explicit is not None:
+        return  # explicit case is schema-enforced already, not this gap
+    if section.rhythm != "pattern":
+        return
+    if section.harmony_pattern is not None:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting="harmony_rhythm is unset, inheriting rhythm='pattern' from "
+                "the section",
+        cause="no harmony_pattern block, and the inherited case isn't "
+              "schema-checked the way an explicit harmony_rhythm.rhythm="
+              "'pattern' is",
+        effect="harmony renders completely silent for this section — no "
+               "events, no print, no error",
+        fix="add a harmony_pattern block, or set harmony_rhythm.rhythm "
+            "explicitly to something else ('sustain'/'free'/'motif').",
+    )
+
+
 CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
@@ -400,6 +636,12 @@ CHECKS = [
     _check_note_length_range_vs_groove,
     _check_note_length_range_vs_rhythm,
     _check_even_chord_split,
+    _check_develop_peer_voice_noop,
+    _check_bass_swing_noop,
+    _check_counterpoint_species_unimplemented,
+    _check_transform_imitation_unimplemented,
+    _check_long_progression_seed_collision,
+    _check_harmony_pattern_silently_empty,
 ]
 
 
