@@ -3,11 +3,26 @@
     "name": "Xanadu Voyage",
     "key": "E",
     "mode": "aeolian",
-    "tempo": { "min": 108, "max": 124 },
+    "tempo": {
+      "min": 108,
+      "max": 124
+    },
     "motif": {
       "name": "xanadu_call",
-      "intervals": [5, 3, -4, -2, 1],
-      "rhythm": [0.5, 0.5, 1.0, 0.5, 1.0],
+      "intervals": [
+        5,
+        3,
+        -4,
+        -2,
+        1
+      ],
+      "rhythm": [
+        0.5,
+        0.5,
+        1.0,
+        0.5,
+        1.5
+      ],
       "transform_pool": [
         "inversion",
         "retrograde",
@@ -18,6 +33,6 @@
         "transpose_down"
       ]
     },
-    "notes": "E aeolian (natural minor). Prog rock / Xanadu-influenced cinematic instrumental. Motif: ascending perfect 4th + minor 3rd, then a falling 3rd + step back up — an 'arrival then question' shape. Transform pool is wide to allow motif to mutate across development sections. Instruments: Mellotron V for the classic prog string/flute texture, ARP 2600 or Mini V for lead. Valhalla Shimmer on harmony, Valhalla Supermassive on counterpoint tail. Logic tempo 116 BPM."
+    "notes": "E aeolian (natural minor). Prog rock / Xanadu-influenced cinematic instrumental. Motif: ascending perfect 4th + minor 3rd, then a falling 3rd + step back up — an 'arrival then question' shape. Transform pool is wide to allow motif to mutate across development sections. Instruments: Mellotron V for the classic prog string/flute texture, ARP 2600 or Mini V for lead. Valhalla Shimmer on harmony, Valhalla Supermassive on counterpoint tail. Logic tempo 116 BPM. Rhythm corrected: original [0.5,0.5,1.0,0.5,1.0] summed to 3.5 beats, not a multiple of the 4-beat bar (_check_bar_alignment rejected it). Fixed by extending the final note from 1.0 to 1.5 beats -- the 'question' at the end of the arrival-then-question shape now lingers slightly longer, which reinforces the described contour rather than just patching the arithmetic."
   }
 }

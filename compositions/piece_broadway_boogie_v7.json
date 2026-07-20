@@ -69,7 +69,7 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 75
+          "velocity": 85
         },
         "bass_style": "steady",
         "arc": "fade_in",

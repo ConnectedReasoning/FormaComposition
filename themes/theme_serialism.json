@@ -3,12 +3,44 @@
     "name": "Emancipated Row",
     "key": "C",
     "mode": "locrian",
-    "tempo": { "min": 80, "max": 105 },
+    "tempo": {
+      "min": 80,
+      "max": 105
+    },
     "motif": {
       "name": "prime_row",
-      "intervals": [1, 6, -5, 11, -3, 7, -1, 2, -8, 4, -9],
-      "rhythm": [0.5, 0.75, 0.25, 1.0, 0.5, 0.5, 1.0, 0.25, 0.75, 0.5, 1.0],
-      "transform_pool": ["inversion", "retrograde", "retrograde_inversion"]
+      "intervals": [
+        1,
+        6,
+        -5,
+        11,
+        -3,
+        7,
+        -1,
+        2,
+        -8,
+        4,
+        -9
+      ],
+      "rhythm": [
+        0.5,
+        0.75,
+        0.25,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        0.25,
+        0.75,
+        0.5,
+        2.0
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "retrograde_inversion"
+      ],
+      "notes": "Rhythm corrected: original 11 values summed to 7.0 beats, not a multiple of the 4-beat bar (_check_bar_alignment rejected it). Fixed by extending the final note (the row's 12th and final pitch, interval -9) from 1.0 to 2.0 beats -- now 8.0 beats (2 bars), preserving all 11 original intervals and 10 of 11 original durations. Extending the row's completion note fits its own logic: the arrival of the final pitch is a real structural event in a twelve-tone row, worth landing on."
     }
   }
 }

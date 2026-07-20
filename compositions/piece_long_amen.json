@@ -1,0 +1,83 @@
+{
+  "piece": {
+    "title": "The Long Amen",
+    "theme": "The Long Amen",
+    "tempo": 80,
+    "seed": 1517,
+    "notes": "Ambient/long-running rebuild of the gospel-quartet sketch. Narrative mode, no repeats -- four sections drift rather than loop. Plagal (IV-I) and modal color chords (vi, ii) carry the harmony; the one appearance of V is dissolved through IV rather than resolved to I. One continuous tonic pedal runs under all four sections. Ends on vi, not I -- deliberately unresolved. ~104 bars at 60bpm ~= 6-7 minutes.",
+    "sections": [
+      {
+        "name": "opening_drift",
+        "bars": 24,
+        "progression": ["I", "IV", "I", "vi"],
+        "chord_bars": [1, 1, 1, 1],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "build",
+        "swing": 0.0,
+        "beats_per_bar": 8,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+      {
+        "name": "ii_color_turn",
+        "bars": 24,
+        "progression": ["vi", "ii", "IV", "I"],
+        "chord_bars": [1, 1, 1, 1],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "swing": 0.0,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+      {
+        "name": "widening",
+        "bars": 24,
+        "progression": ["I", "V", "IV", "I"],
+        "chord_bars": [4, 2, 2, 4],
+        "rhythm": "motif",
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "swell",
+        "swing": 0.0,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        }
+      },
+      {
+        "name": "closing_hover",
+        "bars": 32,
+        "progression": ["IV", "I", "IV", "vi"],
+        "chord_bars": [1, 1, 1, 1],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "swing": 0.0,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        }
+      }
+    ]
+  }
+}

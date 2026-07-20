@@ -1,7 +1,7 @@
 {
   "piece": {
     "title": "Embers",
-    "tempo": 72,
+    "tempo": 82,
     "seed": 11,
     "form_type": "song",
     "form": ["intro", "verse", "chorus", "verse", "chorus", "bridge", "chorus", "outro"],

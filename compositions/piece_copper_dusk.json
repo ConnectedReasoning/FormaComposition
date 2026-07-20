@@ -13,7 +13,7 @@
         "chord_bars": [4, 4],
         "progression": ["i", "VII"],
         "density": "medium",
-        "melody": "medium",
+        "melody": "develop",
         "bass_style": "motif",
         "arc": "fade_in",
         "rhythm": "motif",

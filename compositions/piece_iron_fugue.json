@@ -115,7 +115,7 @@
       {
         "name": "stretto",
         "notes": "Stretto — subject entries compressed and overlapping. Short chord windows simulate the feeling of voices piling on top of each other before the other has finished. One-bar changes. Maximum harmonic rhythm. This is the fugue's crisis point.",
-        "bars": 8,
+        "bars": 7,
         "chord_bars": [1, 1, 1, 1, 0.5, 0.5, 2],
         "progression": ["i", "iv", "V", "i", "VII", "V", "i"],
         "density": "full",

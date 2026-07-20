@@ -1,0 +1,49 @@
+{
+  "title": "Stand By Me",
+  "theme": "stand",
+  "tempo": 92,
+  "seed": 162,
+  "form_type": "song",
+  "form":[
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop",
+    "verse_loop"
+  ],
+  "sections":{
+    "verse_loop": {
+      "section_name": "verse_loop",
+      "key": "G",
+      "mode": "ionian",
+      "bars": 8,
+      "progression": [
+        "I", "vi", "IV", "V", "I"
+      ],
+      "chord_bars":[
+        2, 2, 1, 1, 2
+      ],
+      "density": "medium",
+      "melody": {
+        "register": "alto",
+        "behavior": "lyrical",
+        "velocity": 89
+      },
+      "bass_style": "steady",
+      "arc": "fade_in",
+      "rhythm": "free",
+      "rest_probability": 0.25,
+      "harmony_rhythm": {
+        "rhythm": "free",
+        "density": "sparse",
+        "groove": "straight"
+      }
+    }
+  }
+}

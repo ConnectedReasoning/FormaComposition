@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "name": "Stand",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": { "min": 90, "max": 120 }
+  },
+  "motif": {
+    "name": "stand_motif",
+    "intervals": [2, -1, 3, -2],
+    "rhythm": [1.0, 0.5, 1.0, 0.5],
+    "transform_pool": ["inversion", "retrograde", "augmentation"]
+  }
+}

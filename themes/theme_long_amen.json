@@ -1,0 +1,16 @@
+{
+  "theme": {
+    "name": "The Long Amen",
+    "key": "A",
+    "mode": "ionian",
+    "tempo": {"min": 50, "max": 70},
+    "motif": {
+      "name": "quiet_drift",
+      "intervals": [0, 2, 2, -1, -3],
+      "rhythm": [2.0, 2.0, 1.5, 1.5, 1.0],
+      "velocities": [0.5, 0.6, 0.65, 0.55, 0.45],
+      "transform_pool": ["inversion", "retrograde", "transpose_up", "transpose_down"]
+    },
+    "notes": "Stepwise, mostly-descending arch in long note values, meant to cycle quietly under very slow-changing plagal harmony rather than announce itself. No dominant-function harmony anywhere in the piece -- IV, vi, and ii function as color around I, and the one appearance of V is dissolved through IV rather than resolved straight to I."
+  }
+}

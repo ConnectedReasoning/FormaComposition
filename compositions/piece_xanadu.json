@@ -11,12 +11,12 @@
         "beats_per_bar": 4,
         "progression": ["i", "VII", "VI", "VII"],
         "chord_bars": [4, 4, 4, 4],
-        "density": "sparse",
-        "melody": "sparse",
+        "density": "medium",
+        "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_in",
         "rhythm": "free",
-        "rest_probability": 0.65,
+        "rest_probability": 0.15,
         "notes": "Pure atmosphere. Pedal E drone underneath slowly shifting harmony. No motif — this is mist and space. Where the synth arpeggio enters manually in Logic. Very long, very spacious. Fade in from silence."
       },
       {
@@ -30,7 +30,7 @@
         "bass_style": "root_only",
         "arc": "fade_in",
         "rhythm": "motif",
-        "rest_probability": 0.45,
+        "rest_probability": 0.15,
         "notes": "Motif appears for the first time — sparse, tentative, like something stirring. The xanadu_call shape in its original form only. Bass stays minimal. No counterpoint yet. The ♭III (G) arrives for the first prog color moment."
       },
       {
@@ -44,7 +44,7 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "motif",
-        "rest_probability": 0.30,
+        "rest_probability": 0.20,
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -84,7 +84,7 @@
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.55,
+        "rest_probability": 0.15,
         "notes": "The piece pulls back dramatically after the development peak. Sparse texture, pedal bass, long rests. Like the eye of the storm. No counterpoint. Sets up the recapitulation. The Mellotron strings thin out here — let them decay in Logic."
       },
       {
@@ -98,7 +98,7 @@
         "bass_style": "walking",
         "arc": "swell",
         "rhythm": "motif",
-        "rest_probability": 0.20,
+        "rest_probability": 0.10,
         "counterpoint": {
           "species": "free",
           "register": "below",
@@ -118,7 +118,7 @@
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.60,
+        "rest_probability": 0.30,
         "notes": "Dissolution. Back to the opening harmonic simplicity — Em, D, C, Em. Very long chord durations (5 bars each). The motif appears once, maybe twice, then stops. Bass anchors on root only. No counterpoint. The piece exhales into silence. Let Valhalla Supermassive tail ring for 8+ seconds after the last note."
       }
     ]
