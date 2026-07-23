@@ -175,9 +175,19 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         intervals = [int(round(i * 1.5)) for i in intervals]
 
     elif transform_name == "compress":
-        intervals = [int(round(i * 0.5)) for i in intervals]
-        # Ensure no zero intervals (use ±1 minimum for non-zero)
-        intervals = [i if i != 0 else 0 for i in intervals]
+        compressed = []
+        for original_i in intervals:
+            c = int(round(original_i * 0.5))
+            # Ensure no zero intervals (use +/-1 minimum for non-zero):
+            # rounding a nonzero original interval down to 0 (e.g. a single
+            # semitone) would otherwise collapse a real melodic step into no
+            # step at all. Substitute +/-1, matching the original interval's
+            # direction, so the contour survives compression. A genuinely
+            # zero original interval stays 0 -- there was no step to preserve.
+            if c == 0 and original_i != 0:
+                c = 1 if original_i > 0 else -1
+            compressed.append(c)
+        intervals = compressed
 
     else:
         raise ValueError(
