@@ -1107,7 +1107,7 @@ def generate_piece(
                         species=v.species, register=rel,
                         beats_per_bar=section_model.beats_per_bar,
                         velocity=v.velocity, dissonance=v.dissonance,
-                        seed=base_seed + i * 10 + voice_idx,
+                        seed=base_seed + seed_offsets[i] + voice_idx,
                         against_notes=against_notes,
                         against_voices=against_voices,
                         chord_voices=chord_voices,
@@ -1125,7 +1125,7 @@ def generate_piece(
                         chords, theme["key"], theme["mode"],
                         behavior=v.behavior, density=density,
                         bars_per_chord=bars_list, beats_per_bar=beats_per_bar,
-                        seed=base_seed + i * 10 + voice_idx,
+                        seed=base_seed + seed_offsets[i] + voice_idx,
                         octave_bottom=m_lo, octave_top=m_hi,
                         base_velocity=v.velocity,
                         rest_probability=v_rest,
@@ -1209,7 +1209,7 @@ def generate_piece(
                     key=theme["key"],
                     mode=theme["mode"],
                     beats_per_bar=section_model.beats_per_bar,
-                    seed=base_seed + i * 10 + voice_idx,
+                    seed=base_seed + seed_offsets[i] + voice_idx,
                     cp_model=cp_model,
                     against_notes=against_notes,
                     against_voices=against_voices,
@@ -1300,7 +1300,7 @@ def generate_piece(
                 total_per_chord=total_per_chord,
                 beat_offset=beat_offset_local,
                 precomputed_events=harmony_section_events,
-                seed=base_seed + i * 10 + ci,
+                seed=base_seed + seed_offsets[i] + ci,
             )
             hctx = build_harmony_chord_context(
                 harmony_rhythm_ctx=hrctx,
@@ -1372,7 +1372,7 @@ def generate_piece(
                 groove=drums_groove,
                 swing=drums_swing,
                 beats_per_bar=section_model.beats_per_bar,
-                seed=base_seed + i * 10,
+                seed=base_seed + seed_offsets[i],
             )
 
             # Offset drum hits by global beat
