@@ -3,7 +3,7 @@ Regression probe: `exact_repeat: true` song-form entries must render
 byte-identical events for EVERY voice — melody, harmony, bass, every
 counterpoint voice, and drums — not just melody and bass.
 
-Uses probes/piece_shake_v5.json's "chorus" section, which appears twice in
+Uses validation/piece_shake_v5.json's "chorus" section, which appears twice in
 the song form (form index 2, and form index 4 with exact_repeat: true).
 generate_piece()'s seed_offset reuse logic is specifically designed to make
 these two renders of "chorus" identical (see the comment above
@@ -18,7 +18,7 @@ deliberately a black-box, output-only check — it does not assume anything
 about which internal seed arithmetic the generator uses, only that the
 final MIDI for both choruses must match.
 
-NOTE ON THE DRUMS VOICE: probes/piece_shake_v5.json does not define a
+NOTE ON THE DRUMS VOICE: validation/piece_shake_v5.json does not define a
 `drums` block on any section (none of its voices use percussion). To
 exercise the drum-hit path at all, this probe works from a copy of the
 piece with a minimal `drums: {"pattern": "four_on_floor"}` added to the
@@ -35,9 +35,9 @@ import mido
 from intervals.core.generator import generate_piece, beats_to_ticks
 
 
-PROBES_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "probes",
+FIXTURES_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "validation",
 )
 
 
@@ -46,9 +46,9 @@ PROBES_DIR = os.path.join(
 # ---------------------------------------------------------------------------
 
 def _load_shake_theme_and_piece():
-    with open(os.path.join(PROBES_DIR, "theme_shake_v2.json")) as f:
+    with open(os.path.join(FIXTURES_DIR, "theme_shake_v2.json")) as f:
         theme = json.load(f)["theme"]
-    with open(os.path.join(PROBES_DIR, "piece_shake_v5.json")) as f:
+    with open(os.path.join(FIXTURES_DIR, "piece_shake_v5.json")) as f:
         piece = json.load(f)["piece"]
 
     # Add a minimal drums block to "chorus" only, so the drum-hit voice is
