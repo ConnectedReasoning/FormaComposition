@@ -43,8 +43,22 @@ CONSONANCES          = PERFECT_CONSONANCES | IMPERFECT_CONSONANCES
 DISSONANCES          = {1, 2, 5, 6, 10, 11}  # 2nds, 4th, tritone, 7ths
 
 def interval_class(a: int, b: int) -> int:
-    """Return the interval class (0-12) between two MIDI notes."""
-    return abs(a - b) % 12 if abs(a - b) % 12 <= 6 else 12 - (abs(a - b) % 12)
+    """Return the mod-12 pitch-class interval between two MIDI notes, in
+    the range 0-11 (0 = unison or any octave apart).
+
+    Deliberately NOT folded to its smallest complement (i.e. this does
+    not return min(d, 12-d)): PERFECT_CONSONANCES / IMPERFECT_CONSONANCES
+    / DISSONANCES below are all defined assuming plain 0-11 distances, and
+    that's also what correctly preserves the classical distinction between
+    a perfect fourth (5 semitones -- dissonant against the bass) and a
+    perfect fifth (7 semitones -- a true perfect consonance). Folding to
+    the smallest complement would map both to the same value and silently
+    disable every rule that checks for a real fifth specifically (parallel
+    fifths, direct/hidden fifths, the cadence-candidate filters, and the
+    'prefer imperfect over perfect' scoring preference in score_candidate
+    all depend on interval_class() being able to return 7).
+    """
+    return abs(a - b) % 12
 
 
 def raw_interval(a: int, b: int) -> int:

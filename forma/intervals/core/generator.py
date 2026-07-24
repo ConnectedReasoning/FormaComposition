@@ -227,7 +227,6 @@ def build_bass_track(
 ) -> MidiTrack:
     """Build the bass track from a list of BassNote objects."""
     track = MidiTrack()
-    print(TRACK_NAME_BASS)
     track.append(MetaMessage("track_name", name=TRACK_NAME_BASS, time=0))
     track.append(Message("program_change", program=PROGRAM_BASS, channel=channel, time=0))
 
@@ -259,7 +258,6 @@ def build_counterpoint_track(
     track = MidiTrack()
     track.append(MetaMessage("track_name", name=track_name, time=0))
     track.append(Message("program_change", program=program, channel=channel, time=0))
-    print(track_name)
 
     events = []
     for cn in cp_notes:
@@ -282,7 +280,6 @@ def build_melody_track(
     track = MidiTrack()
     track.append(MetaMessage("track_name", name=TRACK_NAME_MELODY, time=0))
     track.append(Message("program_change", program=PROGRAM_MELODY, channel=channel, time=0))
-    print(TRACK_NAME_MELODY)
     events = []
     for mn in melody_notes:
         if mn.is_rest or mn.midi_note is None:
@@ -304,7 +301,6 @@ def build_drums_track(
     track = MidiTrack()
     track.append(MetaMessage("track_name", name=TRACK_NAME_DRUMS, time=0))
     track.append(Message("program_change", program=PROGRAM_DRUMS, channel=channel, time=0))
-    print(TRACK_NAME_DRUMS)
 
     events = []
     for dh in drum_hits:

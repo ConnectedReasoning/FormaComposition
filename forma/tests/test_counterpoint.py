@@ -10,18 +10,23 @@ against the melody alone gets penalized (and, given a close second
 choice, actually displaced) once it's also dissonant against another
 voice's sounding pitch.
 
-IMPORTANT — a real bug found and locked in below, not fixed here (see
-TestIntervalClassificationBug): interval_class() folds any semitone
-distance to its smallest complement in [0, 6] (standard "interval class"
-convention), but PERFECT_CONSONANCES = {0, 7, 12} is defined in raw
-semitone distances. Since interval_class() can never return 7 or 12, a
-perfect fifth (7 semitones) and perfect fourth (5 semitones) are
-currently misclassified as dissonant by is_consonant()/
-is_perfect_consonance() — confirmed directly below. This propagates into
-check_interval_rules, score_candidate, and the final-cadence filter
-throughout the module. Flagged prominently for a follow-up fix decision,
-per the same "document actual behavior, don't silently patch it" approach
-used for motif.py's compress() bug.
+FIXED BUG (see TestIntervalClassification below): interval_class() used
+to fold any semitone distance to its smallest complement in [0, 6], which
+silently conflated a perfect fifth (7 semitones) with a perfect fourth (5
+semitones) -- both mapped to the same folded value, so a real fifth was
+misclassified as dissonant. Worse, since PERFECT_CONSONANCES/DISSONANCES
+were authored assuming plain 0-11 mod-12 distances (not folded values),
+the fold also made several OTHER rules permanently unreachable: parallel-
+fifths detection (only ever caught parallel octaves), direct/hidden
+fifths (dead code -- its guard condition could never be true), the
+cadence-candidate filters (only ever matched octave-equivalent pitches),
+and score_candidate's "prefer imperfect over perfect" tie-break (dead,
+since its guard excluded the only reachable PERFECT_CONSONANCES value).
+Fixed by removing the fold: interval_class() is now plain abs(a-b) % 12,
+which is also what correctly preserves the intentional classical-
+counterpoint rule that a fourth is dissonant against the bass while a
+fifth is a true perfect consonance -- the fold was conflating exactly
+that distinction.
 """
 import pytest
 
@@ -77,42 +82,54 @@ class TestIntervalClass:
     def test_tritone_is_its_own_complement(self):
         assert interval_class(60, 66) == 6
 
-    def test_major_sixth_folds_to_same_class_as_minor_third(self):
-        """9 semitones' complement is 3 -- major 6ths and minor 3rds share
-        an interval class, which is standard (they're octave-inversions
-        of each other)."""
-        assert interval_class(60, 69) == 3
+    def test_major_sixth_is_distinct_from_minor_third(self):
+        """9 semitones is a major sixth, not a minor third -- plain mod-12
+        distance keeps them distinct (unlike the old folded behavior,
+        which collapsed octave-inversion pairs into the same value)."""
+        assert interval_class(60, 69) == 9
+        assert interval_class(60, 69) != interval_class(60, 63)  # != minor 3rd
 
-    def test_minor_sixth_folds_to_same_class_as_major_third(self):
-        assert interval_class(60, 68) == 4
+    def test_minor_sixth_is_distinct_from_major_third(self):
+        assert interval_class(60, 68) == 8
+        assert interval_class(60, 68) != interval_class(60, 64)  # != major 3rd
 
     def test_raw_interval_is_not_reduced(self):
         assert raw_interval(60, 72) == 12
         assert raw_interval(60, 67) == 7
 
 
-class TestIntervalClassificationBug:
-    """Locks in the actual (buggy) current behavior of the perfect-
-    consonance classification, per this task's 'hand-verified expected
-    output, not just doesn't crash' standard. See module docstring."""
+class TestIntervalClassificationFix:
+    """Confirms the fix: a perfect fifth is correctly a perfect
+    consonance, a perfect fourth is correctly dissonant (the intentional
+    classical rule, not a bug -- a 4th against the bass has always been
+    treated as needing resolution in strict counterpoint), and every
+    mod-12 residue 0-11 is now reachable and correctly classified."""
 
-    def test_perfect_fifth_is_misclassified_as_dissonant(self):
-        assert interval_class(60, 67) == 5  # folds to the P4 complement
-        assert is_consonant(60, 67) is False
-        assert is_perfect_consonance(60, 67) is False
-        assert is_dissonant(60, 67) is True
+    def test_perfect_fifth_is_a_perfect_consonance(self):
+        assert interval_class(60, 67) == 7
+        assert is_consonant(60, 67) is True
+        assert is_perfect_consonance(60, 67) is True
+        assert is_dissonant(60, 67) is False
 
-    def test_perfect_fourth_is_also_misclassified_as_dissonant(self):
+    def test_perfect_fourth_is_dissonant_by_design(self):
+        """Not a bug: a 4th against the bass is the textbook dissonance-
+        requiring-resolution case in species counterpoint."""
         assert interval_class(60, 65) == 5
         assert is_consonant(60, 65) is False
+        assert is_dissonant(60, 65) is True
 
-    def test_only_unison_and_octave_ever_reach_perfect_consonances(self):
-        """PERFECT_CONSONANCES declares {0, 7, 12}, but interval_class()
-        can only ever return values in [0, 6] -- so 7 and 12 are dead
-        entries. This test documents that reachability gap directly."""
+    def test_every_mod_twelve_residue_is_reachable_and_correctly_partitioned(self):
         reachable_ics = {interval_class(60, 60 + d) for d in range(13)}
-        assert reachable_ics == set(range(7))  # {0,1,2,3,4,5,6}
-        assert reachable_ics & PERFECT_CONSONANCES == {0}
+        assert reachable_ics == set(range(12))  # 0-11, all reachable (12 folds to 0)
+
+        for ic in range(12):
+            in_perfect = ic in PERFECT_CONSONANCES
+            in_imperfect = ic in IMPERFECT_CONSONANCES
+            in_dissonant = ic in DISSONANCES
+            # Exactly one classification per residue -- no gaps, no overlaps.
+            assert sum([in_perfect, in_imperfect, in_dissonant]) == 1, (
+                f"interval class {ic} must be classified exactly once"
+            )
 
 
 # ===========================================================================
@@ -189,14 +206,29 @@ class TestCheckIntervalRules:
         violations = check_interval_rules(60, 61, None, None, beat_position=1.0, beats_per_bar=4)
         assert not any(v.rule == "dissonance_on_strong_beat" for v in violations)
 
-    def test_parallel_octaves_between_perfect_consonances_forbidden(self):
-        """Octave (ic=0) is one of the classes that DOES reach
-        PERFECT_CONSONANCES (see the bug note above), so parallel octaves
-        are still correctly caught."""
+    def test_parallel_octaves_forbidden(self):
         from intervals.music.counterpoint import check_interval_rules
         # melody 60->62 (up), cp 48->50 (up, same amount) both octaves below
         violations = check_interval_rules(62, 50, 60, 48, beat_position=1.0, beats_per_bar=4)
         assert any(v.rule == "parallel_perfects" and v.severity == "hard" for v in violations)
+
+    def test_parallel_fifths_forbidden(self):
+        """Now genuinely reachable post-fix: two real perfect fifths in
+        parallel motion (60/67 -> 62/69, i.e. up a whole step, both
+        voices) must be caught -- this is THE canonical forbidden-parallel
+        rule in counterpoint pedagogy, and it was silently unreachable
+        for actual fifths before the interval_class() fix."""
+        from intervals.music.counterpoint import check_interval_rules
+        violations = check_interval_rules(62, 69, 60, 67, beat_position=1.0, beats_per_bar=4)
+        assert any(v.rule == "parallel_perfects" and v.severity == "hard" for v in violations)
+
+    def test_direct_hidden_fifth_forbidden(self):
+        """Similar motion (both voices moving the same direction, unequal
+        amounts) landing on a perfect fifth -- also unreachable before
+        the fix, since its guard checked interval_class(...) == 7."""
+        from intervals.music.counterpoint import check_interval_rules
+        violations = check_interval_rules(67, 60, 64, 55, beat_position=1.0, beats_per_bar=4)
+        assert any(v.rule == "direct_fifth" and v.severity == "hard" for v in violations)
 
     def test_interior_unison_flagged_as_soft(self):
         from intervals.music.counterpoint import check_interval_rules
@@ -327,14 +359,29 @@ class TestScoreCandidateAgainstNotes:
             57, 60, None, None, scale, beat_position=0.0, beats_per_bar=4,
             register="below", is_final=False, rng=random.Random(1), against_notes=None,
         )
-        # 61 is a major third above 57 (interval_class 4, IMPERFECT_CONSONANCES) --
-        # deliberately NOT 7 or 5 semitones away, since those (P5/P4) are the
-        # exact intervals the documented bug above misclassifies as dissonant.
+        # 61 is a major third above 57 (interval_class 4, IMPERFECT_CONSONANCES).
         score_with_consonant_peer = score_candidate(
             57, 60, None, None, scale, beat_position=0.0, beats_per_bar=4,
             register="below", is_final=False, rng=random.Random(1), against_notes=[61],
         )
         assert score_with_consonant_peer == pytest.approx(score_alone)
+
+    def test_real_perfect_fifth_peer_also_adds_no_penalty(self):
+        """Post-fix regression guard: a peer a genuine perfect fifth away
+        (64, 7 semitones from 57) must NOT add a dissonance penalty --
+        this is exactly the case the interval_class() bug used to get
+        wrong (a real fifth was misclassified as dissonant)."""
+        import random
+        scale = [48, 50, 52, 53, 55, 57, 59, 60]
+        score_alone = score_candidate(
+            57, 60, None, None, scale, beat_position=0.0, beats_per_bar=4,
+            register="below", is_final=False, rng=random.Random(1), against_notes=None,
+        )
+        score_with_fifth_peer = score_candidate(
+            57, 60, None, None, scale, beat_position=0.0, beats_per_bar=4,
+            register="below", is_final=False, rng=random.Random(1), against_notes=[64],
+        )
+        assert score_with_fifth_peer == pytest.approx(score_alone)
 
 
 # ===========================================================================
