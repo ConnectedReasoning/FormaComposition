@@ -1125,6 +1125,7 @@ def generate_piece(
                         octave_bottom=m_lo, octave_top=m_hi,
                         base_velocity=v.velocity,
                         rest_probability=v_rest,
+                        groove=groove, swing=swing,
                     )
 
                 # Canon offset (shift forward, trim past section end).

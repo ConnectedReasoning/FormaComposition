@@ -277,3 +277,56 @@ class TestExactRepeatIsPartOfThisSuite:
             assert first_notes == repeat_notes, (
                 f"voice '{voice_name}' diverged between chorus occurrences at seed=999"
             )
+
+
+# ===========================================================================
+# Bugfix regression: peer voices (section.voices[1:]) must receive the
+# section's own groove/swing, the same as the lead melody voice does.
+# ===========================================================================
+
+class TestPeerVoiceInheritsSectionGrooveAndSwing:
+    def test_peer_voice_call_receives_section_groove_and_swing(self):
+        """generate_piece() used to extract a section's groove/swing into
+        local variables (comment: "used by melody, bass") but only ever
+        passed them to the LEAD melody voice's generate_melody_for_
+        progression() call -- every peer voice (section.voices[1:], the
+        non-counterpoint-species case) called the same function without
+        groove/swing at all, silently falling back to that function's own
+        defaults (groove=None, swing=0.0) regardless of what the section
+        actually specified.
+
+        This intercepts every real call to generate_melody_for_progression
+        during a full generate_piece() render and confirms BOTH the lead
+        voice's call and every peer voice's call receive the section's
+        actual groove/swing -- not just the lead."""
+        from unittest.mock import patch
+        import intervals.core.generator as gen
+
+        theme = {"key": "C", "mode": "ionian", "tempo": {"min": 100, "max": 120}}
+        piece = {
+            "title": "peer-groove-swing-test", "tempo": 110, "seed": 1,
+            "sections": [{
+                "name": "a", "progression": ["i", "iv"], "rhythm": "free", "bars": 4,
+                "swing": 0.73, "groove": "shuffle",
+                "voices": [
+                    {"register": "soprano", "behavior": "lyrical"},
+                    {"register": "alto", "behavior": "generative"},
+                ],
+            }],
+        }
+
+        captured_kwargs = []
+        real_fn = gen.generate_melody_for_progression
+
+        def _spy(*args, **kwargs):
+            captured_kwargs.append(kwargs)
+            return real_fn(*args, **kwargs)
+
+        with patch.object(gen, "generate_melody_for_progression", side_effect=_spy):
+            gen.generate_piece(theme, piece, "/tmp/_peer_groove_swing_regression.mid")
+
+        # One call for the lead voice, one for the single peer voice.
+        assert len(captured_kwargs) == 2
+        for kwargs in captured_kwargs:
+            assert kwargs.get("groove") == "shuffle"
+            assert kwargs.get("swing") == 0.73
