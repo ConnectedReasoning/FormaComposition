@@ -13,11 +13,12 @@
         "chord_bars": [1, 1, 1, 1],
         "rhythm": "motif",
         "density": "sparse",
-        "melody": "sparse",
+        "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "build",
         "swing": 0.0,
         "beats_per_bar": 8,
+        "rest_probability": 0.2,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "full",
