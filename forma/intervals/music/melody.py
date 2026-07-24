@@ -715,7 +715,21 @@ def generate_melody_for_progression(
         section_name: Name of section for context-aware generation.
         rhythm_events_override: Pre-computed rhythm events for the FULL progression.
             When provided, events are sliced per chord by beat range.
-        fugal_techniques: Optional dict with keys like "motif_transform", "stretto_compression", etc.
+        fugal_techniques: Optional dict of fugal-development controls:
+            - motif_transform (str): applies a motif.py transform (inversion,
+              retrograde, augmentation, etc.) to the subject before generation.
+            - stretto_compression (float): scales the subject's rhythm values
+              by this factor (e.g. 0.5 = twice as fast).
+            - subject_fragmentation (int): truncates the subject to its first
+              N notes, for episodic development.
+            - canonic_imitation (bool) + canon_interval (float, beats):
+              delays this voice's entire generated line by canon_interval
+              beats (silence beforehand), trimming anything that would
+              land past the progression's total length. Mirrors
+              VoiceModel.canon_offset, which does the same thing for peer
+              voices (section.voices[1:]) at the generator.py level --
+              this is the equivalent for the lead voice, via section-level
+              fugal_techniques.
         piece_ctx: Optional PieceContext for cross-section memory. When provided
             (with arc), the opening note of the FIRST chord is biased relative to
             the previous section's ending contour. Only the section opening is
@@ -891,6 +905,27 @@ def generate_melody_for_progression(
             prev_note = sounding[-1].midi_note
 
         beat_offset += total_beats
+
+    # ════════════════════════════════════════════════════════════
+    # CANONIC IMITATION (offset voice entries like stretto)
+    # Applied once, after the whole line is generated: shift every
+    # note forward by canon_interval beats, then drop anything that
+    # lands past the progression's total length. This mirrors the
+    # already-working VoiceModel.canon_offset mechanism generator.py
+    # applies to PEER voices (section.voices[1:]) -- same underlying
+    # idea (delay this voice's entrance, trim the tail), just scoped
+    # here to the LEAD voice via section-level fugal_techniques,
+    # since peer voices already have their own per-voice canon_offset
+    # field for the same purpose. Applying it as a post-pass (rather
+    # than threading an offset through the per-chord loop above) keeps
+    # every chord's own generation, and the prev_note continuity
+    # tracking between chords, completely unaffected by the shift --
+    # only the final presentation timing moves.
+    # ════════════════════════════════════════════════════════════
+    if canonic_imitation and canon_interval > 0:
+        for n in all_notes:
+            n.start_beat += canon_interval
+        all_notes = [n for n in all_notes if n.start_beat < beat_offset]
 
     return all_notes
 

@@ -278,3 +278,113 @@ class TestGenerateMelodyForProgression:
 
     def test_empty_chord_progression_returns_no_notes(self):
         assert generate_melody_for_progression([], "C", "ionian", seed=1) == []
+
+
+# ===========================================================================
+# Canonic imitation (fugal_techniques) -- newly implemented feature.
+# "offset voice entries like stretto": delays this voice's whole generated
+# line by canon_interval beats and trims anything past the progression's
+# total length, mirroring VoiceModel.canon_offset (the equivalent mechanism
+# generator.py already applies to peer voices).
+# ===========================================================================
+
+class TestCanonicImitation:
+    def _progression_and_motif(self):
+        chords = resolve_progression(["i", "iv", "v", "i"], "C", "ionian", density="medium")
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 0.5, 0.5, 1.0], "transform_pool": []}
+        return chords, motif
+
+    def test_shifts_every_note_forward_by_canon_interval(self):
+        chords, motif = self._progression_and_motif()
+        kwargs = dict(behavior="develop", motif=motif, bars_per_chord=1.0,
+                      beats_per_bar=4, seed=1)
+
+        baseline = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        offset = generate_melody_for_progression(
+            chords, "C", "ionian",
+            fugal_techniques={"canonic_imitation": True, "canon_interval": 4},
+            **kwargs,
+        )
+
+        baseline_sounding = [n for n in baseline if not n.is_rest]
+        offset_sounding = [n for n in offset if not n.is_rest]
+        assert offset_sounding[0].start_beat == baseline_sounding[0].start_beat + 4
+
+    def test_trims_notes_that_land_past_the_progression_end(self):
+        """4 chords * 1 bar * 4 beats = 16 beats total. A 4-chord line
+        biased "develop" ends near beat 16 -- shifting everything forward
+        by 4 beats must drop whatever now falls at or past 16, not extend
+        the progression's total length."""
+        chords, motif = self._progression_and_motif()
+        kwargs = dict(behavior="develop", motif=motif, bars_per_chord=1.0,
+                      beats_per_bar=4, seed=1)
+
+        baseline = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        offset = generate_melody_for_progression(
+            chords, "C", "ionian",
+            fugal_techniques={"canonic_imitation": True, "canon_interval": 4},
+            **kwargs,
+        )
+
+        baseline_sounding = [n for n in baseline if not n.is_rest]
+        offset_sounding = [n for n in offset if not n.is_rest]
+        assert len(offset_sounding) < len(baseline_sounding)
+        assert all(n.start_beat < 16.0 for n in offset_sounding)
+
+    def test_canon_interval_past_total_length_yields_no_notes_without_crashing(self):
+        chords, motif = self._progression_and_motif()
+        result = generate_melody_for_progression(
+            chords, "C", "ionian", behavior="develop", motif=motif,
+            bars_per_chord=1.0, beats_per_bar=4, seed=1,
+            fugal_techniques={"canonic_imitation": True, "canon_interval": 100},
+        )
+        assert result == []
+
+    def test_canon_interval_defaults_to_four_beats_when_unspecified(self):
+        chords, motif = self._progression_and_motif()
+        kwargs = dict(behavior="develop", motif=motif, bars_per_chord=1.0,
+                      beats_per_bar=4, seed=1)
+        baseline = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        default_offset = generate_melody_for_progression(
+            chords, "C", "ionian", fugal_techniques={"canonic_imitation": True}, **kwargs,
+        )
+        baseline_sounding = [n for n in baseline if not n.is_rest]
+        offset_sounding = [n for n in default_offset if not n.is_rest]
+        assert offset_sounding[0].start_beat == baseline_sounding[0].start_beat + 4
+
+    def test_canonic_imitation_false_is_a_no_op_even_with_interval_set(self):
+        chords, motif = self._progression_and_motif()
+        kwargs = dict(behavior="develop", motif=motif, bars_per_chord=1.0,
+                      beats_per_bar=4, seed=1)
+        baseline = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        result = generate_melody_for_progression(
+            chords, "C", "ionian",
+            fugal_techniques={"canonic_imitation": False, "canon_interval": 4},
+            **kwargs,
+        )
+        assert result == baseline
+
+    def test_applies_without_a_motif_too(self):
+        """The extraction sits outside the motif-gated block in the source
+        (unlike motif_transform/stretto_compression/subject_fragmentation),
+        so this must work for pure generative/lyrical/sparse behaviors with
+        no motif involved at all."""
+        chords = resolve_progression(["i", "iv"], "C", "ionian", density="medium")
+        kwargs = dict(behavior="generative", bars_per_chord=1.0, beats_per_bar=4, seed=1)
+        baseline = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        offset = generate_melody_for_progression(
+            chords, "C", "ionian",
+            fugal_techniques={"canonic_imitation": True, "canon_interval": 2}, **kwargs,
+        )
+        baseline_sounding = [n for n in baseline if not n.is_rest]
+        offset_sounding = [n for n in offset if not n.is_rest]
+        assert offset_sounding[0].start_beat == baseline_sounding[0].start_beat + 2
+
+    def test_reproducible_with_same_seed(self):
+        chords, motif = self._progression_and_motif()
+        kwargs = dict(behavior="develop", motif=motif, bars_per_chord=1.0,
+                      beats_per_bar=4, seed=7,
+                      fugal_techniques={"canonic_imitation": True, "canon_interval": 3})
+        a = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        b = generate_melody_for_progression(chords, "C", "ionian", **kwargs)
+        assert a == b

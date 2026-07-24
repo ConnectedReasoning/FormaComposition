@@ -26,6 +26,7 @@ from intervals.core.lint import (
     CHECKS,
     _check_bass_rest_on_continuous,
     _check_bass_swing_noop,
+    _check_canon_interval_without_canonic_imitation,
     _check_counterpoint_motif_species_noop,
     _check_counterpoint_species_unimplemented,
     _check_develop_peer_voice_noop,
@@ -449,11 +450,46 @@ def test_check_harmony_pattern_silently_empty_silent_when_explicit_harmony_rhyth
 
 
 # ===========================================================================
-# Sanity: CHECKS registry contains all 16 section-only checks (the 17th,
+# 18. _check_canon_interval_without_canonic_imitation
+# ===========================================================================
+
+def test_check_canon_interval_without_canonic_imitation_fires_when_absent():
+    section = _section(fugal_techniques={"canon_interval": 4})
+    found = list(_check_canon_interval_without_canonic_imitation(section))
+    assert len(found) == 1
+    assert "canon_interval=4" in found[0].setting
+    assert "canonic_imitation is not true" in found[0].cause
+
+
+def test_check_canon_interval_without_canonic_imitation_fires_when_explicitly_false():
+    section = _section(fugal_techniques={"canon_interval": 4, "canonic_imitation": False})
+    found = list(_check_canon_interval_without_canonic_imitation(section))
+    assert len(found) == 1
+
+
+def test_check_canon_interval_without_canonic_imitation_silent_when_both_set():
+    section = _section(fugal_techniques={"canon_interval": 4, "canonic_imitation": True})
+    assert list(_check_canon_interval_without_canonic_imitation(section)) == []
+
+
+def test_check_canon_interval_without_canonic_imitation_silent_with_no_fugal_techniques():
+    section = _section()
+    assert list(_check_canon_interval_without_canonic_imitation(section)) == []
+
+
+def test_check_canon_interval_without_canonic_imitation_silent_without_interval_key():
+    """canonic_imitation=True with no canon_interval key uses the function's
+    own default (4 beats) internally -- nothing for the linter to flag."""
+    section = _section(fugal_techniques={"canonic_imitation": True})
+    assert list(_check_canon_interval_without_canonic_imitation(section)) == []
+
+
+# ===========================================================================
+# Sanity: CHECKS registry contains all 17 section-only checks (the 18th,
 # _check_melodic_variation_noop, is invoked separately by lint_piece because
 # it needs theme context -- see its docstring and lint_piece's signature).
 # ===========================================================================
 
-def test_checks_registry_has_sixteen_entries_plus_melodic_variation_separately():
-    assert len(CHECKS) == 16
+def test_checks_registry_has_seventeen_entries_plus_melodic_variation_separately():
+    assert len(CHECKS) == 17
     assert _check_melodic_variation_noop not in CHECKS

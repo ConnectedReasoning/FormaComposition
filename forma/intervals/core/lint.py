@@ -155,6 +155,9 @@ COUPLINGS: list[str] = [
     "harmony_pattern block present, produces zero harmony events silently — "
     "the schema's pattern-requires-a-block check only fires for an "
     "EXPLICIT harmony_rhythm.rhythm='pattern'.",
+    "fugal_techniques.canon_interval  is a no-op unless "
+    "fugal_techniques.canonic_imitation is also true — the voice's entrance "
+    "is only delayed when both are set together.",
 ]
 
 # Rhythm sources that supply their own onset+duration grid, so the free
@@ -181,6 +184,17 @@ class Contradiction:
             f"{self.where}: {self.setting} but {self.cause} — {self.effect}. "
             f"{self.fix}"
         )
+
+
+# melody.py: generate_melody_for_progression() reads fugal_techniques.
+# canon_interval regardless of canonic_imitation, but the shift+trim that
+# actually delays the voice's entrance only runs inside
+# `if canonic_imitation and canon_interval > 0`. So canon_interval sitting
+# on its own, with canonic_imitation left unset or false, is a pure no-op —
+# same shape as every other gate in this file, just on an untyped dict
+# field rather than a schema-checked one.
+CANONIC_IMITATION_KEY: str = "canonic_imitation"
+CANON_INTERVAL_KEY: str = "canon_interval"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -625,6 +639,37 @@ def _check_harmony_pattern_silently_empty(section: SectionModel) -> Iterator[Con
     )
 
 
+def _check_canon_interval_without_canonic_imitation(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    fugal_techniques.canon_interval only takes effect when
+    fugal_techniques.canonic_imitation is also true. generate_melody_for_
+    progression() reads canon_interval unconditionally (defaulting to 4
+    when unset) but only applies the shift-and-trim inside
+    `if canonic_imitation and canon_interval > 0` -- so canon_interval set
+    on its own, with canonic_imitation left false or absent, silently does
+    nothing to the render.
+
+    fugal_techniques is an unvalidated dict (no schema sub-model), so this
+    reads it defensively with .get() rather than assuming either key exists.
+    """
+    ft = section.fugal_techniques
+    if not ft:
+        return
+    interval = ft.get(CANON_INTERVAL_KEY)
+    if interval is None:
+        return
+    if ft.get(CANONIC_IMITATION_KEY) is True:
+        return
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"fugal_techniques.canon_interval={interval!r} is set",
+        cause="fugal_techniques.canonic_imitation is not true",
+        effect="the voice's entrance is not delayed at all",
+        fix="set fugal_techniques.canonic_imitation=true to hear the offset, "
+            "or drop canon_interval if no offset is intended.",
+    )
+
+
 CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
@@ -642,6 +687,7 @@ CHECKS = [
     _check_transform_imitation_unimplemented,
     _check_long_progression_seed_collision,
     _check_harmony_pattern_silently_empty,
+    _check_canon_interval_without_canonic_imitation,
 ]
 
 
