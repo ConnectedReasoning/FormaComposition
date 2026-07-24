@@ -57,25 +57,27 @@ class TestKeyAndScale:
 
 class TestParseRoman:
     @pytest.mark.parametrize("roman,expected", [
-        ("i", (0, None)),
-        ("IV", (3, None)),
-        ("iim7", (1, "minor7")),
-        ("Vmaj9", (4, "major9")),
-        ("viidim", (6, "diminished")),
+        ("i", (0, None, 0)),
+        ("IV", (3, None, 0)),
+        ("iim7", (1, "minor7", 0)),
+        ("Vmaj9", (4, "major9", 0)),
+        ("viidim", (6, "diminished", 0)),
     ])
     def test_basic_and_quality_suffix(self, roman, expected):
         assert parse_roman(roman) == expected
 
-    def test_flat_alteration_wraps_degree_down(self):
-        # bVI: VI=degree5, alteration -1 -> 4
-        assert parse_roman("bVI") == (4, None)
+    def test_flat_alteration_does_not_change_the_degree(self):
+        """bVI is still degree 5 (VI's own position) -- the alteration is
+        a pitch shift applied later, not a different diatonic degree.
+        (Previously this wrapped to degree 4, silently colliding with
+        whatever numeral actually lives at degree 4 in a given mode.)"""
+        assert parse_roman("bVI") == (5, None, -1)
 
-    def test_sharp_alteration_wraps_degree_up(self):
-        # #iv: iv=degree3, alteration +1 -> 4
-        assert parse_roman("#iv") == (4, None)
+    def test_sharp_alteration_does_not_change_the_degree(self):
+        assert parse_roman("#iv") == (3, None, 1)
 
     def test_alteration_combined_with_quality(self):
-        assert parse_roman("bVImaj7") == (4, "major7")
+        assert parse_roman("bVImaj7") == (5, "major7", -1)
 
     def test_invalid_roman_raises(self):
         with pytest.raises(ValueError, match="Cannot parse Roman numeral"):
@@ -259,6 +261,63 @@ class TestResolveChord:
     def test_explicit_quality_suffix_overrides_mode_derived_quality(self):
         chord = resolve_chord("idim7", "C", "ionian", density="medium")
         assert chord.quality == "diminished7"
+
+    def test_bVII_no_longer_collides_with_vi(self):
+        """The bug this fix targets: bVII and vi used to resolve to the
+        literal same chord (same root, same quality, same degree), because
+        the old code re-indexed the diatonic degree instead of applying a
+        real chromatic shift. They must now be genuinely distinct."""
+        vi = resolve_chord("vi", "F", "mixolydian", density="medium")
+        bVII = resolve_chord("bVII", "F", "mixolydian", density="medium")
+        assert (vi.root_name, vi.degree) != (bVII.root_name, bVII.degree)
+
+    def test_flat_seven_in_mixolydian_reproduces_the_modes_own_native_seventh(self):
+        """The key semantic this fix has to get right: mixolydian's own
+        native 7th degree is ALREADY a semitone below the major scale's
+        (that's the definition of mixolydian). So bVII, computed relative
+        to the major scale, must land on that SAME native pitch -- not
+        flatten a second time past it. F mixolydian's native 7th is
+        Eb/D# (enharmonic); bVII must resolve to exactly that, not to D
+        (which would be the over-flattened, wrong result)."""
+        native_seventh = resolve_chord("VII", "F", "mixolydian", density="sparse")
+        flat_seventh = resolve_chord("bVII", "F", "mixolydian", density="sparse")
+        assert flat_seventh.root_name == native_seventh.root_name
+
+    def test_flat_seven_is_a_genuine_foreign_chord_in_ionian(self):
+        """The other side of the same formula: ionian's native 7th is
+        NOT already flattened, so bVII there must be a real chromatic/
+        borrowed color, distinct from ionian's own native vii."""
+        native_seventh = resolve_chord("VII", "F", "ionian", density="sparse")
+        flat_seventh = resolve_chord("bVII", "F", "ionian", density="sparse")
+        assert flat_seventh.root_name != native_seventh.root_name
+
+    def test_altered_chord_with_no_quality_suffix_defaults_to_major(self):
+        """Standard tonal-theory convention: borrowed chords (bVI, bVII,
+        bIII, bII) are conventionally major triads when no quality is
+        given explicitly."""
+        chord = resolve_chord("bVII", "F", "ionian", density="sparse")
+        assert chord.quality == "major"
+
+    def test_altered_chord_quality_suffix_still_overrides_the_major_default(self):
+        chord = resolve_chord("bVII7", "F", "ionian", density="medium")
+        assert chord.quality == "dominant7"
+
+    def test_altered_chord_degree_matches_the_bare_numerals_position(self):
+        """bVII keeps degree 6 (VII's own position) -- alteration changes
+        the pitch, not which diatonic position the chord occupies. This
+        matters for melody.py's diatonic motif-sequencing, which reads
+        .degree as a scale POSITION, not a pitch."""
+        chord = resolve_chord("bVII", "F", "mixolydian", density="sparse")
+        assert chord.degree == 6
+
+    def test_secondary_chord_with_altered_target_resolves_correctly(self):
+        """Secondary/applied chords route through the same alteration
+        fix via the shared helper -- confirm an altered TARGET ('bVI')
+        is handled, not silently discarded the way it used to be."""
+        chord = resolve_chord("V7/bVI", "C", "ionian", density="medium")
+        # bVI in C ionian = Ab; V7 of Ab = Eb dominant7
+        assert chord.root_name == "D#"  # enharmonic Eb
+        assert chord.quality == "dominant7"
 
 
 # ===========================================================================

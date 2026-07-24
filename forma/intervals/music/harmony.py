@@ -151,20 +151,31 @@ def get_scale(key: str, mode: str, octave: int = 4) -> list[int]:
     return [root_midi + interval for interval in MODES[mode]]
 
 
-def parse_roman(roman: str) -> tuple[int, Optional[str]]:
+def parse_roman(roman: str) -> tuple[int, Optional[str], int]:
     """
-    Parse a Roman numeral string into (degree_index, quality_override_or_None).
-    Supports chromatic alterations with 'b' (flat) and '#' (sharp) prefixes.
+    Parse a Roman numeral string into (degree_index, quality_override_or_None,
+    alteration). Supports chromatic alterations with 'b' (flat) and '#'
+    (sharp) prefixes.
+
+    degree_index is the UNALTERED position (0-6) the bare numeral names --
+    "bVII" is still degree 6 (the seventh-position chord), same as "VII".
+    The alteration does not change which position a chord occupies; it
+    changes the pitch built at that position. (Previously this function
+    folded the alteration into the degree itself via `% 7`, which meant a
+    genuine chromatic alteration was indistinguishable from just picking a
+    different diatonic degree -- e.g. "bVII" and "vi" resolved to the
+    literal same chord. See resolve_chord()'s docstring for how the
+    returned alteration is now actually applied.)
 
     Examples:
-        "i"      → (0, None)
-        "IV"     → (3, None)
-        "iim7"   → (1, "minor7")
-        "Vmaj9"  → (4, "major9")
-        "viidim" → (6, "diminished")
-        "bVI"    → (5, None)  [VI lowered by semitone]
-        "#iv"    → (3, None)  [iv raised by semitone]
-        "bVImaj7" → (5, "major7")  [alteration + quality]
+        "i"      → (0, None, 0)
+        "IV"     → (3, None, 0)
+        "iim7"   → (1, "minor7", 0)
+        "Vmaj9"  → (4, "major9", 0)
+        "viidim" → (6, "diminished", 0)
+        "bVI"    → (5, None, -1)  [VI, flattened by a semitone]
+        "#iv"    → (3, None, +1)  [iv, sharpened by a semitone]
+        "bVImaj7" → (5, "major7", -1)  [alteration + quality]
     """
     # Strip leading/trailing whitespace
     roman = roman.strip()
@@ -190,10 +201,6 @@ def parse_roman(roman: str) -> tuple[int, Optional[str]]:
 
     degree = ROMAN_TO_DEGREE[base.upper()]
 
-    # Apply chromatic alteration
-    # In a 7-degree system, alterations wrap: bI → VII, #VII → I, etc.
-    degree = (degree + alteration) % 7
-
     remainder = roman[len(base):]  # anything after the numeral
 
     # Check for explicit quality symbol
@@ -203,7 +210,7 @@ def parse_roman(roman: str) -> tuple[int, Optional[str]]:
             quality_override = QUALITY_SYMBOLS[symbol.lower()]
             break
 
-    return degree, quality_override
+    return degree, quality_override, alteration
 
 
 def mode_chord_quality(degree: int, mode: str, density: str) -> str:
@@ -274,6 +281,33 @@ def mode_chord_quality(degree: int, mode: str, density: str) -> str:
         quality = "dominant11"
 
     return quality
+
+
+def _roman_degree_to_root_midi(degree: int, alteration: int, key: str, mode: str, octave: int) -> int:
+    """
+    Resolve a parsed Roman-numeral (degree, alteration) pair to an
+    absolute MIDI root pitch.
+
+    Unaltered (alteration == 0): read straight off the theme's OWN mode --
+    diatonic, unambiguous, no change from prior behavior.
+
+    Altered (alteration != 0): computed against the MAJOR SCALE's interval
+    at this degree, NOT the theme's current mode. This is what makes a
+    chromatic alteration behave the way it's conventionally understood in
+    tonal theory: modes are themselves described as alterations of the
+    major scale (mixolydian IS "major with a flat 7"; aeolian IS "major
+    with a flat 3, 6, 7"), so "bVII" written while composing in mixolydian
+    correctly reproduces mixolydian's own native, already-flat 7th chord
+    instead of flattening past it into some other, unrelated scale
+    degree. The same formula also does the right thing for a GENUINE
+    borrowed/chromatic color when the current mode's own degree ISN'T
+    already sitting there (e.g. bVII in ionian is a real foreign chord).
+    """
+    if alteration == 0:
+        scale = get_scale(key, mode, octave)
+        return scale[degree]
+    major_scale = get_scale(key, "ionian", octave)
+    return major_scale[degree] + alteration
 
 
 # ---------------------------------------------------------------------------
@@ -398,7 +432,7 @@ def _resolve_secondary_chord(
     target_str = target_str.strip()
 
     try:
-        target_degree, _ = parse_roman(target_str)
+        target_degree, _, target_alteration = parse_roman(target_str)
     except ValueError:
         raise ValueError(
             f"Cannot resolve '{roman}': '{target_str}' is not a valid Roman "
@@ -408,12 +442,14 @@ def _resolve_secondary_chord(
             f"this piece needs a different approach for now."
         )
 
-    applied_degree, applied_quality_override = parse_roman(applied_str)
+    applied_degree, applied_quality_override, applied_alteration = parse_roman(applied_str)
 
     scale = get_scale(key, mode, octave)
     tonic_midi = scale[0]
-    target_root_midi = scale[target_degree]
-    applied_offset = scale[applied_degree] - tonic_midi
+    target_root_midi = _roman_degree_to_root_midi(target_degree, target_alteration, key, mode, octave)
+    applied_offset = (
+        _roman_degree_to_root_midi(applied_degree, applied_alteration, key, mode, octave) - tonic_midi
+    )
     applied_root_midi = target_root_midi + applied_offset
 
     root_name = CHROMATIC[applied_root_midi % 12]
@@ -466,12 +502,23 @@ def resolve_chord(
             roman, key, mode, density, prev_chord, register_bottom, register_top, octave
         )
 
-    degree, quality_override = parse_roman(roman)
-    scale = get_scale(key, mode, octave)
-    root_midi = scale[degree]
+    degree, quality_override, alteration = parse_roman(roman)
+    root_midi = _roman_degree_to_root_midi(degree, alteration, key, mode, octave)
     root_name = CHROMATIC[root_midi % 12]
 
-    quality = quality_override if quality_override else mode_chord_quality(degree, mode, density)
+    if quality_override:
+        quality = quality_override
+    elif alteration == 0:
+        quality = mode_chord_quality(degree, mode, density)
+    else:
+        # A chromatically altered/borrowed chord has no diatonic quality to
+        # fall back to -- mode_chord_quality() only knows how to derive a
+        # quality for a degree that's actually IN the mode's own scale.
+        # Default to a plain major triad, matching standard tonal-theory
+        # convention for borrowed chords (bVI, bVII, bIII, bII are
+        # conventionally major, borrowed from the parallel natural minor).
+        # An explicit quality suffix ("bVII7", "bVImaj7", ...) always wins.
+        quality = "major"
 
     raw_tones = build_chord_tones(root_midi, quality, density)
     voiced, inversion = choose_inversion_for_voice_leading(
