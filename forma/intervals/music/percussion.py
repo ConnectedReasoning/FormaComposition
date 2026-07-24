@@ -1,9 +1,12 @@
 """
 percussion.py — Intervals Engine
-Generates drum patterns that track the bass and lock to groove/rhythm.
+Generates drum patterns that track the bass and lock to density/rhythm.
 
 Drum patterns are MIDI-based: kick, snare, hi-hat, ghost notes.
-They follow the same groove/density/swing system as other voices.
+They follow the same density/swing system as other voices. Groove is
+honored only where its name overlaps with a defined drum pattern (see
+generate_drums()'s docstring) -- there is no general mapping from an
+arbitrary single-voice groove name onto a full kick/snare/hi-hat kit.
 
 The drums reinforce bass note onsets and add rhythmic definition at the
 subdivision level. Five named patterns: four_on_floor, backbeat, halftime,
@@ -159,7 +162,7 @@ def generate_drums(
     seed: Optional[int] = None,
 ) -> list[DrumHit]:
     """
-    Generate drum hits that track the bass and lock to groove/density.
+    Generate drum hits that track the bass and lock to density/rhythm.
 
     The function:
     1. Tiles the named drum pattern across total_beats
@@ -172,7 +175,17 @@ def generate_drums(
         bass_notes:     List of BassNote to track
         pattern:        Drum pattern name
         density:        "sparse" | "medium" | "full"
-        groove:         Optional groove name
+        groove:         Optional groove name (from rhythm.py's VALID_GROOVES,
+                        the same vocabulary melody/bass/harmony use). There
+                        is no general mapping from a single-voice groove
+                        onto a full kick/snare/hi-hat kit, so this only
+                        takes effect when the name ALSO happens to be a
+                        defined drum pattern (currently "backbeat" or
+                        "halftime") -- in that case it overrides `pattern`.
+                        Any other groove name (e.g. "shuffle", "waltz",
+                        "push") is a deliberate no-op here: swing still
+                        applies regardless of groove, but the pattern
+                        itself is unaffected.
         swing:          Public swing amount, 0.0-1.0 (0.0 = off, 1.0 = heaviest).
                         Converted internally via remap_swing_ratio() before
                         being applied — do not confuse with the internal
@@ -186,6 +199,17 @@ def generate_drums(
     if seed is None:
         raise ValueError(f"Deterministic generation requires an explicit seed in {__name__}")
     rng = random.Random(seed)
+
+    # Groove/drum-pattern vocabulary overlap: "backbeat" and "halftime" exist
+    # in both rhythm.py's VALID_GROOVES and this module's DRUM_PATTERNS. When
+    # the section's groove happens to name a real drum pattern, honor it --
+    # this is the only place the docstring's promise is actually
+    # implementable (see the `groove` arg doc above for why every other
+    # groove name stays a no-op). An explicit `pattern` argument is what the
+    # caller asked for by name, so groove only steps in as an override here,
+    # not silently underneath an already-specific choice made elsewhere.
+    if groove is not None and groove in DRUM_PATTERNS:
+        pattern = groove
 
     if pattern not in DRUM_PATTERNS:
         raise ValueError(

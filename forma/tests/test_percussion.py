@@ -151,3 +151,53 @@ class TestGenerateDrumsSwingIntegration:
         )
         assert straight_offbeat_starts  # sanity: there are offbeats to swing
         assert swung_same_notes  # they moved off the exact half-beat grid
+
+
+# ===========================================================================
+# Bugfix regression: `groove` used to be a fully documented parameter that
+# had zero effect. It now overrides `pattern` when the groove name also
+# happens to be a defined drum pattern ("backbeat" or "halftime") -- the
+# only case where a single-voice groove name has an unambiguous drum-kit
+# meaning. Every other groove name remains a deliberate, documented no-op.
+# ===========================================================================
+
+class TestGrooveOverridesPatternWhenNamesOverlap:
+    def test_groove_backbeat_produces_the_same_hits_as_explicit_pattern_backbeat(self):
+        via_groove = generate_drums(4.0, [], pattern="four_on_floor", groove="backbeat",
+                                     density="sparse", seed=1)
+        via_explicit_pattern = generate_drums(4.0, [], pattern="backbeat",
+                                               density="sparse", seed=1)
+        assert via_groove == via_explicit_pattern
+
+    def test_groove_halftime_produces_the_same_hits_as_explicit_pattern_halftime(self):
+        via_groove = generate_drums(4.0, [], pattern="four_on_floor", groove="halftime",
+                                     density="sparse", seed=1)
+        via_explicit_pattern = generate_drums(4.0, [], pattern="halftime",
+                                               density="sparse", seed=1)
+        assert via_groove == via_explicit_pattern
+
+    def test_groove_override_actually_changes_output_from_the_original_pattern(self):
+        """Confirms this isn't a no-op that happens to coincide -- the
+        overridden pattern's hits genuinely differ from what `pattern`
+        alone would have produced."""
+        without_groove = generate_drums(4.0, [], pattern="four_on_floor",
+                                         density="sparse", seed=1)
+        with_groove_override = generate_drums(4.0, [], pattern="four_on_floor",
+                                               groove="backbeat", density="sparse", seed=1)
+        assert without_groove != with_groove_override
+
+    def test_non_matching_groove_name_remains_a_documented_no_op(self):
+        """'shuffle' is a valid rhythm.py groove name but has no defined
+        drum-kit mapping -- must not silently do anything to the pattern."""
+        without_groove = generate_drums(4.0, [], pattern="minimal",
+                                         density="sparse", seed=1)
+        with_unmapped_groove = generate_drums(4.0, [], pattern="minimal",
+                                               groove="shuffle", density="sparse", seed=1)
+        assert without_groove == with_unmapped_groove
+
+    def test_no_groove_is_unaffected(self):
+        without_groove_kw = generate_drums(4.0, [], pattern="four_on_floor",
+                                            density="sparse", seed=1)
+        with_explicit_none = generate_drums(4.0, [], pattern="four_on_floor", groove=None,
+                                             density="sparse", seed=1)
+        assert without_groove_kw == with_explicit_none
