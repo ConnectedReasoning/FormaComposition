@@ -80,6 +80,15 @@ CHORD_INTERVALS = {
     "minor9":       (3, 7, 10, 14),
     "major9":       (4, 7, 11, 14),
     "dominant9":    (4, 7, 10, 14),
+    # Flat-ninth variants: standard real-world jazz chord-symbol names
+    # ("7b9", "m7b9"). Selected by mode_chord_quality() instead of the
+    # natural-9th quality whenever the mode's own scale step from root to
+    # its 2nd degree is a half-step (13 semitones compound), not a whole
+    # step (14) -- e.g. the V chord in harmonic minor, or the i chord in
+    # phrygian, both textbook b9 colors.
+    "minor7b9":     (3, 7, 10, 13),
+    "major7b9":     (4, 7, 11, 13),
+    "dominant7b9":  (4, 7, 10, 13),
     "minor11":      (3, 7, 10, 14, 17),
     "dominant11":   (4, 7, 10, 14, 17),
 }
@@ -247,12 +256,13 @@ def mode_chord_quality(degree: int, mode: str, density: str) -> str:
 
     # Extend to ninth
     ninth_interval = (intervals[(degree + 1) % n] - intervals[degree]) % 12 + 12
+    flat_ninth = (ninth_interval == 13)  # mode's 2nd degree sits a half-step above root
     if "major7" in quality:
-        quality = "major9"
+        quality = "major7b9" if flat_ninth else "major9"
     elif "minor7" in quality:
-        quality = "minor9"
+        quality = "minor7b9" if flat_ninth else "minor9"
     elif "dominant7" in quality:
-        quality = "dominant9"
+        quality = "dominant7b9" if flat_ninth else "dominant9"
 
     if max_tones <= 5:
         return quality

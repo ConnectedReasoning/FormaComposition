@@ -105,6 +105,27 @@ class TestModeChordQuality:
     def test_density_sparse_never_extends_past_triad(self):
         assert mode_chord_quality(4, "ionian", "sparse") == "major"
 
+    def test_harmonic_minor_dominant_is_a_flat_ninth(self):
+        """The V chord in harmonic minor is THE textbook 7b9 dominant --
+        the mode's own 2nd scale degree sits a half-step above its root."""
+        assert mode_chord_quality(4, "harmonic_minor", "full") == "dominant7b9"
+
+    def test_phrygian_tonic_is_a_flat_ninth(self):
+        """Phrygian's hallmark color: the i chord's 9th is a half-step
+        above the root (phrygian's defining b2)."""
+        assert mode_chord_quality(0, "phrygian", "full") == "minor7b9"
+
+    def test_ionian_tonic_and_dominant_stay_natural_ninth(self):
+        """Sanity: modes/degrees whose own 2nd scale degree is a whole
+        step above the root must NOT get the flat-ninth treatment."""
+        assert mode_chord_quality(0, "ionian", "full") == "major9"
+        assert mode_chord_quality(4, "ionian", "full") == "dominant11"  # extends further, unaffected
+
+    def test_flat_ninth_quality_does_not_extend_further_to_an_eleventh(self):
+        """Matches the pre-existing asymmetry where major9 also never
+        extends to an eleventh -- a b9 chord stops at the ninth."""
+        assert mode_chord_quality(4, "harmonic_minor", "full") == "dominant7b9"
+
 
 # ===========================================================================
 # build_chord_tones
@@ -124,6 +145,14 @@ class TestBuildChordTones:
 
     def test_unknown_quality_falls_back_to_major_triad(self):
         assert build_chord_tones(60, "not_a_real_quality", "sparse") == [60, 64, 67]
+
+    def test_flat_ninth_qualities_build_correct_tones(self):
+        # dominant7b9: root, M3, P5, m7, b9 (13 semitones)
+        assert build_chord_tones(60, "dominant7b9", "full") == [60, 64, 67, 70, 73]
+        # minor7b9: root, m3, P5, m7, b9
+        assert build_chord_tones(60, "minor7b9", "full") == [60, 63, 67, 70, 73]
+        # major7b9: root, M3, P5, M7, b9
+        assert build_chord_tones(60, "major7b9", "full") == [60, 64, 67, 71, 73]
 
 
 # ===========================================================================
@@ -207,6 +236,21 @@ class TestResolveChord:
     def test_unknown_key_raises(self):
         with pytest.raises(ValueError):
             resolve_chord("i", "H", "ionian")
+
+    def test_hand_verified_harmonic_minor_dominant_is_flat_ninth(self):
+        """The real V chord in harmonic minor, at full integration level
+        (through resolve_chord, not just mode_chord_quality directly):
+        root G, quality dominant7b9, and every voiced tone's pitch class
+        matches the b9 chord's actual pitch-class set (register/inversion
+        placement is choose_inversion_for_voice_leading's job, already
+        covered elsewhere -- this checks pitch-class correctness only)."""
+        chord = resolve_chord("v", "C", "harmonic_minor", density="full")
+        assert chord.root_name == "G"
+        assert chord.quality == "dominant7b9"
+        actual_pcs = sorted(n % 12 for n in chord.midi_notes)
+        root_pc = CHROMATIC.index("G")
+        expected_pcs = sorted((root_pc + iv) % 12 for iv in (0, 4, 7, 10, 13))
+        assert actual_pcs == expected_pcs
 
     def test_invalid_roman_raises(self):
         with pytest.raises(ValueError, match="Cannot parse"):
