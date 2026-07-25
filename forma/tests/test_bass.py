@@ -16,7 +16,9 @@ import pytest
 from intervals.music.bass import (
     BASS_OCTAVE_BOTTOM,
     BASS_OCTAVE_TOP,
+    BASS_STYLES,
     BassNote,
+    _apply_swing_to_bass,
     approach_note,
     bass_chord_tones,
     bass_fifth,
@@ -213,3 +215,89 @@ class TestGenerateBass:
 
     def test_empty_chord_list_returns_no_notes(self):
         assert generate_bass([], style="root_only", seed=1) == []
+
+
+# ===========================================================================
+# Bugfix / feature: swing applied uniformly, independent of bass style.
+#
+# Previously only style_melodic and style_motif consulted swing_ratio at
+# all -- every other style silently ignored it, even though every style
+# accepted it as a parameter. Swing is now applied as a single centralized
+# post-pass (_apply_swing_to_bass) after style dispatch, so every style
+# gets correct swing behavior automatically. Styles whose figures never
+# place a note on an offbeat eighth (root_only, root_fifth, walking,
+# steady, pedal, pulse at its default subdivision) are correctly
+# unaffected -- not because they're skipped, but because there's nothing
+# on their onset grid for swing to displace.
+# ===========================================================================
+
+class TestApplySwingToBass:
+    def test_straight_ratio_is_a_no_op(self):
+        notes = [BassNote(50, 1.5, 0.5, 70)]
+        assert _apply_swing_to_bass(notes, 0.5) == notes
+
+    def test_on_beat_note_passes_through_unchanged(self):
+        notes = [BassNote(50, 2.0, 1.0, 70)]
+        assert _apply_swing_to_bass(notes, 0.67) == notes
+
+    def test_offbeat_note_is_delayed_and_shortened(self):
+        notes = [BassNote(50, 1.5, 0.5, 70)]
+        result = _apply_swing_to_bass(notes, 0.67)
+        assert result[0].start_beat == pytest.approx(1.67)
+        assert result[0].duration_beats == pytest.approx(0.33)
+        assert result[0].midi_note == 50
+        assert result[0].velocity == 70
+
+    def test_duration_is_floored_at_point_one_beat(self):
+        notes = [BassNote(50, 1.5, 0.15, 70)]
+        result = _apply_swing_to_bass(notes, 0.9)
+        assert result[0].duration_beats == pytest.approx(0.1)
+
+    def test_empty_list_returns_empty_list(self):
+        assert _apply_swing_to_bass([], 0.67) == []
+
+    def test_mixed_on_and_off_beat_notes_in_one_pass(self):
+        notes = [BassNote(50, 0.0, 1.0, 70), BassNote(52, 1.5, 0.5, 70),
+                 BassNote(50, 2.0, 1.0, 70)]
+        result = _apply_swing_to_bass(notes, 0.67)
+        starts = [round(n.start_beat, 2) for n in result]
+        assert starts == [0.0, 1.67, 2.0]
+
+
+class TestSwingIsUniformAcrossEveryStyle:
+    def _kwargs_for(self, style):
+        if style == "motif":
+            return {"motif": {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 0.5, 0.5, 1.0]}}
+        return {}
+
+    @pytest.mark.parametrize("style", list(BASS_STYLES.keys()))
+    def test_every_style_accepts_swing_without_crashing(self, style):
+        chords = resolve_progression(["i", "iv", "v", "i"], "D", "dorian", density="medium")
+        notes = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
+                               swing=0.34, seed=1, **self._kwargs_for(style))
+        assert isinstance(notes, list)
+
+    @pytest.mark.parametrize("style", [
+        "root_only", "root_fifth", "walking", "steady", "pulse", "pedal",
+    ])
+    def test_styles_with_no_offbeat_content_are_unaffected_by_swing(self, style):
+        """Not skipped -- genuinely unaffected, because these styles never
+        place a note on an offbeat eighth in the first place."""
+        chords = resolve_progression(["i", "iv", "v", "i"], "D", "dorian", density="medium")
+        swung = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
+                               swing=0.34, seed=1)
+        straight = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
+                                  swing=0.0, seed=1)
+        assert swung == straight
+
+    @pytest.mark.parametrize("style", ["melodic", "motif"])
+    def test_styles_with_offbeat_content_still_genuinely_swing(self, style):
+        """Regression guard: the two styles that already worked before this
+        refactor must still actually respond to swing, not just silently
+        pass the byte-identity check above."""
+        chords = resolve_progression(["i", "iv", "v", "i"], "D", "dorian", density="medium")
+        swung = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
+                               swing=0.34, seed=1, **self._kwargs_for(style))
+        straight = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
+                                  swing=0.0, seed=1, **self._kwargs_for(style))
+        assert swung != straight

@@ -420,24 +420,9 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 vel = velocity - 4 if (t % beats_per_bar) < 0.01 else max(55, velocity - 10)
 
             actual_dur = min(dur, remaining)
-            # Swing-aware placement (L1). This line's only offbeat content is
-            # the occasional eighth-note pair above; in a swung section the
-            # second of that pair belongs late (long-short), not on the straight
-            # half-beat. Consult the ensemble's shared swing rule per note —
-            # every other onset here is on the beat and comes back untouched,
-            # so this is a decision, not a blanket transform.
             onset = beat + t
-            off = swing_offset(onset, swing_ratio)
-            notes.append(BassNote(
-                n,
-                onset + off,
-                max(0.1, actual_dur - off) if off else actual_dur,
-                vel,
-            ))
+            notes.append(BassNote(n, onset, actual_dur, vel))
             current = n
-            # The underlying grid does NOT move — only the onset is displaced,
-            # exactly as apply_swing does for melody. Advancing t by the swung
-            # offset would drift the whole line late.
             t += actual_dur
 
         beat += total
@@ -530,23 +515,9 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
             actual_dur = min(dur, total - t)
             if not is_rest:
                 vel = int(velocity * vel_scale)
-                # Swing-aware placement (M1). This style plays the SAME cell the
-                # melody plays, and that cell carries its groove in its offbeat
-                # pushes. If melody swings them and bass doesn't, the two voices
-                # land ~0.17 beats apart on the same gesture — a flam, not a
-                # groove. So bass's placement decision here is to lock: consult
-                # the same shared swing rule, displacing the identical onsets by
-                # the identical amount, so the shared cell reads as one gesture.
                 onset = beat + t
-                off = swing_offset(onset, swing_ratio)
-                notes.append(BassNote(
-                    candidate,
-                    onset + off,
-                    max(0.1, actual_dur - off) if off else actual_dur,
-                    vel,
-                ))
+                notes.append(BassNote(candidate, onset, actual_dur, vel))
             current = candidate
-            # Grid advances unswung — only onsets are displaced (see style_melodic).
             t += actual_dur
             step += 1
 
@@ -634,6 +605,46 @@ def _apply_bass_rests(
         return notes
     rng = random.Random((seed or 0) ^ 0x8A5)
     return [n for n in notes if rng.random() >= rest_probability]
+
+
+def _apply_swing_to_bass(notes: list[BassNote], swing_ratio: float) -> list[BassNote]:
+    """
+    Apply swing displacement to a finished bass note list, uniformly,
+    regardless of which style produced it.
+
+    This used to be each style's own responsibility -- style_melodic and
+    style_motif applied it inline, per-note, during construction; every
+    other style silently ignored swing_ratio entirely. That meant swing
+    only ever worked for two of the eight styles, and a new style added
+    later would silently be swing-deaf unless someone remembered to wire
+    it in by hand. Centralizing it here as a single post-pass (mirroring
+    rhythm.py's apply_swing() for melody, and percussion.py's
+    _apply_swing_to_drums()) means every style gets identical, correct
+    swing behavior automatically, including styles added in the future.
+
+    Only offbeat-eighth onsets (beat % 1.0 == 0.5, within swing_offset()'s
+    tolerance) are ever displaced -- an onset on a whole beat is returned
+    completely unchanged. Styles whose figures never place a note off the
+    beat (root_only, root_fifth, walking, steady, pedal, and pulse at its
+    default quarter-note subdivision) are therefore correctly unaffected
+    by this pass, not because it skips them, but because there's nothing
+    on their grid for swing_offset() to act on.
+    """
+    if swing_ratio == 0.5 or not notes:  # straight -- every offset would be 0 anyway
+        return notes
+    swung = []
+    for n in notes:
+        off = swing_offset(n.start_beat, swing_ratio)
+        if off:
+            swung.append(BassNote(
+                n.midi_note,
+                n.start_beat + off,
+                max(0.1, n.duration_beats - off),
+                n.velocity,
+            ))
+        else:
+            swung.append(n)
+    return swung
 
 
 def generate_bass(
@@ -736,13 +747,17 @@ def generate_bass(
     # `swing` is the public 0.0-1.0 section field; the placement rule
     # (rhythm.swing_offset) works on the internal 0.5-straight scale, so convert
     # once here — the same conversion melody does before calling apply_swing.
-    # Every style accepts swing_ratio; only those that can actually place a note
-    # off the beat (melodic, motif) consult it. For the rest it is inert because
-    # their onsets are all on the beat, where straight and swung are identical.
     swing_ratio = remap_swing_ratio(swing) if swing and swing > 0 else 0.5
     notes = fn(chords, bars_per_chord, beats_per_bar, density, velocity,
                key=key, mode=mode, seed=seed, motif=motif,
                swing_ratio=swing_ratio, **kwargs)
+
+    # Swing is applied uniformly here, once, regardless of style — see
+    # _apply_swing_to_bass()'s docstring. Every style's output passes
+    # through this; styles whose onsets never land on an offbeat eighth
+    # (root_only, root_fifth, walking, steady, pedal, pulse at its default
+    # subdivision) come back byte-identical, not because they're skipped.
+    notes = _apply_swing_to_bass(notes, swing_ratio)
 
     # Style-path rest guard: walking/melodic lines rely on stepwise motion
     # into the next chord root, so random note drops break the line rather
