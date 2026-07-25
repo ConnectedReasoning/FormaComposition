@@ -19,6 +19,11 @@ order too, and this piece's generation touches both.
 These tests exercise the scheme through the public generate_piece() API
 using the shake_v5 fixture, rather than importing a private function that
 no longer exists.
+
+Theme merged into piece (single-file format, schemas.ThemeModel retired):
+generate_piece() takes one piece dict now. The catalog on disk still has
+the old two-file layout (Phase 4 migration hasn't happened yet), so
+_load_shake_piece() merges them in memory as a stand-in.
 """
 import json
 import os
@@ -35,12 +40,14 @@ FIXTURES_DIR = os.path.join(
 )
 
 
-def _load_shake_theme_and_piece():
+def _load_shake_piece() -> dict:
     with open(os.path.join(FIXTURES_DIR, "theme_shake_v2.json")) as f:
         theme = json.load(f)["theme"]
     with open(os.path.join(FIXTURES_DIR, "piece_shake_v5.json")) as f:
         piece = json.load(f)["piece"]
-    return theme, piece
+    merged = dict(theme)
+    merged.update(piece)
+    return merged
 
 
 def _midi_bytes(path):
@@ -51,10 +58,10 @@ def _midi_bytes(path):
 def test_same_seed_same_process_reproducible(tmp_path):
     """Rendering the same piece dict twice in the same process with the
     same `seed` field must produce byte-identical MIDI."""
-    theme, piece = _load_shake_theme_and_piece()
+    piece = _load_shake_piece()
 
-    path_a = generate_piece(theme, piece, str(tmp_path / "a.mid"))
-    path_b = generate_piece(theme, piece, str(tmp_path / "b.mid"))
+    path_a = generate_piece(piece, str(tmp_path / "a.mid"))
+    path_b = generate_piece(piece, str(tmp_path / "b.mid"))
 
     assert _midi_bytes(path_a) == _midi_bytes(path_b)
 
@@ -66,9 +73,9 @@ def test_same_seed_cross_process_reproducible(tmp_path):
     theme_path = os.path.join(FIXTURES_DIR, "theme_shake_v2.json")
     piece_path = os.path.join(FIXTURES_DIR, "piece_shake_v5.json")
 
-    theme, piece = _load_shake_theme_and_piece()
+    piece = _load_shake_piece()
     in_process_path = tmp_path / "in_process.mid"
-    generate_piece(theme, piece, str(in_process_path))
+    generate_piece(piece, str(in_process_path))
     in_process_bytes = _midi_bytes(str(in_process_path))
 
     repo_root = str(Path(__file__).resolve().parents[1])
@@ -86,7 +93,8 @@ def test_same_seed_cross_process_reproducible(tmp_path):
         "from intervals.core.generator import generate_piece\n"
         f"theme = json.load(open({theme_path!r}))['theme']\n"
         f"piece = json.load(open({piece_path!r}))['piece']\n"
-        f"generate_piece(theme, piece, {str(subprocess_out)!r})\n"
+        "merged = dict(theme); merged.update(piece)\n"
+        f"generate_piece(merged, {str(subprocess_out)!r})\n"
     )
     subprocess.run(
         [sys.executable, "-c", script],
@@ -102,14 +110,14 @@ def test_same_seed_cross_process_reproducible(tmp_path):
 def test_different_seed_changes_output(tmp_path):
     """Sanity check that `piece["seed"]` actually participates in
     generation -- a different base_seed must not render identical output."""
-    theme, piece = _load_shake_theme_and_piece()
+    piece = _load_shake_piece()
 
     piece_a = dict(piece)
     piece_a["seed"] = 42
     piece_b = dict(piece)
     piece_b["seed"] = 43
 
-    path_a = generate_piece(theme, piece_a, str(tmp_path / "seed42.mid"))
-    path_b = generate_piece(theme, piece_b, str(tmp_path / "seed43.mid"))
+    path_a = generate_piece(piece_a, str(tmp_path / "seed42.mid"))
+    path_b = generate_piece(piece_b, str(tmp_path / "seed43.mid"))
 
     assert _midi_bytes(path_a) != _midi_bytes(path_b)

@@ -45,7 +45,7 @@ FIXTURES_DIR = os.path.join(
 # Fixture loading
 # ---------------------------------------------------------------------------
 
-def _load_shake_theme_and_piece():
+def _load_shake_piece() -> dict:
     with open(os.path.join(FIXTURES_DIR, "theme_shake_v2.json")) as f:
         theme = json.load(f)["theme"]
     with open(os.path.join(FIXTURES_DIR, "piece_shake_v5.json")) as f:
@@ -56,7 +56,13 @@ def _load_shake_theme_and_piece():
     # so this never mutates a shared fixture dict across test runs.
     piece = copy.deepcopy(piece)
     piece["sections"]["chorus"]["drums"] = {"pattern": "four_on_floor"}
-    return theme, piece
+
+    # Theme merged into piece (single-file format, schemas.ThemeModel
+    # retired). Catalog on disk still has the old two-file layout (Phase 4
+    # migration hasn't happened yet) -- merge in memory as a stand-in.
+    merged = dict(theme)
+    merged.update(piece)
+    return merged
 
 
 # ---------------------------------------------------------------------------
@@ -191,10 +197,10 @@ VOICE_TRACK_NAMES = [
 
 
 def test_exact_repeat_chorus_is_byte_identical_across_every_voice(tmp_path):
-    theme, piece = _load_shake_theme_and_piece()
+    piece = _load_shake_piece()
 
     out_path = tmp_path / "shake_v5_exact_repeat_probe.mid"
-    rendered_path = generate_piece(theme, piece, str(out_path))
+    rendered_path = generate_piece(piece, str(out_path))
     mid = mido.MidiFile(rendered_path)
 
     (first_start, first_end), (repeat_start, repeat_end) = _chorus_windows_ticks(piece)

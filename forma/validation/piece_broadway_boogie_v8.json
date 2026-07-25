@@ -1,6 +1,6 @@
 {
   "piece": {
-    "title": "Broadway Boogie Woogie (FormaComposition) v7",
+    "title": "Broadway Boogie Woogie (FormaComposition) v8",
     "theme": "broadway_boogie",
     "tempo": 98,
     "seed": 194,
@@ -69,19 +69,19 @@
         "melody": {
           "register": "alto",
           "behavior": "lyrical",
-          "velocity": 75
+          "velocity": 85
         },
         "bass_style": "steady",
-        "arc": "fade_in",
+        "arc": "plateau",
         "rhythm": "motif",
-        "rest_probability": 0.00005,
+        "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "sparse",
           "groove": "syncopated"
         },
         "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
-        "swing": 0.1
+        "swing": 0.5
       },
       "m1_grid_2": {
         "name": "m1_grid_2",
@@ -192,7 +192,7 @@
         "rest_probability": 0.3,
         "harmony_rhythm": {
           "rhythm": "sustain",
-          "density": "low",
+          "density": "full",
           "groove": "straight"
         },
         "notes": "II. Accumulation — 5 min at 110 BPM. Bass + offbeat comping stabs. Mute melody in Logic. | Harmony fix: V3 (I-bVII-ii-v) x3 — bVII as Mondrian color block, diatonic, no functional pull. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle — its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
@@ -223,7 +223,7 @@
         "rest_probability": 0.25,
         "harmony_rhythm": {
           "rhythm": "sustain",
-          "density": "low",
+          "density": "full",
           "groove": "straight"
         },
         "counterpoint": {
@@ -269,7 +269,7 @@
         "rest_probability": 0.3,
         "harmony_rhythm": {
           "rhythm": "sustain",
-          "density": "low",
+          "density": "full",
           "groove": "straight"
         },
         "counterpoint": {

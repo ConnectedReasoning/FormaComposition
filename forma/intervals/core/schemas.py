@@ -3,8 +3,7 @@ schemas.py — Pydantic v2 models for FormaComposition input validation.
 
 Single source of truth for all structural and enum-based validation.
 ``validate_piece()`` in generator.py has been retired; call
-``PieceModel.model_validate(piece)`` and ``ThemeModel.model_validate(theme)``
-instead.
+``PieceModel.model_validate(piece)`` instead.
 
 Validation hierarchy:
     PieceModel
@@ -15,15 +14,19 @@ Validation hierarchy:
     │   └── DrumModel
     └── SongFormEntryModel    (song form: form array entries)
 
-MotifModel and ThemeModel cover the theme side.
+MotifModel covers the theme side (motif/motifs). ThemeModel has been
+retired — its fields (name, key, mode, tempo, motif, motifs) are absorbed
+directly into PieceModel: theme is merged into piece now (single-file
+format, one JSON per piece instead of a paired theme.json + piece.json).
 
 Usage
 -----
-    from intervals.core.schemas import PieceModel, ThemeModel, SectionModel
+    from intervals.core.schemas import PieceModel, SectionModel
 
-    theme = ThemeModel.model_validate(raw_theme_dict)
     piece = PieceModel.model_validate(raw_piece_dict)
-    piece.validate_against_theme(theme)   # cross-model rhythm checks
+    piece.validate_against_theme(piece)   # self-check: rhythm-source
+                                           # prerequisites against the
+                                           # piece's own motif/motifs
 
 Exported Literal aliases
 ------------------------
@@ -904,15 +907,20 @@ class SectionModel(BaseModel):
     # Cross-model validation (requires theme — called by PieceModel)
     # ─────────────────────────────────────────────────────────────────────────
 
-    def validate_against_theme(self, theme_model: "ThemeModel") -> None:
+    def validate_against_theme(self, theme_model: "PieceModel") -> None:
         """
-        Validate rhythm-source prerequisites that depend on theme content.
-        Migrated from the cross-validate block in validate_piece().
+        Validate rhythm-source prerequisites that depend on theme content
+        (key, mode, motif/motifs — absorbed into PieceModel; theme is
+        merged into piece now, single-file format). theme_model is the
+        containing PieceModel itself, passed in by
+        PieceModel.validate_against_theme() as a self-check rather than a
+        genuinely separate model.
 
-        Raises ValueError if rhythm='motif' but neither the theme nor the
-        relevant independent override (voice.motif / harmony_rhythm.motif)
-        supplies a motif rhythm. Call PieceModel.validate_against_theme(
-        theme_model) to run this for every section at once.
+        Raises ValueError if rhythm='motif' but neither the piece's own
+        motif nor the relevant independent override (voice.motif /
+        harmony_rhythm.motif) supplies a motif rhythm. Call
+        PieceModel.validate_against_theme(self) to run this for every
+        section at once.
         """
         primary = theme_model.primary_motif
         theme_has_rhythm = primary is not None and primary.rhythm is not None
@@ -1135,7 +1143,7 @@ class SongFormEntryModel(BaseModel):
     exact_repeat: bool = False
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ThemeModel
+# TempoRangeModel
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class TempoRangeModel(BaseModel):
@@ -1149,110 +1157,10 @@ class TempoRangeModel(BaseModel):
             raise ValueError(f"tempo.min ({self.min}) must be ≤ tempo.max ({self.max})")
         return self
 
-class ThemeModel(BaseModel):
-    """
-    Validated theme dict.
-    extra="allow" — composers add documentation fields freely.
-    """
-    model_config = ConfigDict(extra="allow")
-
-    name:   Optional[str]          = None
-    key:    str                    = Field(min_length=1)
-    mode:   str                    = Field(min_length=1)
-    tempo:  TempoRangeModel
-
-    motif:  Optional[MotifModel]       = None
-    motifs: Optional[list[MotifModel]] = None
-
-    @field_validator("key", mode="before")
-    @classmethod
-    def _validate_theme_key(cls, v):
-        """
-        Mirrors SectionModel._validate_section_key. Theme key/mode were
-        previously plain str (min_length=1 only) — schema-legal for any
-        typo. A section that doesn't override key/mode inherits the
-        theme's value directly into harmony.py's chord resolution, where
-        a bad one only surfaces as "Unknown key: '...'" at render time.
-        Section-level overrides were already caught; the theme's own
-        value wasn't.
-        """
-        if not isinstance(v, str):
-            return v  # let Pydantic's own type check produce its message
-        VALID_KEYS = {
-            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-            "Db", "Eb", "Gb", "Ab", "Bb",
-        }
-        if v not in VALID_KEYS:
-            raise ValueError(
-                f"Theme key '{v}' is not a valid note name. "
-                f"Choose from {sorted(VALID_KEYS)}."
-            )
-        return v
-
-    @field_validator("mode", mode="before")
-    @classmethod
-    def _validate_theme_mode(cls, v):
-        """Mirrors SectionModel._validate_section_mode — see _validate_theme_key."""
-        if not isinstance(v, str):
-            return v
-        VALID_MODES = {
-            "ionian", "dorian", "phrygian", "lydian",
-            "mixolydian", "aeolian", "locrian",
-        }
-        if v.lower() not in VALID_MODES:
-            raise ValueError(
-                f"Theme mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}."
-            )
-        return v.lower()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _warn_obsolete_theme_keys(cls, data: dict) -> dict:
-        """
-        Warn about known obsolete theme keys before field validation.
-        Migrated from validate_piece() obsolete-key and prosodic-rhythm checks.
-        """
-        if not isinstance(data, dict):
-            return data
-        # Support both wrapped {"theme": {...}} and flat dict
-        t = data.get("theme", data)
-        for key in _OBSOLETE_THEME_KEYS:
-            if key in t:
-                warnings.warn(
-                    f"theme has obsolete field '{key}' — remove it "
-                    f"(instruments live in Logic)",
-                    stacklevel=5,
-                )
-        return data
-
-    @model_validator(mode="after")
-    def _motif_consistency(self) -> "ThemeModel":
-        """
-        Migrated from validate_piece() motif/motifs consistency checks.
-        No-motif case is a warning, not an error (generation still works).
-        """
-        if self.motif is None and self.motifs is None:
-            warnings.warn(
-                "theme has no motif or motifs defined — melodic identity "
-                "will be purely generative",
-                stacklevel=4,
-            )
-        if self.motif is not None and self.motifs is not None:
-            warnings.warn(
-                "theme has both 'motif' and 'motifs' — 'motifs' array takes "
-                "precedence; 'motif' is ignored.",
-                stacklevel=4,
-            )
-        if self.motifs is not None and len(self.motifs) == 0:
-            raise ValueError("theme 'motifs' must be a non-empty list")
-        return self
-
-    @property
-    def primary_motif(self) -> Optional[MotifModel]:
-        """Return the effective primary motif (motifs[0] if array, else motif)."""
-        if self.motifs:
-            return self.motifs[0]
-        return self.motif
+# ThemeModel retired — its fields (name, key, mode, tempo, motif, motifs)
+# and validators (_validate_theme_key/_mode, _warn_obsolete_theme_keys,
+# _motif_consistency, primary_motif) are absorbed directly into PieceModel
+# below (single-file format: theme merged into piece).
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PieceModel
@@ -1273,7 +1181,7 @@ class PieceModel(BaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     title:     Optional[str] = None
-    tempo:     Optional[Annotated[int, Field(ge=20, le=300)]] = None
+    tempo:     Optional[TempoRangeModel] = None
     seed:      int = 42
 
     form_type: Literal["narrative", "song"] = "narrative"
@@ -1286,17 +1194,119 @@ class PieceModel(BaseModel):
 
     transform_sequence: Optional[list[TransformLiteral]] = None
 
+    # Absorbed from ThemeModel (theme merged into piece — single-file format).
+    name:   Optional[str]              = None
+    key:    str                        = Field(min_length=1)
+    mode:   str                        = Field(min_length=1)
+    motif:  Optional[MotifModel]       = None
+    motifs: Optional[list[MotifModel]] = None
+
+    def resolved_tempo(self) -> Optional[int]:
+        """
+        Resolve ``tempo`` (a TempoRangeModel) to a single bpm value for
+        generation. Exact value when min == max (composer set a fixed
+        tempo), otherwise the midpoint of the range.
+
+        Single source of truth for the midpoint formula that used to be
+        duplicated in main.py (x2) and generator.py (x1). Returns None
+        when tempo is unset entirely — callers fall back appropriately
+        (see the theme-midpoint fallback, retired once theme merges in).
+        """
+        if self.tempo is None:
+            return None
+        if self.tempo.min == self.tempo.max:
+            return self.tempo.min
+        return (self.tempo.min + self.tempo.max) // 2
+
+    @property
+    def primary_motif(self) -> Optional[MotifModel]:
+        """
+        Absorbed from ThemeModel. Return the effective primary motif
+        (motifs[0] if the array is set, else the single 'motif' field).
+        """
+        if self.motifs:
+            return self.motifs[0]
+        return self.motif
+
+    @field_validator("key", mode="before")
+    @classmethod
+    def _validate_key(cls, v):
+        """
+        Absorbed from ThemeModel._validate_theme_key. key/mode were
+        previously plain str (min_length=1 only) — schema-legal for any
+        typo. A section that doesn't override key/mode inherits this
+        value directly into harmony.py's chord resolution, where a bad
+        one only surfaces as "Unknown key: '...'" at render time.
+        """
+        if not isinstance(v, str):
+            return v  # let Pydantic's own type check produce its message
+        VALID_KEYS = {
+            "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+            "Db", "Eb", "Gb", "Ab", "Bb",
+        }
+        if v not in VALID_KEYS:
+            raise ValueError(
+                f"Piece key '{v}' is not a valid note name. "
+                f"Choose from {sorted(VALID_KEYS)}."
+            )
+        return v
+
+    @field_validator("mode", mode="before")
+    @classmethod
+    def _validate_mode(cls, v):
+        """Absorbed from ThemeModel._validate_theme_mode — see _validate_key."""
+        if not isinstance(v, str):
+            return v
+        VALID_MODES = {
+            "ionian", "dorian", "phrygian", "lydian",
+            "mixolydian", "aeolian", "locrian",
+        }
+        if v.lower() not in VALID_MODES:
+            raise ValueError(
+                f"Piece mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}."
+            )
+        return v.lower()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _warn_obsolete_keys(cls, data: dict) -> dict:
+        """
+        Absorbed from ThemeModel._warn_obsolete_theme_keys. Flat check now
+        that theme is merged in — no more {"theme": {...}} sub-dict to
+        unwrap for this specific check.
+        """
+        if not isinstance(data, dict):
+            return data
+        for key in _OBSOLETE_THEME_KEYS:
+            if key in data:
+                warnings.warn(
+                    f"piece has obsolete field '{key}' — remove it "
+                    f"(instruments live in Logic)",
+                    stacklevel=5,
+                )
+        return data
+
     @model_validator(mode="before")
     @classmethod
     def _unwrap_nested_and_sections(cls, data: dict) -> dict:
         """
         1. Accept both {"piece": {...}} and flat dict forms.
         2. Disambiguate sections list vs dict into separate fields.
+        3. Coerce a bare-int tempo (every existing catalog piece) into
+           {"min": v, "max": v} so old JSON keeps validating unchanged
+           now that tempo is a TempoRangeModel. Fixed-value range and a
+           bare exact bpm are the same thing; this just accepts both
+           spellings rather than forcing a catalog-wide rewrite as a
+           side effect of the schema step.
         """
         if "piece" in data and isinstance(data["piece"], dict):
             data = data["piece"]
         else:
             data = dict(data)
+
+        raw_tempo = data.get("tempo")
+        if isinstance(raw_tempo, (int, float)):
+            data["tempo"] = {"min": raw_tempo, "max": raw_tempo}
 
         raw_sections = data.get("sections")
         if isinstance(raw_sections, dict):
@@ -1354,18 +1364,44 @@ class PieceModel(BaseModel):
             )
         return self
 
-    def validate_against_theme(self, theme_model: ThemeModel) -> None:
+    @model_validator(mode="after")
+    def _motif_consistency(self) -> "PieceModel":
         """
-        Run cross-model checks that require both piece and theme.
-        Call this after ThemeModel.model_validate() and PieceModel.model_validate()
-        both succeed.
+        Absorbed from ThemeModel._motif_consistency. No-motif case is a
+        warning, not an error (generation still works, purely generative).
+        """
+        if self.motif is None and self.motifs is None:
+            warnings.warn(
+                "piece has no motif or motifs defined — melodic identity "
+                "will be purely generative",
+                stacklevel=4,
+            )
+        if self.motif is not None and self.motifs is not None:
+            warnings.warn(
+                "piece has both 'motif' and 'motifs' — 'motifs' array takes "
+                "precedence; 'motif' is ignored.",
+                stacklevel=4,
+            )
+        if self.motifs is not None and len(self.motifs) == 0:
+            raise ValueError("piece 'motifs' must be a non-empty list")
+        return self
 
-        Also warns if piece has no tempo and theme has no tempo — this was a
-        [WARN] in validate_piece() that can't live in a single-model validator.
+    def validate_against_theme(self, theme_model: "PieceModel") -> None:
+        """
+        Run the cross-checks that used to require a separate ThemeModel
+        (rhythm='motif' needs a motif.rhythm somewhere, etc.). Theme's
+        fields are absorbed into PieceModel now (single-file format), so
+        this is a self-check — call as `piece_model.validate_against_theme(
+        piece_model)` after PieceModel.model_validate() succeeds (see
+        generator.generate_piece).
+
+        Also warns if the piece has no explicit tempo — this was a [WARN]
+        in the old validate_piece() that can't live in a single-model
+        field validator (needs the whole model constructed first).
         """
         if self.tempo is None:
-            # Can't check theme.tempo here (TempoRangeModel always validates),
-            # but the midpoint fallback in generate_piece() handles the None case.
+            # generate_piece()'s resolved_tempo() falls back to a plain
+            # 120bpm default when tempo is unset entirely.
             warnings.warn(
                 "piece has no explicit 'tempo' — will use theme midpoint",
                 stacklevel=3,

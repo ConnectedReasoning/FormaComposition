@@ -2,13 +2,15 @@
 """
 main.py — Intervals Engine
 
-Generate MIDI pieces from theme + piece JSON files.
+Generate MIDI pieces from a single piece JSON file (theme fields — key,
+mode, tempo, motif/motifs — live at the top level alongside title and
+sections; schemas.ThemeModel has been retired, absorbed into PieceModel).
 
 Usage:
-    python main.py theme.json piece.json
-    python main.py theme.json piece.json --output ./output/name.mid
-    python main.py theme.json piece_01.json piece_02.json --outdir ./album/
-    python main.py theme.json piece.json --info
+    python main.py piece.json
+    python main.py piece.json --output ./output/name.mid
+    python main.py piece_01.json piece_02.json --outdir ./album/
+    python main.py piece.json --info
 """
 
 import argparse
@@ -17,8 +19,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from intervals.core.generator import generate_piece, load_theme, load_piece, bpm_to_tempo, PPQ
-from intervals.core.schemas import ThemeModel, PieceModel
+from intervals.core.generator import generate_piece, load_song, bpm_to_tempo, PPQ
+from intervals.core.schemas import PieceModel
 from intervals.core.lint import lint_piece, format_report
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.rhythm import VALID_GROOVES
@@ -28,24 +30,34 @@ from intervals.music.percussion import VALID_DRUM_PATTERNS
 # Info display
 # ---------------------------------------------------------------------------
 
-def display_info(theme: dict, piece: dict) -> None:
-    tempo_range = theme.get("tempo", {})
-    bpm = piece.get("tempo", (tempo_range.get("min", 60) + tempo_range.get("max", 80)) // 2)
+def display_info(piece: dict) -> None:
+    """
+    piece is the single merged dict (theme fields + piece fields). The
+    printed "THEME:" / "PIECE:" grouping is kept for readability — it
+    still reflects two conceptually distinct halves of one file, even
+    though there's only one JSON to load now.
+    """
+    tempo_range = piece.get("tempo", {})
+    if isinstance(tempo_range, dict):
+        bpm = (tempo_range.get("min", 60) + tempo_range.get("max", 80)) // 2
+    else:
+        bpm = tempo_range  # legacy bare-int tempo
     beats_per_bar = 4
 
     print(f"\n{'─'*56}")
-    print(f"  THEME:  {theme.get('name', '(unnamed)')}")
-    print(f"  Key:    {theme.get('key', '?')} {theme.get('mode', '?')}")
-    print(f"  Tempo:  {tempo_range.get('min')}–{tempo_range.get('max')} BPM")
+    print(f"  THEME:  {piece.get('name', '(unnamed)')}")
+    print(f"  Key:    {piece.get('key', '?')} {piece.get('mode', '?')}")
+    if isinstance(tempo_range, dict):
+        print(f"  Tempo:  {tempo_range.get('min')}–{tempo_range.get('max')} BPM")
 
-    motif_def = theme.get("motif")
+    motif_def = piece.get("motif")
     if motif_def:
         m = motif_from_dict(motif_def)
         print(f"  Motif:  intervals={m.intervals}  rhythm={m.rhythm}")
         print(f"          contour={''.join(m.contour())}  transforms={m.transform_pool}")
 
 
-    palette = theme.get("palette", {})
+    palette = piece.get("palette", {})
     if palette:
         print(f"  Palette: harmony={palette.get('harmony')}  "
               f"melody={palette.get('melody')}  bass={palette.get('bass')}")
@@ -90,8 +102,8 @@ def display_info(theme: dict, piece: dict) -> None:
               f"{s.get('density','?'):6s}  {s.get('melody','?'):11s}  "
               f"bass={s.get('bass_style','?')}{groove_info}  [{prog}]")
         if s.get("key") or s.get("mode"):
-            sec_key  = s.get("key",  theme.get("key", "?"))
-            sec_mode = s.get("mode", theme.get("mode", "?"))
+            sec_key  = s.get("key",  piece.get("key", "?"))
+            sec_mode = s.get("mode", piece.get("mode", "?"))
             print(f"      key/mode: {sec_key} {sec_mode}")
         hr = s.get("harmony_rhythm")
         if hr:
@@ -140,22 +152,15 @@ def display_info(theme: dict, piece: dict) -> None:
 # Single piece generation
 # ---------------------------------------------------------------------------
 
-def run_single(theme_path: str, piece_path: str, output_path: Optional[str], info_only: bool) -> bool:
+def run_single(piece_path: str, output_path: Optional[str], info_only: bool) -> bool:
     try:
-        theme = load_theme(theme_path)
-    except Exception as e:
-        print(f"  ERROR loading theme '{theme_path}': {e}", file=sys.stderr)
-        return False
-
-    try:
-        piece = load_piece(piece_path)
+        piece = load_song(piece_path)
     except Exception as e:
         print(f"  ERROR loading piece '{piece_path}': {e}", file=sys.stderr)
         return False
 
     from pydantic import ValidationError as _PydanticValidationError
     try:
-        ThemeModel.model_validate(theme)
         piece_model = PieceModel.model_validate(piece)
     except _PydanticValidationError as exc:
         print(f"  ERRORS in '{piece_path}':")
@@ -166,13 +171,14 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
 
     # Consumption lint: surface any setting the engine will silently ignore.
     # Non-fatal — generation still runs; this just makes the ignored settings
-    # visible instead of leaving them as silent no-ops.
-    report = format_report(lint_piece(piece_model, theme=theme))
+    # visible instead of leaving them as silent no-ops. theme is the same
+    # dict as piece now (fields merged), so pass piece for the pool-size check.
+    report = format_report(lint_piece(piece_model, theme=piece))
     if report:
         print(report)
 
     if info_only:
-        display_info(theme, piece)
+        display_info(piece)
         return True
 
     if output_path is None:
@@ -182,11 +188,13 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
     os.makedirs(os.path.dirname(output_path) or "output", exist_ok=True)
 
     try:
-        result = generate_piece(theme, piece, output_path)
+        result = generate_piece(piece, output_path)
         import mido
         mid = mido.MidiFile(result)
         total_ticks = max(sum(m.time for m in track) for track in mid.tracks)
-        bpm = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
+        bpm = piece_model.resolved_tempo()
+        if bpm is None:
+            bpm = 120
         total_seconds = mido.tick2second(total_ticks, PPQ, bpm_to_tempo(bpm))
         mins, secs = divmod(int(total_seconds), 60)
         size_kb = os.path.getsize(result) / 1024
@@ -207,18 +215,17 @@ def run_single(theme_path: str, piece_path: str, output_path: Optional[str], inf
 def main():
     parser = argparse.ArgumentParser(
         prog="intervals",
-        description="Intervals Engine — generate MIDI from theme + piece JSON.",
+        description="Intervals Engine — generate MIDI from a single piece JSON file.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 examples:
-  python main.py theme.json piece.json
-  python main.py theme.json piece.json --output ./output/name.mid
-  python main.py theme.json p1.json p2.json --outdir ./album/
-  python main.py theme.json piece.json --info
+  python main.py piece.json
+  python main.py piece.json --output ./output/name.mid
+  python main.py p1.json p2.json --outdir ./album/
+  python main.py piece.json --info
         """,
     )
 
-    parser.add_argument("theme",  help="Path to theme.json")
     parser.add_argument("pieces", nargs="+", help="One or more piece JSON files")
     parser.add_argument("--output", "-o", default=None,
                         help="Output .mid path (single piece only)")
@@ -228,10 +235,6 @@ examples:
                         help="Display piece info without generating")
 
     args = parser.parse_args()
-
-    if not os.path.exists(args.theme):
-        print(f"ERROR: theme file not found: '{args.theme}'", file=sys.stderr)
-        sys.exit(1)
 
     missing = [p for p in args.pieces if not os.path.exists(p)]
     if missing:
@@ -248,7 +251,6 @@ examples:
         os.makedirs(args.outdir, exist_ok=True)
 
     print(f"\nIntervals Engine")
-    print(f"Theme: {args.theme}")
     print(f"Mode:  {'info' if args.info else 'generate'}")
     print()
 
@@ -264,7 +266,7 @@ examples:
         else:
             out = None
 
-        ok = run_single(args.theme, piece_path, out, args.info)
+        ok = run_single(piece_path, out, args.info)
         if ok:
             success += 1
         else:

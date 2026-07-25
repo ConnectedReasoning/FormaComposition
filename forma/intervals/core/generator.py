@@ -55,7 +55,6 @@ from intervals.core.context import (
 )
 from intervals.core.schemas import (
     SectionModel,
-    ThemeModel,
     PieceModel,
     # Exported Literal sets — replaces VALID_DENSITY etc. defined below
     VALID_DENSITY,
@@ -893,41 +892,55 @@ def _enrich_chords_with_rhythm(
 # ---------------------------------------------------------------------------
 
 def generate_piece(
-    theme: dict,
     piece: dict,
     output_path: str,
 ) -> str:
     """
-    Generate a complete MIDI file from theme + piece dicts.
+    Generate a complete MIDI file from a single piece dict (theme fields —
+    key, mode, tempo, motif/motifs — now live at the piece's top level;
+    see schemas.PieceModel, absorbed from the retired ThemeModel).
     Supports both narrative arcs and song forms.
 
     Creates PieceContext for cross-section memory and SectionContext
     per section for cross-voice awareness.
 
     Args:
-        theme:       Parsed theme dict (from theme.json)
-        piece:       Parsed piece dict (from piece.json)
+        piece:       Parsed piece dict (from the single piece JSON file)
         output_path: File path to write the .mid file
 
     Returns:
         Absolute path of the written file
     """
-    # Validate theme + piece via Pydantic models before generation.
-    # ThemeModel / PieceModel raise ValidationError with field-level detail;
-    # we convert to ValueError so callers that catch ValueError still work.
+    # Validate via Pydantic model before generation. PieceModel raises
+    # ValidationError with field-level detail; we convert to ValueError so
+    # callers that catch ValueError still work.
     from pydantic import ValidationError as _PydanticValidationError
     try:
-        theme_model = ThemeModel.model_validate(theme)
         piece_model = PieceModel.model_validate(piece)
-        # Cross-model checks: rhythm='motif' requires theme motif.rhythm, etc.
-        piece_model.validate_against_theme(theme_model)
+        # Cross-checks that used to require a separate ThemeModel (rhythm=
+        # 'motif' needs a motif.rhythm somewhere) now run against the piece
+        # itself — theme's fields live on the same model, so this is a
+        # self-check rather than a two-model comparison.
+        piece_model.validate_against_theme(piece_model)
     except _PydanticValidationError as exc:
         raise ValueError(
             f"Validation failed before generation:\n{exc}"
         ) from exc
 
-    bpm      = piece.get("tempo", (theme["tempo"]["min"] + theme["tempo"]["max"]) // 2)
+    bpm = piece_model.resolved_tempo()
+    if bpm is None:
+        # No tempo anywhere on the piece — validate_against_theme() already
+        # warned about this; 120 is a plain, documented last resort rather
+        # than silently defaulting inside resolved_tempo() itself.
+        bpm = 120
     base_seed = piece.get("seed", 42)  # Optional seed parameter, defaults to 42
+
+    # theme/piece are one dict now (theme merged into piece — single-file
+    # format). Keep the local name `theme` for the rest of this function so
+    # the ~140 lines below (generate_section calls, key/mode reads, motif
+    # pool resolution) don't need touching — they only ever read dict keys,
+    # never cared which file those keys came from.
+    theme = piece
 
     # Theme's inline motif pool, resolved once here for counterpoint voices'
     # own per-voice motif overrides (item MT-1, option A). This is the SAME
@@ -935,6 +948,8 @@ def generate_piece(
     # a separate call here rather than threaded through SectionResult because
     # it's a pure function of theme alone, not section-specific.
     _cp_motif_pool = resolve_motif_pool_from_theme(theme)
+
+
 
     def _resolve_voice_motif_rhythm(motif_value, total_beats: float):
         """
@@ -1475,13 +1490,14 @@ def generate_piece(
 # JSON loaders
 # ---------------------------------------------------------------------------
 
-def load_theme(path: str) -> dict:
-    with open(path) as f:
-        data = json.load(f)
-    return data.get("theme", data)
+def load_song(path: str) -> dict:
+    """
+    Load a single-file piece JSON (theme fields merged in at the top level —
+    key, mode, tempo, motif/motifs). Replaces the old load_theme()/
+    load_piece() pair now that there's one file instead of two.
 
-
-def load_piece(path: str) -> dict:
+    Accepts both the flat form and an optional {"piece": {...}} wrapper.
+    """
     with open(path) as f:
         data = json.load(f)
     return data.get("piece", data)
@@ -1496,24 +1512,20 @@ if __name__ == "__main__":
 
     print("=== Intervals Engine — generator.py demo ===\n")
 
-    # Inline theme + piece (no files needed for demo)
-    theme = {
+    # Single merged piece dict (theme fields — key, mode, tempo, motif —
+    # now live at the top level alongside title/sections).
+    piece = {
         "name": "Evening Water",
+        "title": "Still Cove",
         "key": "D",
         "mode": "dorian",
-        "tempo": {"min": 60, "max": 80},
+        "tempo": {"min": 68, "max": 68},
         "motif": {
             "name": "evening_water",
             "intervals": [2, -1, 3, -2],
             "rhythm": [1.0, 0.5, 0.5, 1.0],
             "transform_pool": ["inversion", "retrograde", "augmentation"]
         },
-
-    }
-
-    piece = {
-        "title": "Still Cove",
-        "tempo": 68,
         "transform_sequence": ["original", "inversion", "retrograde"],
         "sections": [
             {
@@ -1547,7 +1559,7 @@ if __name__ == "__main__":
     }
 
     out_path = "/mnt/user-data/outputs/still_cove.mid"
-    result = generate_piece(theme, piece, out_path)
+    result = generate_piece(piece, out_path)
 
     mid = MidiFile(result)
     total_ticks = max(
@@ -1555,11 +1567,12 @@ if __name__ == "__main__":
         for track in mid.tracks
     )
     total_beats = total_ticks / PPQ
-    total_seconds = mido.tick2second(total_ticks, PPQ, bpm_to_tempo(piece["tempo"]))
+    resolved_bpm = PieceModel.model_validate(piece).resolved_tempo()
+    total_seconds = mido.tick2second(total_ticks, PPQ, bpm_to_tempo(resolved_bpm))
 
     print(f"  Title:    {piece['title']}")
-    print(f"  Key:      {theme['key']} {theme['mode']}")
-    print(f"  Tempo:    {piece['tempo']} BPM")
+    print(f"  Key:      {piece['key']} {piece['mode']}")
+    print(f"  Tempo:    {resolved_bpm} BPM")
     print(f"  Sections: {len(piece['sections'])}")
     print(f"  Tracks:   {len(mid.tracks)} (metadata + harmony + bass + melody)")
     print(f"  Duration: {total_beats:.0f} beats / {total_seconds:.1f} seconds")
