@@ -1,36 +1,86 @@
 {
   "piece": {
-    "title": "Chiming Pocket",
+    "name": "Chiming Pocket",
+    "key": "D",
+    "mode": "ionian",
     "tempo": 116,
+    "motif": {
+      "name": "harmonic_echo",
+      "intervals": [
+        0,
+        4,
+        3,
+        -7
+      ],
+      "rhythm": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "transform_pool": [
+        "original",
+        "inversion",
+        "transpose_up"
+      ]
+    },
+    "title": "Chiming Pocket",
     "seed": 77,
     "form_type": "song",
-    "form": ["ambient_verse", "chucking_chorus", "ambient_verse", "chucking_chorus"],
+    "form": [
+      "ambient_verse",
+      "chucking_chorus",
+      "ambient_verse",
+      "chucking_chorus"
+    ],
     "sections": {
       "ambient_verse": {
         "name": "ambient_verse",
         "bars": 16,
-        "progression": ["i7", "III7", "v7", "IV7"],
+        "progression": [
+          "i7",
+          "III7",
+          "v7",
+          "IV7"
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "breath",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "rest_probability": 0.5
       },
       "chucking_chorus": {
         "name": "chucking_chorus",
         "bars": 16,
-        "progression": ["i7", "III7", "v7", "IV7"],
+        "progression": [
+          "i7",
+          "III7",
+          "v7",
+          "IV7"
+        ],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "plateau",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "free", "density": "medium", "groove": "offbeat" },
-        "drums": { "pattern": "four_on_floor" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "offbeat"
+        },
+        "drums": {
+          "pattern": "four_on_floor"
+        },
         "rest_probability": 0.0,
-        "counterpoint": { "species": "free", "register": "below", "dissonance": "none" }
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "none"
+        }
       }
     }
   }

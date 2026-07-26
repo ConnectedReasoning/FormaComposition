@@ -1,0 +1,61 @@
+{
+  "piece": {
+    "title": "Blue Dorian",
+    "tempo": 92,
+    "seed": 59,
+    "form_type": "song",
+    "form": ["head_in", "solo_verse", "solo_bridge", "head_out"],
+    "sections": {
+      "head_in": {
+        "name": "head_in",
+        "bars": 16,
+        "progression": ["i", "ii"],
+        "chord_bars": [8, 8],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.2
+      },
+      "solo_verse": {
+        "name": "solo_verse",
+        "bars": 32,
+        "progression": ["i", "ii", "i", "ii"],
+        "chord_bars": [8, 8, 8, 8],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "walking",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.35
+      },
+      "solo_bridge": {
+        "name": "solo_bridge",
+        "bars": 16,
+        "key": "E",
+        "mode": "phrygian",
+        "progression": ["i", "bII"],
+        "chord_bars": [8, 8],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "walking",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.3
+      },
+      "head_out": {
+        "name": "head_out",
+        "bars": 16,
+        "progression": ["i", "ii"],
+        "chord_bars": [8, 8],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "rest_probability": 0.2
+      }
+    }
+  }
+}

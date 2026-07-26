@@ -1,9 +1,32 @@
 {
   "piece": {
-    "title": "Return",
-    "theme": "Return",
+    "name": "Return",
+    "key": "D",
+    "mode": "mixolydian",
     "tempo": 62,
-    "notes": "A 5-minute meditation on returning to a place that's home but changed. D Mixolydian throughout — the flattened 7 (C natural) is the bittersweet color. The false resolution V→bVI in 'Passage' is the moment of 'not quite home.' The piece doesn't resolve this; it settles with it. Emotional arc: hesitation → walking through → recognition → acceptance.",
+    "motif": {
+      "name": "return",
+      "intervals": [
+        -2,
+        4,
+        1,
+        -3
+      ],
+      "rhythm": [
+        0.5,
+        1.0,
+        0.5,
+        1.0
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "augmentation"
+      ],
+      "notes": "Prosodic root: 'Return' \u2014 unstressed prefix (re-) followed by stressed arrival (-turn). Intervals: step down (approach), leap up (arrival), step up, resolution back. Rhythm mirrors: short, long emphasis. This motif is about *arriving* at home."
+    },
+    "notes": "A 5-minute meditation on returning to a place that's home but changed. D Mixolydian throughout \u2014 the flattened 7 (C natural) is the bittersweet color. The false resolution V\u2192bVI in 'Passage' is the moment of 'not quite home.' The piece doesn't resolve this; it settles with it. Emotional arc: hesitation \u2192 walking through \u2192 recognition \u2192 acceptance.",
+    "title": "Return",
     "sections": [
       {
         "name": "threshold",
@@ -22,7 +45,7 @@
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_in",
-        "notes": "Standing at a door. The question mark. Pedal bass holds D (home, but absent). I-V-vi progression is open, unresolved. Melody barely moves — just hints of the motif, fragmented. Long silences. The listener should feel anticipation, not comfort.",
+        "notes": "Standing at a door. The question mark. Pedal bass holds D (home, but absent). I-V-vi progression is open, unresolved. Melody barely moves \u2014 just hints of the motif, fragmented. Long silences. The listener should feel anticipation, not comfort.",
         "rhythm": "free"
       },
       {
@@ -50,7 +73,7 @@
           "dissonance": "passing",
           "velocity": 54
         },
-        "notes": "Walking through the threshold. The crucial moment: V→bVI is the deceptive cadence — 'I expected home (I) but got something else (bVI).' This is the motif's arrival gesture meeting the composition's harmonic surprise. Lyrical melody walks through the space; counterpoint adds texture under the swell. Root-fifth bass gives forward motion. By bar 12, the listener realizes: this isn't the expected return, it's something else.",
+        "notes": "Walking through the threshold. The crucial moment: V\u2192bVI is the deceptive cadence \u2014 'I expected home (I) but got something else (bVI).' This is the motif's arrival gesture meeting the composition's harmonic surprise. Lyrical melody walks through the space; counterpoint adds texture under the swell. Root-fifth bass gives forward motion. By bar 12, the listener realizes: this isn't the expected return, it's something else.",
         "rhythm": "free"
       },
       {
@@ -76,7 +99,7 @@
         "melody": "develop",
         "bass_style": "melodic",
         "arc": "breath",
-        "notes": "In the rooms. The bVII chord (C major) appears for the first time — this is the D Mixolydian color revealed. The place is familiar (I, IV, V anchors), but that C natural makes it foreign. Walking bass drives the motion without urgency. Developed melody (augmentation or inversion of the motif) stretches the arrival gesture into longer phrases. This is where the piece says: 'I'm home, but it's not the home I left.' The breath arc means it swells naturally — no forced climax, just inevitable growth.",
+        "notes": "In the rooms. The bVII chord (C major) appears for the first time \u2014 this is the D Mixolydian color revealed. The place is familiar (I, IV, V anchors), but that C natural makes it foreign. Walking bass drives the motion without urgency. Developed melody (augmentation or inversion of the motif) stretches the arrival gesture into longer phrases. This is where the piece says: 'I'm home, but it's not the home I left.' The breath arc means it swells naturally \u2014 no forced climax, just inevitable growth.",
         "rhythm": "free"
       },
       {
@@ -98,7 +121,7 @@
         "melody": "sparse",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "notes": "The arrival is quiet. Sparse texture, single bass notes (root only). The melody barely moves — echoes of the motif, retrograded or inverted. The piece cycles through D→C→G→D, never resolving the Mixolydian ambiguity. By the end, the bittersweet quality (C natural) is just accepted as part of home. Not resolved, not answered — just inhabited. The fade is gradual; the piece doesn't end, it becomes silence.",
+        "notes": "The arrival is quiet. Sparse texture, single bass notes (root only). The melody barely moves \u2014 echoes of the motif, retrograded or inverted. The piece cycles through D\u2192C\u2192G\u2192D, never resolving the Mixolydian ambiguity. By the end, the bittersweet quality (C natural) is just accepted as part of home. Not resolved, not answered \u2014 just inhabited. The fade is gradual; the piece doesn't end, it becomes silence.",
         "rhythm": "free"
       }
     ]

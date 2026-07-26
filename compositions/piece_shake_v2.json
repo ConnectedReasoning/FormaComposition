@@ -1,15 +1,120 @@
 {
   "piece": {
-    "title": "Shake the Disease (FormaComposition)",
-    "theme": "theme_shake",
+    "name": "Shake the Disease",
+    "key": "D",
+    "mode": "aeolian",
     "tempo": 117,
-    "seed": 1985,
     "notes": "Structure: Intro \u2192 Verse \u2192 Chorus \u2192 Verse \u2192 Chorus \u2192 Bridge \u2192 Chorus \u2192 Outro. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm \u2014 the DM signature dark move). Bridge: Bb-C-Bb-Dm. Primary melody carries the 'plea' motif throughout (rhythm:motif). Two counterpoint voices ride above/below: voice 1 ('arpeggio' character, above) and voice 2 ('counterline' character, below), now rendered as independent tracks (Counterpoint / Counterpoint 2) via the n-length counterpoint array.",
+    "motifs": [
+      {
+        "name": "plea",
+        "intervals": [
+          0,
+          2,
+          -1,
+          -2,
+          1
+        ],
+        "rhythm": [
+          1.0,
+          0.5,
+          0.5,
+          1.0,
+          1.0
+        ],
+        "velocities": [
+          0.63,
+          0.55,
+          0.51,
+          0.59,
+          0.47
+        ],
+        "transform_pool": [
+          "inversion",
+          "retrograde",
+          "diminution",
+          "compress"
+        ]
+      },
+      {
+        "name": "arpeggio",
+        "intervals": [
+          3,
+          4,
+          -3,
+          2,
+          -2,
+          -4
+        ],
+        "rhythm": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          1.5
+        ],
+        "velocities": [
+          0.47,
+          0.43,
+          0.46,
+          0.41,
+          0.43,
+          0.39
+        ],
+        "transform_pool": [
+          "inversion",
+          "augmentation",
+          "transpose_up",
+          "transpose_down"
+        ]
+      },
+      {
+        "name": "counterline",
+        "intervals": [
+          -2,
+          -1,
+          3,
+          -3,
+          1,
+          2
+        ],
+        "rhythm": [
+          0.75,
+          0.25,
+          0.5,
+          1.0,
+          0.75,
+          0.75
+        ],
+        "velocities": [
+          0.43,
+          0.39,
+          0.41,
+          0.46,
+          0.39,
+          0.38
+        ],
+        "transform_pool": [
+          "retrograde",
+          "retrograde_inversion",
+          "compress",
+          "expand"
+        ]
+      }
+    ],
+    "title": "Shake the Disease (FormaComposition)",
+    "seed": 1985,
     "sections": [
       {
         "name": "intro",
         "bars": 8,
-        "progression": ["i", "VII", "v", "VI"],
+        "progression": [
+          "i",
+          "VII",
+          "v",
+          "VI"
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pulse",
@@ -17,13 +122,20 @@
         "rhythm": "motif",
         "beats_per_bar": 4,
         "rest_probability": 0.35,
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here \u2014 sparse texture only."
       },
       {
         "name": "verse_1",
         "bars": 16,
-        "progression": ["i", "VII", "III", "VI"],
+        "progression": [
+          "i",
+          "VII",
+          "III",
+          "VI"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pulse",
@@ -31,18 +143,41 @@
         "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
         "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; Counterpoint 2 (counterline character) sits below.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 55 },
-          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 48 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 55
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 48
+          }
         ]
       },
       {
         "name": "chorus_1",
         "bars": 12,
-        "chord_bars": [3, 3, 3, 3],
-        "progression": ["i", "iim", "bVI", "VI"],
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "pulse",
@@ -50,17 +185,35 @@
         "rhythm": "motif",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "medium" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium"
+        },
         "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Primary melody develops the plea motif. Counterpoint 1 (arpeggio) at full energy above. Counterpoint 2 (counterline) below, freer dissonance for contrary-motion tension.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 65 },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 55 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 65
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "free",
+            "velocity": 55
+          }
         ]
       },
       {
         "name": "verse_2",
         "bars": 16,
-        "progression": ["i", "VII", "III", "VI"],
+        "progression": [
+          "i",
+          "VII",
+          "III",
+          "VI"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pulse",
@@ -68,18 +221,41 @@
         "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
         "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 52 },
-          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 45 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 52
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 45
+          }
         ]
       },
       {
         "name": "chorus_2",
         "bars": 12,
-        "chord_bars": [3, 3, 3, 3],
-        "progression": ["i", "iim", "bVI", "VI"],
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "pulse",
@@ -87,16 +263,34 @@
         "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "medium" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium"
+        },
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 68 },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 58 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 68
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "free",
+            "velocity": 58
+          }
         ]
       },
       {
         "name": "bridge",
         "bars": 8,
-        "progression": ["VI", "VII", "VI", "i"],
+        "progression": [
+          "VI",
+          "VII",
+          "VI",
+          "i"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -104,18 +298,41 @@
         "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "sparse" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse"
+        },
         "notes": "Bb-C-Bb-Dm. Tension and release. Primary melody sparse here; counterpoint 1 and 2 move in contrary motion, building toward the final chorus.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "none", "velocity": 50 },
-          { "species": "free", "register": "below", "dissonance": "passing", "velocity": 55 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 50
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 55
+          }
         ]
       },
       {
         "name": "chorus_final",
         "bars": 16,
-        "chord_bars": [4, 4, 4, 4],
-        "progression": ["i", "iim", "bVI", "VI"],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "progression": [
+          "i",
+          "iim",
+          "bVI",
+          "VI"
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "pulse",
@@ -123,17 +340,35 @@
         "rhythm": "motif",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "free", "density": "full" },
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "full"
+        },
         "notes": "Extended final chorus \u2014 16 bars. Primary melody and both counterpoint voices at full intensity, peak interweave.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "free", "velocity": 75 },
-          { "species": "free", "register": "below", "dissonance": "free", "velocity": 65 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 75
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "free",
+            "velocity": 65
+          }
         ]
       },
       {
         "name": "outro",
         "bars": 8,
-        "progression": ["i", "VII", "v", "i"],
+        "progression": [
+          "i",
+          "VII",
+          "v",
+          "i"
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",
@@ -141,10 +376,17 @@
         "rhythm": "free",
         "rest_probability": 0.35,
         "beats_per_bar": 4,
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "notes": "Voices dissolve in reverse order. Bass pedal on D. Primary melody (plea motif) fragments only; counterpoint 2 drops out first, then counterpoint 1.",
         "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "none", "velocity": 32 }
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 32
+          }
         ]
       }
     ]

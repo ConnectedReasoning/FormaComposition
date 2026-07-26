@@ -1,7 +1,45 @@
 {
   "piece": {
-    "title": "Constellation Op 1",
+    "name": "Emancipated Row",
+    "key": "C",
+    "mode": "locrian",
     "tempo": 96,
+    "motif": {
+      "name": "prime_row",
+      "intervals": [
+        1,
+        6,
+        -5,
+        11,
+        -3,
+        7,
+        -1,
+        2,
+        -8,
+        4,
+        -9
+      ],
+      "rhythm": [
+        0.5,
+        0.75,
+        0.25,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        0.25,
+        0.75,
+        0.5,
+        2.0
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "retrograde_inversion"
+      ],
+      "notes": "Rhythm corrected: original 11 values summed to 7.0 beats, not a multiple of the 4-beat bar (_check_bar_alignment rejected it). Fixed by extending the final note (the row's 12th and final pitch, interval -9) from 1.0 to 2.0 beats -- now 8.0 beats (2 bars), preserving all 11 original intervals and 10 of 11 original durations. Extending the row's completion note fits its own logic: the arrival of the final pitch is a real structural event in a twelve-tone row, worth landing on."
+    },
+    "title": "Constellation Op 1",
     "seed": 1923,
     "transform_sequence": [
       "original",
@@ -15,7 +53,7 @@
     "sections": [
       {
         "name": "prime_statement",
-        "notes": "MOVEMENT I. Row introduced in original form. Sparse, angular, searching. The motif appears once or twice — no development yet, just declaration. Bass anchors on root only. No counterpoint. Arc holds flat — no emotional direction yet.",
+        "notes": "MOVEMENT I. Row introduced in original form. Sparse, angular, searching. The motif appears once or twice \u2014 no development yet, just declaration. Bass anchors on root only. No counterpoint. Arc holds flat \u2014 no emotional direction yet.",
         "bars": 16,
         "progression": [
           "i",
@@ -38,7 +76,7 @@
       },
       {
         "name": "inversion_entry",
-        "notes": "Row inversion enters. Melodic shape descends where it previously rose — the mirror image. Density increases slightly. Bass moves to melodic for forward motion. Still no counterpoint — the single voice is enough here.",
+        "notes": "Row inversion enters. Melodic shape descends where it previously rose \u2014 the mirror image. Density increases slightly. Bass moves to melodic for forward motion. Still no counterpoint \u2014 the single voice is enough here.",
         "bars": 20,
         "progression": [
           "bII",
@@ -61,7 +99,7 @@
       },
       {
         "name": "contrapuntal_web",
-        "notes": "MOVEMENT II. Full contrapuntal complexity. Canon at 1.5 bars offset — the row chasing itself. All four transforms active via transform_sequence. Walking bass drives forward relentlessly. Two breath waves across 32 bars. This is the emotional and intellectual center of the piece.",
+        "notes": "MOVEMENT II. Full contrapuntal complexity. Canon at 1.5 bars offset \u2014 the row chasing itself. All four transforms active via transform_sequence. Walking bass drives forward relentlessly. Two breath waves across 32 bars. This is the emotional and intellectual center of the piece.",
         "bars": 32,
         "progression": [
           "bV",
@@ -91,7 +129,7 @@
       },
       {
         "name": "suspension",
-        "notes": "MOVEMENT III. Slow movement — near silence after the complexity of Movement II. Sparse melody fragments, pedal bass, very long rests. The row appears in retrograde — backward, dissolving. No counterpoint. Arc holds flat. This is the void at the center of the piece.",
+        "notes": "MOVEMENT III. Slow movement \u2014 near silence after the complexity of Movement II. Sparse melody fragments, pedal bass, very long rests. The row appears in retrograde \u2014 backward, dissolving. No counterpoint. Arc holds flat. This is the void at the center of the piece.",
         "bars": 24,
         "progression": [
           "bVII",
@@ -114,7 +152,7 @@
       },
       {
         "name": "inversion_mirror",
-        "notes": "MOVEMENT IV. Mirror of Movement I but darker — retrograde_inversion now drives the melody. The same chromatic chords but entered from bVII, which shifts the harmonic gravity. Density builds back toward full. Bass becomes melodic again. Counterpoint re-enters below the melody — a reversal of Movement II where it sat above.",
+        "notes": "MOVEMENT IV. Mirror of Movement I but darker \u2014 retrograde_inversion now drives the melody. The same chromatic chords but entered from bVII, which shifts the harmonic gravity. Density builds back toward full. Bass becomes melodic again. Counterpoint re-enters below the melody \u2014 a reversal of Movement II where it sat above.",
         "bars": 24,
         "progression": [
           "bVII",
@@ -143,7 +181,7 @@
       },
       {
         "name": "dissolution",
-        "notes": "MOVEMENT V. The row breaks apart. Sparse, generative melody — fragments only, no complete statements. Bass pulls back to root_only. No counterpoint. Arc fades to nothing. The piece ends mid-thought, unresolved — serial logic demands no cadence.",
+        "notes": "MOVEMENT V. The row breaks apart. Sparse, generative melody \u2014 fragments only, no complete statements. Bass pulls back to root_only. No counterpoint. Arc fades to nothing. The piece ends mid-thought, unresolved \u2014 serial logic demands no cadence.",
         "bars": 24,
         "progression": [
           "i",

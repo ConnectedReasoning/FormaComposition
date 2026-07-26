@@ -1,64 +1,156 @@
 {
   "piece": {
-    "title": "Xanadu Voyage",
-    "theme": "Xanadu Voyage",
+    "name": "Xanadu Voyage",
+    "key": "E",
+    "mode": "aeolian",
     "tempo": 116,
-    "notes": "Prog rock cinematic instrumental. E aeolian. Seven sections across ~8-9 minutes. Arc: atmosphere → motif birth → building complexity → climax → breakdown → recapitulation → dissolution. Layer Mellotron flutes on counterpoint track in Logic. ARP 2600 or Mini V lead over the melody track. Add a synth arpeggio manually in Logic over the harmony chords — the Xanadu-ish running 16th-note figure the engine cannot generate.",
+    "motif": {
+      "name": "xanadu_call",
+      "intervals": [
+        5,
+        3,
+        -4,
+        -2,
+        1
+      ],
+      "rhythm": [
+        0.5,
+        0.5,
+        1.0,
+        0.5,
+        1.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "retrograde_inversion",
+        "augmentation",
+        "diminution",
+        "transpose_up",
+        "transpose_down"
+      ]
+    },
+    "notes": "Prog rock cinematic instrumental. E aeolian. Seven sections across ~8-9 minutes. Arc: atmosphere \u2192 motif birth \u2192 building complexity \u2192 climax \u2192 breakdown \u2192 recapitulation \u2192 dissolution. Layer Mellotron flutes on counterpoint track in Logic. ARP 2600 or Mini V lead over the melody track. Add a synth arpeggio manually in Logic over the harmony chords \u2014 the Xanadu-ish running 16th-note figure the engine cannot generate.",
+    "title": "Xanadu Voyage",
     "sections": [
       {
         "name": "prologue",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["i", "VII", "VI", "VII"],
-        "chord_bars": [4, 4, 4, 4],
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "VII"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_in",
         "rhythm": "free",
         "rest_probability": 0.15,
-        "notes": "Pure atmosphere. Pedal E drone underneath slowly shifting harmony. No motif — this is mist and space. Where the synth arpeggio enters manually in Logic. Very long, very spacious. Fade in from silence."
+        "notes": "Pure atmosphere. Pedal E drone underneath slowly shifting harmony. No motif \u2014 this is mist and space. Where the synth arpeggio enters manually in Logic. Very long, very spacious. Fade in from silence."
       },
       {
         "name": "awakening",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["i", "VII", "VI", "III"],
-        "chord_bars": [4, 4, 4, 4],
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "III"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "fade_in",
         "rhythm": "motif",
         "rest_probability": 0.15,
-        "notes": "Motif appears for the first time — sparse, tentative, like something stirring. The xanadu_call shape in its original form only. Bass stays minimal. No counterpoint yet. The ♭III (G) arrives for the first prog color moment."
+        "notes": "Motif appears for the first time \u2014 sparse, tentative, like something stirring. The xanadu_call shape in its original form only. Bass stays minimal. No counterpoint yet. The \u266dIII (G) arrives for the first prog color moment."
       },
       {
         "name": "statement",
         "bars": 24,
         "beats_per_bar": 4,
-        "progression": ["i", "VII", "VI", "III", "VII", "i", "iv", "VII"],
-        "chord_bars": [3, 3, 3, 3, 3, 3, 3, 3],
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "III",
+          "VII",
+          "i",
+          "iv",
+          "VII"
+        ],
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "motif",
-        "rest_probability": 0.20,
+        "rest_probability": 0.2,
         "counterpoint": {
           "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 50
         },
-        "notes": "Full motif statement. Counterpoint enters quietly on Mellotron flutes. Extended progression introduces iv (A minor) for darkness. Bass moves to root_fifth — gentle forward motion. Arc swells to midpoint climax. This is the first time the piece feels complete and alive."
+        "notes": "Full motif statement. Counterpoint enters quietly on Mellotron flutes. Extended progression introduces iv (A minor) for darkness. Bass moves to root_fifth \u2014 gentle forward motion. Arc swells to midpoint climax. This is the first time the piece feels complete and alive."
       },
       {
         "name": "development",
         "bars": 32,
         "beats_per_bar": 4,
-        "progression": ["i", "iv", "VII", "III", "VI", "III", "iv", "i", "VII", "VI", "III", "VII"],
-        "chord_bars": [3, 3, 2, 3, 3, 2, 3, 3, 2, 3, 3, 2],
+        "progression": [
+          "i",
+          "iv",
+          "VII",
+          "III",
+          "VI",
+          "III",
+          "iv",
+          "i",
+          "VII",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "chord_bars": [
+          3,
+          3,
+          2,
+          3,
+          3,
+          2,
+          3,
+          3,
+          2,
+          3,
+          3,
+          2
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "walking",
@@ -71,55 +163,93 @@
           "dissonance": "passing",
           "velocity": 58
         },
-        "notes": "The engine works hardest here. Motif transforms — inversions, retrograde, augmentation, retrograde_inversion — across a long extended progression. Walking bass drives relentlessly. Counterpoint louder and more present. Two breath waves across 32 bars. Extended 9th and 11th chords. This is the prog center — complex, layered, earned."
+        "notes": "The engine works hardest here. Motif transforms \u2014 inversions, retrograde, augmentation, retrograde_inversion \u2014 across a long extended progression. Walking bass drives relentlessly. Counterpoint louder and more present. Two breath waves across 32 bars. Extended 9th and 11th chords. This is the prog center \u2014 complex, layered, earned."
       },
       {
         "name": "breakdown",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["i", "VI", "III", "VII"],
-        "chord_bars": [4, 4, 4, 4],
+        "progression": [
+          "i",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
         "rest_probability": 0.15,
-        "notes": "The piece pulls back dramatically after the development peak. Sparse texture, pedal bass, long rests. Like the eye of the storm. No counterpoint. Sets up the recapitulation. The Mellotron strings thin out here — let them decay in Logic."
+        "notes": "The piece pulls back dramatically after the development peak. Sparse texture, pedal bass, long rests. Like the eye of the storm. No counterpoint. Sets up the recapitulation. The Mellotron strings thin out here \u2014 let them decay in Logic."
       },
       {
         "name": "recapitulation",
         "bars": 24,
         "beats_per_bar": 4,
-        "progression": ["i", "VII", "VI", "III", "iv", "VII", "VI", "i"],
-        "chord_bars": [3, 3, 3, 3, 3, 3, 3, 3],
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "III",
+          "iv",
+          "VII",
+          "VI",
+          "i"
+        ],
+        "chord_bars": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "walking",
         "arc": "swell",
         "rhythm": "motif",
-        "rest_probability": 0.10,
+        "rest_probability": 0.1,
         "counterpoint": {
           "species": "free",
           "register": "below",
           "dissonance": "passing",
           "velocity": 55
         },
-        "notes": "Return of the motif at full force — but now the transforms have been heard, so the melody feels both familiar and evolved. Walking bass returns. Counterpoint re-enters. Arc swells to final climax before the coda. The dotted 8th delay on lead shines here."
+        "notes": "Return of the motif at full force \u2014 but now the transforms have been heard, so the melody feels both familiar and evolved. Walking bass returns. Counterpoint re-enters. Arc swells to final climax before the coda. The dotted 8th delay on lead shines here."
       },
       {
         "name": "coda",
         "bars": 20,
         "beats_per_bar": 4,
-        "progression": ["i", "VII", "VI", "i"],
-        "chord_bars": [5, 5, 5, 5],
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "i"
+        ],
+        "chord_bars": [
+          5,
+          5,
+          5,
+          5
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "free",
-        "rest_probability": 0.30,
-        "notes": "Dissolution. Back to the opening harmonic simplicity — Em, D, C, Em. Very long chord durations (5 bars each). The motif appears once, maybe twice, then stops. Bass anchors on root only. No counterpoint. The piece exhales into silence. Let Valhalla Supermassive tail ring for 8+ seconds after the last note."
+        "rest_probability": 0.3,
+        "notes": "Dissolution. Back to the opening harmonic simplicity \u2014 Em, D, C, Em. Very long chord durations (5 bars each). The motif appears once, maybe twice, then stops. Bass anchors on root only. No counterpoint. The piece exhales into silence. Let Valhalla Supermassive tail ring for 8+ seconds after the last note."
       }
     ]
   }

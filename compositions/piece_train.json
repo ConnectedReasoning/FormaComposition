@@ -1,0 +1,28 @@
+{
+  "piece": {
+    "title": "Training",
+    "key": "C",
+    "mode": "ionian",
+    "tempo": { "min": 60, "max": 74 },
+    "motif": {
+      "name": "clouds",
+      "intervals": [2, 2, 1, -2],
+      "rhythm": [1, 1, 1, 1],
+      "transform_pool": ["inversion", "augmentation"]
+    },
+    "seed": 1894,
+    "sections": [
+      {
+        "name": "clouds",
+        "bars": 4,
+        "progression": ["I", "V", "IV", "VI"],
+        "density": "full",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "motif",
+        "harmony_rhythm": { "rhythm": "motif" },
+        "rest_probability": 0.3
+      }    ]
+  }
+}

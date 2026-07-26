@@ -1,58 +1,117 @@
 {
   "piece": {
-    "title": "Deep Work Current",
+    "name": "Deep Current",
+    "key": "C",
+    "mode": "lydian",
     "tempo": 72,
+    "motif": {
+      "name": "current",
+      "intervals": [
+        2,
+        3,
+        -1,
+        -2
+      ],
+      "rhythm": [
+        1.5,
+        1.0,
+        1.5,
+        2.0
+      ],
+      "transform_pool": [
+        "inversion",
+        "transpose_up"
+      ]
+    },
+    "title": "Deep Work Current",
     "seed": 31,
     "sections": [
       {
         "name": "surface",
         "bars": 20,
-        "progression": ["I", "II", "vi", "I"],
+        "progression": [
+          "I",
+          "II",
+          "vi",
+          "I"
+        ],
         "density": "sparse",
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_in",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "rest_probability": 0.35
       },
       {
         "name": "current",
         "bars": 24,
-        "progression": ["I", "V", "II", "vi"],
+        "progression": [
+          "I",
+          "V",
+          "II",
+          "vi"
+        ],
         "density": "medium",
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "plateau",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "pattern": "minimal", "density": "sparse" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "drums": {
+          "pattern": "minimal",
+          "density": "sparse"
+        },
         "rest_probability": 0.3
       },
       {
         "name": "undertow",
         "bars": 24,
-        "progression": ["vi", "II", "I", "V"],
+        "progression": [
+          "vi",
+          "II",
+          "I",
+          "V"
+        ],
         "density": "medium",
         "melody": "generative",
         "bass_style": "root_only",
         "arc": "breath",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
-        "drums": { "pattern": "minimal", "density": "sparse" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "drums": {
+          "pattern": "minimal",
+          "density": "sparse"
+        },
         "rest_probability": 0.3
       },
       {
         "name": "stillness",
         "bars": 20,
-        "progression": ["II", "vi", "I"],
-        "chord_bars": [6, 6, 8],
+        "progression": [
+          "II",
+          "vi",
+          "I"
+        ],
+        "chord_bars": [
+          6,
+          6,
+          8
+        ],
         "density": "sparse",
         "melody": "generative",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "rest_probability": 0.4
       }
     ]

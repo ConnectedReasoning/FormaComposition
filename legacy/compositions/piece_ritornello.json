@@ -1,0 +1,47 @@
+{
+  "piece": {
+    "title": "Brandenburg Circuit",
+    "tempo": 100,
+    "seed": 17,
+    "form_type": "song",
+    "form": ["ritornello", "episode_one", "ritornello", "episode_two", "ritornello"],
+    "sections": {
+      "ritornello": {
+        "name": "ritornello",
+        "bars": 10,
+        "progression": ["I", "IV", "V", "I"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "counterpoint": { "species": "free", "register": "below", "dissonance": "passing", "canon_offset": 1.0 }
+      },
+      "episode_one": {
+        "name": "episode_one",
+        "bars": 16,
+        "key": "A",
+        "mode": "ionian",
+        "progression": ["I", "vi", "ii", "V"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "rhythm": "motif"
+      },
+      "episode_two": {
+        "name": "episode_two",
+        "bars": 16,
+        "key": "B",
+        "mode": "aeolian",
+        "progression": ["i", "iv", "VII", "III", "v", "i"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "breath",
+        "rhythm": "motif",
+        "counterpoint": { "species": "free", "register": "above", "dissonance": "passing", "canon_offset": 2.0 }
+      }
+    }
+  }
+}

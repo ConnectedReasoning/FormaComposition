@@ -1,0 +1,104 @@
+{
+  "piece": {
+    "title": "Rebecca",
+    "theme": "Rebecca",
+    "tempo": 56,
+    "notes": "A 10-minute romantic piece for Rebecca. Strings-forward, no piano. G major — warm, open, and resonant under guitar or voice. Emotional arc: quiet arrival → growing tenderness → full warmth → bloom at center → a breath of stillness → return with memory → gentle evening close. Manuel plays guitar or sings over the bed. The generated track is the embrace; his instrument is the voice in it.",
+    "sections": [
+      {
+        "name": "approach",
+        "bars": 12,
+        "progression": ["I", "V", "vi", "IV"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "rhythm": "motif",
+        "notes": "She doesn't know it's about to begin. Sparse strings open slowly — single notes, long tones. The I-V-vi-IV progression is deliberately familiar and warm. Pedal bass barely moves. Leave room for silence."
+      },
+      {
+        "name": "tenderness",
+        "bars": 20,
+        "progression": ["I", "IV", "vi", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "rhythm": "motif",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 52
+        },
+        "notes": "The piece finds its voice. Lyrical melody enters — this is where Manuel's guitar or voice belongs. Counterpoint strings enter underneath, very soft. Root-fifth bass gives gentle movement. The progression is the most natural, loving thing in music — nothing surprising, everything true."
+      },
+      {
+        "name": "warmth",
+        "bars": 24,
+        "progression": ["I", "ii", "IV", "V", "I"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "walking",
+        "arc": "breath",
+        "rhythm": "motif",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "passing",
+          "velocity": 55
+        },
+        "notes": "Longest lyrical section — 24 bars of sustained warmth. The ii chord adds a gentle ache (borrowed longing). Walking bass gives the section forward motion without urgency. Breath arc means it swells and recedes naturally — like a long exhale. This is the section to play guitar over."
+      },
+      {
+        "name": "bloom",
+        "bars": 20,
+        "progression": ["I", "V", "vi", "iii", "IV", "I"],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "swell",
+        "rhythm": "motif",
+        "notes": "The emotional peak. The iii chord (B minor in G) appears for the first time — a touch of shadow that makes the resolution back to I feel earned. Full density, developed melody, walking bass. This is the center of the song — where it says what it has been building toward. No counterpoint here; the developed motif carries it."
+      },
+      {
+        "name": "stillness",
+        "bars": 16,
+        "progression": ["I", "IV", "I"],
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "motif",
+        "notes": "A quiet breath after the bloom. Sparse texture, pedal bass, generative melody wanders gently — like watching light move. I-IV-I is a rocking motion, almost lullaby-like. This is where a listener catches their breath before the return."
+      },
+      {
+        "name": "return",
+        "bars": 24,
+        "progression": ["I", "IV", "vi", "V", "I", "IV"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell",
+        "rhythm": "motif",
+        "counterpoint": {
+          "species": "free",
+          "register": "below",
+          "dissonance": "none",
+          "velocity": 50
+        },
+        "notes": "The melody returns — now it feels like memory. Same lyrical behavior but the motif has been through augmentation; it moves slower, fuller. Counterpoint is dissonance-free here — pure consonance, nothing unresolved. The added IV at the end begins the farewell."
+      },
+      {
+        "name": "evening",
+        "bars": 24,
+        "progression": ["I", "V", "I", "IV", "I"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "notes": "The piece does not end — it simply becomes quiet. Sparse melody, root-only bass, long slow fade. The I-V-I-IV-I progression is the most resolved thing in tonal music. By the end only the strings remain, then silence. Give this section long reverb tails in Logic."
+      }
+    ]
+  }
+}

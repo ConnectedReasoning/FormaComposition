@@ -1,0 +1,74 @@
+{
+  "piece": {
+    "title": "Streetlight Serenade",
+    "tempo": 122,
+    "seed": 86,
+    "form_type": "song",
+    "form": ["intro", "verse", "chorus", "verse", "chorus", "middle_eight", "chorus", "outro"],
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["i", "VI", "III", "VII"],
+        "density": "medium",
+        "melody": "sparse",
+        "bass_style": "pulse",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" },
+        "rest_probability": 0.4
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 16,
+        "progression": ["i", "VI", "III", "VII"],
+        "density": "medium",
+        "melody": "generative",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" },
+        "rest_probability": 0.5
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 16,
+        "progression": ["VI", "VII", "i", "v"],
+        "density": "full",
+        "melody": "lyrical",
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" }
+      },
+      "middle_eight": {
+        "name": "middle_eight",
+        "bars": 8,
+        "progression": ["iv", "VI", "VII", "v"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "root_fifth",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": { "pattern": "halftime" }
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 12,
+        "progression": ["i", "VI", "III", "VII"],
+        "density": "full",
+        "melody": "sparse",
+        "bass_style": "pulse",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": { "rhythm": "free", "density": "full", "groove": "offbeat" },
+        "drums": { "pattern": "four_on_floor" },
+        "rest_probability": 0.4
+      }
+    }
+  }
+}

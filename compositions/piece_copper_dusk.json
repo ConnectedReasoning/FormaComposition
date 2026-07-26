@@ -1,17 +1,54 @@
 {
   "piece": {
+    "name": "Copper Dusk",
+    "key": "A",
+    "mode": "dorian",
+    "tempo": 120,
+    "motif": {
+      "name": "copper_dusk",
+      "intervals": [
+        2,
+        -1,
+        3,
+        -2,
+        1
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "velocities": [
+        0.9,
+        0.65,
+        0.75,
+        0.85,
+        0.6
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "augmentation"
+      ]
+    },
+    "notes": "A dorian \u2014 warm, modal, slightly melancholic. The motif has a rising third that pulls forward, then settles. Designed to test harmony rhythm variation across sections.",
     "title": "Copper Dusk",
-    "tempo":120,
     "seed": 17,
-
     "sections": [
-
       {
         "name": "open",
-        "notes": "Sparse density — harmony re-strikes at bar boundaries only. Should sound like a pad player holding long notes with a fresh attack each bar. NOT a wall of whole notes.",
+        "notes": "Sparse density \u2014 harmony re-strikes at bar boundaries only. Should sound like a pad player holding long notes with a fresh attack each bar. NOT a wall of whole notes.",
         "bars": 8,
-        "chord_bars": [4, 4],
-        "progression": ["i", "VII"],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "progression": [
+          "i",
+          "VII"
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "motif",
@@ -22,13 +59,22 @@
           "density": "sparse"
         }
       },
-
       {
         "name": "stir",
-        "notes": "Medium density — harmony hits beats 1 and 3, with occasional ghost notes. Chord movement is faster so the articulation pattern is clearly audible across chord changes.",
+        "notes": "Medium density \u2014 harmony hits beats 1 and 3, with occasional ghost notes. Chord movement is faster so the articulation pattern is clearly audible across chord changes.",
         "bars": 8,
-        "chord_bars": [2, 2, 2, 2],
-        "progression": ["i", "iv", "VII", "III"],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "progression": [
+          "i",
+          "iv",
+          "VII",
+          "III"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -39,13 +85,22 @@
           "density": "medium"
         }
       },
-
       {
         "name": "push",
-        "notes": "Full density — harmony plays quarter notes with accent on beats 1 and 3, occasional breath rest on beat 4. The groove makes the chord changes swing. This is the Africa test.",
+        "notes": "Full density \u2014 harmony plays quarter notes with accent on beats 1 and 3, occasional breath rest on beat 4. The groove makes the chord changes swing. This is the Africa test.",
         "bars": 8,
-        "chord_bars": [2, 2, 2, 2],
-        "progression": ["III", "VII", "iv", "i"],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "progression": [
+          "III",
+          "VII",
+          "iv",
+          "i"
+        ],
         "density": "full",
         "melody": "generative",
         "bass_style": "walking",
@@ -56,13 +111,18 @@
           "density": "full"
         }
       },
-
       {
         "name": "motif_driven",
-        "notes": "Harmony rhythm driven by the motif rhythm — [1.0, 0.5, 0.5, 1.0, 1.0]. The chord articulates on exactly those durations, tiled across the section. The motif shape is audible in the harmony layer.",
+        "notes": "Harmony rhythm driven by the motif rhythm \u2014 [1.0, 0.5, 0.5, 1.0, 1.0]. The chord articulates on exactly those durations, tiled across the section. The motif shape is audible in the harmony layer.",
         "bars": 8,
-        "chord_bars": [4, 4],
-        "progression": ["iv", "i"],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "progression": [
+          "iv",
+          "i"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -72,13 +132,22 @@
           "rhythm": "motif"
         }
       },
-
       {
         "name": "groove_push",
-        "notes": "Backbeat groove applied to harmony — harmony hits fall on the push pattern. Medium density, but the groove gives it rhythmic personality rather than mechanical grid.",
+        "notes": "Backbeat groove applied to harmony \u2014 harmony hits fall on the push pattern. Medium density, but the groove gives it rhythmic personality rather than mechanical grid.",
         "bars": 8,
-        "chord_bars": [2, 2, 2, 2],
-        "progression": ["i", "III", "iv", "VII"],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "progression": [
+          "i",
+          "III",
+          "iv",
+          "VII"
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -90,13 +159,18 @@
           "groove": "push"
         }
       },
-
       {
         "name": "return",
-        "notes": "Back to sparse — but now the ear has heard the full range. Same chord as the opening but feels earned. Harmony re-strikes per bar, long sustains, fade out.",
+        "notes": "Back to sparse \u2014 but now the ear has heard the full range. Same chord as the opening but feels earned. Harmony re-strikes per bar, long sustains, fade out.",
         "bars": 8,
-        "chord_bars": [4, 4],
-        "progression": ["i", "VII"],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "progression": [
+          "i",
+          "VII"
+        ],
         "density": "sparse",
         "melody": "develop",
         "bass_style": "pedal",
@@ -106,7 +180,6 @@
           "rhythm": "sustain"
         }
       }
-
     ]
   }
 }

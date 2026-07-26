@@ -1,16 +1,58 @@
 {
   "piece": {
-    "title": "The Long Amen",
-    "theme": "The Long Amen",
+    "name": "The Long Amen",
+    "key": "A",
+    "mode": "ionian",
     "tempo": 80,
-    "seed": 1517,
+    "motif": {
+      "name": "quiet_drift",
+      "intervals": [
+        0,
+        2,
+        2,
+        -1,
+        -3
+      ],
+      "rhythm": [
+        2.0,
+        2.0,
+        1.5,
+        1.5,
+        1.0
+      ],
+      "velocities": [
+        0.5,
+        0.6,
+        0.65,
+        0.55,
+        0.45
+      ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "transpose_up",
+        "transpose_down"
+      ]
+    },
     "notes": "Ambient/long-running rebuild of the gospel-quartet sketch. Narrative mode, no repeats -- four sections drift rather than loop. Plagal (IV-I) and modal color chords (vi, ii) carry the harmony; the one appearance of V is dissolved through IV rather than resolved to I. One continuous tonic pedal runs under all four sections. Ends on vi, not I -- deliberately unresolved. ~104 bars at 60bpm ~= 6-7 minutes.",
+    "title": "The Long Amen",
+    "seed": 1517,
     "sections": [
       {
         "name": "opening_drift",
         "bars": 24,
-        "progression": ["I", "IV", "I", "vi"],
-        "chord_bars": [1, 1, 1, 1],
+        "progression": [
+          "I",
+          "IV",
+          "I",
+          "vi"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "melody": "lyrical",
@@ -28,8 +70,18 @@
       {
         "name": "ii_color_turn",
         "bars": 24,
-        "progression": ["vi", "ii", "IV", "I"],
-        "chord_bars": [1, 1, 1, 1],
+        "progression": [
+          "vi",
+          "ii",
+          "IV",
+          "I"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "melody": "sparse",
@@ -46,8 +98,18 @@
       {
         "name": "widening",
         "bars": 24,
-        "progression": ["I", "V", "IV", "I"],
-        "chord_bars": [4, 2, 2, 4],
+        "progression": [
+          "I",
+          "V",
+          "IV",
+          "I"
+        ],
+        "chord_bars": [
+          4,
+          2,
+          2,
+          4
+        ],
         "rhythm": "motif",
         "density": "medium",
         "melody": "generative",
@@ -64,8 +126,18 @@
       {
         "name": "closing_hover",
         "bars": 32,
-        "progression": ["IV", "I", "IV", "vi"],
-        "chord_bars": [1, 1, 1, 1],
+        "progression": [
+          "IV",
+          "I",
+          "IV",
+          "vi"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "melody": "sparse",

@@ -1,8 +1,40 @@
 {
   "piece": {
-    "title": "Broadway Boogie Woogie (FormaComposition) v7",
-    "theme": "broadway_boogie",
+    "name": "broadway_boogie",
+    "key": "F",
+    "mode": "mixolydian",
     "tempo": 98,
+    "motif": {
+      "name": "boogie_cell",
+      "intervals": [
+        0,
+        4,
+        3,
+        2,
+        1,
+        -1,
+        -2,
+        -3
+      ],
+      "rhythm": [
+        1.5,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "transform_pool": [
+        "retrograde",
+        "inversion",
+        "sequence"
+      ],
+      "notes": "Decouple pass (v3): reshaped from flat [0.5]*8 to a shaped 8-beat (2-bar) cell now that only melody (always) and harmony (accumulation/peak sections, via the 'stressed' >=median filter) consume it \u2014 the bass no longer reads this cell at all. Contour unchanged: root-3rd-5th-6th-b7-6th-5th-3rd, diatonic F Mixolydian. Melody onsets: 0, 1.5, 2, 3, 4, 4.5, 5, 6 \u2014 the off-beat pushes at 1.5/4.5 are the swing carriers. Harmony 'stressed' filter (median dur = 1.0) keeps slots 0,2,3,6,7: onsets 0, 2, 3, 5, 6 with durations 1.5/1/1/1/2 \u2014 five varied-length comp chords per 2-bar cycle, ALL on the beat by design, because the harmony path never receives swing (engine plumbing gap, logged) and on-beat chords are identical in straight and swung time. Off-beat comp onsets would flam against the swung melody."
+    },
+    "notes": "v7 \u2014 restructured from v6's 23-section narrative arc into song form. Uses ONLY the first 8 sections of v6 (m1_grid_1 through m4_peak_hold_1 \u2014 the opening/build arc, before dissolve/return), unchanged in every field, looped 5x via the 'form' array to reach ~28.6 min at 98 BPM (140 bars/cycle x 5 = 700 bars, no section stretched). Each pass generates fresh material under the same style/density/harmony parameters (default song-form seed offsetting, not exact_repeat), so the 5 loops vary generatively while staying in the same aesthetic register \u2014 this is now a static/circular piece (the grid as an ambient loop) rather than the v6 arc-with-dissolution. If you want the original arc shape back, v6 is still the file for that.",
+    "title": "Broadway Boogie Woogie (FormaComposition) v8",
     "seed": 194,
     "form_type": "song",
     "form": [
@@ -74,14 +106,14 @@
         "bass_style": "steady",
         "arc": "plateau",
         "rhythm": "motif",
-        "rest_probability": 0.015,
+        "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "sparse",
           "groove": "syncopated"
         },
-        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 — corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
-        "swing": 0.1
+        "notes": "I. Grid \u2014 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) x4 \u2014 corrected from II-V-I; diatonic minor ii/v, no borrowed majors. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "swing": 0.01
       },
       "m1_grid_2": {
         "name": "m1_grid_2",
@@ -121,7 +153,7 @@
           "density": "sparse",
           "groove": "straight"
         },
-        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) — corrected from II-V-I. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "I. Grid \u2014 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony fix: V1 (ii-v-I) \u2014 corrected from II-V-I. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.25
       },
       "m1_grid_3": {
@@ -154,7 +186,7 @@
           "density": "sparse",
           "groove": "straight"
         },
-        "notes": "I. Grid — 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony check: already diatonic (I-v7-ii-v7), no change needed. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "I. Grid \u2014 4 min at 110 BPM. Bass alone. Mute melody and harmony in Logic. | Harmony check: already diatonic (I-v7-ii-v7), no change needed. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.28
       },
       "m2_accumulation": {
@@ -195,7 +227,7 @@
           "density": "full",
           "groove": "straight"
         },
-        "notes": "II. Accumulation — 5 min at 110 BPM. Bass + offbeat comping stabs. Mute melody in Logic. | Harmony fix: V3 (I-bVII-ii-v) x3 — bVII as Mondrian color block, diatonic, no functional pull. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle — its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "II. Accumulation \u2014 5 min at 110 BPM. Bass + offbeat comping stabs. Mute melody in Logic. | Harmony fix: V3 (I-bVII-ii-v) x3 \u2014 bVII as Mondrian color block, diatonic, no functional pull. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle \u2014 its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.24
       },
       "m3_canon_entry": {
@@ -203,7 +235,7 @@
         "bars": 16,
         "progression": [
           "ii",
-          "iii°",
+          "iii\u00b0",
           "v"
         ],
         "chord_bars": [
@@ -231,7 +263,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "notes": "III. Canon (entry) — melodic cell arrives. Duplicate counterpoint MIDI region, offset 2 beats right for the canon effect. | Harmony fix: V4 truncated (ii-iii°-v) — diminished passing chord leads into canon entry, deliberately unresolved. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "III. Canon (entry) \u2014 melodic cell arrives. Duplicate counterpoint MIDI region, offset 2 beats right for the canon effect. | Harmony fix: V4 truncated (ii-iii\u00b0-v) \u2014 diminished passing chord leads into canon entry, deliberately unresolved. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.34
       },
       "m3_canon_full": {
@@ -239,11 +271,11 @@
         "bars": 32,
         "progression": [
           "ii",
-          "iii°",
+          "iii\u00b0",
           "v",
           "I",
           "ii",
-          "iii°",
+          "iii\u00b0",
           "v",
           "I"
         ],
@@ -277,7 +309,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "notes": "III. Canon (full) — both voices in flight. | Harmony fix: V4 (ii-iii°-v-I) x3 — diatonic passing motion under full canon. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "III. Canon (full) \u2014 both voices in flight. | Harmony fix: V4 (ii-iii\u00b0-v-I) x3 \u2014 diatonic passing motion under full canon. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=sustain (held color-field chords, length = harmonic span), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.34
       },
       "m4_peak_build_1": {
@@ -313,7 +345,7 @@
           "register": "above",
           "dissonance": "passing"
         },
-        "notes": "IV. Full Grid (build) — tempo steps to 116 in Logic tempo track at this section boundary. | Harmony fix: V5 truncated (vi-ii-v) — descending-fourths build, withholds I into the hold section. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle — its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing — the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
+        "notes": "IV. Full Grid (build) \u2014 tempo steps to 116 in Logic tempo track at this section boundary. | Harmony fix: V5 truncated (vi-ii-v) \u2014 descending-fourths build, withholds I into the hold section. | Decouple pass (v3): melody=motif (sole owner of the cell), bass=steady (locked figure from STEADY_FIGURES, chord- and meter-bound, approach notes into changes), harmony=motif (stressed filter on the shaped v3 cell -> five varied-length on-beat comp chords per 2-bar cycle \u2014 its own syncopated life against the bass), swing=0.34 at section level (public 0.0-1.0 scale; remap_swing_ratio(0.34)=0.67 internal = triplet swing \u2014 the v2 value 0.67 was on the internal scale and would have produced a 0.835 hard shuffle).",
         "swing": 0.34
       },
       "m4_peak_hold_1": {
@@ -359,10 +391,9 @@
           "register": "below",
           "dissonance": "none"
         },
-        "notes": "Anchor — the vi-ii-v-I descending-fourth chain (theme's stated primary high-density vehicle), unaltered. Full sustained color-field pad, straight groove.",
+        "notes": "Anchor \u2014 the vi-ii-v-I descending-fourth chain (theme's stated primary high-density vehicle), unaltered. Full sustained color-field pad, straight groove.",
         "swing": 0.34
       }
-    },
-    "notes": "v7 — restructured from v6's 23-section narrative arc into song form. Uses ONLY the first 8 sections of v6 (m1_grid_1 through m4_peak_hold_1 — the opening/build arc, before dissolve/return), unchanged in every field, looped 5x via the 'form' array to reach ~28.6 min at 98 BPM (140 bars/cycle x 5 = 700 bars, no section stretched). Each pass generates fresh material under the same style/density/harmony parameters (default song-form seed offsetting, not exact_repeat), so the 5 loops vary generatively while staying in the same aesthetic register — this is now a static/circular piece (the grid as an ambient loop) rather than the v6 arc-with-dissolution. If you want the original arc shape back, v6 is still the file for that."
+    }
   }
 }

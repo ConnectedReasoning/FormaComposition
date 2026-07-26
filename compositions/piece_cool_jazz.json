@@ -1,16 +1,50 @@
 {
   "piece": {
-    "title": "Blue Dorian",
+    "name": "Blue Dorian",
+    "key": "D",
+    "mode": "dorian",
     "tempo": 92,
+    "motif": {
+      "name": "modal_sketch",
+      "intervals": [
+        2,
+        1,
+        2,
+        -3
+      ],
+      "rhythm": [
+        1.0,
+        1.0,
+        0.5,
+        1.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "transpose_up",
+        "transpose_down"
+      ]
+    },
+    "title": "Blue Dorian",
     "seed": 59,
     "form_type": "song",
-    "form": ["head_in", "solo_verse", "solo_bridge", "head_out"],
+    "form": [
+      "head_in",
+      "solo_verse",
+      "solo_bridge",
+      "head_out"
+    ],
     "sections": {
       "head_in": {
         "name": "head_in",
         "bars": 16,
-        "progression": ["i", "ii"],
-        "chord_bars": [8, 8],
+        "progression": [
+          "i",
+          "ii"
+        ],
+        "chord_bars": [
+          8,
+          8
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "walking",
@@ -21,8 +55,18 @@
       "solo_verse": {
         "name": "solo_verse",
         "bars": 32,
-        "progression": ["i", "ii", "i", "ii"],
-        "chord_bars": [8, 8, 8, 8],
+        "progression": [
+          "i",
+          "ii",
+          "i",
+          "ii"
+        ],
+        "chord_bars": [
+          8,
+          8,
+          8,
+          8
+        ],
         "density": "full",
         "melody": "generative",
         "bass_style": "walking",
@@ -35,8 +79,14 @@
         "bars": 16,
         "key": "E",
         "mode": "phrygian",
-        "progression": ["i", "bII"],
-        "chord_bars": [8, 8],
+        "progression": [
+          "i",
+          "bII"
+        ],
+        "chord_bars": [
+          8,
+          8
+        ],
         "density": "full",
         "melody": "generative",
         "bass_style": "walking",
@@ -47,8 +97,14 @@
       "head_out": {
         "name": "head_out",
         "bars": 16,
-        "progression": ["i", "ii"],
-        "chord_bars": [8, 8],
+        "progression": [
+          "i",
+          "ii"
+        ],
+        "chord_bars": [
+          8,
+          8
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "walking",
