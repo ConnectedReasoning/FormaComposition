@@ -26,6 +26,11 @@ from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.rhythm import VALID_GROOVES
 from intervals.music.percussion import VALID_DRUM_PATTERNS
 
+try:
+    from slop_metrics import report_for_piece as _slop_report
+except ImportError:
+    _slop_report = None  # optional — mido-only dependency, degrade silently if absent
+
 # ---------------------------------------------------------------------------
 # Info display
 # ---------------------------------------------------------------------------
@@ -200,6 +205,15 @@ def run_single(piece_path: str, output_path: Optional[str], info_only: bool) -> 
         size_kb = os.path.getsize(result) / 1024
         print(f"  ✓  {piece.get('title', Path(piece_path).stem):30s}  "
               f"{mins}m {secs:02d}s  {size_kb:.1f} KB  →  {result}")
+
+        # Slop check: does the render itself, not just the JSON, hold up?
+        # Non-fatal and never blocks a render — same posture as the lint
+        # report above. Skips quietly if slop_metrics/mido aren't available.
+        if _slop_report is not None:
+            slop = _slop_report(result, piece)
+            if slop.strip():
+                print(slop)
+
         return True
     except Exception as e:
         print(f"  ERROR generating '{piece_path}': {e}", file=sys.stderr)
