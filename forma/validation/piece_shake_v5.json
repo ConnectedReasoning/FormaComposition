@@ -1,8 +1,109 @@
 {
   "piece": {
-    "title": "Shake the Disease (FormaComposition) v5",
-    "theme": "theme_shake",
+    "name": "Shake the Disease",
+    "key": "D",
+    "mode": "aeolian",
     "tempo": 117,
+    "notes": "Structure: Intro -> Verse -> Chorus -> Verse -> Chorus -> Bridge -> Chorus(final) -> Outro. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm \u2014 the DM signature dark move). Bridge: Bb-C-Bb-Dm. Primary melody carries the 'plea' motif throughout (rhythm:motif). Two counterpoint voices ride above/below: counterpoint 1 (arpeggio character, above) and counterpoint 2 (counterline character, below), each rhythmically independent. v4: chorus is now a single shared definition in song form, repeated via exact_repeat so chorus_1 and chorus_2 are byte-identical \u2014 same seed, same rest_probability, same velocities. chorus_final remains a distinct, larger climactic variant (16 bars, fuller texture) and is NOT a repeat. v5: v4 validated and rendered but never actually exercised per-voice motif assignment (item 9 / MT-1) \u2014 neither counterpoint entry set a motif field anywhere, so both voices rendered with default rule-driven pitch and generic free-species rhythm, no motif involvement at all, despite this piece's own notes describing 'arpeggio character' and 'counterline character'. Added motif: 'arpeggio' to counterpoint 1 and motif: 'counterline' to counterpoint 2 in every section that has a counterpoint block (verse_1, chorus, verse_2, bridge, chorus_final, outro \u2014 intro has none, voices silent there per its own notes). Pitch selection is untouched by this change \u2014 consonance/voice-leading stays fully rule-driven (MT-1 decision (i)); only each voice's RHYTHM now comes from its assigned motif's tiled rhythm instead of a generic groove/density grid. This is the first version of this piece that actually renders the three-named-motif structure theme_shake_v2.json declares. v5 correction: the motif field only has an audible effect on free-species voices \u2014 first-species counterpoint is rhythmically locked to the melody by definition and silently ignores any assigned motif (verified, this is MT-1's intended design, not a bug). This piece's species assignment per voice position flips between verse and chorus sections (a deliberate v4 texture choice), so a motif fixed to a voice index was inert in some sections and active in others. Corrected: motif is now present only where that voice is actually free-species in that section \u2014 arpeggio is silent (locked to melody's plea rhythm) in chorus/chorus_final, where the above voice is first-species; counterline is silent in verse_1/verse_2, where the below voice is first-species. Both are active in bridge (both voices free). This is the first version of this piece where every motif field present is genuinely audible, none silently inert.",
+    "motifs": [
+      {
+        "name": "plea",
+        "intervals": [
+          0,
+          2,
+          -1,
+          -2,
+          1
+        ],
+        "rhythm": [
+          1.0,
+          0.5,
+          0.5,
+          1.0,
+          1.0
+        ],
+        "velocities": [
+          0.63,
+          0.55,
+          0.51,
+          0.59,
+          0.47
+        ],
+        "transform_pool": [
+          "inversion",
+          "retrograde",
+          "diminution",
+          "compress"
+        ]
+      },
+      {
+        "name": "arpeggio",
+        "intervals": [
+          3,
+          4,
+          -3,
+          2,
+          -2,
+          -4
+        ],
+        "rhythm": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          1.5
+        ],
+        "velocities": [
+          0.47,
+          0.43,
+          0.46,
+          0.41,
+          0.43,
+          0.39
+        ],
+        "transform_pool": [
+          "inversion",
+          "augmentation",
+          "transpose_up",
+          "transpose_down"
+        ]
+      },
+      {
+        "name": "counterline",
+        "intervals": [
+          -2,
+          -1,
+          3,
+          -3,
+          1,
+          2
+        ],
+        "rhythm": [
+          0.75,
+          0.25,
+          0.5,
+          1.0,
+          0.75,
+          0.75
+        ],
+        "velocities": [
+          0.43,
+          0.39,
+          0.41,
+          0.46,
+          0.39,
+          0.38
+        ],
+        "transform_pool": [
+          "retrograde",
+          "retrograde_inversion",
+          "compress",
+          "expand"
+        ]
+      }
+    ],
+    "title": "Shake the Disease (FormaComposition) v5",
     "seed": 1985,
     "form_type": "song",
     "form": [
@@ -18,7 +119,6 @@
       "chorus_final",
       "outro"
     ],
-    "notes": "Structure: Intro -> Verse -> Chorus -> Verse -> Chorus -> Bridge -> Chorus(final) -> Outro. Verse: Dm-C-F-Bb (aeolian, warm). Chorus: Dm-Fm-Db-Bb (Fm is borrowed bIIIm — the DM signature dark move). Bridge: Bb-C-Bb-Dm. Primary melody carries the 'plea' motif throughout (rhythm:motif). Two counterpoint voices ride above/below: counterpoint 1 (arpeggio character, above) and counterpoint 2 (counterline character, below), each rhythmically independent. v4: chorus is now a single shared definition in song form, repeated via exact_repeat so chorus_1 and chorus_2 are byte-identical — same seed, same rest_probability, same velocities. chorus_final remains a distinct, larger climactic variant (16 bars, fuller texture) and is NOT a repeat. v5: v4 validated and rendered but never actually exercised per-voice motif assignment (item 9 / MT-1) — neither counterpoint entry set a motif field anywhere, so both voices rendered with default rule-driven pitch and generic free-species rhythm, no motif involvement at all, despite this piece's own notes describing 'arpeggio character' and 'counterline character'. Added motif: 'arpeggio' to counterpoint 1 and motif: 'counterline' to counterpoint 2 in every section that has a counterpoint block (verse_1, chorus, verse_2, bridge, chorus_final, outro — intro has none, voices silent there per its own notes). Pitch selection is untouched by this change — consonance/voice-leading stays fully rule-driven (MT-1 decision (i)); only each voice's RHYTHM now comes from its assigned motif's tiled rhythm instead of a generic groove/density grid. This is the first version of this piece that actually renders the three-named-motif structure theme_shake_v2.json declares. v5 correction: the motif field only has an audible effect on free-species voices — first-species counterpoint is rhythmically locked to the melody by definition and silently ignores any assigned motif (verified, this is MT-1's intended design, not a bug). This piece's species assignment per voice position flips between verse and chorus sections (a deliberate v4 texture choice), so a motif fixed to a voice index was inert in some sections and active in others. Corrected: motif is now present only where that voice is actually free-species in that section — arpeggio is silent (locked to melody's plea rhythm) in chorus/chorus_final, where the above voice is first-species; counterline is silent in verse_1/verse_2, where the below voice is first-species. Both are active in bridge (both voices free). This is the first version of this piece where every motif field present is genuinely audible, none silently inert.",
     "sections": {
       "intro": {
         "bars": 8,
@@ -38,7 +138,7 @@
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
-        "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here — sparse texture only. Harmony stays sustained, no strumming yet."
+        "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here \u2014 sparse texture only. Harmony stays sustained, no strumming yet."
       },
       "verse_1": {
         "bars": 16,
@@ -100,7 +200,7 @@
         "harmony_rhythm": {
           "rhythm": "motif"
         },
-        "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Harmony strikes on the plea motif's syncopated rhythm — Ob-La-Di-style chord hits. This single definition is reused for both choruses via exact_repeat so the hook is identical each time.",
+        "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Harmony strikes on the plea motif's syncopated rhythm \u2014 Ob-La-Di-style chord hits. This single definition is reused for both choruses via exact_repeat so the hook is identical each time.",
         "counterpoint": [
           {
             "species": "first",
@@ -213,7 +313,7 @@
         "harmony_rhythm": {
           "rhythm": "motif"
         },
-        "notes": "Extended final chorus — 16 bars, intentionally NOT a repeat of chorus. Primary melody and both counterpoint voices at full intensity, peak interweave.",
+        "notes": "Extended final chorus \u2014 16 bars, intentionally NOT a repeat of chorus. Primary melody and both counterpoint voices at full intensity, peak interweave.",
         "counterpoint": [
           {
             "species": "first",
