@@ -262,17 +262,42 @@ def _check_harmony_motif_without_motif_rhythm(section: SectionModel) -> Iterator
 
 def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradiction]:
     """
-    groove is inert once harmony_rhythm.rhythm == 'motif': the motif cell
-    supplies its own fixed onset grid tiled across the section, the same
-    way melody's 'motif' rhythm source already ignores groove.
+    groove is inert under two of harmony_rhythm's four rhythm sources:
+
+      - 'motif':   the motif cell supplies its own fixed onset grid, tiled
+                   across the section, the same way melody's 'motif' rhythm
+                   source already ignores groove.
+      - 'sustain': there's no onset pattern at all -- one held note per
+                   chord span, so there's nothing for a groove template to
+                   accent.
+
+    groove is only ever audible under 'free' (the onset grid a groove
+    shapes actually exists there). 'pattern' supplies its own hand-authored
+    onsets via harmony_pattern and doesn't consult groove either, but that
+    combination isn't flagged here -- harmony_pattern authors are already
+    hand-placing onsets/velocities directly, so a stray groove alongside it
+    is a much smaller footgun than the silent, easy-to-reach motif/sustain
+    cases.
+
+    Previously this only checked the 'motif' case. The 'sustain' case was a
+    real coverage gap -- confirmed live in piece_long_amen.json, which sets
+    harmony_rhythm.groove='straight' under rhythm='sustain' on all four of
+    its sections and passed lint clean.
     """
     hr = section.harmony_rhythm
-    if hr is None or hr.rhythm != "motif" or hr.groove is None:
+    if hr is None or hr.groove is None:
+        return
+    if hr.rhythm not in ("motif", "sustain"):
         return
     yield Contradiction(
         where=f"section '{section.name or '?'}'",
         setting=f"harmony_rhythm.groove={hr.groove!r}",
-        cause="harmony_rhythm.rhythm='motif' supplies its own fixed onset cell",
+        cause=f"harmony_rhythm.rhythm={hr.rhythm!r} has no onset grid for "
+              f"a groove to shape" + (
+                  " (the motif cell supplies its own fixed onsets)"
+                  if hr.rhythm == "motif"
+                  else " (one held note per chord span, zero onsets)"
+              ),
         effect="groove is never consulted for this harmony source",
         fix="drop harmony_rhythm.groove, or switch to rhythm='free' to use "
             "grooves.",

@@ -113,6 +113,26 @@ def test_check_harmony_motif_groove_noop_silent_without_groove():
     assert list(_check_harmony_motif_groove_noop(section)) == []
 
 
+def test_check_harmony_groove_noop_fires_under_sustain():
+    """
+    Coverage gap fix: groove is just as inert under 'sustain' (one held
+    note per chord, no onset grid) as it is under 'motif'. Confirmed live
+    in piece_long_amen.json, which set this exact combination on all four
+    of its sections and passed lint clean before this fix.
+    """
+    section = _section(harmony_rhythm={"rhythm": "sustain", "groove": "straight"})
+    found = list(_check_harmony_motif_groove_noop(section))
+    assert len(found) == 1
+    assert "groove='straight'" in found[0].setting
+    assert "sustain" in found[0].cause
+
+
+def test_check_harmony_groove_noop_silent_under_free():
+    """groove is genuinely audible under 'free' -- must not fire here."""
+    section = _section(harmony_rhythm={"rhythm": "free", "groove": "straight"})
+    assert list(_check_harmony_motif_groove_noop(section)) == []
+
+
 # ===========================================================================
 # 4. _check_counterpoint_motif_species_noop
 # ===========================================================================
