@@ -1,4 +1,18 @@
-# FormaComposition JSON Cheat Sheet (v4 — verified against source 2026-07-26)
+# FormaComposition JSON Cheat Sheet (v5 — verified against source 2026-07-26)
+
+**Changes since v4:**
+1. **Corrected a leftover framing error from v3 that survived the v4 pass unfixed:** there
+   is no separate `theme_*.json` file anymore. `ThemeModel` was retired; `key`/`mode`/
+   `motif`/`motifs`/`tempo` are fields directly on the single piece file (`PieceModel`),
+   same as `title`/`sections`/`form`. v4 already said this in the PIECE section's "one file
+   per piece now" note, but left the entire `## THEME (theme_*.json)` header and its
+   framing untouched above it — actively contradicting the correction two sections later.
+   Fixed below: the field tables are unchanged (they're still accurate), just relabeled and
+   moved under the single piece-file umbrella instead of implying a second file.
+2. Fixed the harmony_rhythm.groove-under-sustain lint gap noted in v4 — `lint.py`'s
+   `_check_harmony_motif_groove_noop` now also fires for `rhythm: "sustain"`, not just
+   `rhythm: "motif"`. `piece_long_amen.json`'s dead `groove: "straight"` settings are now
+   correctly flagged.
 
 **Changes since v3** (all verified by reading `schemas.py`/`lint.py`/`bass.py` directly, not
 by inference):
@@ -15,24 +29,33 @@ by inference):
 4. Transform enum reference was missing `sequence` — added below.
 5. `piece_broadway_boogie_v7.json` → your catalog now uses `piece_broadway_boogie_v8.json`;
    the collision caveat below still applies to it unchanged.
-6. Noted a real lint coverage gap: `groove` inert-under-`sustain` (harmony_rhythm) is **not**
-   lint-checked, only the inert-under-`motif` case is. `piece_long_amen.json` currently has
-   this exact dead setting (`groove: "straight"` under `rhythm: "sustain"`, all 4 sections)
-   and passes lint clean.
+6. Noted a real lint coverage gap (see "Changes since v4" above — now fixed).
 
 ---
 
-## THEME (`theme_*.json`)
+## Motif & tempo fields — no longer a separate theme file
 
-### `theme` (top-level object)
+**There is no `theme_*.json` anymore.** `ThemeModel` was retired; the fields it used to
+own — `key`, `mode`, `motif`/`motifs`, `tempo`, and the theme-level `name` — are declared
+directly on `PieceModel` and live at the top of your single piece file, right alongside
+`title`/`sections`/`form`. One file per piece, full stop. (Your `validation/` folder still
+has old `theme_broadway_boogie_v3.json` / `theme_shake_v2.json` files sitting next to the
+now-merged `piece_*.json` files they used to pair with — those are dead weight; nothing in
+`main.py`/`load_song()` reads a second file, so they're orphaned, not an alternate format
+still in use.)
+
+The tables below document those fields — they're accurate as-is, just relocated in this
+doc to stop implying a file split that doesn't exist.
+
+### `key` / `mode` / `motif` / `motifs` / `tempo` (on the piece file)
 | Field | Type | Required | Notes |
 |---|---|---|---|
-| `key` | string | **yes** | any non-empty string (not enum-checked at theme level — see Section `key` for the enum enforced at render time) |
-| `mode` | string | **yes** | any non-empty string at theme level (not enum-checked here — see Section `mode`) |
+| `key` | string | **yes** | any non-empty string (not enum-checked at this level — see Section `key` for the enum enforced at render time) |
+| `mode` | string | **yes** | any non-empty string at this level (not enum-checked here — see Section `mode`) |
 | `motif` | object | one of `motif`/`motifs` | single motif, see Motif below |
 | `motifs` | array of motif objects | one of `motif`/`motifs` | if both present, `motifs` wins and `motif` is ignored (warning, not error). Must be non-empty if present. Missing both → warns, generation still works (purely generative) |
 | `name` | string | no | free text |
-| `tempo` | object `{min, max}` | **yes** | see TempoRange below |
+| `tempo` | object `{min, max}` or bare int | **yes** | see TempoRange below; a bare int is auto-coerced into a fixed-value `{min, max}` range |
 
 `extra="allow"` — you can add documentation fields freely; only `palette` is flagged obsolete (warns: "instruments live in Logic").
 
@@ -96,12 +119,12 @@ render time** — a schema-level check resolves every `motif` reference
 raises a clean error on a typo, rather than an uncaught `FileNotFoundError`
 mid-render.
 
-Worked example, from your own `theme_shake_v2.json` (`[plea, arpeggio,
-counterline]`): `plea` sits at index 0, so it's the implicit primary — the
-main melody's `rhythm: "motif"` carries it with zero configuration, exactly
-as the piece's own notes describe. `arpeggio` and `counterline` are otherwise
-invisible to the engine; they only become audible in `piece_shake_v5.json`
-because `counterpoint[].motif` names them explicitly, one per voice.
+Worked example, from your own `piece_shake_v5.json`'s motif pool (`[plea, arpeggio,
+counterline]` — merged onto the piece file, not a separate theme file): `plea` sits at
+index 0, so it's the implicit primary — the main melody's `rhythm: "motif"` carries it
+with zero configuration, exactly as the piece's own notes describe. `arpeggio` and
+`counterline` are otherwise invisible to the engine; they only become audible because
+`counterpoint[].motif` names them explicitly, one per voice, elsewhere in that same file.
 
 ---
 
