@@ -32,8 +32,8 @@ from intervals.music.rhythm import remap_swing_ratio, swing_offset
 # Constants
 # ---------------------------------------------------------------------------
 
-BASS_OCTAVE_BOTTOM = 36   # C2
-BASS_OCTAVE_TOP    = 48   # C3
+BASS_OCTAVE_BOTTOM = 48   # C3
+BASS_OCTAVE_TOP    = 60   # C4
 
 # ---------------------------------------------------------------------------
 # Data classes

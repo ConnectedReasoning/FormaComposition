@@ -131,33 +131,33 @@ VoiceRegisterLiteral        = Literal[
     "above", "below",
 ]
 
-# Absolute (bottom, top) MIDI bounds per register name. Widened 2026-07 from
-# the original choir-SATB tessitura (~21 semitones each) to a full 2-octave
-# span per voice: real instruments have far more usable range than a human
-# voice part, and the tighter bands were visibly clipping both ends once
-# melodic content actually used the space (measured: 31% of notes sitting
-# at the tenor floor on a real develop-behavior line, dropping to 20% at
-# these wider bounds — floor-clustering itself is a separate, deeper
-# mechanism, see generate_develop's anchor carry-forward; widening reduces
-# how often it triggers but doesn't remove the mechanism). Anchored on
-# clean C/G note names, alternating by a fifth going down, so they're easy
-# to reason about and still overlap generously at the seams (~1.5 octaves)
-# for real multi-voice writing. Legacy aliases updated to match.
-# 'above'/'below' are intentionally absent — they are relative, not
-# absolute, and resolved by the generator against the lead voice.
+# Absolute (bottom, top) MIDI bounds per register name. 18-semitone span (an
+# octave + a sixth) per voice, centered on the same pitch each name has
+# always centered on. Previously a full 24-semitone (2-octave) span; that
+# width was what let melody hit both walls in essentially every render
+# (measured: register span == exactly 24 semitones in 61 of 71 catalog
+# renders) — pitch selection samples close to uniformly across whatever box
+# it's given (motif_to_notes octave-folds into [octave_bottom, octave_top]
+# with no center-weighting), so the box's width IS the piece's effective
+# melodic range, not a ceiling that's rarely touched. Narrowing directly
+# caps that. Centers are unchanged from the original 24-semitone version, so
+# nothing shifted relative to another voice's center — soprano is still
+# centered on C5, tenor still on C4, etc. — only each wall moved 3
+# semitones closer to its own center.
 REGISTER_BOUNDS: dict[str, tuple[int, int]] = {
-    # Traditional SATB + baritone (canonical) — each a full 2 octaves
-    "soprano":  (60, 84),   # C4–C6
-    "alto":     (55, 79),   # G3–G5
-    "tenor":    (48, 72),   # C3–C5
-    "baritone": (43, 67),   # G2–G4
-    "bass":     (36, 60),   # C2–C4
-    # Legacy aliases (widened to match their SATB equivalents)
-    "high":     (64, 88),   # E4–E6
-    "mid":      (60, 84),   # C4–C6  (== soprano)
-    "low_mid":  (48, 72),   # C3–C5  (== tenor)
-    "low":      (33, 57),   # A1–A3
+    # Traditional SATB + baritone (canonical) — 18 semitones, same centers
+    "soprano":  (63, 81),   # D#4–A5, centered C5
+    "alto":     (58, 76),   # A#3–E5, centered G4
+    "tenor":    (51, 69),   # D#3–A4, centered C4
+    "baritone": (46, 64),   # A#2–E4, centered G3
+    "bass":     (39, 57),   # D#2–A3, centered C3
+    # Legacy aliases (same treatment, same centers as their SATB equivalents)
+    "high":     (67, 85),   # G4–C#6, centered E5
+    "mid":      (63, 81),   # D#4–A5, centered C5  (== soprano)
+    "low_mid":  (51, 69),   # D#3–A4, centered C4  (== tenor)
+    "low":      (36, 54),   # C2–F#3, centered A2
 }
+
 
 # Convenience sets for runtime checks — derived from Literals, not duplicated.
 # These replace VALID_DENSITY, VALID_MELODY_BEH, etc. in generator.py.

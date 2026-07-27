@@ -184,7 +184,7 @@ class TestCounterpointModel:
 class TestVoiceModel:
     def test_valid(self):
         m = VoiceModel(register="soprano", behavior="lyrical", velocity=90)
-        assert m.bounds() == (60, 84)
+        assert m.bounds() == (63, 81)  # soprano, 18 semitones, centered C5
         assert m.is_relative() is False
 
     def test_valid_relative_register(self):
@@ -577,4 +577,3 @@ class TestPieceModel:
                 "sections": [_minimal_section()],
             })
         assert any("no motif or motifs defined" in str(w.message) for w in caught)
-
