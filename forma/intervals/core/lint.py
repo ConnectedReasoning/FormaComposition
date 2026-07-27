@@ -29,6 +29,8 @@ from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from intervals.core.schemas import PieceModel, SectionModel, VoiceModel
+from intervals.music.rhythm import get_pattern
+from intervals.music.harmony import DENSITY_TONES
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Engine facts — the consume-gates, as verified in the engine source.
@@ -50,6 +52,16 @@ CONTINUOUS_BASS_STYLES: frozenset[str] = frozenset({"walking", "melodic"})
 # "sustain" source there is exactly one onset per harmonic span, so a rest roll
 # there would delete the whole chord, not thin it — the field is a no-op.
 SUSTAIN_HARMONY_SOURCE: str = "sustain"
+
+# strategies_typed.py's build_harmony_rhythm_context_from_model: harmony's
+# effective rhythm source is harmony_rhythm.rhythm if explicitly set, else
+# section.rhythm — EXCEPT section.rhythm=="motif" is coerced to "free" when
+# inherited (not explicitly chosen on harmony_rhythm itself), closing a back
+# door where nearly every melodic section's rhythm="motif" would otherwise
+# silently activate harmony's independent motif mechanism. Density follows
+# the same cascade: harmony_rhythm.density if set, else section.density —
+# there is no separate hardcoded default; verified directly in that file,
+# not assumed from the harmony_rhythm.rhythm cascade above.
 
 # Unlike the gates above (verified engine facts — a field IS or ISN'T read
 # under some condition), this one is a heuristic. Nothing is silently dropped
@@ -695,6 +707,169 @@ def _check_canon_interval_without_canonic_imitation(section: SectionModel) -> It
     )
 
 
+# Same trigger point as slop_metrics.py's HARMONY_MASS_WARN, so a piece that
+# would fail the post-render measurement gets a matching pre-render warning
+# instead of a surprise after a multi-minute render.
+HARMONY_MASS_RATIO_TRIGGER: float = 3.0
+
+# Fixed seed for the count estimate below — these grid patterns' EVENT COUNT
+# is governed almost entirely by density/groove, with only rest-placement and
+# fine timing varying by seed, so a fixed seed gives a stable, reproducible
+# estimate. It will not exactly match the real render's seed (derived per-
+# chord as base_seed + section_index*10 + chord_index — see the harmony
+# seed-collision comment elsewhere in this file), so treat the predicted
+# ratio as a close estimate, not a promise of the exact rendered count.
+_RATIO_ESTIMATE_SEED: int = 42
+
+
+# Below this many predicted lead notes, the ratio is noise, not a finding —
+# a 4-vs-12 count swings entirely on one chord's rest-placement randomness.
+# Same posture as slop_metrics.py's MIN_NOTES_FOR_SECTION for the identical
+# reason: short sections need a floor before a ratio means anything.
+MIN_MELODY_COUNT_FOR_RATIO: int = 8
+
+
+def _predicted_onset_count(
+    total_beats: float,
+    density: str,
+    voice_type: str,
+    groove: Optional[str],
+    beats_per_bar: int,
+    note_length_range: Optional[tuple[float, float]] = None,
+) -> int:
+    """
+    Sounding (non-rest) NOTE count get_pattern's rhythm would produce for one
+    chord window — not just onset count. Melody is monophonic, so one onset
+    is one note. Harmony isn't: each chord onset voices multiple simultaneous
+    tones (DENSITY_TONES — 3 at 'sparse' up to 6 at 'full'), so a harmony
+    onset count on its own understates the real note count by that same
+    multiple. First version of this function returned onset count directly
+    and predicted a ~1.7x ratio where the real render measured 7x — the gap
+    was almost exactly this missing multiplier (96 onsets x 6 tones = 576,
+    vs. 540 actually rendered — close enough to trust as an estimate).
+    """
+    events = get_pattern(
+        total_beats, density=density, voice_type=voice_type, groove=groove,
+        beats_per_bar=beats_per_bar, seed=_RATIO_ESTIMATE_SEED,
+        note_length_range=note_length_range,
+    )
+    onsets = sum(1 for e in events if not e.is_rest)
+    tones_per_onset = DENSITY_TONES.get(density, 3) if voice_type == "chord" else 1
+    return onsets * tones_per_onset
+
+
+def _motif_note_count(total_beats: float, motif_rhythm: Optional[list], articulation: str) -> Optional[int]:
+    """
+    Exact tiled note count for a motif-driven voice — reuses rhythm.py's own
+    _motif_rhythm_to_events rather than approximating the tiling separately,
+    so this isn't a second implementation of the same math that could drift
+    from the real one. Returns None if there's no motif rhythm to tile.
+    """
+    if not motif_rhythm:
+        return None
+    from intervals.music.rhythm import _motif_rhythm_to_events
+    return len(_motif_rhythm_to_events(motif_rhythm, total_beats, articulation))
+
+
+def _check_harmony_melody_ratio(section: SectionModel, primary_motif: Optional[dict] = None) -> Iterator[Contradiction]:
+    """
+    Predicts, before render, the same harmony-events ÷ melody-events ratio
+    slop_metrics.py measures after render (its HARMONY_MASS_FAIL/WARN
+    thresholds) — catching the "eight times the tune's note count" problem
+    at authoring time instead of after a multi-minute render.
+
+    Covers both predictable rhythm sources: "free" (density-grid — harmony's
+    note count is onsets x DENSITY_TONES, since melody is monophonic but a
+    chord onset voices several tones at once — an earlier version of this
+    check missed that multiplier and undershot a measured 7x ratio as 1.7x)
+    and "motif" (exact tiled count via rhythm.py's own tiling function,
+    rather than re-deriving the same math a second way).
+
+    primary_motif: the piece's resolved primary motif (PieceModel.
+    primary_motif, model-dumped), used only when a side's rhythm source is
+    "motif". Does NOT resolve a lead voice's own motif override or
+    harmony_rhythm's own independent motif — both fall back to the theme's
+    primary here, which will misestimate a piece that deliberately uses a
+    different motif on one side. Omit (None) to skip motif-sourced
+    prediction — those sections then produce no finding, same as before
+    this parameter existed.
+
+    Skips entirely — no finding either way — when a "motif" side has no
+    resolvable rhythm, or melody's source is "pattern" (not modeled).
+    "sustain" harmony (one note per chord span) and hand-authored "pattern"
+    harmony (its own onset count) are both exact, not estimates.
+    """
+    beats_per_bar = section.beats_per_bar
+    chord_beats = [b * beats_per_bar for b in section.bars_list()]
+    total_beats = sum(chord_beats)
+    motif_rhythm = primary_motif.get("rhythm") if primary_motif else None
+
+    # ── Melody side ──────────────────────────────────────────────────────
+    if section.rhythm == "free":
+        note_length_range = None
+        if section.note_length_range is not None and section.groove is None:
+            note_length_range = (section.note_length_range.min, section.note_length_range.max)
+        melody_count = sum(
+            _predicted_onset_count(cb, section.density, "melody", section.groove,
+                                    beats_per_bar, note_length_range)
+            for cb in chord_beats
+        )
+    elif section.rhythm == "motif":
+        melody_count = _motif_note_count(total_beats, motif_rhythm, "full")
+        if melody_count is None:
+            return
+    else:
+        return  # "pattern" melody: not modeled, skip rather than guess
+
+    if melody_count < MIN_MELODY_COUNT_FOR_RATIO:
+        return  # too short a section for the ratio to mean anything
+
+    # ── Harmony side — same source-resolution rule as generation ────────
+    hr = section.harmony_rhythm
+    explicit_h_rhythm = hr.rhythm if hr is not None else None
+    h_source = explicit_h_rhythm or section.rhythm
+    if h_source == "motif" and explicit_h_rhythm != "motif":
+        h_source = "free"  # inherited-motif-blocked-to-free, same as generation
+
+    if h_source == "sustain":
+        harmony_count = len(chord_beats)
+    elif h_source == "pattern":
+        if section.harmony_pattern is None:
+            return
+        harmony_count = len(section.harmony_pattern.onsets)
+    elif h_source == "motif":
+        harmony_count = _motif_note_count(total_beats, motif_rhythm, "stressed")
+        if harmony_count is None:
+            return
+    else:  # "free"
+        h_density = hr.density if (hr is not None and hr.density is not None) else section.density
+        h_groove  = hr.groove  if (hr is not None and hr.groove  is not None) else section.groove
+        harmony_count = sum(
+            _predicted_onset_count(cb, h_density, "chord", h_groove, beats_per_bar)
+            for cb in chord_beats
+        )
+
+    ratio = harmony_count / melody_count
+    if ratio < HARMONY_MASS_RATIO_TRIGGER:
+        return
+
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"harmony_rhythm.rhythm='{h_source}'",
+        cause=f"melody's rhythm='{section.rhythm}' produces an estimated "
+              f"{melody_count} lead notes here, but this harmony setting "
+              f"produces an estimated {harmony_count} chord events — "
+              f"~{ratio:.1f}× as many",
+        effect="a chord bed with several times the tune's note count wins the "
+               "mix regardless of velocity — the same problem slop_metrics.py's "
+               "harmony-mass check measures after render, caught here before "
+               "you spend the render time",
+        fix="move harmony_rhythm.rhythm toward 'sustain', or drop harmony_rhythm."
+            "density (or section.density if harmony has no override) — aim for "
+            "roughly parity with the melody's own note count, not several times it.",
+    )
+
+
 CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
@@ -728,6 +903,59 @@ def lint_section(section: SectionModel) -> list[Contradiction]:
     return found
 
 
+def _lead_behavior(section: SectionModel) -> Optional[str]:
+    """
+    The lead voice's effective melody behavior for this section, whichever
+    form it was written in: `voices[0].behavior` if `voices` is set (it
+    supersedes `melody`+`counterpoint` outright), else `melody` directly if
+    it's a bare string, else `melody.behavior` if it's the dict/VoiceModel
+    form. Returns None only if nothing resolvable is set, which shouldn't
+    happen given schema defaults but is handled rather than assumed away.
+    """
+    if section.voices:
+        return section.voices[0].behavior
+    if isinstance(section.melody, str):
+        return section.melody
+    if isinstance(section.melody, VoiceModel):
+        return section.melody.behavior
+    return None
+
+
+def _check_motif_never_developed(piece: PieceModel, sections: list[SectionModel]) -> Iterator[Contradiction]:
+    """
+    Piece-level, not per-section: if the piece defines a motif (real
+    `intervals`, not just a name), at least one section needs to actually
+    develop it, or the motif's pitch shape is never heard anywhere in the
+    piece — MOTIF_CONSUMING_BEHAVIORS is the only behavior that reads it.
+
+    Deliberately does NOT fire when no motif is defined at all — a piece
+    with no motif block is an honest choice (purely generative/ambient),
+    not an ignored setting, and this module only flags settings that were
+    written and then silently dropped. The complaint here is narrower and
+    sharper: you defined `intervals`, so something implied a hummable
+    identity was wanted, and nothing in the piece ever plays it.
+    """
+    if piece.primary_motif is None:
+        return
+    if any(_lead_behavior(s) in MOTIF_CONSUMING_BEHAVIORS for s in sections):
+        return
+    yield Contradiction(
+        where=f"piece '{piece.title or '?'}'",
+        setting="theme defines a motif (intervals set)",
+        cause="no section's lead voice uses behavior='develop' — the only "
+              "behavior that reads a motif's pitch shape",
+        effect="the motif's rhythm may still surface via rhythm='motif', but "
+               "its pitch contour is never heard anywhere in the piece — "
+               "every section is effectively a fresh random draw with no "
+               "melodic identity to recognize or return to",
+        fix="set behavior='develop' on voices[0] in at least the section(s) "
+            "meant to carry the theme, or remove the motif block entirely "
+            "if this is meant to be a purely textural/ambient piece with no "
+            "hook — an undefined motif is not flagged, only a defined-and-"
+            "unused one.",
+    )
+
+
 def lint_piece(piece: PieceModel, theme: Optional[dict] = None) -> list[Contradiction]:
     """
     Run every check against every *unique* section definition.
@@ -758,10 +986,15 @@ def lint_piece(piece: PieceModel, theme: Optional[dict] = None) -> list[Contradi
             # suppresses the pool-size reason rather than guessing at it.
             motif_pool_size = -1
 
+    primary_motif_dict = (piece.primary_motif.model_dump(exclude_none=True)
+                          if piece.primary_motif is not None else None)
+
     found: list[Contradiction] = []
     for section in sections:
         found.extend(lint_section(section))
         found.extend(_check_melodic_variation_noop(section, motif_pool_size))
+        found.extend(_check_harmony_melody_ratio(section, primary_motif_dict))
+    found.extend(_check_motif_never_developed(piece, sections))
     return found
 
 

@@ -300,10 +300,41 @@ def _verdict(value: float, warn: float, fail: float, higher_is_worse: bool = Tru
 # The checks
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _check_motif_identity(lead: list[Note]) -> Iterator[Finding]:
+def has_motif(piece: dict) -> bool:
+    """
+    True if the piece defines a primary motif with real `intervals` —
+    same resolution order as the engine's own `PieceModel.primary_motif`
+    (`motifs[0]` if the array is set, else `motif`).
+
+    Used to waive the motif-identity metric entirely for pieces that never
+    claimed a hook in the first place: a purely generative/ambient piece
+    with no motif block isn't failing to be memorable, it's honestly
+    textural, and shouldn't score the same FAIL as a piece that defined
+    `intervals` and then never developed them (see lint.py's
+    `_check_motif_never_developed`, the authoring-time half of this check).
+    """
+    p = piece.get("piece", piece)
+    motifs = p.get("motifs")
+    m = motifs[0] if motifs else p.get("motif")
+    if not m:
+        return False
+    if isinstance(m, dict):
+        return bool(m.get("intervals"))
+    return True  # named string ref to a pool entry — can't resolve the pool
+                 # here, so assume real rather than false-waiving a valid piece
+
+
+def _check_motif_identity(lead: list[Note], waived: bool = False) -> Iterator[Finding]:
     intervals = [b.pitch - a.pitch for a, b in zip(lead, lead[1:])]
     reuse = _reuse(intervals)
     if reuse is None:
+        return
+    if waived:
+        yield Finding(
+            "motif identity", SKIP, f"{reuse:.0%}",
+            "no motif defined for this piece — nothing to develop, not scored",
+            "", PIECE,
+        )
         return
     verdict = _verdict(reuse, MOTIF_IDENTITY_WARN, MOTIF_IDENTITY_FAIL, higher_is_worse=False)
     yield Finding(
@@ -529,10 +560,10 @@ def format_section_report(findings: list[Finding]) -> str:
 _MARK = {FAIL: "FAIL", WARN: "warn", PASS: "ok", SKIP: "-", INFO: "-"}
 
 
-def _row_metrics(lead_slice: list[Note], harmony_slice: list[Note]) -> dict[str, Finding]:
+def _row_metrics(lead_slice: list[Note], harmony_slice: list[Note], waived: bool = False) -> dict[str, Finding]:
     """One Finding per metric, keyed by name — PASS included, not just trouble."""
     out: dict[str, Finding] = {}
-    for f in _check_motif_identity(lead_slice):
+    for f in _check_motif_identity(lead_slice, waived=waived):
         out["motif"] = f
     for f in _check_leap_profile(lead_slice):
         out["leap"] = f
@@ -550,9 +581,10 @@ def format_table(path: Path, report: Report, tracks: dict[str, list[Note]], piec
     """
     lead = _find(tracks, LEAD_TRACK)
     harmony = _find(tracks, HARMONY_TRACK)
+    waived = not has_motif(piece)
 
     rows: list[tuple[str, int, dict[str, Finding]]] = []
-    rows.append(("OVERALL", len(lead), _row_metrics(lead, harmony)))
+    rows.append(("OVERALL", len(lead), _row_metrics(lead, harmony, waived=waived)))
 
     for name, start, end in section_timeline(piece):
         lslice = _slice(lead, start, end)
@@ -560,7 +592,7 @@ def format_table(path: Path, report: Report, tracks: dict[str, list[Note]], piec
             rows.append((name, len(lslice), {}))
             continue
         hslice = _slice(harmony, start, end)
-        rows.append((name, len(lslice), _row_metrics(lslice, hslice)))
+        rows.append((name, len(lslice), _row_metrics(lslice, hslice, waived=waived)))
 
     name_w = max(7, max(len(r[0]) for r in rows))
     cols = [("notes", 5), ("motif", 12), ("leap", 14), ("harmony", 10)]
@@ -589,20 +621,21 @@ def format_table(path: Path, report: Report, tracks: dict[str, list[Note]], piec
 # Orchestration
 # ─────────────────────────────────────────────────────────────────────────────
 
-def analyze(path: Path, pad_piece: bool = False) -> Report:
+def analyze(path: Path, pad_piece: bool = False, piece: Optional[dict] = None) -> Report:
     tracks, span = _read_tracks(path)
     report = Report(path=path, beats=span)
     report.fingerprint = hashlib.sha1(path.read_bytes()).hexdigest()[:12]
 
     lead = _find(tracks, LEAD_TRACK)
     harmony = _find(tracks, HARMONY_TRACK)
+    waived = piece is not None and not has_motif(piece)
 
     if len(lead) < MIN_NOTES_FOR_ANALYSIS:
         report.findings.append(Finding(
             "lead track", SKIP, f"{len(lead)}",
             "too few lead notes to judge — melodic metrics skipped", ""))
     else:
-        report.findings.extend(_check_motif_identity(lead))
+        report.findings.extend(_check_motif_identity(lead, waived=waived))
         report.findings.extend(_check_rhythm_stencil(lead))
         report.findings.extend(_check_leap_profile(lead))
         report.findings.extend(_check_register_discipline(lead))
@@ -628,7 +661,7 @@ def report_for_piece(midi_path: str, piece: dict, verbose: bool = False, table: 
     path = Path(midi_path)
     try:
         tracks, _ = _read_tracks(path)
-        report = analyze(path)
+        report = analyze(path, piece=piece)
     except Exception as exc:
         return f"  (slop_metrics skipped: {exc})"
 
@@ -715,7 +748,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     reports: list[Report] = []
     for path in args.files:
         try:
-            reports.append(analyze(path, pad_piece=args.pad_piece))
+            reports.append(analyze(path, pad_piece=args.pad_piece, piece=piece_json))
         except Exception as exc:  # a bad file shouldn't take the batch down
             print(f"{path.name}: could not read ({exc})", file=sys.stderr)
 

@@ -31,12 +31,14 @@ from intervals.core.lint import (
     _check_counterpoint_species_unimplemented,
     _check_develop_peer_voice_noop,
     _check_even_chord_split,
+    _check_harmony_melody_ratio,
     _check_harmony_motif_groove_noop,
     _check_harmony_motif_without_motif_rhythm,
     _check_harmony_pattern_silently_empty,
     _check_harmony_rest_on_sustain,
     _check_long_progression_seed_collision,
     _check_melodic_variation_noop,
+    _check_motif_never_developed,
     _check_note_length_range_vs_groove,
     _check_note_length_range_vs_rhythm,
     _check_section_motif_override,
@@ -505,11 +507,19 @@ def test_check_canon_interval_without_canonic_imitation_silent_without_interval_
 
 
 # ===========================================================================
-# Sanity: CHECKS registry contains all 17 section-only checks (the 18th,
-# _check_melodic_variation_noop, is invoked separately by lint_piece because
-# it needs theme context -- see its docstring and lint_piece's signature).
+# Sanity: CHECKS registry contains all 17 section-only checks. Three more
+# are piece-level and invoked directly by lint_piece instead of through this
+# registry, because each needs context beyond a single SectionModel:
+#   _check_melodic_variation_noop      — needs the theme's motif pool size
+#   _check_motif_never_developed       — needs every section at once (it's
+#                                         a piece-wide "was it ever used"
+#                                         check, not a per-section one)
+#   _check_harmony_melody_ratio        — needs the piece's primary motif,
+#                                         for the "motif" rhythm-source case
 # ===========================================================================
 
 def test_checks_registry_has_seventeen_entries_plus_melodic_variation_separately():
     assert len(CHECKS) == 17
     assert _check_melodic_variation_noop not in CHECKS
+    assert _check_motif_never_developed not in CHECKS
+    assert _check_harmony_melody_ratio not in CHECKS
