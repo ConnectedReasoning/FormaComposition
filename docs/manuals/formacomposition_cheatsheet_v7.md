@@ -243,6 +243,14 @@ Legal ≠ memorable. `lint.py` catches broken settings; `slop_metrics.py` (auto-
 
 Always check section-level, not just OVERALL — an average can hide one bad section.
 
+### Reading the section table
+|Column| Meaning|Direction|
+|---|---|---|
+|notes|lead-melody note count in that slice|	below ~10, shown as - — too short to judge|
+|motif|	% of 4-note pitch-contour shapes that recur in the slice — "does the tune have a hook"	higher = better|
+|leap|	% of intervals ≥ a 4th — "does it move by step or by jump"|	lower = better|
+|harmony|chord events ÷ melody events — "does the pad outweigh the tune"	|lower = better, <3× is fine|
+
 ### Engine-wide constants (not per-piece fixes)
 - Rhythm stencil sits at 84–100% everywhere — `note_length_range` is the only lever and it's unset catalog-wide.
 - Register span is 24 semitones in most renders — set it explicitly, widen once at the climax.
