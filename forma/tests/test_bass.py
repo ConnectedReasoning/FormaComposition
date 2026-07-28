@@ -93,11 +93,19 @@ class TestBassToneHelpers:
 class TestStyleRootOnly:
     def test_hand_verified_one_root_per_chord(self):
         chords = [_root_position_chord("D"), _root_position_chord("G", notes=(67, 71, 74, 77))]
-        notes = style_root_only(chords, [1.0, 1.0], beats_per_bar=4, velocity=70)
-        assert notes == [
-            BassNote(38, 0.0, 4.0, 70),
-            BassNote(43, 4.0, 4.0, 70),
-        ]
+        notes = style_root_only(chords, [1.0, 1.0], beats_per_bar=4, velocity=70, seed=1)
+        # Pitch/timing are exact; velocity now carries a small deterministic
+        # jitter (+/-4) instead of being pinned to exactly 70 for every note
+        # — see style_root_only's docstring. Same seed -> same jitter, so
+        # this is still a reproducible assertion, just not a bare equality
+        # on the full tuple.
+        assert [n.midi_note for n in notes] == [38, 43]
+        assert [n.start_beat for n in notes] == [0.0, 4.0]
+        assert [n.duration_beats for n in notes] == [4.0, 4.0]
+        assert all(66 <= n.velocity <= 74 for n in notes)
+        # Same seed reproduces the same jitter exactly.
+        again = style_root_only(chords, [1.0, 1.0], beats_per_bar=4, velocity=70, seed=1)
+        assert notes == again
 
 
 # ===========================================================================
@@ -202,7 +210,7 @@ class TestGenerateBass:
             warnings.simplefilter("always")
             notes = generate_bass(chords, style="motif", bars_per_chord=1.0, seed=1, motif=None)
         assert any("falling back to root_only" in str(w.message) for w in caught)
-        assert notes == style_root_only(chords, [1.0, 1.0], beats_per_bar=4, velocity=70)
+        assert notes == style_root_only(chords, [1.0, 1.0], beats_per_bar=4, velocity=70, seed=1)
 
     def test_motif_style_reproducible_with_a_real_motif(self):
         chords = resolve_progression(["i", "iv"], "D", "dorian", density="medium")

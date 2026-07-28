@@ -1,0 +1,67 @@
+{
+  "piece": {
+    "title": "Training (Even Split)",
+    "key": "E",
+    "mode": "ionian",
+    "tempo": { "min": 100, "max": 120 },
+    "motif": {
+      "name": "ditty",
+      "intervals": [0, 2, 2, -2, -2],
+      "rhythm":    [1.0, 1.0, 1.0, 0.5, 0.5],
+      "transform_pool": ["inversion", "sequence"]
+    },
+    "seed": 1894,
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse",
+      "chorus",
+      "verse",
+      "chorus"
+    ],
+    "sections": {
+      "intro": {
+        "bars": 1,
+        "progression": ["I"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "density": "medium",
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.05
+      },
+      "verse": {
+        "bars": 4,
+        "progression": ["I", "IV"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "density": "medium",
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.05
+      },
+      "chorus": {
+        "bars": 3,
+        "progression": ["I", "IV", "V"],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "density": "medium",
+          "rhythm": "sustain"
+        },
+        "rest_probability": 0.05
+      }
+    }
+  }
+}

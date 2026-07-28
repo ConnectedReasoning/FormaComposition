@@ -32,8 +32,8 @@ from intervals.music.rhythm import remap_swing_ratio, swing_offset
 # Constants
 # ---------------------------------------------------------------------------
 
-BASS_OCTAVE_BOTTOM = 48   # C3
-BASS_OCTAVE_TOP    = 60   # C4
+BASS_OCTAVE_BOTTOM = 36   # C2
+BASS_OCTAVE_TOP    = 48   # C3
 
 # ---------------------------------------------------------------------------
 # Data classes
@@ -176,13 +176,26 @@ def scale_neighbors(note: int, scale_tones: list[int], direction: int = 0) -> li
 # ---------------------------------------------------------------------------
 
 def style_root_only(chords, bars_per_chord, beats_per_bar=4, density="sparse",
-                    velocity=70, swing_ratio: float = 0.5, **kwargs):
-    """One root note per chord, held for full duration."""
+                    velocity=70, swing_ratio: float = 0.5, seed=None, **kwargs):
+    """
+    One root note per chord, held for full duration.
+
+    Velocity gets a small deterministic jitter per note rather than the
+    exact same number every time — this was the flattest style in the
+    engine (no rng at all previously), and it's exactly the style an
+    ambient piece with few other moving parts tends to lean on, which
+    makes its flatness the most exposed. The held-note character (one
+    note, full chord duration) is unchanged; only the attack velocity
+    varies, the way a real player's touch differs slightly note to note
+    even on a simple part.
+    """
     notes = []
     beat = 0.0
+    rng = random.Random(seed) if seed is not None else random.Random()
     for i, chord in enumerate(chords):
         dur = bars_per_chord[i] * beats_per_bar
-        notes.append(BassNote(bass_root(chord), beat, dur, velocity))
+        vel = max(1, min(127, velocity + rng.randint(-4, 4)))
+        notes.append(BassNote(bass_root(chord), beat, dur, vel))
         beat += dur
     return notes
 
@@ -551,15 +564,25 @@ def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
 # ---------------------------------------------------------------------------
 
 def style_pedal(chords, bars_per_chord, beats_per_bar=4, density="sparse",
-                velocity=65, tonic_midi=None, swing_ratio: float = 0.5, **kwargs):
-    """Holds a single pedal tone (tonic) throughout."""
+                velocity=65, tonic_midi=None, swing_ratio: float = 0.5, seed=None, **kwargs):
+    """
+    Holds a single pedal tone (tonic) throughout.
+
+    Same fix as style_root_only: a small deterministic velocity jitter per
+    re-articulation instead of the exact same number every time. This was
+    the actual style behind the "bass mean velocity 70.0, one unique value"
+    finding — long_amen and v9 both use bass_style='pedal', not 'root_only'
+    (style_root_only alone wasn't the whole fix).
+    """
     notes = []
     beat = 0.0
     if tonic_midi is None:
         tonic_midi = bass_root(chords[0])
+    rng = random.Random(seed) if seed is not None else random.Random()
     for i, chord in enumerate(chords):
         total = bars_per_chord[i] * beats_per_bar
-        notes.append(BassNote(tonic_midi, beat, total, velocity))
+        vel = max(1, min(127, velocity + rng.randint(-4, 4)))
+        notes.append(BassNote(tonic_midi, beat, total, vel))
         beat += total
     return notes
 

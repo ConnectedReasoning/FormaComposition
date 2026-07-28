@@ -230,25 +230,34 @@ def fold_to_register(pitch: int, octave_bottom: int, octave_top: int) -> int:
     Bring `pitch` into [octave_bottom, octave_top] by whole-octave shifts,
     choosing the in-register octave-equivalent closest to the register's
     CENTER rather than the first one reached by walking toward the nearest
-    wall.
+    wall — but ONLY when `pitch` is actually out of bounds. An already-valid
+    pitch is returned untouched.
 
-    The difference matters for `develop` melodies specifically: each motif
-    retile continues its pitch anchor from wherever the previous statement
-    ended (deliberately — resetting to a fixed start every retile made the
-    line sound static), so the running pitch drifts over many retiles. A
-    plain "while too low: +12 / while too high: -12" fold always lands a
-    drifting pitch at the wall it just crossed, and a narrower register hits
-    that far more often — measured: narrowing the default melody register
-    from 24 to 18 semitones raised floor-clustering from 18% to 45% of notes
-    with the old wall-fold. This fixes the fold itself rather than
-    compensating by widening the box back out.
+    That "only when out of bounds" guard was missing in the first version of
+    this function, and it was a real bug, not a tuning choice: the function
+    searched every octave-equivalent and picked whichever was nearest center
+    regardless of whether the original pitch needed to move at all. Traced
+    directly from a reported artifact (a neighbor-tone step that should have
+    been E-F#-E rendering as E-F#[an octave low]-E): pitch=78 with bounds
+    (63, 81) was folded down to 66, even though 78 sits comfortably inside
+    the register with room to spare. 78 and 66 are equidistant from the
+    center (72), so the tie-break silently dragged a perfectly valid note
+    down an octave — and the same mechanism was doing it to any in-bounds
+    note whose octave-equivalent happened to sit closer to center, not just
+    exact ties (measured on a real render: 63->75, 64->76, both moved a
+    full octave for no reason). This was pulling melodic content toward the
+    register's center far more aggressively than intended, which is the
+    "voice feels limited" complaint in stronger form than a width tuning
+    issue would produce on its own.
 
-    Brings `pitch` within one octave of the register first (cheap early exit
-    for the overwhelmingly common case), then checks every in-range
-    octave-equivalent and keeps whichever is nearest the center. Ties
-    resolve toward the lower option — an arbitrary but stable, harmless
-    choice; center-ties are rare and both options sound fine.
+    The centering behavior below is still correct and still needed for
+    pitches that genuinely fall outside the register (that's the original
+    floor-clustering fix from the register-narrowing work), it just no
+    longer fires on pitches that were never out of bounds to begin with.
     """
+    if octave_bottom <= pitch <= octave_top:
+        return pitch
+
     p = pitch
     while p < octave_bottom - 12:
         p += 12
