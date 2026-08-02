@@ -1,0 +1,25 @@
+{
+  "piece": {
+    "title": "B4 Blues Sanity Check",
+    "key": "E", "mode": "mixolydian",
+    "tempo": {"min": 100, "max": 120},
+    "motif": {
+      "name": "blue_call",
+      "intervals": [1, 1, -1, 1, -2, 1, 0, 0],
+      "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "melodic_scale": "blues",
+      "transform_pool": ["inversion", "retrograde"]
+    },
+    "seed": 7,
+    "form_type": "song",
+    "form": ["intro"],
+    "sections": {
+      "intro": {
+        "bars": 12, "progression": ["I", "IV", "V"], "chord_bars": [1.0, 1.0, 1.0],
+        "density": "medium", "melody": "develop", "bass_style": "pedal",
+        "arc": "plateau", "rhythm": "motif",
+        "harmony_rhythm": {"rhythm": "sustain"}, "rest_probability": 0.0
+      }
+    }
+  }
+}

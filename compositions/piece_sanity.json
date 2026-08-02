@@ -1,0 +1,25 @@
+{
+  "piece": {
+    "title": "B2 Sanity Check",
+    "key": "E", "mode": "mixolydian",
+    "tempo": {"min": 100, "max": 120},
+    "motif": {
+      "name": "diatonic_arc",
+      "intervals": [2, 1, 1, -1, -1, -2],
+      "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
+      "rests": [false, false, false, false, false, true],
+      "transform_pool": ["inversion", "retrograde"]
+    },
+    "seed": 42,
+    "form_type": "song",
+    "form": ["intro"],
+    "sections": {
+      "intro": {
+        "bars": 12, "progression": ["I", "V", "IV"], "chord_bars": [1.0, 2.0, 3.0],
+        "density": "medium", "melody": "develop", "bass_style": "pedal",
+        "arc": "plateau", "rhythm": "motif",
+        "harmony_rhythm": {"rhythm": "sustain"}, "rest_probability": 0.0
+      }
+    }
+  }
+}
