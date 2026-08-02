@@ -65,19 +65,36 @@ class TestScaleAndChordHelpers:
 # ===========================================================================
 
 class TestMotifToNotes:
-    def test_hand_verified_sequence(self):
-        # start=60, intervals=[2,-1,3] -> running pitch 62,61,64
-        # snap to scale [60,62,64,65,67,69,71]: 62->62, 61->closest(60 or 62,
-        # tie -> min() picks first in list order = 60, so 61 snaps to 60,
-        # then 60+3=63 snaps to nearest of {..} -> 62 (dist1) vs 64(dist1)
-        # tie -> 62 comes first in list -> 62
+    def test_hand_verified_diatonic_walk(self):
+        # Phase B2: intervals are diatonic scale-degree steps, not
+        # semitones. start=60 (degree 0 in C ionian). +2 degrees -> degree 2
+        # -> pcs[2]=4 -> pitch 64 (E, a third up). -1 degree -> degree 1 ->
+        # pcs[1]=2 -> pitch 62 (D). +3 degrees -> degree 4 -> pcs[4]=7 ->
+        # pitch 67 (G, a fifth up from start). Every resulting pitch is a
+        # scale tone by construction -- no separate snap step, and nothing
+        # for a snap to silently collapse (contrast with this test's
+        # pre-migration version, which pinned exactly that collapse: three
+        # semitone-based intervals landing on only two distinct pitches).
         result = motif_to_notes(
             60, [2, -1, 3], [1.0, 1.0, 1.0],
             scale_tones=[60, 62, 64, 65, 67, 69, 71],
             chord_tones=[60, 64, 67],
             octave_bottom=48, octave_top=84,
         )
-        assert result == [(62, 1.0), (60, 1.0), (62, 1.0)]
+        assert result == [(64, 1.0), (62, 1.0), (67, 1.0)]
+
+    def test_every_note_lands_on_scale_regardless_of_step_size(self):
+        # A large diatonic step (spanning more than one octave) must still
+        # land exactly on a scale tone -- degree-walking guarantees this by
+        # construction, unlike the old semitone-then-snap approach.
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        result = motif_to_notes(
+            60, [10, -15, 6], [1.0, 1.0, 1.0],
+            scale_tones=scale, chord_tones=[60],
+            octave_bottom=36, octave_top=96,
+        )
+        pcs = set(t % 12 for t in scale)
+        assert all(pitch % 12 in pcs for pitch, _ in result)
 
     def test_rests_are_omitted_but_pitch_trajectory_continues_underneath(self):
         result = motif_to_notes(
@@ -90,6 +107,23 @@ class TestMotifToNotes:
         )
         # positions: 62, 64 (rest, omitted), 66 -- second entry skipped
         assert result == [(62, 1.0), (66, 1.0)]
+
+    def test_rests_continue_trajectory_under_degree_walking_too(self):
+        # Same rest-continuation guarantee, but exercised on the real
+        # (snap_to_scale=True, degree-walking) path every actual caller
+        # uses -- the semitone-path test above only covers the
+        # snap_to_scale=False escape hatch.
+        result = motif_to_notes(
+            60, [2, 1, 1], [1.0, 1.0, 1.0],
+            scale_tones=[60, 62, 64, 65, 67, 69, 71],
+            chord_tones=[60],
+            octave_bottom=48, octave_top=84,
+            rests=[False, True, False],
+        )
+        # degree 0 -> +2 -> degree 2 (64, sounding)
+        # degree 2 -> +1 -> degree 3 (65, rest -- omitted, trajectory continues)
+        # degree 3 -> +1 -> degree 4 (67, sounding)
+        assert result == [(64, 1.0), (67, 1.0)]
 
 
 # ===========================================================================

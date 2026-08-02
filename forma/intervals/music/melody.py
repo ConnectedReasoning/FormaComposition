@@ -321,6 +321,30 @@ def motif_to_notes(
     Convert a motif (interval sequence + rhythm) to (midi_note, duration) pairs
     starting from start_midi.
 
+    intervals: diatonic scale-degree steps (Phase B2 of the diatonic-motif
+    migration — see motif.py's Motif.intervals docstring for the full
+    contract). Each step moves `current` by that many scale-degree
+    positions in `scale_tones`, not semitones — by construction, every
+    resulting pitch is a scale tone, so there is no separate quantization
+    pass and nothing to erase. This replaces the old behavior (add the
+    interval as semitones, then snap the result to the nearest scale tone),
+    which was the root cause of the bug that motivated this whole
+    migration: a motif built from ±1-semitone neighbor-tone steps in a mode
+    whose local scale gap was a whole tone had those steps silently
+    snapped back to their starting pitch — six of nine notes in one real
+    catalog motif collapsed to a single repeated pitch (traced and
+    confirmed against piece_train's motif in E mixolydian).
+
+    snap_to_scale: when True (the default, and the only path any current
+    caller uses), walks diatonic degree space as described above. When
+    False, preserves this parameter's ORIGINAL meaning unchanged from
+    before this migration: `intervals` are treated as literal, unquantized
+    semitone deltas — no scale awareness at all, register-folding only.
+    This is a deliberate escape hatch for chromatic content that is
+    explicitly out of the diatonic-motif contract (per the "chromatic
+    alterations are authored manually in Logic after render, not modeled
+    by intervals" decision), not a removed or half-migrated feature.
+
     rests: optional, same length as rhythm. True = this slot is silent and is
     omitted from the returned list entirely (not included as a placeholder).
     The interval is still applied to the running pitch position underneath a
@@ -330,21 +354,30 @@ def motif_to_notes(
     Returns list of (midi_note, duration_beats), one entry per SOUNDING slot.
     """
     notes = []
-    current = start_midi
-
-    # Pair up intervals and rhythm (zip to shorter)
     pairs = list(zip(intervals, rhythm))
+    if not pairs:
+        return notes
+
+    pcs = pitch_classes(scale_tones) if scale_tones else []
+    walk_degrees = snap_to_scale and bool(pcs)
+
+    current_pitch = start_midi
+    current_degree = pitch_to_degree(start_midi, pcs) if walk_degrees else None
 
     for idx, (interval, dur) in enumerate(pairs):
-        current = current + interval
-        # Clamp to register — centered fold, not nearest-wall (see fold_to_register)
-        current = fold_to_register(current, octave_bottom, octave_top)
-        # Snap to scale
-        if snap_to_scale and scale_tones:
-            current = nearest_scale_tone(current, scale_tones)
+        if walk_degrees:
+            current_degree = current_degree + interval
+            current_pitch = degree_to_pitch(current_degree, pcs)
+        else:
+            current_pitch = current_pitch + interval
+        # Clamp to register — centered fold, not nearest-wall (see fold_to_register).
+        # Folding by whole octaves preserves pitch class exactly, so a pitch
+        # that was already on-scale from the degree walk above stays on-scale
+        # after folding; no re-snap is needed here.
+        current_pitch = fold_to_register(current_pitch, octave_bottom, octave_top)
         if rests is not None and idx < len(rests) and rests[idx]:
             continue
-        notes.append((current, dur))
+        notes.append((current_pitch, dur))
 
     return notes
 
