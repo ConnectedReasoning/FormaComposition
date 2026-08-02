@@ -3,7 +3,9 @@ motif.py — Intervals Engine
 Standalone motif definition, transformation, and generation system.
 
 A motif is the melodic DNA of a theme — a short interval sequence with
-a rhythmic profile. This module handles:
+a rhythmic profile. Interval units are migrating from semitones to
+diatonic scale-degree steps (see Motif.intervals docstring below for the
+target contract and current implementation status). This module handles:
   - Motif creation (from explicit definition or random generation)
   - All Bach-style transforms (inversion, retrograde, augmentation, etc.)
   - Motif mutation (for variation over long pieces)
@@ -28,8 +30,28 @@ class Motif:
     """
     A motif: interval sequence + rhythmic profile + metadata.
 
-    intervals:      Semitone steps between successive notes.
-                    e.g. [2, -1, 3, -2] means: up 2, down 1, up 3, down 2
+    intervals:      CONTRACT (as of 2026-08, pending implementation — see
+                    Phase B of the diatonic-motif migration): diatonic
+                    scale-degree steps between successive notes, resolved
+                    against the piece's mode. e.g. [2, -1, 3, -2] means: up
+                    2 scale degrees, down 1, up 3, down 2 — NOT semitones.
+                    A diatonic step always lands on a scale tone by
+                    construction, so downstream snap-to-scale quantization
+                    (melody.py's motif_to_notes) no longer erases small
+                    steps the way semitone intervals did (see the E-mixolydian
+                    trace that motivated this: four of nine ±1-semitone
+                    steps collapsed back to their starting pitch because the
+                    local scale gap was a whole tone).
+                    PENDING: the code below (motif_to_notes, apply_transform,
+                    interval_range, TRANSFORM_DESCRIPTIONS' semitone-based
+                    entries) still implements the OLD semitone contract as of
+                    this comment. This docstring states the target spec that
+                    Phase B migrates the implementation to match — it is not
+                    yet true of the running code. Chromatic alterations
+                    (borrowed chords, secondary-dominant coloring of the
+                    melodic line) are intentionally out of scope for this
+                    field — those are authored manually in Logic after
+                    render, not modeled by `intervals`.
     rhythm:         Duration in beats for each note.
                     e.g. [1.0, 0.5, 0.5, 1.0]
     name:           Optional label for identification.
@@ -74,7 +96,11 @@ class Motif:
         return sum(self.rhythm)
 
     def interval_range(self) -> int:
-        """Total semitone span of the motif."""
+        """Total span of the motif, in whatever unit `intervals` currently
+        holds (semitones under the present implementation; will read as
+        diatonic scale-degree span once Phase B lands — see
+        Motif.intervals docstring). Callers relying on this as a semitone
+        width for register planning should re-check after that migration."""
         pos = 0
         positions = [0]
         for i in self.intervals:
@@ -99,6 +125,10 @@ TRANSFORM_DESCRIPTIONS = {
     "retrograde":    "Reverse the interval sequence",
     "augmentation":  "Double all note durations",
     "diminution":    "Halve all note durations",
+    # PENDING (Phase B): magnitude below is the OLD semitone contract's value.
+    # Once intervals migrate to diatonic scale-degree steps, this needs an
+    # explicit decision — transpose by 1 diatonic step (nearest neighbor) or
+    # 2 (a third-ish) — not a silent carry-over of "2".
     "transpose_up":  "Shift all intervals up by 2 semitones",
     "transpose_down":"Shift all intervals down by 2 semitones",
     "shuffle":       "Randomly reorder intervals",
@@ -231,7 +261,10 @@ def mutate(
     Args:
         motif:          Source Motif
         mutation_rate:  Probability each interval is mutated (0.0–1.0)
-        interval_range: Max semitone change per mutation
+        interval_range: Max change per mutation, in whatever unit
+                        motif.intervals currently holds (semitones today;
+                        diatonic scale-degree steps once Phase B lands —
+                        see Motif.intervals docstring)
         seed:           Random seed
 
     Returns:
@@ -271,7 +304,10 @@ def generate_random(
 
     Args:
         length:       Number of intervals
-        max_interval: Maximum absolute semitone jump
+        max_interval: Maximum absolute jump, in whatever unit
+                      motif.intervals currently holds (semitones today;
+                      diatonic scale-degree steps once Phase B lands —
+                      see Motif.intervals docstring)
         rhythm_pool:  Durations to sample from (default: [0.5, 1.0, 1.5, 2.0])
         name:         Motif name
         seed:         Random seed

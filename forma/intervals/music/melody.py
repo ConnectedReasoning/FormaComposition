@@ -10,7 +10,14 @@ Melody behaviors:
 
 Motif is defined in theme.json as:
   {
-    "intervals": [2, -1, 3],        # semitone steps between notes
+    "intervals": [2, -1, 3],        # diatonic scale-degree steps between
+                                     # notes, resolved against the piece's
+                                     # mode (NOT semitones) — see
+                                     # motif.py's Motif.intervals docstring
+                                     # for the full contract. PENDING as of
+                                     # 2026-08: motif_to_notes below still
+                                     # implements the old semitone contract;
+                                     # this comment states the Phase B target.
     "rhythm":    [1.0, 0.5, 0.5],   # note durations in beats
     "transform_pool": ["inversion", "retrograde", "augmentation"]
   }
@@ -139,6 +146,16 @@ def _sequence_intervals_diatonically(
     """
     Transpose a motif's interval shape by `degree_shift` diatonic scale
     steps (not semitones), snapping each note to the scale.
+
+    PENDING (Phase B): this function currently assumes `intervals` arrives
+    in semitones and converts to degree-space internally just for this one
+    transform. Once Motif.intervals natively holds diatonic steps (see
+    that docstring), the degree/pitch conversion below (_pitch_to_degree /
+    _degree_to_pitch) becomes the reusable primitive Phase B1 generalizes
+    for motif_to_notes itself — and this function's own semitone-to-degree
+    conversion step becomes unnecessary, since the input would already be
+    in degree space. Revisit at that point rather than carrying this
+    function forward unchanged.
 
     This is a real/tonal sequence in the Piston sense: the harmony moves by
     some interval (e.g. the descending-fifths vi-ii-v-I chain), and the
