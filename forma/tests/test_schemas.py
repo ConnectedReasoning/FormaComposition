@@ -264,6 +264,28 @@ class TestMotifModel:
         with pytest.raises(ValidationError, match="0.0-1.0"):
             MotifModel(intervals=[0, 2], rhythm=[1.0, 1.0], velocities=[0.5, 90.0])
 
+    def test_melodic_scale_defaults_to_none(self):
+        """Absent melodic_scale means 'use the piece's own mode' -- every
+        motif written before this field existed behaves identically."""
+        m = MotifModel(intervals=[0, 2])
+        assert m.melodic_scale is None
+
+    def test_melodic_scale_accepts_standard_mode(self):
+        m = MotifModel(intervals=[0, 2], melodic_scale="Dorian")
+        assert m.melodic_scale == "dorian"  # normalized lowercase, like piece.mode
+
+    def test_melodic_scale_accepts_pentatonic_and_blues(self):
+        """The whole point of this field: scales that are deliberately
+        INVALID as a piece's harmonic mode (see PieceModel._validate_mode)
+        are valid here, since this never touches Roman-numeral resolution."""
+        for scale in ("pentatonic_major", "pentatonic_minor", "blues"):
+            m = MotifModel(intervals=[0, 2], melodic_scale=scale)
+            assert m.melodic_scale == scale
+
+    def test_melodic_scale_rejects_unknown_value(self):
+        with pytest.raises(ValidationError, match="not valid"):
+            MotifModel(intervals=[0, 2], melodic_scale="not_a_real_scale")
+
 
 # ===========================================================================
 # TempoRangeModel

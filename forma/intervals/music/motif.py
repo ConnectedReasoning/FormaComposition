@@ -64,6 +64,11 @@ class Motif:
     transform_pool: Transforms eligible for variation generation.
     generation:     How many transforms away from the original (0 = source).
     parent_name:    Name of the motif this was derived from.
+    melodic_scale:  Optional scale override for THIS motif's pitches,
+                    independent of the piece's harmonic mode (Phase B4 —
+                    see schemas.py's MotifModel._validate_melodic_scale for
+                    the full contract). None means "use the piece's mode",
+                    unchanged from before this field existed.
     """
     intervals: list[int]
     rhythm: list[float]
@@ -75,6 +80,7 @@ class Motif:
     ])
     generation: int = 0
     parent_name: Optional[str] = None
+    melodic_scale: Optional[str] = None
 
     def __post_init__(self):
         # Pad or trim rhythm to match interval count
@@ -239,6 +245,7 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         transform_pool=list(motif.transform_pool),
         generation=motif.generation + 1,
         parent_name=motif.name,
+        melodic_scale=motif.melodic_scale,
     )
 
 
@@ -291,6 +298,7 @@ def mutate(
         transform_pool=list(motif.transform_pool),
         generation=motif.generation + 1,
         parent_name=motif.name,
+        melodic_scale=motif.melodic_scale,
     )
 
 
@@ -419,7 +427,8 @@ def from_dict(d: dict) -> Motif:
     """
     Build a Motif from a dictionary (e.g. parsed from theme.json).
 
-    Expected keys: intervals, rhythm, name (optional), transform_pool (optional)
+    Expected keys: intervals, rhythm, name (optional), transform_pool (optional),
+    melodic_scale (optional, Phase B4 — see Motif.melodic_scale docstring)
     """
     return Motif(
         intervals=d["intervals"],
@@ -430,6 +439,7 @@ def from_dict(d: dict) -> Motif:
             "inversion", "retrograde", "augmentation",
             "diminution", "transpose_up", "transpose_down"
         ]),
+        melodic_scale=d.get("melodic_scale"),
     )
 
 
@@ -445,6 +455,8 @@ def to_dict(motif: Motif) -> dict:
     }
     if motif.rests is not None:
         d["rests"] = motif.rests
+    if motif.melodic_scale is not None:
+        d["melodic_scale"] = motif.melodic_scale
     return d
 
 

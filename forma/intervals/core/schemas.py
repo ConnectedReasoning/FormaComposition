@@ -482,6 +482,51 @@ class MotifModel(BaseModel):
     rests:          Optional[list[bool]]   = None
     velocities:     Optional[list[float]]  = None
     transform_pool: list[TransformLiteral] = Field(default_factory=list)
+    melodic_scale:  Optional[str]          = None
+
+    @field_validator("melodic_scale", mode="before")
+    @classmethod
+    def _validate_melodic_scale(cls, v):
+        """
+        Phase B4 (melodic-scale decoupling): an optional override of which
+        scale motif_to_notes walks for THIS motif's pitches, independent of
+        the piece's harmonic mode. When None (the default), melody walks
+        the piece's own mode exactly as before this field existed.
+
+        Chords/Roman-numeral resolution never read this field — harmony.py's
+        resolve_progression always uses the piece's `mode`, so a piece keeps
+        ordinary diatonic I-IV-V7 harmony (which needs a 7-note scale for
+        Roman numerals to mean anything) while its melody can walk a
+        pentatonic/blues scale on top. That's the actual relationship blues
+        melody has to its underlying harmony — the melody scale and the
+        harmony scale genuinely differ, which is what makes a blue note
+        "blue" rather than a wrong note. A single shared `mode` field can't
+        express that; this field exists so the diatonic-motif contract
+        (every interval lands on a scale tone by construction — see
+        motif.py's Motif.intervals docstring) doesn't have to sacrifice
+        that guarantee to get blues color, and doesn't have to carve out a
+        chromatic exception either.
+
+        Wider whitelist than piece.mode's _validate_mode: pentatonic/blues
+        scales are deliberately INVALID as a piece's harmonic mode (only 5
+        or 6 notes — harmony.py's chord-quality math stacks thirds off
+        exactly 7 scale degrees per ROMAN_TO_DEGREE, so a 5-note scale
+        there produces nonsense chords), but they're exactly the point of
+        this field, which never touches that code path at all.
+        """
+        if v is None or not isinstance(v, str):
+            return v
+        VALID_MELODIC_SCALES = {
+            "ionian", "dorian", "phrygian", "lydian",
+            "mixolydian", "aeolian", "locrian",
+            "pentatonic_major", "pentatonic_minor", "blues",
+        }
+        if v.lower() not in VALID_MELODIC_SCALES:
+            raise ValueError(
+                f"motif melodic_scale '{v}' is not valid. "
+                f"Choose from {sorted(VALID_MELODIC_SCALES)}."
+            )
+        return v.lower()
 
     @model_validator(mode="after")
     def _rhythm_vel_match(self) -> "MotifModel":

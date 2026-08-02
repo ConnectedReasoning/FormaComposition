@@ -395,3 +395,38 @@ class TestSerialisation:
         m = Motif(intervals=[1, 2], rhythm=[1, 1])
         d = to_dict(m)
         assert "rests" not in d
+
+    def test_round_trip_preserves_melodic_scale(self):
+        """Regression: found during Phase B4 -- generator.py round-trips
+        every piece's motif through from_dict(to_dict(...)) before
+        generate_melody ever sees it (resolve_motif_from_theme ->
+        motif_to_dict, unconditionally, for every piece). Motif originally
+        had no melodic_scale field at all, so it was silently dropped at
+        that very first conversion -- schemas.py validated the field
+        correctly, generate_melody's call site read it correctly, and the
+        bug only showed up in a full main.py render, never in either
+        function tested directly."""
+        original = Motif(intervals=[1, 2], rhythm=[1, 1], melodic_scale="blues")
+        restored = from_dict(to_dict(original))
+        assert restored.melodic_scale == "blues"
+
+    def test_to_dict_omits_melodic_scale_when_none(self):
+        m = Motif(intervals=[1, 2], rhythm=[1, 1])
+        d = to_dict(m)
+        assert "melodic_scale" not in d
+
+    def test_transform_preserves_melodic_scale(self):
+        """A transform changes intervals/rhythm/rests -- never the scale
+        the motif is meant to walk. Without this, any piece using a
+        transform_sequence would silently lose its melodic_scale override
+        the moment a transform fired."""
+        m = Motif(intervals=[2, -1, 3, -2], rhythm=[1.0, 0.5, 0.5, 1.0],
+                   melodic_scale="pentatonic_minor")
+        result = transform(m, "inversion")
+        assert result.melodic_scale == "pentatonic_minor"
+
+    def test_mutate_preserves_melodic_scale(self):
+        m = Motif(intervals=[2, -1, 3, -2], rhythm=[1.0, 0.5, 0.5, 1.0],
+                   melodic_scale="blues")
+        result = mutate(m, mutation_rate=1.0, seed=1)
+        assert result.melodic_scale == "blues"

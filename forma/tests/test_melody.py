@@ -289,6 +289,45 @@ class TestGenerateMelody:
                              total_beats=8.0, seed=13)
         assert a == b
 
+    def test_melodic_scale_overrides_mode_for_pitch_selection(self):
+        """Phase B4: a motif's melodic_scale, when present, determines which
+        scale the melody is quantized to -- independent of the piece's
+        harmonic mode. Here the piece is in C ionian (would include D, F,
+        A, B) but the motif declares C pentatonic_major (only C, D, E, G,
+        A) -- every sounding note must respect the OVERRIDE, not the mode."""
+        motif = {
+            "intervals": [1, 1, 1, 1, 1, 1, 1, 1],
+            "rhythm": [0.5] * 8,
+            "melodic_scale": "pentatonic_major",
+            "transform_pool": [],
+        }
+        notes = generate_melody(
+            _chord(), "C", "ionian", behavior="develop",
+            total_beats=8.0, motif=motif, octave_bottom=60, octave_top=84, seed=1,
+        )
+        sounding = [n.midi_note for n in notes if not n.is_rest]
+        assert sounding  # sanity
+        # C pentatonic_major pitch classes: 0, 2, 4, 7, 9 -- notably
+        # excludes 5 (F) and 11 (B), which ARE in C ionian.
+        assert all(n % 12 in {0, 2, 4, 7, 9} for n in sounding)
+
+    def test_no_melodic_scale_falls_back_to_mode_unchanged(self):
+        """Absent melodic_scale -- every motif written before this field
+        existed -- must behave exactly as before it existed."""
+        motif = {
+            "intervals": [1, 1, 1, 1, 1, 1, 1, 1],
+            "rhythm": [0.5] * 8,
+            "transform_pool": [],
+        }
+        notes = generate_melody(
+            _chord(), "C", "ionian", behavior="develop",
+            total_beats=8.0, motif=motif, octave_bottom=60, octave_top=84, seed=1,
+        )
+        sounding = [n.midi_note for n in notes if not n.is_rest]
+        assert sounding
+        # C ionian pitch classes: 0, 2, 4, 5, 7, 9, 11
+        assert all(n % 12 in {0, 2, 4, 5, 7, 9, 11} for n in sounding)
+
 
 # ===========================================================================
 # generate_melody_for_progression

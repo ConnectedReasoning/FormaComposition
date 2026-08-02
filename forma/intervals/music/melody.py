@@ -720,7 +720,19 @@ def generate_melody(
     if behavior not in BEHAVIOR_GENERATORS:
         raise ValueError(f"Unknown behavior: '{behavior}'. Choose from {list(BEHAVIOR_GENERATORS.keys())}.")
 
-    scale_tones = get_scale_tones(key, mode, octave_bottom, octave_top)
+    # Phase B4: a motif can declare its own melodic_scale, independent of
+    # the piece's harmonic mode (e.g. a blues/pentatonic melody scale over
+    # ordinary diatonic I-IV-V7 harmony). Falls back to the piece's mode
+    # when absent -- every motif without this field behaves exactly as
+    # before it existed. Chord/Roman-numeral resolution is untouched by
+    # this: chords are already resolved (VoicedChord objects passed in)
+    # using the piece's true mode before generate_melody ever runs, so
+    # this only ever affects which scale the MELODY line is quantized to.
+    melodic_scale = None
+    if motif:
+        melodic_scale = motif.get("melodic_scale") if isinstance(motif, dict) \
+            else getattr(motif, "melodic_scale", None)
+    scale_tones = get_scale_tones(key, melodic_scale or mode, octave_bottom, octave_top)
     chord_tones = get_chord_tones_in_register(chord, octave_bottom, octave_top)
 
     # Use prosodic rhythm if provided, otherwise get_pattern
