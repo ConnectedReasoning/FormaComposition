@@ -344,14 +344,17 @@ class TestGenerateDevelop:
         silently mismatched: the WRONG notes could end up treated as the
         ones to skip.
 
-        Note: duration is deliberately NOT compared here. generate_develop
-        never surfaces the motif's own (transformed) rhythm as an actual
-        note's duration -- `note, _ = motif_notes[statement_idx]` discards
-        it explicitly; real output duration always comes from the external
-        rhythm_events grid. A motif with no rests at all also can't make
-        the pairing bug observable, since nothing gets skipped either way
-        -- this motif needs a real rest to make mismatched pairing
-        (skipping the wrong note) detectable at all.
+        Note: duration is deliberately NOT compared here. Shuffle doesn't
+        touch timing at all -- it's augmentation/diminution specifically
+        that now drive real timing from the motif's own rhythm (see
+        TestGenerateDevelop's augmentation/diminution tests below); every
+        other transform, including shuffle, still gets its note's actual
+        duration from the external rhythm_events grid (`note, _ =
+        motif_notes[statement_idx]` still discards the motif's own
+        rhythm value for those). A motif with no rests at all also can't
+        make the shuffle pairing bug observable, since nothing gets
+        skipped either way -- this motif needs a real rest to make
+        mismatched pairing (skipping the wrong note) detectable at all.
         """
         import random as _random
         motif = {
@@ -384,6 +387,94 @@ class TestGenerateDevelop:
                                    rests=transformed.rests)
         expected_pitches = [note for note, _ in expected][:3]
         assert [n.midi_note for n in notes] == expected_pitches
+
+    def test_augmentation_genuinely_doubles_duration_and_halves_note_count(self):
+        """Augmentation is supposed to mean the same notes at half the
+        rate, genuinely taking twice the time -- not a doubled duration
+        number that gets thrown away. Before this fix, generate_develop
+        always sourced actual note duration from the external
+        rhythm_events grid regardless of transform, so augmentation was
+        correctly computed internally and then silently discarded (grep
+        the git history / prior finding: 4 grid onsets in, 4 identical
+        1-beat notes out, same as no transform at all). Now it drives
+        real timing from the transformed motif's own rhythm: 4 grid
+        onsets of 1 beat each (4 beats total) become 2 notes of 2 beats
+        each -- half as many notes, twice as long, same total span."""
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
+                  "transform_pool": ["augmentation"]}
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        notes = generate_develop(
+            _events(4, dur=1.0), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        sounding = [n for n in notes if not n.is_rest]
+        assert [n.duration_beats for n in sounding] == [2.0, 2.0]
+        assert len(sounding) == 2
+        # Total span still fits exactly in the 4-beat window given to
+        # generate_develop -- no overshoot past the chord boundary.
+        assert sounding[-1].start_beat + sounding[-1].duration_beats == 4.0
+
+    def test_diminution_genuinely_halves_duration_and_doubles_note_count(self):
+        """Same fix, opposite direction: diminution means the same notes
+        at twice the rate. 4 grid onsets of 1 beat (4 beats total) become
+        8 notes of 0.5 beats each -- filling the same span, which
+        requires a second retile mid-statement since one 4-note pass at
+        half-duration only covers 2 of the 4 available beats."""
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
+                  "transform_pool": ["diminution"]}
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        notes = generate_develop(
+            _events(4, dur=1.0), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        sounding = [n for n in notes if not n.is_rest]
+        assert len(sounding) == 8
+        assert all(n.duration_beats == 0.5 for n in sounding)
+        assert sounding[-1].start_beat + sounding[-1].duration_beats == 4.0
+
+    def test_augmentation_clamps_to_the_chord_boundary_not_past_it(self):
+        """An augmented statement whose real timing would overshoot the
+        available span must clamp to exactly what's left, the same
+        discipline chord-boundary rhythm slicing already applies
+        elsewhere -- not overshoot into the next chord's territory."""
+        # 3 beats available, augmentation doubles a 1-beat rhythm to 2
+        # beats/note -- the second note would want to run to beat 4, but
+        # only 3 beats are available in this call.
+        motif = {"intervals": [2, -1], "rhythm": [1.0, 1.0],
+                  "transform_pool": ["augmentation"]}
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        notes = generate_develop(
+            _events(3, dur=1.0), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        sounding = [n for n in notes if not n.is_rest]
+        assert sounding[-1].start_beat + sounding[-1].duration_beats == 3.0
+
+    def test_augmentation_rests_consume_time_without_sounding(self):
+        """A rest slot within an augmented statement must still consume
+        its (doubled) share of real time -- motif_to_notes with
+        rests=None (used internally here to get correct total elapsed
+        time) returns a pitch for every slot including rests; this
+        confirms the rest slot is correctly skipped from output while
+        still advancing the timeline, rather than being either emitted
+        as a note or silently compressing the statement's true span."""
+        motif = {
+            "intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
+            "rests": [False, True, False],
+            "transform_pool": ["augmentation"],
+        }
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        notes = generate_develop(
+            _events(3, dur=1.0), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        sounding = [n for n in notes if not n.is_rest]
+        # 3 slots of 1.0 beat -> augmented to 2.0 beats each = 6 beats
+        # total, but only 3 beats are available -- clamped, and the
+        # middle (rest) slot's 2 beats must still have been consumed
+        # before the clamp, not skipped over for free.
+        assert len(sounding) == 1  # only the first slot fits before the boundary
+        assert sounding[0].duration_beats == 2.0
 
 
 # ===========================================================================

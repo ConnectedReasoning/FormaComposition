@@ -682,9 +682,23 @@ def generate_develop(
     statement_idx = 0
     last_transform: Optional[str] = None
 
-    for ev in rhythm_events:
+    # Hard ceiling for augmentation/diminution's real-timing playback below
+    # (see that branch) -- this call's total span, so a stretched statement
+    # gets clamped to fit exactly, the same discipline chord-boundary
+    # slicing already applies elsewhere (e.g. _slice_events_into_window).
+    section_total_beats = (
+        rhythm_events[-1].start_beat + rhythm_events[-1].duration_beats
+        if rhythm_events else 0.0
+    )
+
+    ev_idx = 0
+    n_events = len(rhythm_events)
+    while ev_idx < n_events:
+        ev = rhythm_events[ev_idx]
+
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
+            ev_idx += 1
             continue
 
         # Out of pre-built motif notes — retile a fresh (re-transformed)
@@ -707,12 +721,52 @@ def generate_develop(
                 note = rng.choice(candidates) if candidates else 60
                 vel = int(base_velocity * ev.velocity_scale)
                 notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
+                ev_idx += 1
+                continue
+
+            if last_transform in ("augmentation", "diminution"):
+                # Real timing, not a relabeled grid onset. Augmentation/
+                # diminution are supposed to mean the same notes at twice
+                # or half the rate -- genuinely taking twice or half the
+                # time, the same way Bach's actual technique does, not a
+                # doubled duration number nobody ever plays. Drive this
+                # whole statement's timing from the TRANSFORMED motif's
+                # own (scaled) rhythm directly, starting at this onset,
+                # instead of consuming rhythm_events one-for-one.
+                #
+                # motif_notes (above) already dropped rest slots' timing
+                # entirely -- motif_to_notes with rests=rs never returns
+                # a duration for a rest, so summing motif_notes' own
+                # durations would silently compress the statement's true
+                # span whenever it has any rests. Recomputing with
+                # rests=None gets one entry per slot (sounding AND rest)
+                # so real elapsed time is correct either way; the rests
+                # mask is reapplied here to decide what actually sounds.
+                all_slot_notes = motif_to_notes(
+                    anchor, iv, rh, scale_tones, chord_tones,
+                    MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=None
+                )
+                t = ev.start_beat
+                vel = int(base_velocity * ev.velocity_scale)
+                for i, (note_pitch, dur) in enumerate(all_slot_notes):
+                    if t >= section_total_beats - 1e-9:
+                        break
+                    dur = min(dur, section_total_beats - t)
+                    is_rest_slot = rs is not None and i < len(rs) and rs[i]
+                    if not is_rest_slot:
+                        notes_out.append(MelodyNote(note_pitch, t, dur, vel))
+                    t += dur
+                statement_idx = len(motif_notes)  # fully consumed this pass
+                t_capped = min(t, section_total_beats)
+                while ev_idx < n_events and rhythm_events[ev_idx].start_beat < t_capped - 1e-9:
+                    ev_idx += 1
                 continue
 
         note, _ = motif_notes[statement_idx]
         statement_idx += 1
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
+        ev_idx += 1
 
     return notes_out
 
