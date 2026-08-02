@@ -7,10 +7,10 @@
     "motif": {
       "name": "subject",
       "intervals": [
-        2,
         1,
-        -3,
-        4
+        1,
+        -2,
+        2
       ],
       "rhythm": [
         1.0,

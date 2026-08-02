@@ -7,10 +7,10 @@
     "motif": {
       "name": "anthem_rise",
       "intervals": [
+        1,
         2,
-        3,
-        -2,
-        5
+        -1,
+        3
       ],
       "rhythm": [
         2.0,

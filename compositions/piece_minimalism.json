@@ -3,21 +3,53 @@
     "title": "Phase Glass",
     "key": "A",
     "mode": "aeolian",
-    "tempo": { "min": 80, "max": 96 },
+    "tempo": {
+      "min": 80,
+      "max": 96
+    },
     "motif": {
       "name": "cellular_pattern",
-      "intervals": [0, 3, 2, -5],
-      "rhythm": [1.5, 0.5, 1.5, 0.5],
-      "transform_pool": ["original", "diminution", "retrograde"]
+      "intervals": [
+        0,
+        2,
+        1,
+        -3
+      ],
+      "rhythm": [
+        1.5,
+        0.5,
+        1.5,
+        0.5
+      ],
+      "transform_pool": [
+        "original",
+        "diminution",
+        "retrograde"
+      ]
     },
     "seed": 42,
-    "transform_sequence": ["original", "diminution", "retrograde", "diminution"],
+    "transform_sequence": [
+      "original",
+      "diminution",
+      "retrograde",
+      "diminution"
+    ],
     "sections": [
       {
         "name": "ground",
         "bars": 32,
-        "progression": ["i", "VI", "i", "v"],
-        "chord_bars": [8, 8, 8, 8],
+        "progression": [
+          "i",
+          "VI",
+          "i",
+          "v"
+        ],
+        "chord_bars": [
+          8,
+          8,
+          8,
+          8
+        ],
         "density": "sparse",
         "melody": "develop",
         "bass_style": "steady",
@@ -28,28 +60,56 @@
       {
         "name": "shift",
         "bars": 32,
-        "progression": ["i", "iv", "VI", "v"],
-        "chord_bars": [8, 8, 8, 8],
+        "progression": [
+          "i",
+          "iv",
+          "VI",
+          "v"
+        ],
+        "chord_bars": [
+          8,
+          8,
+          8,
+          8
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pulse",
         "arc": "plateau",
         "rhythm": "motif",
         "rest_probability": 0.0,
-        "counterpoint": { "species": "first", "register": "above", "dissonance": "none" }
+        "counterpoint": {
+          "species": "first",
+          "register": "above",
+          "dissonance": "none"
+        }
       },
       {
         "name": "accumulation",
         "bars": 32,
-        "progression": ["VI", "v", "VI", "v"],
-        "chord_bars": [8, 8, 8, 8],
+        "progression": [
+          "VI",
+          "v",
+          "VI",
+          "v"
+        ],
+        "chord_bars": [
+          8,
+          8,
+          8,
+          8
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "steady",
         "arc": "plateau",
         "rhythm": "motif",
         "rest_probability": 0.0,
-        "counterpoint": { "species": "free", "register": "above", "dissonance": "passing" }
+        "counterpoint": {
+          "species": "free",
+          "register": "above",
+          "dissonance": "passing"
+        }
       }
     ]
   }

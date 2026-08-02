@@ -3,12 +3,30 @@
     "title": "Training (Explicit Chord Bars)",
     "key": "E",
     "mode": "ionian",
-    "tempo": { "min": 100, "max": 120 },
+    "tempo": {
+      "min": 100,
+      "max": 120
+    },
     "motif": {
       "name": "ditty",
-      "intervals": [0, 2, 2, -2, -2],
-      "rhythm":    [1.0, 1.0, 1.0, 0.5, 0.5],
-      "transform_pool": ["inversion", "sequence"]
+      "intervals": [
+        0,
+        1,
+        1,
+        -1,
+        -1
+      ],
+      "rhythm": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "sequence"
+      ]
     },
     "seed": 1894,
     "form_type": "song",
@@ -22,7 +40,9 @@
     "sections": {
       "intro": {
         "bars": 1,
-        "progression": ["I"],
+        "progression": [
+          "I"
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
@@ -36,8 +56,16 @@
       },
       "verse": {
         "bars": 6,
-        "progression": ["I", "IV", "V"],
-        "chord_bars": [3, 2, 1],
+        "progression": [
+          "I",
+          "IV",
+          "V"
+        ],
+        "chord_bars": [
+          3,
+          2,
+          1
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
@@ -51,8 +79,18 @@
       },
       "chorus": {
         "bars": 5,
-        "progression": ["I", "vi", "IV", "V"],
-        "chord_bars": [2, 1, 1, 1],
+        "progression": [
+          "I",
+          "vi",
+          "IV",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          1,
+          1,
+          1
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",

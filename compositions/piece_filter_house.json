@@ -8,9 +8,9 @@
       "name": "disco_slice",
       "intervals": [
         0,
+        1,
         2,
-        3,
-        -2
+        -1
       ],
       "rhythm": [
         0.5,

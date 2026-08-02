@@ -7,9 +7,9 @@
     "motif": {
       "name": "xanadu_call",
       "intervals": [
-        5,
         3,
-        -4,
+        2,
+        -2,
         -2,
         1
       ],

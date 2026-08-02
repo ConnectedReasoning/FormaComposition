@@ -7,10 +7,10 @@
     "motif": {
       "name": "drift",
       "intervals": [
-        4,
-        -2,
-        3,
-        -5
+        2,
+        -1,
+        2,
+        -3
       ],
       "rhythm": [
         2.0,

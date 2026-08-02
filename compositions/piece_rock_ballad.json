@@ -7,10 +7,10 @@
     "motif": {
       "name": "embers_hook",
       "intervals": [
-        2,
-        2,
-        -1,
-        -2
+        1,
+        1,
+        0,
+        -1
       ],
       "rhythm": [
         1.0,

@@ -3,22 +3,24 @@
     "title": "Training",
     "key": "E",
     "mode": "mixolydian",
-    "tempo": { "min": 100, "max": 120 },
-
-    "motif" : {
-      "intervals" : [
-        -1,
+    "tempo": {
+      "min": 100,
+      "max": 120
+    },
+    "motif": {
+      "intervals": [
+        0,
+        0,
+        0,
+        0,
         1,
         -1,
-        1,
-        2,
-        -2,
-        -1,
+        0,
         0,
         0
       ],
-      "name" : "First Motif motif",
-      "rests" : [
+      "name": "First Motif motif",
+      "rests": [
         false,
         false,
         false,
@@ -29,7 +31,7 @@
         true,
         true
       ],
-      "rhythm" : [
+      "rhythm": [
         0.5,
         1,
         2,
@@ -40,13 +42,11 @@
         0.5,
         0.5
       ],
-      "transform_pool" : [
+      "transform_pool": [
         "inversion",
         "augmentation"
       ]
-    }
-
-,
+    },
     "seed": 1894,
     "form_type": "song",
     "form": [
@@ -55,10 +55,18 @@
       "chorus"
     ],
     "sections": {
-      "intro":{
+      "intro": {
         "bars": 6,
-        "progression": ["I", "V", "IV"],
-        "chord_bars": [1.0, 2.0, 3.0 ],
+        "progression": [
+          "I",
+          "V",
+          "IV"
+        ],
+        "chord_bars": [
+          1.0,
+          2.0,
+          3.0
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
@@ -69,10 +77,18 @@
         },
         "rest_probability": 0.0
       },
-      "verse":{
+      "verse": {
         "bars": 6,
-        "progression": ["V", "VI", "V"],
-        "chord_bars": [ 2.0, 2.0, 2.0 ],
+        "progression": [
+          "V",
+          "VI",
+          "V"
+        ],
+        "chord_bars": [
+          2.0,
+          2.0,
+          2.0
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
@@ -83,10 +99,18 @@
         },
         "rest_probability": 0.0
       },
-      "chorus":{
+      "chorus": {
         "bars": 12,
-        "progression": ["VI", "III", "II"],
-        "chord_bars": [ 1.0, 2.0, 3.0 ],
+        "progression": [
+          "VI",
+          "III",
+          "II"
+        ],
+        "chord_bars": [
+          1.0,
+          2.0,
+          3.0
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "pedal",
