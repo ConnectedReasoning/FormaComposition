@@ -134,13 +134,15 @@ class TestTransformDiminution:
 
 
 class TestTransformTranspose:
-    def test_transpose_up_adds_two_semitones(self):
+    def test_transpose_up_adds_one_diatonic_step(self):
+        # Phase B3: 1 diatonic step (decided), was 2 under the old
+        # semitone contract.
         result = transform(_src(), "transpose_up")
-        assert result.intervals == [4, 1, 5, 0]
+        assert result.intervals == [3, 0, 4, -1]
 
-    def test_transpose_down_subtracts_two_semitones(self):
+    def test_transpose_down_subtracts_one_diatonic_step(self):
         result = transform(_src(), "transpose_down")
-        assert result.intervals == [0, -3, 1, -4]
+        assert result.intervals == [1, -2, 2, -3]
 
 
 class TestTransformExpand:

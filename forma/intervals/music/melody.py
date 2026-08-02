@@ -232,7 +232,10 @@ def apply_transform(
       retrograde   — reverse the sequence
       augmentation — double all durations (applied to rhythm separately)
       diminution   — halve all durations (applied to rhythm separately)
-      transpose    — shift all intervals by +2 (adds variety; NOT harmony-aware)
+      transpose    — shift all intervals by +1 diatonic step (decided,
+                     Phase B3 — was +2 semitones under the old contract;
+                     adds variety; NOT harmony-aware, unlike "sequence"
+                     below)
       shuffle      — randomly reorder intervals
       sequence     — diatonic (harmony-aware) restatement at a new scale
                      degree; requires scale_tones + degree_shift from the
@@ -249,7 +252,7 @@ def apply_transform(
     elif transform == "retrograde":
         return list(reversed(intervals))
     elif transform == "transpose":
-        return [i + 2 for i in intervals]
+        return [i + 1 for i in intervals]
     elif transform == "shuffle":
         shuffled = list(intervals)
         rng.shuffle(shuffled)

@@ -42,16 +42,22 @@ class Motif:
                     trace that motivated this: four of nine ±1-semitone
                     steps collapsed back to their starting pitch because the
                     local scale gap was a whole tone).
-                    PENDING: the code below (motif_to_notes, apply_transform,
-                    interval_range, TRANSFORM_DESCRIPTIONS' semitone-based
-                    entries) still implements the OLD semitone contract as of
-                    this comment. This docstring states the target spec that
-                    Phase B migrates the implementation to match — it is not
-                    yet true of the running code. Chromatic alterations
-                    (borrowed chords, secondary-dominant coloring of the
-                    melodic line) are intentionally out of scope for this
-                    field — those are authored manually in Logic after
-                    render, not modeled by `intervals`.
+                    STATUS: motif_to_notes (Phase B2) now walks diatonic
+                    degree space natively, and apply_transform's transpose
+                    (Phase B3) uses the decided magnitude of 1 diatonic
+                    step. Both now implement this docstring's contract, not
+                    the old one. Still untouched: mutate()'s and
+                    generate_random()'s default interval_range/max_interval
+                    values (2 and 5) were tuned for semitone-scale
+                    variation; whether those specific defaults are still
+                    the right magnitudes for diatonic-step variation is a
+                    separate, unscoped question -- not addressed by B2/B3,
+                    since neither function is apply_transform/transform().
+                    Chromatic alterations (borrowed chords, secondary-
+                    dominant coloring of the melodic line) remain
+                    intentionally out of scope for this field — those are
+                    authored manually in Logic after render, not modeled
+                    by `intervals`.
     rhythm:         Duration in beats for each note.
                     e.g. [1.0, 0.5, 0.5, 1.0]
     name:           Optional label for identification.
@@ -97,10 +103,11 @@ class Motif:
 
     def interval_range(self) -> int:
         """Total span of the motif, in whatever unit `intervals` currently
-        holds (semitones under the present implementation; will read as
-        diatonic scale-degree span once Phase B lands — see
-        Motif.intervals docstring). Callers relying on this as a semitone
-        width for register planning should re-check after that migration."""
+        holds. As of Phase B2/B3, that's diatonic scale-degree span for any
+        motif produced by motif_to_notes or apply_transform's transpose —
+        see Motif.intervals docstring. Callers that previously relied on
+        this as a semitone width for register planning should re-check
+        their assumption now that it reads in scale degrees."""
         pos = 0
         positions = [0]
         for i in self.intervals:
@@ -125,12 +132,9 @@ TRANSFORM_DESCRIPTIONS = {
     "retrograde":    "Reverse the interval sequence",
     "augmentation":  "Double all note durations",
     "diminution":    "Halve all note durations",
-    # PENDING (Phase B): magnitude below is the OLD semitone contract's value.
-    # Once intervals migrate to diatonic scale-degree steps, this needs an
-    # explicit decision — transpose by 1 diatonic step (nearest neighbor) or
-    # 2 (a third-ish) — not a silent carry-over of "2".
-    "transpose_up":  "Shift all intervals up by 2 semitones",
-    "transpose_down":"Shift all intervals down by 2 semitones",
+    # DECIDED (Phase B3): 1 diatonic step (nearest scale-degree neighbor).
+    "transpose_up":  "Shift all intervals up by 1 diatonic step",
+    "transpose_down":"Shift all intervals down by 1 diatonic step",
     "shuffle":       "Randomly reorder intervals",
     "expand":        "Scale intervals by 1.5 (wider leaps)",
     "compress":      "Scale intervals by 0.5, rounded (smaller steps)",
@@ -183,10 +187,12 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         rhythm = [max(0.25, r * 0.5) for r in rhythm]
 
     elif transform_name == "transpose_up":
-        intervals = [i + 2 for i in intervals]
+        # Phase B3: 1 diatonic step (decided) -- was 2 under the old
+        # semitone contract; see TRANSFORM_DESCRIPTIONS above.
+        intervals = [i + 1 for i in intervals]
 
     elif transform_name == "transpose_down":
-        intervals = [i - 2 for i in intervals]
+        intervals = [i - 1 for i in intervals]
 
     elif transform_name == "shuffle":
         if rests is not None:
