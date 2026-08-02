@@ -1,4 +1,4 @@
-# FormaComposition JSON Cheat Sheet (v7 — trimmed to reference, no changelog/footnotes)
+# FormaComposition JSON Cheat Sheet (v9 — Values columns, behavior notes as bullets)
 
 One file per piece (`piece_*.json`) — no separate `theme_*.json`. `key`/`mode`/`motif`/
 `motifs`/`tempo` live on the piece top level alongside `title`/`sections`/`form`.
@@ -8,28 +8,36 @@ One file per piece (`piece_*.json`) — no separate `theme_*.json`. `key`/`mode`
 
 ## Theme fields (on the piece file)
 
-| Field | Type | Required | Notes |
+| Field | Type | Required | Values |
 |---|---|---|---|
-| `key` | string | yes | not enum-checked here |
-| `mode` | string | yes | not enum-checked here |
-| `motif` | object | one of motif/motifs | see Motif below |
-| `motifs` | array | one of motif/motifs | if both set, `motifs` wins |
-| `tempo` | `{min,max}` or int | yes | bare int auto-coerced to fixed range |
-| `name` | string | no | |
+| `key` | string | yes | `C, C#, D, D#, E, F, F#, G, G#, A, A#, B, Db, Eb, Gb, Ab, Bb` |
+| `mode` | string | yes | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian` |
+| `motif` | object | one of motif/motifs | see Motif section below |
+| `motifs` | array | one of motif/motifs | array of motif objects — see Motif section below |
+| `tempo` | object or int | yes | `{min,max}` or bare int |
+| `name` | string | no | free text |
+
+- `key`/`mode` at this level are not enum-checked by the engine, but the values above are the only real ones.
+- If both `motif` and `motifs` are set, `motifs` wins.
+- A bare int for `tempo` is auto-coerced to a fixed range.
 
 ### `tempo`
-| Field | Range |
+| Field | Values |
 |---|---|
 | `min` / `max` | 20–300, max ≥ min |
 
 ### `motif` / `motifs[]`
-| Field | Type | Required | Notes |
+| Field | Type | Required | Values |
 |---|---|---|---|
 | `intervals` | array of int | yes | semitones |
-| `rhythm` | array of float | no | needed for `rhythm: "motif"` |
-| `transform_pool` | array | no, default `[]` | only `inversion`/`retrograde`/`shuffle`/`sequence` vary pitch in `develop`. `augmentation`/`diminution` are rhythm-only. `transpose_up`/`transpose_down` are dead. `retrograde_inversion`/`expand`/`compress` are pitch no-ops. |
-| `velocities` | array of float | no | 0.0–1.0 multipliers, not raw MIDI velocity |
-| `name` | string | no | |
+| `rhythm` | array of float | no | — |
+| `transform_pool` | array | no, default `[]` | `original, inversion, retrograde, retrograde_inversion, augmentation, diminution, transpose_up, transpose_down, shuffle, expand, compress, sequence` |
+| `velocities` | array of float | no | 0.0–1.0 |
+| `name` | string | no | free text |
+
+- `rhythm` is needed for `rhythm: "motif"`.
+- Of the `transform_pool` values: only `inversion`/`retrograde`/`shuffle`/`sequence` vary pitch in `develop`. `augmentation`/`diminution` are rhythm-only. `transpose_up`/`transpose_down` are dead. `retrograde_inversion`/`expand`/`compress` are pitch no-ops.
+- `velocities` are multipliers, not raw MIDI velocity.
 
 ---
 
@@ -54,42 +62,62 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 ## PIECE (`piece_*.json`)
 
 ### Top level (PieceModel)
-| Field | Type | Required | Notes |
+| Field | Type | Required | Values |
 |---|---|---|---|
-| `form` | array | song form only | each entry's `section` must exist in `sections` |
-| `form_type` | `narrative`\|`song` | no, default `narrative` | |
-| `sections` | array (narrative) or dict (song) | yes | |
-| `seed` | int | no, default 42 | |
-| `title` | string | no | |
-| `transform_sequence` | array | no | wraps if shorter than section count |
+| `form` | array | song form only | array of `{section, exact_repeat}` — see Song form below |
+| `form_type` | enum | no, default `narrative` | `narrative, song` |
+| `sections` | array or dict | yes | array (narrative form) or dict (song form) |
+| `seed` | int | no, default 42 | — |
+| `title` | string | no | free text |
+| `transform_sequence` | array | no | — |
+
+- Each `form[]` entry's `section` must exist in `sections`.
+- `transform_sequence` wraps if shorter than the section count.
 
 ### Section (SectionModel)
-| Field | Type | Default | Notes |
+| Field | Type | Default | Values |
 |---|---|---|---|
 | `arc` | enum | `swell` | `swell, build, fade, fade_in, fade_out, plateau, decay, breath` — see Arc table |
-| `bars` | float | 8 | |
-| `bass_rest_probability` | float | 0.0 | thins bass; refused on `walking`/`melodic` |
-| `bass_style` | enum | `root_fifth` | `root_fifth, walking, pedal, root_only, melodic, steady, pulse, motif`. `motif` needs a theme motif with `intervals`+`rhythm`. Swing only audible on `melodic`/`motif`. |
+| `bars` | float | 8 | — |
+| `bass_rest_probability` | float | 0.0 | 0.0–1.0 |
+| `bass_style` | enum | `root_fifth` | `root_fifth, walking, pedal, root_only, melodic, steady, pulse, motif` |
 | `beats_per_bar` | int | 4 | 1–16 |
-| `chord_bars` | array of float | — | must match `progression` length; tiles to fill `bars` if shorter |
-| `counterpoint` | object/array | — | up to 3 voices; `voices[]` overrides if both set |
+| `chord_bars` | array of float | — | — |
+| `counterpoint` | object or array | — | see Counterpoint table below |
 | `density` | enum | `medium` | `low, sparse, medium, full` |
-| `drums` | string/object | — | patterns: `four_on_floor, backbeat, halftime, minimal, sideclick` |
-| `fugal_techniques` | dict | — | `canon_interval` needs `canonic_imitation: true` or it's a no-op |
-| `groove` | string | — | must be a valid `GROOVES` key |
-| `harmony_pattern` | object | — | required if `harmony_rhythm.rhythm: "pattern"` |
-| `harmony_rest_probability` | float | 0.0 | no-op under `sustain` |
-| `harmony_rhythm` | object | — | must be an object, not a bare string — see table below |
-| `key` | string | — | overrides theme key |
-| `melodic_variation` | enum | — | `isorhythmic` — needs `rhythm: "motif"` + multi-motif pool + no lead motif override |
-| `melody` | enum/object | `generative` (bare) / `lyrical` (dict, unset `behavior`) | `lyrical, generative, sparse, develop`. `develop` is lead-voice only — no-op on peer voices. |
-| `mode` | string | — | overrides theme mode |
-| `note_length_range` | `{min,max,quantum?}` | — | melody + free-species counterpoint only; needs `rhythm: "free"`; ignored under `groove` or `pattern`/`motif` rhythm |
-| `progression` | array of string | yes | not enum-validated, no max length |
-| `rest_probability` | float | 0.0 | melody only |
-| `rhythm` | enum | yes | `motif, pattern, free` — timing, separate from `melody` behavior |
-| `swing` | float | 0.0 | 0–1; audible on bass only via `melodic`/`motif` |
-| `voices` | array | — | peer voices, up to 4 total — see table below |
+| `drums` | string or object | — | see Drums table below |
+| `fugal_techniques` | dict | — | — |
+| `groove` | string | — | `straight, push, backbeat, syncopated, halftime, shuffle, broken, clave, waltz, offbeat, driving` |
+| `harmony_pattern` | object | — | see `rhythm_pattern` / `harmony_pattern` table below |
+| `harmony_rest_probability` | float | 0.0 | 0.0–1.0 |
+| `harmony_rhythm` | object | — | see Harmony rhythm table below |
+| `key` | string | — | `C, C#, D, D#, E, F, F#, G, G#, A, A#, B, Db, Eb, Gb, Ab, Bb` |
+| `melodic_variation` | enum | — | `isorhythmic` |
+| `melody` | enum or object | `generative` (bare) / `lyrical` (dict, unset `behavior`) | `lyrical, generative, sparse, develop` |
+| `mode` | string | — | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian` |
+| `note_length_range` | object | — | `{min, max, quantum?}` |
+| `progression` | array of string | yes | Roman numerals, not enum-validated, no max length |
+| `rest_probability` | float | 0.0 | 0.0–1.0 |
+| `rhythm` | enum | yes | `motif, pattern, free` |
+| `swing` | float | 0.0 | 0–1 |
+| `voices` | array | — | up to 4 total — see Voices table below |
+
+- `bass_rest_probability` is refused on `walking`/`melodic` bass styles.
+- `bass_style: "motif"` needs a theme motif with `intervals`+`rhythm`. Swing on bass is only audible on `melodic`/`motif`.
+- `chord_bars` must match `progression` length; tiles to fill `bars` if shorter.
+- `counterpoint`: up to 3 voices; `voices[]` overrides if both set.
+- `drums` string is a pattern name; object form uses the Drums table.
+- `fugal_techniques.canon_interval` needs `canonic_imitation: true` or it's a no-op.
+- `harmony_pattern` is required if `harmony_rhythm.rhythm: "pattern"`.
+- `harmony_rest_probability` is a no-op under `sustain`.
+- `harmony_rhythm` must be an object, not a bare string.
+- `key`/`mode` here override the theme-level key/mode.
+- `melodic_variation: "isorhythmic"` needs `rhythm: "motif"` + multi-motif pool + no lead motif override.
+- `melody: "develop"` is lead-voice only — no-op on peer voices.
+- `note_length_range` applies to melody + free-species counterpoint only; needs `rhythm: "free"`; ignored under `groove` or `pattern`/`motif` rhythm.
+- `rest_probability` is melody only.
+- `rhythm` (timing) is separate from `melody` (behavior).
+- `swing` on bass is audible only via `melodic`/`motif` bass styles.
 
 ### Arc curves
 | `arc` | Shape | Range |
@@ -105,66 +133,80 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 Cross-section blending is always on (up to 4 bars / 25% of section) — not disableable.
 
 ### `harmony_rhythm`
-| Field | Notes |
+| Field | Values |
 |---|---|
-| `density` | `low, sparse, medium, full` — no effect under `sustain` |
-| `groove` | inert under `sustain`/`motif`, audible only under `free` |
-| `motif` | harmony's own motif, independent of melody's; only resolves under `rhythm: "motif"` |
-| `rhythm` | `motif, pattern, sustain, free`. `sustain` = zero internal motion. |
+| `density` | `low, sparse, medium, full` |
+| `groove` | must be a valid groove name — see Section `groove` values |
+| `motif` | object — see Motif section |
+| `rhythm` | `motif, pattern, sustain, free` |
 | `swing` | 0–1 |
-| `transform_imitation` | **don't set** — `"strict"` hard-crashes at render time |
+| `transform_imitation` | do not set |
+
+- `density` has no effect under `sustain`.
+- `groove` is inert under `sustain`/`motif`, audible only under `free`.
+- `motif` is harmony's own motif, independent of melody's; only resolves under `rhythm: "motif"`.
+- `rhythm: "sustain"` = zero internal motion.
+- `transform_imitation: "strict"` hard-crashes at render time.
 
 ### `counterpoint[]`
-| Field | Default | Notes |
+| Field | Default | Values |
 |---|---|---|
-| `canon_offset` | 0.0 | |
+| `canon_offset` | 0.0 | — |
 | `dissonance` | `passing` | `none, passing, neighbor, free` |
-| `groove` | — | free species only |
-| `motif` | — | free species only, rhythm only |
-| `note_length_range` | — | free species only |
-| `register` | `below` | `above, below` — relative to melody's rendered range |
-| `rhythm_density` | `medium` | free species only |
-| `species` | `free` | only `free`/`first` implemented — others fail at validation |
+| `groove` | — | valid groove name — free species only |
+| `motif` | — | object — free species only |
+| `note_length_range` | — | `{min, max, quantum?}` — free species only |
+| `register` | `below` | `above, below` |
+| `rhythm_density` | `medium` | `low, sparse, medium, full` — free species only |
+| `species` | `free` | `free, first, second, third, fourth, fifth` |
 | `velocity` | 58 | 1–127 |
 
-Cap: 3 voices max.
+- `register` (`above`/`below`) is relative to melody's rendered range, not a fixed band.
+- Of the `species` values, only `free`/`first` are implemented — others fail at validation.
+- `motif` on a counterpoint voice affects rhythm only, never pitch.
+- Cap: 3 voices max.
 
 ### `voices[]` — up to 4 total (1 lead + 3 peers)
-| Field | Default | Notes |
+| Field | Default | Values |
 |---|---|---|
-| `behavior` | `lyrical` | `develop` no-op on peer voices |
-| `canon_offset` | 0.0 | |
-| `dissonance` | `passing` | |
-| `motif` | — | lead voice (`voices[0]`) only |
-| `register` | `mid` | absolute — `high, mid, low_mid, low, above, below` + SATB names |
-| `rest_probability` | — | overrides section default |
-| `species` | — | switches to counterpoint path |
+| `behavior` | `lyrical` | `lyrical, generative, sparse, develop` |
+| `canon_offset` | 0.0 | — |
+| `dissonance` | `passing` | `none, passing, neighbor, free` |
+| `motif` | — | object |
+| `register` | `mid` | `high, mid, low_mid, low, above, below` + SATB names |
+| `rest_probability` | — | 0.0–1.0 |
+| `species` | — | `free, first, second, third, fourth, fifth` |
 | `velocity` | 64 | 1–127 |
 
-Cap: 4 voices max.
+- `behavior: "develop"` is a no-op on peer voices (`voices[1:]`).
+- `motif` only applies to the lead voice (`voices[0]`).
+- `register` is absolute (unlike counterpoint's relative `above`/`below`).
+- `rest_probability` overrides the section default.
+- Setting `species` switches the voice onto the counterpoint path.
+- Cap: 4 voices max.
 
 ### `drums`
-| Field | Default |
-|---|---|
-| `density` | inherits section |
-| `groove` | inherits section |
-| `pattern` | `four_on_floor` (5 total patterns) |
-| `swing` | inherits section |
+| Field | Default | Values |
+|---|---|---|
+| `density` | inherits section | `low, sparse, medium, full` |
+| `groove` | inherits section | valid groove name |
+| `pattern` | `four_on_floor` | `four_on_floor, backbeat, halftime, minimal, sideclick` |
+| `swing` | inherits section | 0–1 |
 
 ### `rhythm_pattern` / `harmony_pattern`
-| Field | Notes |
-|---|---|
-| `durations` | required, matches `onsets` length |
-| `length_beats` | default 8.0 |
-| `onsets` | required |
-| `velocities` | optional, 0.0–1.0 multipliers |
+| Field | Required | Values |
+|---|---|---|
+| `durations` | yes | array, matches `onsets` length |
+| `length_beats` | no, default 8.0 | — |
+| `onsets` | yes | array |
+| `velocities` | no | 0.0–1.0 |
 
 ### Song form: `form[]`
-| Field | Default |
-|---|---|
-| `exact_repeat` | `false` |
-| `section` | required, must exist in `sections` |
-| `variation` | removed — hard validation error if set |
+| Field | Default | Values |
+|---|---|---|
+| `exact_repeat` | `false` | boolean |
+| `section` | required | must exist in `sections` |
+| `variation` | — | removed — hard validation error if set |
 
 ---
 
@@ -200,31 +242,11 @@ Default melody register: 60–84. Counterpoint's `above`/`below` is relative to 
 
 ## Harmonic structure
 
-| Concept | Field | Notes |
+| Concept | Field | Values |
 |---|---|---|
 | Chord sequence | `progression` | list of Roman numerals, not enum-validated |
 | Per-chord duration | `chord_bars` | must match `progression` length |
 | No length cap | — | keep ≤10 chords/section (seed-collision risk above that, unless `rhythm: "sustain"`) |
-
----
-
-## Enum reference
-
-- **Density**: `low, sparse, medium, full`
-- **Melody**: `lyrical, generative, sparse, develop`
-- **Bass style**: `root_fifth, walking, pedal, root_only, melodic, steady, pulse, motif`
-- **Arc**: `swell, fade, build, plateau, decay, fade_in, fade_out, breath`
-- **Rhythm source (section)**: `motif, pattern, free`
-- **Harmony rhythm source**: `motif, pattern, sustain, free`
-- **Transform**: `original, inversion, retrograde, retrograde_inversion, augmentation, diminution, transpose_up, transpose_down, shuffle, expand, compress, sequence` — only `inversion, retrograde, shuffle, sequence` vary pitch in `develop`
-- **Counterpoint species**: `free, first, second, third, fourth, fifth` — only `free`/`first` implemented
-- **Counterpoint register**: `above, below`
-- **Dissonance**: `none, passing, neighbor, free`
-- **Voice register**: `high, mid, low_mid, low, above, below` + SATB names
-- **Section key**: `C, C#, D, D#, E, F, F#, G, G#, A, A#, B, Db, Eb, Gb, Ab, Bb`
-- **Section mode**: `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian`
-- **Drum pattern**: `four_on_floor, backbeat, halftime, minimal, sideclick`
-- **Groove**: `straight, push, backbeat, syncopated, halftime, shuffle, broken, clave, waltz, offbeat, driving`
 
 ---
 
