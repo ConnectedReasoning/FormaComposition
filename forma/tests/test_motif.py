@@ -56,7 +56,25 @@ class TestMotifConstruction:
 
     def test_interval_range(self):
         # positions: 0, 2, 1, 4, 2 -> max 4, min 0 -> range 4
+        # This is diatonic scale-DEGREE span as of Phase B5 -- see
+        # Motif.interval_range docstring. The raw arithmetic is unchanged
+        # from before the migration; what changed is what the number 4
+        # actually means (scale degrees, not semitones).
         assert _src().interval_range() == 4
+
+    def test_semitone_span_resolves_actual_register_width(self):
+        """Phase B5: interval_range() alone can't answer 'how many
+        semitones does this actually span' anymore, since a diatonic step
+        isn't a fixed semitone count. semitone_span(mode) resolves the
+        same motif's degree positions against a real mode's pitch classes.
+        Same motif, same interval_range()==4, but the true width differs
+        by mode -- 7 semitones in ionian (0,4,2,7,4), 6 in locrian
+        (0,3,1,6,3) -- because the two modes place their scale degrees at
+        different semitone offsets."""
+        m = _src()
+        assert m.interval_range() == 4
+        assert m.semitone_span("ionian") == 7
+        assert m.semitone_span("locrian") == 6
 
     def test_contour(self):
         assert _src().contour() == ["U", "D", "U", "D"]

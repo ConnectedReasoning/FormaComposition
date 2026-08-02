@@ -43,16 +43,22 @@ class Motif:
                     steps collapsed back to their starting pitch because the
                     local scale gap was a whole tone).
                     STATUS: motif_to_notes (Phase B2) now walks diatonic
-                    degree space natively, and apply_transform's transpose
+                    degree space natively, apply_transform's transpose
                     (Phase B3) uses the decided magnitude of 1 diatonic
-                    step. Both now implement this docstring's contract, not
-                    the old one. Still untouched: mutate()'s and
-                    generate_random()'s default interval_range/max_interval
-                    values (2 and 5) were tuned for semitone-scale
-                    variation; whether those specific defaults are still
-                    the right magnitudes for diatonic-step variation is a
-                    separate, unscoped question -- not addressed by B2/B3,
-                    since neither function is apply_transform/transform().
+                    step, melodic_scale (Phase B4) lets a motif walk a
+                    scale decoupled from the piece's harmonic mode, and
+                    interval_range()/semitone_span() (Phase B5) now state
+                    plainly which of the two questions each one answers —
+                    scale-degree span vs. actual semitone/register width —
+                    instead of leaving that ambiguous. All now implement
+                    this docstring's contract, not the old one. Still
+                    untouched: mutate()'s and generate_random()'s default
+                    interval_range/max_interval values (2 and 5) were tuned
+                    for semitone-scale variation; whether those specific
+                    defaults are still the right magnitudes for diatonic-
+                    step variation is a separate, unscoped question -- not
+                    addressed by B2/B3/B5, since none of those functions
+                    are apply_transform/transform()/interval_range().
                     Chromatic alterations (borrowed chords, secondary-
                     dominant coloring of the melodic line) remain
                     intentionally out of scope for this field — those are
@@ -108,18 +114,60 @@ class Motif:
         return sum(self.rhythm)
 
     def interval_range(self) -> int:
-        """Total span of the motif, in whatever unit `intervals` currently
-        holds. As of Phase B2/B3, that's diatonic scale-degree span for any
-        motif produced by motif_to_notes or apply_transform's transpose —
-        see Motif.intervals docstring. Callers that previously relied on
-        this as a semitone width for register planning should re-check
-        their assumption now that it reads in scale degrees."""
+        """
+        Total DIATONIC SCALE-DEGREE span of the motif — how many scale
+        steps separate its highest and lowest points, not semitones.
+
+        This is a genuine unit change (Phase B5), not a hedge: every motif
+        produced by motif_to_notes or apply_transform's transpose (Phase
+        B2/B3) now holds diatonic steps in `intervals`, so this number
+        means "spans N scale degrees," e.g. 4 means a fourth-to-fifth-ish
+        range depending on the mode — not "spans 4 semitones." A motif
+        with the same shape sounds like a wider or narrower leap in
+        different modes even though this number is identical, because a
+        diatonic step is a variable number of semitones depending on where
+        in the mode it falls (most steps are a whole tone, but every mode
+        has exactly one or two half-step positions — see harmony.py's
+        MODES). If you need the actual semitone/register width instead of
+        the scale-degree count, use semitone_span(mode) below, which
+        resolves this the way it actually sounds in a given mode.
+        """
         pos = 0
         positions = [0]
         for i in self.intervals:
             pos += i
             positions.append(pos)
         return max(positions) - min(positions)
+
+    def semitone_span(self, mode: str) -> int:
+        """
+        Actual semitone width the motif spans when interpreted in `mode`.
+
+        interval_range() alone can't answer this (Phase B5): it returns
+        diatonic-DEGREE span, which doesn't translate to a fixed semitone
+        count without knowing the mode's own step pattern. This resolves
+        each cumulative scale-degree position to its real semitone offset
+        within `mode` and returns the true register width — the question
+        interval_range() used to answer for free back when `intervals`
+        held semitones directly, before Phase B2/B3 changed what unit is
+        actually stored.
+
+        Reuses harmony.py's MODES (already a sorted pitch-class list per
+        mode, same shape scale_degrees.degree_to_pitch expects) rather
+        than re-deriving scale tones from a key/register — this only
+        needs the mode's shape, not an absolute pitch, since it's
+        measuring a relative span.
+        """
+        from intervals.music.harmony import MODES
+        from intervals.music.scale_degrees import degree_to_pitch
+
+        pcs = MODES[mode.lower()]
+        pos = 0
+        pitches = [degree_to_pitch(0, pcs)]
+        for i in self.intervals:
+            pos += i
+            pitches.append(degree_to_pitch(pos, pcs))
+        return max(pitches) - min(pitches)
 
     def contour(self) -> list[str]:
         """Melodic contour as a string of U(p), D(own), S(ame)."""
@@ -478,7 +526,8 @@ if __name__ == "__main__":
 
     print(f"Source:  {source}")
     print(f"Contour: {source.contour()}")
-    print(f"Range:   {source.interval_range()} semitones")
+    print(f"Range:   {source.interval_range()} diatonic scale degrees")
+    print(f"Span:    {source.semitone_span('dorian')} semitones (in dorian)")
     print(f"Duration:{source.total_duration()} beats\n")
 
     # Apply every transform
