@@ -28,6 +28,7 @@ from intervals.music.melody import (
     nearest_scale_tone,
 )
 from intervals.music.rhythm import RhythmEvent
+from intervals.music.motif import Motif, transform as motif_transform
 
 
 def _chord(root="C", quality="major", notes=(60, 64, 67)):
@@ -264,6 +265,125 @@ class TestGenerateDevelop:
         assert len(notes) == 2
         assert all(not n.is_rest for n in notes)
         assert all(n.midi_note == 60 for n in notes)  # only candidate available
+
+    def test_transpose_up_actually_transforms_pitch(self):
+        """Regression for Finding 0 (scoped and fixed separately from
+        Phase B): transpose_up used to be a silent no-op in develop --
+        melody.py's old three-function split didn't recognize the name,
+        fell through to unchanged intervals, no error, no log. A
+        single-option transform_pool forces deterministic selection, so
+        the transformed result is fully derivable by calling motif.py's
+        own transform() directly -- the same canonical implementation
+        generate_develop now routes through."""
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
+                  "transform_pool": ["transpose_up"]}
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        notes = generate_develop(
+            _events(3), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        transformed = motif_transform(
+            Motif(intervals=[2, -1, 3], rhythm=[1.0, 1.0, 1.0]), "transpose_up"
+        )
+        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=[60, 64, 67],
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP)
+        assert [(n.midi_note, n.duration_beats) for n in notes] == expected
+
+        # And confirm it's NOT the untransformed baseline -- the actual
+        # regression this guards against was "transpose_up chosen, nothing
+        # audibly changes."
+        baseline = motif_to_notes(60, [2, -1, 3], [1.0, 1.0, 1.0],
+                                   scale_tones=scale, chord_tones=[60, 64, 67],
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP)
+        assert expected != baseline
+
+    def test_retrograde_inversion_actually_transforms_pitch(self):
+        """Same regression as transpose_up, for another name melody.py's
+        old split never recognized either."""
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
+                  "transform_pool": ["retrograde_inversion"]}
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        notes = generate_develop(
+            _events(3), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        transformed = motif_transform(
+            Motif(intervals=[2, -1, 3], rhythm=[1.0, 1.0, 1.0]), "retrograde_inversion"
+        )
+        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=[60, 64, 67],
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP)
+        assert [(n.midi_note, n.duration_beats) for n in notes] == expected
+
+    def test_original_in_transform_pool_does_not_crash(self):
+        """Regression guard for the OTHER risk unifying created: motif.py's
+        transform() raises ValueError on 'original' (it has no no-op case
+        -- its other caller handles 'original' as a sentinel before ever
+        calling transform()). Before this fix, 'original' in a
+        transform_pool "worked" only by accident, via the old split's
+        unconditional fallthrough. Must still produce notes, not raise."""
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
+                  "transform_pool": ["original"]}
+        notes = generate_develop(
+            _events(3), _chord(), [60, 62, 64, 65, 67, 69, 71], [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+        )
+        assert len(notes) == 3
+        assert all(not n.is_rest for n in notes)
+
+    def test_shuffle_reorders_rests_together_with_pitch(self):
+        """Deliberate behavior change from unifying (Finding 0): motif.py's
+        shuffle reorders intervals+rhythm+rests as ONE paired permutation.
+        The old split (apply_transform for pitch, apply_rhythm_transform
+        for rhythm/rests) couldn't do this -- neither had a "shuffle" case,
+        so pitch reordered while rests stayed in original position,
+        silently mismatched: the WRONG notes could end up treated as the
+        ones to skip.
+
+        Note: duration is deliberately NOT compared here. generate_develop
+        never surfaces the motif's own (transformed) rhythm as an actual
+        note's duration -- `note, _ = motif_notes[statement_idx]` discards
+        it explicitly; real output duration always comes from the external
+        rhythm_events grid. A motif with no rests at all also can't make
+        the pairing bug observable, since nothing gets skipped either way
+        -- this motif needs a real rest to make mismatched pairing
+        (skipping the wrong note) detectable at all.
+        """
+        import random as _random
+        motif = {
+            "intervals": [2, -1, 3, -2], "rhythm": [0.25, 0.5, 0.75, 1.0],
+            "rests": [False, True, False, False],
+            "transform_pool": ["shuffle"],
+        }
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        seed = 5
+        notes = generate_develop(
+            _events(3, dur=1.0), _chord(), scale, [60, 64, 67],
+            prev_note=60, base_velocity=80, seed=seed, motif=motif,
+        )
+
+        # Replicate generate_develop's own rng sequence: one draw to pick
+        # "shuffle" from the (single-option) pool, then one draw for the
+        # sub-seed handed to motif.py's transform().
+        rng = _random.Random(seed)
+        rng.choice(["shuffle"])
+        sub_seed = rng.randint(0, 2**31 - 1)
+        transformed = motif_transform(
+            Motif(intervals=[2, -1, 3, -2], rhythm=[0.25, 0.5, 0.75, 1.0],
+                  rests=[False, True, False, False]),
+            "shuffle", seed=sub_seed,
+        )
+        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=[60, 64, 67],
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   rests=transformed.rests)
+        expected_pitches = [note for note, _ in expected][:3]
+        assert [n.midi_note for n in notes] == expected_pitches
 
 
 # ===========================================================================

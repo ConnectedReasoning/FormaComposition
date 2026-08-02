@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
 from intervals.music.scale_degrees import pitch_classes, degree_to_pitch, pitch_to_degree
+from intervals.music.motif import Motif, transform as apply_motif_transform
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern, apply_swing, remap_swing_ratio,
     apply_rhythm_transform, apply_rests_transform,
@@ -603,20 +604,77 @@ def generate_develop(
 
     def _transformed_statement(prev_transform: Optional[str]) -> tuple[list[int], list[float], Optional[list[bool]]]:
         """One retransformed pass of the motif, avoiding an immediate repeat
-        of the previous repetition's transform when the pool allows it."""
+        of the previous repetition's transform when the pool allows it.
+
+        Unified (Finding 0, scoped separately from Phase C): previously this
+        called three independent functions -- apply_transform (pitch),
+        apply_rhythm_transform (rhythm), apply_rests_transform (rests) --
+        none of which recognized transpose_up/transpose_down/
+        retrograde_inversion/expand/compress, all of which are valid
+        TransformLiteral schema values. Any pool containing one of those
+        silently did nothing when chosen: no error, no log, just an
+        unchanged repetition indistinguishable from a deliberate one. Now
+        routes through motif.py's transform() -- the canonical, complete
+        implementation already used by the piece-level transform_sequence
+        mechanism -- for every transform except two that transform() can't
+        (or, for one of them, must not) handle:
+
+        - "sequence": harmony-aware (needs scale_tones + degree_shift from
+          THIS chord's position in the progression), which has no place in
+          transform()'s signature. Stays a melody.py-side special case,
+          unchanged from before.
+        - "original" / no transform chosen: transform() raises
+          ValueError("Unknown transform: 'original'") -- it has no no-op
+          case, because motif.py's other caller (the piece-level
+          transform_sequence mechanism) handles "original" as a sentinel
+          BEFORE ever calling transform(), not inside it. Here, the only
+          reason "original" appearing in a transform_pool has ever worked
+          is that the OLD three-function split's fallthrough (`else:
+          return list(intervals)`) happened to produce the right answer by
+          accident. That fallthrough is exactly what's being removed, so
+          "original" needs its own explicit no-op case now, or a piece
+          using it in transform_pool would start crashing instead of
+          silently working -- a real regression risk, caught during
+          scoping, not after.
+
+        A real, deliberate behavior change from unifying (not a bug in
+        this change): motif.py's shuffle reorders intervals+rhythm+rests
+        TOGETHER as one paired shuffle. The old split-call approach
+        couldn't do that -- neither apply_transform nor
+        apply_rhythm_transform had a "shuffle" case for rhythm/rests, so
+        pitch reordered while rests stayed in original position: the
+        WRONG notes could end up treated as the ones to skip. This is
+        NOT an audible-duration change, though -- generate_develop always
+        takes a note's actual duration from the external rhythm_events
+        grid (see the final MelodyNote construction below: `note, _ =
+        motif_notes[statement_idx]` discards the motif's own rhythm
+        value explicitly). The observable consequence of correct pairing
+        here is which pitches survive a rest-bearing motif's shuffle, not
+        how long they last.
+        """
         choices = pool
         if pool and len(pool) > 1 and prev_transform is not None:
             choices = [t for t in pool if t != prev_transform] or pool
-        transform = rng.choice(choices) if choices else None
-        if not transform:
-            return base_intervals, base_rhythm, base_rests
-        iv = apply_transform(
-            base_intervals, transform, rng=rng,
-            scale_tones=scale_tones, degree_shift=degree_shift,
-        )
-        rh = apply_rhythm_transform(base_rhythm, transform)
-        rs = apply_rests_transform(base_rests, transform)
-        return iv, rh, rs, transform
+        transform_name = rng.choice(choices) if choices else None
+
+        if not transform_name or transform_name == "original":
+            return base_intervals, base_rhythm, base_rests, transform_name
+
+        if transform_name == "sequence":
+            iv = apply_transform(
+                base_intervals, transform_name, rng=rng,
+                scale_tones=scale_tones, degree_shift=degree_shift,
+            )
+            return iv, base_rhythm, base_rests, transform_name
+
+        # Sub-seed derived from the live rng, not the outer `seed` param
+        # directly -- keeps transform()'s internal shuffle randomness
+        # deterministic without correlating every shuffle to the same
+        # draw as the pool's transform-name choice.
+        sub_seed = rng.randint(0, 2**31 - 1)
+        source = Motif(intervals=base_intervals, rhythm=base_rhythm, rests=base_rests)
+        transformed = apply_motif_transform(source, transform_name, seed=sub_seed)
+        return transformed.intervals, transformed.rhythm, transformed.rests, transform_name
 
     notes_out = []
     start = _pick_start_note(chord_tones, scale_tones, prev_note)
