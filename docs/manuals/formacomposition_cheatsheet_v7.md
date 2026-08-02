@@ -1,4 +1,4 @@
-# FormaComposition JSON Cheat Sheet (v9 — Values columns, behavior notes as bullets)
+# FormaComposition JSON Cheat Sheet (v10 — diatonic-motif migration + transform_pool fixes reflected; see Motif section)
 
 One file per piece (`piece_*.json`) — no separate `theme_*.json`. `key`/`mode`/`motif`/
 `motifs`/`tempo` live on the piece top level alongside `title`/`sections`/`form`.
@@ -29,14 +29,19 @@ One file per piece (`piece_*.json`) — no separate `theme_*.json`. `key`/`mode`
 ### `motif` / `motifs[]`
 | Field | Type | Required | Values |
 |---|---|---|---|
-| `intervals` | array of int | yes | semitones |
+| `intervals` | array of int | yes | diatonic scale-degree steps (NOT semitones — migrated; see below) |
 | `rhythm` | array of float | no | — |
 | `transform_pool` | array | no, default `[]` | `original, inversion, retrograde, retrograde_inversion, augmentation, diminution, transpose_up, transpose_down, shuffle, expand, compress, sequence` |
 | `velocities` | array of float | no | 0.0–1.0 |
 | `name` | string | no | free text |
+| `melodic_scale` | string | no | 7 standard modes, or `pentatonic_major`, `pentatonic_minor`, `blues` |
 
 - `rhythm` is needed for `rhythm: "motif"`.
-- Of the `transform_pool` values: only `inversion`/`retrograde`/`shuffle`/`sequence` vary pitch in `develop`. `augmentation`/`diminution` are rhythm-only. `transpose_up`/`transpose_down` are dead. `retrograde_inversion`/`expand`/`compress` are pitch no-ops.
+- **`intervals` are diatonic scale-degree steps**, resolved against the mode (or `melodic_scale`, if set) — not semitones. `[2, -1, 3]` means up 2 scale degrees, down 1, up 3. Every resulting note lands on a scale tone by construction; there's no separate quantization step to silently erase a small interval the way the old semitone contract could (a ±1-semitone neighbor-tone step could land exactly between two scale tones a whole-tone apart and snap back to where it started — the bug that motivated this migration). Chromatic alterations (borrowed chords, secondary-dominant coloring) are intentionally out of scope for this field — author those by hand in Logic after render.
+- **All `transform_pool` values now genuinely work in `develop`**, including pitch variation: `inversion`, `retrograde`, `retrograde_inversion`, `transpose_up`, `transpose_down`, `shuffle`, `expand`, `compress`, `sequence` (harmony-aware), and `original` (explicit no-op). Earlier versions of this doc listed `transpose_up`/`transpose_down` as dead and `retrograde_inversion`/`expand`/`compress` as pitch no-ops — that was accurate at the time (a routing gap meant those names fell through to a silent no-op in `develop` specifically) and has since been fixed.
+- **`augmentation`/`diminution` now genuinely stretch/compress real output**, not just an internally-computed value that got discarded — a statement using either drives its actual timing from the transformed (doubled/halved) rhythm, clamped to fit the available span exactly, rather than reusing the section's pre-built onset grid. Half as many notes at twice the length (augmentation) or twice as many at half the length (diminution), same total span.
+- **`shuffle` reorders intervals + rhythm + rests together as one paired permutation** — a piece using `shuffle` may sound different from before this was fixed (pitch and rests used to be able to shuffle out of alignment; now they move as a unit).
+- **`melodic_scale`** (optional): overrides which scale `intervals` walks for THIS motif's pitches, independent of the piece's harmonic `mode`. Chords/Roman-numeral resolution never read this field — harmony stays on the piece's `mode` regardless, so a piece can keep ordinary diatonic I–IV–V7 harmony while its melody walks a pentatonic/blues scale on top, which is the actual relationship blues melody has to its harmony (the two scales genuinely differ — that's what makes a blue note "blue"). Accepts the 7 standard modes too, not just pentatonic/blues. Omitted → melody uses the piece's `mode`, unchanged from before this field existed.
 - `velocities` are multipliers, not raw MIDI velocity.
 
 ---
@@ -259,7 +264,7 @@ Legal ≠ memorable. `lint.py` catches broken settings; `slop_metrics.py` (auto-
 ### Piece-tier metrics (these discriminate)
 | Metric | Threshold | Fix |
 |---|---|---|
-| Motif identity | FAIL <10%, WARN <25% | `develop` on `voices[0]`; prune `transform_pool` to `inversion`/`retrograde`/`shuffle`/`sequence` |
+| Motif identity | FAIL <10%, WARN <25% | `develop` on `voices[0]`; a smaller `transform_pool` gives tighter, more recognizable identity (all 10 real transforms now vary pitch or rhythm — this is a variety-vs-recognizability choice, not working around a dead transform) |
 | Leap profile | FAIL ≥35%/10%, WARN ≥28%/5% | narrow `register`; prefer `develop` over `lyrical`/`generative` |
 | Harmony mass | FAIL ≥4.0×, WARN ≥3.0× | move toward `rhythm: "sustain"`, or drop `density` |
 

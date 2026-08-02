@@ -477,7 +477,17 @@ class MotifModel(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     name:           Optional[str]          = None
-    intervals:      list[int]              = Field(min_length=1)
+    intervals:      list[int]              = Field(
+        min_length=1,
+        description=(
+            "Diatonic scale-degree steps between successive notes, resolved "
+            "against the piece's mode (or melodic_scale, if set) -- NOT "
+            "semitones. E.g. [2, -1, 3] means up 2 scale degrees, down 1, "
+            "up 3. Every resulting note lands on a scale tone by "
+            "construction. See motif.py's Motif.intervals docstring for "
+            "the full contract and migration history."
+        ),
+    )
     rhythm:         Optional[list[float]]  = None
     rests:          Optional[list[bool]]   = None
     velocities:     Optional[list[float]]  = None
