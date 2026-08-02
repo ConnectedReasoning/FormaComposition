@@ -28,6 +28,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
+from intervals.music.scale_degrees import pitch_classes, degree_to_pitch, pitch_to_degree
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern, apply_swing, remap_swing_ratio,
     apply_rhythm_transform, apply_rests_transform,
@@ -148,14 +149,10 @@ def _sequence_intervals_diatonically(
     steps (not semitones), snapping each note to the scale.
 
     PENDING (Phase B): this function currently assumes `intervals` arrives
-    in semitones and converts to degree-space internally just for this one
-    transform. Once Motif.intervals natively holds diatonic steps (see
-    that docstring), the degree/pitch conversion below (_pitch_to_degree /
-    _degree_to_pitch) becomes the reusable primitive Phase B1 generalizes
-    for motif_to_notes itself — and this function's own semitone-to-degree
-    conversion step becomes unnecessary, since the input would already be
-    in degree space. Revisit at that point rather than carrying this
-    function forward unchanged.
+    in semitones. Once Motif.intervals natively holds diatonic steps (see
+    that docstring), Phase B2 reuses the same scale_degrees primitives this
+    function now calls — motif_to_notes will walk degree space directly
+    instead of converting semitones to degrees just for this one transform.
 
     This is a real/tonal sequence in the Piston sense: the harmony moves by
     some interval (e.g. the descending-fifths vi-ii-v-I chain), and the
@@ -175,27 +172,49 @@ def _sequence_intervals_diatonically(
     final absolute pitches into the melody register one octave at a time,
     so this only needs to get the pitch-class shape right; register
     placement is someone else's job, correctly, downstream.
+
+    Pitch-to-degree conversion (Phase B1) is sequential: each note's degree
+    is resolved relative to the previous note's degree, not independently,
+    so a genuine tie (a pitch exactly halfway between two scale degrees)
+    breaks toward the small step rather than an accidental octave jump —
+    see scale_degrees.pitch_to_degree for the case that motivated this.
     """
     if not scale_tones or degree_shift == 0:
         return list(intervals)
 
-    pcs = sorted(set(t % 12 for t in scale_tones))
-    n = len(pcs)
+    pcs = pitch_classes(scale_tones)
     anchor = scale_tones[len(scale_tones) // 2]
 
-    def _pitch_to_degree(p: int) -> int:
-        octave, pc = divmod(p, 12)
-        idx = min(range(n), key=lambda i: min(abs(pcs[i] - pc), 12 - abs(pcs[i] - pc)))
-        return idx + n * octave
-
-    def _degree_to_pitch(d: int) -> int:
-        octave, idx = divmod(d, n)
-        return pcs[idx] + 12 * octave
-
+    anchor_degree = pitch_to_degree(anchor, pcs)
     abs_pitches = [anchor + iv for iv in intervals]
-    degrees = [_pitch_to_degree(p) for p in abs_pitches]
-    shifted_pitches = [_degree_to_pitch(d + degree_shift) for d in degrees]
-    return [p - shifted_pitches[0] for p in shifted_pitches]
+    degrees = []
+    prev_degree = anchor_degree
+    for p in abs_pitches:
+        d = pitch_to_degree(p, pcs, prev_degree=prev_degree)
+        degrees.append(d)
+        prev_degree = d
+
+    # PRE-EXISTING BUG FIX (found while doing Phase B1, not introduced by
+    # it — the original code had this same defect, just never exercised by
+    # any test): motif_to_notes consumes `intervals` as successive deltas
+    # (each one added cumulatively to a running pitch), the same convention
+    # every other transform in apply_transform already follows. The
+    # previous version here returned offsets-from-the-first-note instead,
+    # which is a different shape entirely once fed through cumulative
+    # addition (verified: produced deltas like 16, 31, 43 on a real motif
+    # instead of small diatonic steps). Fixed by shifting the anchor's own
+    # degree along with every note's, then re-deriving successive deltas
+    # from that shifted reference point — this preserves the motif's shape
+    # exactly the way "sequence" is supposed to (same relative contour,
+    # restated `degree_shift` diatonic steps higher/lower).
+    shifted_anchor_pitch = degree_to_pitch(anchor_degree + degree_shift, pcs)
+    shifted_pitches = [degree_to_pitch(d + degree_shift, pcs) for d in degrees]
+    deltas = []
+    prev_pitch = shifted_anchor_pitch
+    for p in shifted_pitches:
+        deltas.append(p - prev_pitch)
+        prev_pitch = p
+    return deltas
 
 
 def apply_transform(
