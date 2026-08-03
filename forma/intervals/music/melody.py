@@ -478,7 +478,21 @@ def generate_generative(
     context: Optional[dict] = None,
     rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
-    """Freely picks notes from weighted pool of chord + scale tones."""
+    """
+    Freely picks notes from weighted pool of chord + scale tones.
+
+    Apex/goal-tone bias (Phase 3 of the apex/goal-tone build): when
+    context["melodic_arc"] is present with an "apex_degree", the
+    proximity-filtered candidate pool below is additionally weighted
+    toward the declared apex before apex_position, and away from it
+    after — see melodic_shape.apex_weighted_candidates. Absent
+    melodic_arc, behavior is byte-identical to before this existed.
+
+    Cadence pull is new here, not a generalization of an existing
+    mechanism the way it was for generate_lyrical (which already had an
+    is_last_note/next-chord-tone extension to generalize) — this
+    behavior had no cadence-adjacent logic at all before this phase.
+    """
     rng = random.Random(seed) if seed is not None else random.Random()
 
     cw, sw, _ = BEHAVIOR_WEIGHTS["generative"]
@@ -491,13 +505,29 @@ def generate_generative(
     notes_out = []
     current = prev_note or _pick_start_note(chord_tones, scale_tones, None)
 
-    for ev in rhythm_events:
+    melodic_arc = context.get("melodic_arc") if context else None
+    apex_pitch = context.get("apex_pitch") if context else None
+    apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
+
+    for i, ev in enumerate(rhythm_events):
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
         # Prefer notes within a 5th of current for smooth motion
         close = [n for n, _ in pool if abs(n - current) <= 7]
         candidates = close if close else [n for n, _ in pool]
+
+        if apex_pitch is not None:
+            position_t = _position_t_from_context(context, ev.start_beat)
+            candidates = apex_weighted_candidates(
+                candidates, current, apex_pitch, position_t, apex_position,
+            )
+
+        is_last_note = (i == len(rhythm_events) - 1)
+        if melodic_arc and is_last_note and context and context.get("is_cadential_chord"):
+            resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, current)
+            candidates = cadence_weighted_candidates(candidates, resolution_pitch)
+
         note = rng.choice(candidates)
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
