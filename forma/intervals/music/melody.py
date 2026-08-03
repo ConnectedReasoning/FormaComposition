@@ -32,7 +32,10 @@ from intervals.music.scale_degrees import pitch_classes, degree_to_pitch, pitch_
 from intervals.music.motif import Motif, transform as apply_motif_transform
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern, apply_swing, remap_swing_ratio,
-    apply_rhythm_transform, apply_rests_transform,
+    apply_rhythm_transform, apply_rests_transform, section_position_t,
+)
+from intervals.music.melodic_shape import (
+    resolve_apex_pitch, apex_weighted_candidates, cadence_weighted_candidates,
 )
 
 # ---------------------------------------------------------------------------
@@ -390,6 +393,69 @@ def motif_to_notes(
 # Behavior generators
 # ---------------------------------------------------------------------------
 
+def _position_t_from_context(context: Optional[dict], local_start_beat: float) -> float:
+    """
+    Melody's normalized position within the SECTION (not just the current
+    chord), for apex/cadence bias (Phase 2 of the apex/goal-tone build).
+
+    generate_lyrical/generate_develop/etc. are called per-CHORD with
+    rhythm_events expressed in chord-LOCAL beat coordinates (first onset
+    at 0.0 for every chord) — see generate_melody_for_progression's
+    chord_rhythm slicing. That local coordinate alone can't answer "how
+    far through the section are we," so generate_melody_for_progression
+    threads section_total_bars/section_beat_offset/beats_per_bar through
+    chord_context for exactly this purpose.
+
+    Converts to bar_index and calls rhythm.section_position_t() — the
+    SAME formula generator.py's velocity_envelope already uses for the
+    dynamic arc, extracted there specifically so this wouldn't become a
+    second, independently-drifting implementation of "where are we in
+    the section" (see melodic_shape.py's module docstring, and
+    rhythm.section_position_t's own docstring, for why that mattered
+    enough to extract ahead of building this).
+
+    Returns 0.0 (start-of-section) if the required context fields are
+    absent — safe and inert, since callers only consult this value when
+    melodic_arc bias was actually requested; a missing field here means
+    generate_melody_for_progression didn't provide it, not that position
+    is genuinely unknown for a caller that needs it.
+    """
+    if not context:
+        return 0.0
+    total_bars = context.get("section_total_bars")
+    beat_offset = context.get("section_beat_offset")
+    bpb = context.get("beats_per_bar")
+    if total_bars is None or beat_offset is None or not bpb:
+        return 0.0
+    absolute_beat = beat_offset + local_start_beat
+    bar_index = int(absolute_beat // bpb)
+    return section_position_t(bar_index, total_bars)
+
+
+def _cadence_resolution_pitch(chord: VoicedChord, chord_tones: list[int], current: int) -> int:
+    """
+    The pitch cadence_weighted_candidates should resolve toward: this
+    chord's ROOT, in melody register, nearest wherever the melody
+    currently sits — not necessarily chord_tones[0] (which is register-
+    sorted, not root-first once the chord is expanded across octaves),
+    and not the piece's tonic (a section can legitimately cadence on a
+    non-tonic harmonic goal, e.g. a half-cadence on V — resolving toward
+    whatever chord is actually functioning as the cadential goal is the
+    musically honest interpretation of "goal-tone pull," matching the
+    original diagnosis: weight toward the target of the CURRENT harmonic
+    function, not an assumed one).
+
+    chord.root_name is authoritative regardless of inversion (midi_notes[0]
+    is the lowest voiced note, which for an inverted chord is the third or
+    fifth, not the root) — CHROMATIC gives its pitch class directly.
+    """
+    root_pc = CHROMATIC.index(chord.root_name)
+    root_candidates = [c for c in chord_tones if c % 12 == root_pc]
+    if not root_candidates:
+        return chord_tones[0] if chord_tones else current
+    return min(root_candidates, key=lambda c: abs(c - current))
+
+
 def _pick_start_note(chord_tones: list[int], scale_tones: list[int], prev_note: Optional[int]) -> int:
     """Pick a good starting note — chord tone near previous note if available."""
     if not chord_tones:
@@ -451,7 +517,25 @@ def generate_lyrical(
     context: Optional[dict] = None,
     rest_probability: float = 0.0,
 ) -> list[MelodyNote]:
-    """Stepwise motion, gravitates toward chord tones, longer phrases."""
+    """
+    Stepwise motion, gravitates toward chord tones, longer phrases.
+
+    Apex/goal-tone bias (Phase 2 of the apex/goal-tone build): when
+    context["melodic_arc"] is present with an "apex_degree", this
+    behavior's previously-aimless per-note coin flip (`direction =
+    rng.choice([-1, 1])`) is replaced by a purposeful bias toward the
+    declared apex before apex_position, and away from it (settling)
+    after — see melodic_shape.apex_weighted_candidates. Absent
+    melodic_arc, behavior is byte-identical to before this existed: same
+    coin flip, same everything.
+
+    Cadence pull layers on top, independently: at whichever chord Phase
+    0's cadence decision marks as cadential (context["is_cadential_chord"]),
+    the final note is additionally weighted toward that chord's root —
+    generalizing the existing next-chord-tone extension below (which stays
+    unconditional; it's a different, always-useful thing: smooth
+    voice-leading into whatever comes next, not a harmonic arrival).
+    """
     rng = random.Random(seed) if seed is not None else random.Random()
 
     notes_out = []
@@ -464,6 +548,10 @@ def generate_lyrical(
             context.get("octave_bottom", MELODY_OCTAVE_BOTTOM),
             context.get("octave_top", MELODY_OCTAVE_TOP),
         )
+
+    melodic_arc = context.get("melodic_arc") if context else None
+    apex_pitch = context.get("apex_pitch") if context else None
+    apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
 
     for i, ev in enumerate(rhythm_events):
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
@@ -481,10 +569,20 @@ def generate_lyrical(
         if is_last_note and context and next_chord_tones != chord_tones:
             candidates.extend(next_chord_tones)
 
-        direction = rng.choice([-1, 1])
-        directed = [n for n in candidates if (n - current) * direction > 0]
-        if directed:
-            candidates = directed
+        if apex_pitch is not None:
+            position_t = _position_t_from_context(context, ev.start_beat)
+            candidates = apex_weighted_candidates(
+                candidates, current, apex_pitch, position_t, apex_position,
+            )
+        else:
+            direction = rng.choice([-1, 1])
+            directed = [n for n in candidates if (n - current) * direction > 0]
+            if directed:
+                candidates = directed
+
+        if melodic_arc and is_last_note and context and context.get("is_cadential_chord"):
+            resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, current)
+            candidates = cadence_weighted_candidates(candidates, resolution_pitch)
 
         note = rng.choice(candidates) if candidates else current
         vel = int(base_velocity * ev.velocity_scale)
@@ -948,6 +1046,8 @@ def generate_melody_for_progression(
     arc: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
+    melodic_arc: Optional[dict] = None,
+    progression_cycle_length: Optional[int] = None,
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -978,6 +1078,29 @@ def generate_melody_for_progression(
             the previous section's ending contour. Only the section opening is
             affected; normal generation takes over afterward.
         arc: The section's declared arc (used only for the opening bias).
+        melodic_arc: Optional apex/goal-tone config (Phase 2 of the
+            apex/goal-tone build — see melodic_shape.py), e.g.
+            {"apex_degree": 4, "apex_position": 0.7}. Absent (the
+            default) means no apex or cadence bias at all — every call
+            site that doesn't pass this behaves exactly as before this
+            feature existed. Currently wired into generate_lyrical only;
+            the other three behaviors don't consult it yet.
+        progression_cycle_length: The ORIGINAL (untiled) progression
+            length, for cadence detection (Phase 0's "resolve every
+            cycle" decision) — REQUIRED if melodic_arc's
+            resolve_every_cycle is True, since `chords` here is already
+            tiled (see resolved_progression() in schemas.py) and carries
+            no memory of how long one repeat was. resolve_every_cycle
+            False (the default) ignores this entirely and treats `chords`
+            as a single cycle — cadence fires once, on the true final
+            chord: a vamp that keeps its groove through every repeat and
+            only resolves when the section actually ends.
+            resolve_every_cycle True fires cadence at every repeat
+            instead — a hook that resolves each time it comes around.
+            Both are real (see melodic_shape.py's module docstring for
+            which songs motivated keeping both); this single field is
+            the actual toggle between them, not a separate knob a caller
+            could set inconsistently with melodic_arc's own declared intent.
 
     Returns:
         Flat list of MelodyNote spanning the entire progression
@@ -987,6 +1110,50 @@ def generate_melody_for_progression(
         bpc_list = [float(bars_per_chord)] * len(chords)
     else:
         bpc_list = list(bars_per_chord)
+
+    # Section-wide bar count, for apex/cadence bias's position_t (Phase 2
+    # of the apex/goal-tone build) -- matches generator.py's
+    # env_total_bars = max(1, int(round(total_beats / beats_per_bar)))
+    # rounding convention exactly, so melody's dynamic-arc position and
+    # its apex-bias position agree on what "N bars" means for this
+    # section, not just on the position-within-those-bars formula
+    # (already unified via rhythm.section_position_t).
+    section_total_bars = max(1, int(round(sum(bpc_list))))
+    # resolve_every_cycle is the single, actually-functional toggle here
+    # (Phase 0's cadence decision) -- not a separate cycle_length knob a
+    # caller could set inconsistently with what melodic_arc declares.
+    # progression_cycle_length is only consulted when resolve_every_cycle
+    # is explicitly True; otherwise cadence always means "the section's
+    # true final chord," regardless of whether a cycle length was passed.
+    resolve_every_cycle = bool(melodic_arc and melodic_arc.get("resolve_every_cycle"))
+    effective_cycle_length = (
+        progression_cycle_length
+        if resolve_every_cycle and progression_cycle_length
+        else len(chords)
+    )
+
+    # Resolve the apex target ONCE for the whole section, not per chord.
+    # BUG CAUGHT DURING THIS PHASE'S OWN VERIFICATION (statistical check
+    # across 30 seeds showed no measurable position effect, despite a
+    # single-seed dump looking convincing): the first version of this
+    # wiring called resolve_apex_pitch() fresh inside generate_lyrical on
+    # every per-chord invocation, anchored to THAT call's own local
+    # `current`. Since `current` reflects wherever the melody already is
+    # at that point, the "target" silently followed the melody around
+    # instead of being a fixed point to build toward -- defeating the
+    # entire mechanism while still returning plausible-looking notes, so
+    # nothing about it looked obviously broken until measured statistically.
+    # Anchoring to the register's center instead gives a stable,
+    # predictable octave placement independent of where the melody
+    # happens to wander.
+    apex_pitch = None
+    if melodic_arc and melodic_arc.get("apex_degree") is not None:
+        scale_tones_for_apex = get_scale_tones(key, mode, octave_bottom, octave_top)
+        register_center = (octave_bottom + octave_top) // 2
+        apex_pitch = resolve_apex_pitch(
+            melodic_arc["apex_degree"], scale_tones_for_apex,
+            octave_bottom, octave_top, anchor=register_center,
+        )
 
     # Apply fugal techniques to motif if specified
     effective_motif = motif
@@ -1096,6 +1263,31 @@ def generate_melody_for_progression(
             # actual range instead of the global melody default.
             "octave_bottom": octave_bottom,
             "octave_top": octave_top,
+            # Apex/goal-tone bias (Phase 2 of the apex/goal-tone build).
+            # melodic_arc itself is just handed through unchanged; the
+            # three fields below let a behavior function compute this
+            # note's position_t via _position_t_from_context() without
+            # needing to know beat_offset/total_bars are section-wide
+            # concepts this per-chord call wouldn't otherwise have access
+            # to (rhythm_events here are already chord-local).
+            "melodic_arc": melodic_arc,
+            "apex_pitch": apex_pitch,
+            "section_total_bars": section_total_bars,
+            "section_beat_offset": beat_offset,
+            "beats_per_bar": beats_per_bar,
+            # True exactly at the chord(s) Phase 0's cadence decision
+            # identifies as cadential: every effective_cycle_length-th
+            # chord. effective_cycle_length == len(chords) (the default,
+            # cycle_length not passed) means this fires ONCE, on the
+            # section's true final chord only -- a vamp/loop keeps its
+            # groove through every repeat and only resolves when the
+            # section actually ends. Passing the ORIGINAL (untiled)
+            # progression length instead fires it at every repeat -- a
+            # hook that resolves each time it comes around. Both are
+            # real (see melodic_shape.py's module docstring); this is
+            # the one place that decision is made, so every behavior's
+            # notion of "is this cadential" means the same thing.
+            "is_cadential_chord": (i % effective_cycle_length) == (effective_cycle_length - 1),
         }
 
         # Slice rhythm events for this chord's time window

@@ -193,6 +193,108 @@ class TestGenerateLyrical:
         notes = generate_lyrical(_events(3), _chord(), tones, [60], 60, 80, seed=5)
         assert all(n.midi_note == 60 for n in notes if not n.is_rest)
 
+    def test_no_melodic_arc_is_byte_identical_to_before_the_feature_existed(self):
+        """Absent context, or context without a melodic_arc key, must
+        produce the exact same output as before Phase 2 -- the coin-flip
+        direction logic stays completely untouched."""
+        a = generate_lyrical(_events(5), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                              [60, 64, 67], 60, 80, seed=9)
+        b = generate_lyrical(_events(5), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                              [60, 64, 67], 60, 80, seed=9, context={})
+        assert a == b
+
+    def test_apex_weighting_prefers_candidates_closer_to_the_target(self):
+        """Hand-derivable single-note check: with apex_pitch pre-resolved
+        and pushed into context (as generate_melody_for_progression does
+        -- see the module-level bug note below), the very first note
+        chosen must be pulled toward the apex rather than random, given a
+        seed/pool combination where the bias is the only thing that could
+        produce this specific note over many draws.
+
+        Regression note: this exercises context["apex_pitch"] directly
+        rather than re-deriving it from melodic_arc/current inside
+        generate_lyrical -- the first version of this wiring resolved
+        apex_pitch fresh, per chord, anchored to that chord's own local
+        `current`. Since current reflects wherever the melody already is,
+        the "target" silently followed the melody around instead of
+        being fixed -- a real bug caught only by a statistical check
+        across many seeds (a single-seed dump looked plausible), not by
+        any single-note assertion like this one. Fixed by resolving
+        apex_pitch ONCE in generate_melody_for_progression, anchored to
+        the register's center, and threading the already-resolved pitch
+        through context instead of re-deriving it downstream.
+        """
+        context = {
+            "melodic_arc": {"apex_degree": 4, "apex_position": 0.7},
+            "apex_pitch": 79,
+            "section_total_bars": 12,
+            "section_beat_offset": 0.0,
+            "beats_per_bar": 4,
+        }
+        notes = generate_lyrical(_events(1), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                                  [60, 64, 67], prev_note=65, base_velocity=80,
+                                  seed=3, context=context)
+        # current resolves to 64 (nearest chord tone to prev_note=65, per
+        # _pick_start_note) -- dist(64, apex=79) = 15. The chosen note
+        # must be strictly closer to apex_pitch than that, confirming a
+        # preferred (weighted) candidate was drawn rather than an
+        # arbitrary one. Verified this exact seed/setup produces 65
+        # (dist=14, legitimately preferred) before pinning it here.
+        assert notes[0].midi_note == 65
+        assert abs(notes[0].midi_note - 79) < abs(64 - 79)
+
+    def test_apex_bias_shape_tracks_the_declared_position_statistically(self):
+        """The mechanism this exists to build: a phrase that builds toward
+        a declared apex_position and settles afterward. A single seed's
+        note sequence isn't reliable evidence for a stochastic, weighted
+        mechanism (confirmed during Phase 2's own verification: a
+        convincing-looking single-seed dump was masking the per-chord
+        anchor bug above). This checks the actual claim statistically,
+        across a fixed set of seeds, using average pitch by position
+        window rather than a single global maximum -- a global peak is a
+        noisy metric for a stepwise random walk (one lucky spike anywhere
+        skews it); the windowed average is what actually distinguishes a
+        real build-and-settle shape from an undirected walk.
+
+        Asserts the qualitative, robust claim (peak window is measurably
+        higher than both the early and late windows) rather than an exact
+        number, since the underlying mechanism is a weighted preference,
+        not a deterministic target -- see melodic_shape.py's module
+        docstring on why it's designed that way.
+        """
+        chords = resolve_progression(["I", "IV", "V"] * 4, "C", "ionian", density="medium")
+
+        def avg_pitch_in_window(seed, lo, hi):
+            notes = generate_melody_for_progression(
+                chords, "C", "ionian", behavior="lyrical",
+                bars_per_chord=1.0, beats_per_bar=4, seed=seed,
+                melodic_arc={"apex_degree": 4, "apex_position": 0.7},
+            )
+            sounding = [n for n in notes if not n.is_rest]
+            total = max(n.start_beat for n in sounding)
+            vals = [n.midi_note for n in sounding if lo <= n.start_beat / total < hi]
+            return sum(vals) / len(vals) if vals else None
+
+        seeds = range(15)
+        early = [avg_pitch_in_window(s, 0.0, 0.2) for s in seeds]
+        near_apex = [avg_pitch_in_window(s, 0.6, 0.8) for s in seeds]
+        late = [avg_pitch_in_window(s, 0.9, 1.0) for s in seeds]
+
+        mean_early = sum(v for v in early if v is not None) / len([v for v in early if v is not None])
+        mean_apex = sum(v for v in near_apex if v is not None) / len([v for v in near_apex if v is not None])
+        mean_late = sum(v for v in late if v is not None) / len([v for v in late if v is not None])
+
+        assert mean_apex > mean_early, (
+            f"expected the apex-window average ({mean_apex:.1f}) to exceed "
+            f"the early-window average ({mean_early:.1f}) -- the phrase "
+            f"should have built toward the declared apex"
+        )
+        assert mean_apex > mean_late, (
+            f"expected the apex-window average ({mean_apex:.1f}) to exceed "
+            f"the late-window average ({mean_late:.1f}) -- the phrase "
+            f"should have settled after the declared apex, not kept climbing"
+        )
+
 
 # ===========================================================================
 # generate_sparse
