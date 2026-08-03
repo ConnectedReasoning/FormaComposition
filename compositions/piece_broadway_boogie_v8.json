@@ -100,7 +100,7 @@
         "density": "medium",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 85
         },
         "bass_style": "steady",
@@ -141,7 +141,7 @@
         "density": "medium",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 89
         },
         "bass_style": "steady",
@@ -174,7 +174,7 @@
         "density": "medium",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 89
         },
         "rhythm": "motif",
@@ -215,7 +215,7 @@
         "density": "low",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 89
         },
         "bass_style": "steady",
@@ -328,7 +328,7 @@
         "density": "medium",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 89
         },
         "bass_style": "steady",
@@ -374,7 +374,7 @@
         "density": "medium",
         "melody": {
           "register": "alto",
-          "behavior": "lyrical",
+          "behavior": "develop",
           "velocity": 89
         },
         "bass_style": "steady",

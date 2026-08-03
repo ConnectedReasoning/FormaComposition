@@ -1,0 +1,29 @@
+{
+  "_NOTE": "PREVIEW ONLY -- not yet renderable via main.py, same caveat as piece_apex_cadence.json. This JSON reconstructs the exact parameters used to generate sparse_baseline.mid via a direct generate_melody_for_progression() call, for reference. Phase 6 (SectionModel schema field + generator.py passthrough) hasn't happened yet, so main.py can't read melodic_arc out of a piece file -- moot for THIS file anyway, since it has none; this is the no-bias control half of the Phase 5 A/B comparison.",
+
+  "piece": {
+    "title": "Sparse Baseline (no apex bias)",
+    "key": "C",
+    "mode": "aeolian",
+    "tempo": { "min": 70, "max": 70 },
+    "seed": 55,
+    "form_type": "song",
+    "form": ["drift"],
+    "sections": {
+      "drift": {
+        "bars": 24,
+        "progression": ["i", "VI", "III", "VII"],
+        "chord_bars": [2.0, 2.0, 2.0, 2.0],
+        "_chord_bars_note": "cell totals 8 bars, tiles 3x to fill 24 bars -- matches the 3-cycle progression used to render sparse_baseline.mid.",
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "free",
+        "note_length_range": { "min": 1.0, "max": 2.0 },
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.0
+      }
+    }
+  }
+}

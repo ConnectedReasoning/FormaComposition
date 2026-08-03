@@ -1,0 +1,25 @@
+{
+  "piece": {
+    "title": "Bass Motif Diatonic Check",
+    "key": "D", "mode": "dorian",
+    "tempo": {"min": 100, "max": 120},
+    "motif": {
+      "name": "neighbor_wobble",
+      "intervals": [-1, 1, -1, 1],
+      "rhythm": [1.0, 1.0, 1.0, 1.0],
+      "transform_pool": []
+    },
+    "seed": 1,
+    "form_type": "song",
+    "form": ["intro"],
+    "sections": {
+      "intro": {
+        "bars": 8, "progression": ["i", "iv"], "chord_bars": [1.0, 1.0],
+        "density": "medium", "melody": "generative", "bass_style": "motif",
+        "arc": "plateau", "rhythm": "free",
+        "harmony_rhythm": {"rhythm": "sustain"}, "rest_probability": 0.0
+        ,"note_length_range": {"min": 0.5, "max": 1.0}
+      }
+    }
+  }
+}

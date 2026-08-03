@@ -1,0 +1,54 @@
+{
+  "_NOTE": "PREVIEW ONLY -- not yet renderable via main.py. melodic_arc is wired into melody.py's generate_lyrical and generate_melody_for_progression (Phase 2 of the apex/goal-tone build), but Phase 6 (SectionModel schema field + generator.py passthrough) hasn't happened yet, so main.py doesn't know how to read this field out of a piece JSON yet. The accompanying piece_apex_cadence.mid was rendered by calling generate_melody_for_progression directly, the same way every other engine-level sanity check in this project has been produced -- this JSON shows the shape Phase 6 will accept once that wiring lands, not something you can hand to main.py today.",
+
+  "piece": {
+    "title": "Apex Cadence Demo",
+    "key": "C",
+    "mode": "ionian",
+    "tempo": { "min": 100, "max": 120 },
+    "seed": 101,
+    "form_type": "song",
+    "form": ["verse", "chorus", "verse", "chorus"],
+    "sections": {
+      "verse": {
+        "bars": 16,
+        "progression": ["I", "vi", "IV", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rhythm": "free",
+        "note_length_range": { "min": 0.5, "max": 1.0 },
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.0,
+
+        "melodic_arc": {
+          "apex_degree": 4,
+          "apex_position": 0.6,
+          "resolve_every_cycle": false
+        },
+        "_melodic_arc_note": "resolve_every_cycle=false (Choice A): this progression repeats 4 times to fill the section, but cadence pull only fires once -- on the true final chord of the whole section. The other 3 loop-backs keep their groove uninterrupted, the way a verse or vamp should."
+      },
+
+      "chorus": {
+        "bars": 12,
+        "progression": ["I", "IV", "V"],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "pedal",
+        "arc": "swell",
+        "rhythm": "free",
+        "note_length_range": { "min": 0.5, "max": 1.0 },
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "rest_probability": 0.0,
+
+        "melodic_arc": {
+          "apex_degree": 7,
+          "apex_position": 0.6,
+          "resolve_every_cycle": true
+        },
+        "_melodic_arc_note": "resolve_every_cycle=true (Choice B): this progression repeats 4 times too, but cadence pull fires at the end of EVERY repeat, not just the section's end -- each pass through the hook gets its own small resolution, the way a satisfying chorus should."
+      }
+    }
+  }
+}
