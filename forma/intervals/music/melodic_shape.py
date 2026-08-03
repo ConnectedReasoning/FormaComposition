@@ -88,6 +88,17 @@ APEX_BIAS_STRENGTH = 3
 # so it pulls harder by default.
 CADENCE_BIAS_STRENGTH = 4
 
+# Phase 4 (generate_develop): max diatonic scale-degree steps a single
+# retile's anchor is allowed to shift toward a target (apex or cadence
+# resolution) in one move. develop has no per-note candidate list to
+# weight the way lyrical/generative do -- motif_to_notes builds each
+# retiled statement deterministically from wherever the anchor sits, so
+# apex/cadence bias here means nudging that anchor instead, cascading
+# through the whole next statement. Capped small so the cumulative pull
+# across many retiles produces real movement without a single retile
+# jumping far enough to break the motif's own identity.
+ANCHOR_SHIFT_MAX_STEP = 2
+
 # A candidate within this many semitones of the resolution pitch counts as
 # "resolving" for cadence-pull purposes — matches motif_to_notes and
 # bass.py's existing "within a whole step" chord-tone-preference threshold
@@ -250,3 +261,56 @@ def cadence_weighted_candidates(
         if is_resolving(c):
             weighted.extend([c] * (strength - 1))
     return weighted
+
+
+def directed_anchor_shift(
+    anchor: int,
+    target_pitch: int,
+    scale_tones: list[int],
+    position_t: float,
+    apex_position: float,
+    max_step_degrees: int = ANCHOR_SHIFT_MAX_STEP,
+) -> int:
+    """
+    Nudge a retile anchor's pitch toward target_pitch, by at most
+    max_step_degrees diatonic scale-degree steps, in the direction
+    implied by position_t vs apex_position (Phase 4: generate_develop's
+    anchor-shift mechanism — see module docstring's Phase 4 note above
+    on why this differs from apex_weighted_candidates/
+    cadence_weighted_candidates rather than reusing them directly).
+
+    Before apex_position ("approaching"): shifts toward target_pitch.
+    At or after apex_position ("receding"): shifts AWAY from
+    target_pitch — the anchor drifts back down (or up, symmetrically)
+    once the phrase has passed its declared peak, rather than
+    continuing to climb indefinitely.
+
+    Reused for cadence by the caller passing position_t=0.0,
+    apex_position=1.0 (or any position_t < apex_position) — cadence has
+    no "settle after" phase of its own, it's a single always-approach
+    pull toward the resolution pitch, so forcing the "approaching"
+    branch unconditionally gives the right behavior without a second,
+    near-duplicate function.
+
+    Distance is measured in degree space nearest THIS anchor's own
+    placement (pitch_to_degree's prev_degree parameter), not target_pitch's
+    literal octave — so a target several octaves away from the anchor
+    doesn't produce one enormous, identity-breaking leap; the shift is
+    always capped at max_step_degrees regardless of how far apart anchor
+    and target actually are.
+
+    Returns `anchor` unchanged if it's already exactly at target_pitch's
+    nearest degree (distance 0) — nothing to shift toward.
+    """
+    pcs = pitch_classes(scale_tones)
+    anchor_degree = pitch_to_degree(anchor, pcs)
+    target_degree = pitch_to_degree(target_pitch, pcs, prev_degree=anchor_degree)
+    distance = target_degree - anchor_degree
+    if distance == 0:
+        return anchor
+
+    toward_target = 1 if distance > 0 else -1
+    direction = toward_target if position_t < apex_position else -toward_target
+    step = direction * min(abs(distance), max_step_degrees)
+
+    return degree_to_pitch(anchor_degree + step, pcs)

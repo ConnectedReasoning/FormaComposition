@@ -9,10 +9,12 @@ from intervals.music.melodic_shape import (
     APEX_BIAS_STRENGTH,
     CADENCE_BIAS_STRENGTH,
     CADENCE_RESOLUTION_THRESHOLD,
+    ANCHOR_SHIFT_MAX_STEP,
     resolve_apex_pitch,
     apex_degree_reachable,
     apex_weighted_candidates,
     cadence_weighted_candidates,
+    directed_anchor_shift,
 )
 
 
@@ -194,3 +196,65 @@ class TestCadenceWeightedCandidates:
         )
         assert result.count(boundary) > 1
         assert result.count(just_outside) == 1
+
+
+class TestDirectedAnchorShift:
+    """
+    Phase 4's develop-specific mechanism -- see melodic_shape.py's Phase 4
+    module note on why this differs from apex_weighted_candidates/
+    cadence_weighted_candidates rather than reusing them: develop has no
+    per-note candidate list, only an anchor each retile builds an entire
+    statement from.
+    """
+
+    def test_approaching_shifts_toward_target(self):
+        # anchor=60 (C4), target=72 (C5, an octave up). Before
+        # apex_position: shifts toward it, capped at the default 2
+        # diatonic steps.
+        result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2, apex_position=0.7)
+        assert result == 64
+
+    def test_receding_shifts_away_from_target(self):
+        # Same anchor/target, but past apex_position: shifts the OTHER
+        # way -- the phrase settles back down after its declared peak
+        # instead of continuing to climb.
+        result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.9, apex_position=0.7)
+        assert result == 57
+        # Confirm it's genuinely the opposite direction from approaching,
+        # not just a different magnitude.
+        approaching_result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2, apex_position=0.7)
+        assert result < 60 < approaching_result
+
+    def test_shift_is_capped_regardless_of_target_distance(self):
+        # target is 3 octaves up (21 diatonic degrees away) -- the shift
+        # must still be capped at max_step_degrees, not scale with
+        # distance. Same result as the one-octave case above confirms
+        # the cap is doing its job, not coincidence.
+        result = directed_anchor_shift(60, 96, C_IONIAN, position_t=0.2, apex_position=0.7)
+        assert result == 64
+
+    def test_custom_max_step_is_respected(self):
+        result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2,
+                                        apex_position=0.7, max_step_degrees=1)
+        # One diatonic step up from C4 (degree-wise) lands on D4.
+        assert result == 62
+
+    def test_already_at_target_returns_anchor_unchanged(self):
+        result = directed_anchor_shift(64, 64, C_IONIAN, position_t=0.2, apex_position=0.7)
+        assert result == 64
+
+    def test_cadence_reuse_pattern_always_approaches(self):
+        """Cadence has no 'settle after' phase -- callers get that by
+        passing position_t=0.0, apex_position=1.0 (position_t is always
+        < apex_position, forcing the approaching branch unconditionally),
+        rather than needing a second, near-duplicate function."""
+        result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.0, apex_position=1.0)
+        approaching_result = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2, apex_position=0.7)
+        assert result == approaching_result == 64
+
+    def test_default_max_step_matches_module_constant(self):
+        result_default = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2, apex_position=0.7)
+        result_explicit = directed_anchor_shift(60, 72, C_IONIAN, position_t=0.2,
+                                                  apex_position=0.7,
+                                                  max_step_degrees=ANCHOR_SHIFT_MAX_STEP)
+        assert result_default == result_explicit

@@ -36,6 +36,7 @@ from intervals.music.rhythm import (
 )
 from intervals.music.melodic_shape import (
     resolve_apex_pitch, apex_weighted_candidates, cadence_weighted_candidates,
+    directed_anchor_shift,
 )
 
 # ---------------------------------------------------------------------------
@@ -456,6 +457,30 @@ def _cadence_resolution_pitch(chord: VoicedChord, chord_tones: list[int], curren
     return min(root_candidates, key=lambda c: abs(c - current))
 
 
+def _last_sounding_index(intervals: list[int], rests: Optional[list[bool]]) -> Optional[int]:
+    """
+    Index of the last non-rest slot in a transformed motif statement, or
+    None if every slot is a rest. Used by generate_develop's cadence
+    bias to find how many of `intervals` actually contribute to the
+    statement's audible ending, so the anchor can be back-calculated to
+    land THAT note near resolution — not just the statement's first note
+    (see generate_develop's cadence branch for why this distinction
+    matters: an anchor shifted straight toward the resolution pitch
+    controls where a statement starts, and the motif's own transformed
+    shape can walk several more diatonic steps away from there before
+    its last sounding note, undoing the shift entirely — caught via
+    statistical verification, not by inspection).
+    """
+    if not intervals:
+        return None
+    if rests is None:
+        return len(intervals) - 1
+    for idx in range(len(intervals) - 1, -1, -1):
+        if idx >= len(rests) or not rests[idx]:
+            return idx
+    return None
+
+
 def _pick_start_note(chord_tones: list[int], scale_tones: list[int], prev_note: Optional[int]) -> int:
     """Pick a good starting note — chord tone near previous note if available."""
     if not chord_tones:
@@ -810,6 +835,11 @@ def generate_develop(
     statement_idx = 0
     last_transform: Optional[str] = None
 
+    melodic_arc = context.get("melodic_arc") if context else None
+    apex_pitch = context.get("apex_pitch") if context else None
+    apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
+    is_cadential_chord = bool(context and context.get("is_cadential_chord"))
+
     # Hard ceiling for augmentation/diminution's real-timing playback below
     # (see that branch) -- this call's total span, so a stretched statement
     # gets clamped to fit exactly, the same discipline chord-boundary
@@ -837,6 +867,52 @@ def generate_develop(
             iv, rh, rs = result[0], result[1], result[2]
             last_transform = result[3] if len(result) > 3 else None
             anchor = motif_notes[-1][0] if motif_notes else start
+
+            # Apex/cadence bias (Phase 4 of the apex/goal-tone build).
+            # develop has no per-note candidate list to weight the way
+            # lyrical/generative do -- motif_to_notes builds each
+            # retiled statement deterministically from wherever the
+            # anchor sits, so bias here means nudging THIS anchor before
+            # the statement gets built from it, cascading through every
+            # note of the next statement. See melodic_shape.py's Phase 4
+            # module note for why this is directed_anchor_shift, not
+            # apex_weighted_candidates. Absent melodic_arc, `anchor` is
+            # completely unchanged from before this phase existed --
+            # both branches below (normal and augmentation/diminution)
+            # consume whatever `anchor` holds without needing to know
+            # whether it was shifted.
+            if apex_pitch is not None:
+                position_t = _position_t_from_context(context, ev.start_beat)
+                anchor = directed_anchor_shift(
+                    anchor, apex_pitch, scale_tones, position_t, apex_position,
+                )
+            if melodic_arc and is_cadential_chord:
+                # Cadence should pull the LAST sounding note of this
+                # statement toward resolution, not just where the
+                # statement starts. The transformed motif walks
+                # net_degree_shift diatonic steps from its first note to
+                # its last sounding one (rests still consume a slot in
+                # the interval sequence but don't sound, so the "last"
+                # one is the last non-rest index, not necessarily the
+                # final slot) -- shifting the anchor straight toward the
+                # resolution pitch only controls the START, and that
+                # walk can undo the shift entirely by the time the
+                # statement actually ends. Confirmed by statistics, not
+                # inspection: an earlier version of this shifted toward
+                # the resolution pitch directly and measurably made the
+                # final note LAND FARTHER from resolution on average
+                # than doing nothing at all.
+                resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, anchor)
+                last_idx = _last_sounding_index(iv, rs)
+                net_degree_shift = sum(iv[:last_idx + 1]) if last_idx is not None else 0
+                pcs = pitch_classes(scale_tones)
+                resolution_degree = pitch_to_degree(resolution_pitch, pcs)
+                adjusted_target = degree_to_pitch(resolution_degree - net_degree_shift, pcs)
+                anchor = directed_anchor_shift(
+                    anchor, adjusted_target, scale_tones,
+                    position_t=0.0, apex_position=1.0,  # always-approach, see docstring
+                )
+
             motif_notes = motif_to_notes(
                 anchor, iv, rh, scale_tones, chord_tones,
                 MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rs

@@ -684,6 +684,116 @@ class TestGenerateDevelop:
         assert len(sounding) == 1  # only the first slot fits before the boundary
         assert sounding[0].duration_beats == 2.0
 
+    def test_no_melodic_arc_is_byte_identical_to_before_the_feature_existed(self):
+        """Absent melodic_arc, the anchor computation is completely
+        untouched -- confirmed byte-identical against the exact
+        transforms Finding 0 and the augmentation/diminution fix already
+        cover, not just a fresh assertion."""
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
+                  "transform_pool": ["augmentation"]}
+        scale = [60, 62, 64, 65, 67, 69, 71]
+        a = generate_develop(_events(4, dur=1.0), _chord(), scale, [60, 64, 67],
+                              prev_note=60, base_velocity=80, seed=5, motif=motif)
+        b = generate_develop(_events(4, dur=1.0), _chord(), scale, [60, 64, 67],
+                              prev_note=60, base_velocity=80, seed=5, motif=motif,
+                              context={})
+        assert a == b
+
+    def test_apex_bias_shape_tracks_declared_position_statistically(self):
+        """develop has no per-note candidate list -- motif_to_notes builds
+        each retiled statement deterministically from wherever the
+        anchor sits, so apex bias here means nudging that anchor (see
+        melodic_shape.directed_anchor_shift), not weighting a candidate
+        list the way lyrical/generative do. Same statistical discipline
+        as those two phases: a single seed isn't reliable evidence for a
+        stochastic mechanism, and the metric that isolates the real claim
+        is apex-window-minus-late (does the melody drop measurably after
+        the declared apex_position), not early-vs-apex (which Phase 3
+        found unreliable for leap-heavy behaviors).
+        """
+        chords = resolve_progression(["I", "IV", "V"] * 4, "C", "ionian", density="medium")
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
+                  "transform_pool": ["inversion", "retrograde"]}
+
+        def apex_minus_late(seed, with_apex):
+            arc = {"apex_degree": 4, "apex_position": 0.7} if with_apex else None
+            notes = generate_melody_for_progression(
+                chords, "C", "ionian", behavior="develop",
+                bars_per_chord=1.0, beats_per_bar=4, seed=seed,
+                melodic_arc=arc, motif=motif,
+            )
+            sounding = [n for n in notes if not n.is_rest]
+            total = max(n.start_beat for n in sounding)
+            apex_w = [n.midi_note for n in sounding if 0.55 <= n.start_beat / total < 0.75]
+            late_w = [n.midi_note for n in sounding if n.start_beat / total >= 0.9]
+            if not apex_w or not late_w:
+                return None
+            return sum(apex_w) / len(apex_w) - sum(late_w) / len(late_w)
+
+        seeds = range(20)
+        with_bias = [d for d in (apex_minus_late(s, True) for s in seeds) if d is not None]
+        without_bias = [d for d in (apex_minus_late(s, False) for s in seeds) if d is not None]
+        mean_with = sum(with_bias) / len(with_bias)
+        mean_without = sum(without_bias) / len(without_bias)
+
+        assert mean_with > mean_without
+        assert mean_with > 2.0
+
+    def test_cadence_pull_accounts_for_motif_net_displacement(self):
+        """Regression for a real bug this phase's own statistical
+        verification caught: the first version of develop's cadence
+        branch shifted the anchor straight toward the resolution pitch.
+        Since the anchor only controls where a retiled STATEMENT
+        STARTS, and the motif's own transformed shape then walks
+        net_degree_shift diatonic steps to reach its actual last
+        sounding note, that first version measurably made the final
+        note land FARTHER from resolution on average than doing nothing
+        (3.03 semitones with cadence "on" vs 2.30 without, across 30
+        seeds) -- backwards from the entire point of the mechanism.
+        Fixed by back-calculating the anchor target as resolution_pitch
+        MINUS the motif's net displacement (see
+        _last_sounding_index/generate_develop's cadence branch), so the
+        statement's END lands near resolution, not its start.
+
+        This test pins the corrected, statistically-verified direction
+        with a single retile per cadential chord -- the clean case where
+        the effect is strong and unambiguous (2.15 vs 3.65 semitones
+        across 40 seeds). A second, real limitation exists and is
+        documented but not tested here: when a cadential chord is long
+        enough to trigger a SECOND retile, that second shift's effect is
+        measurably weaker (though still correctly directional, not
+        backwards) because the first shifted statement's ending
+        position isn't accounted for when computing the second shift.
+        """
+        chords = resolve_progression(["I", "IV", "V"], "C", "ionian", density="medium")
+        motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
+                  "transform_pool": ["inversion", "retrograde"]}
+
+        def final_note_dist_to_root(seed, with_cadence):
+            arc = ({"apex_degree": 4, "apex_position": 0.7, "resolve_every_cycle": False}
+                   if with_cadence else None)
+            notes = generate_melody_for_progression(
+                chords, "C", "ionian", behavior="develop",
+                bars_per_chord=1.0, beats_per_bar=4, seed=seed,
+                melodic_arc=arc, motif=motif,
+            )
+            last = [n for n in notes if not n.is_rest][-1]
+            g_candidates = [p for p in range(40, 100) if p % 12 == 7]  # V's root, G
+            return min(abs(last.midi_note - g) for g in g_candidates)
+
+        seeds = range(25)
+        with_cadence = [final_note_dist_to_root(s, True) for s in seeds]
+        without = [final_note_dist_to_root(s, False) for s in seeds]
+        mean_with = sum(with_cadence) / len(with_cadence)
+        mean_without = sum(without) / len(without)
+
+        assert mean_with < mean_without, (
+            f"expected cadence pull to reduce mean distance to the "
+            f"resolution tone ({mean_with:.2f}) below the unbiased "
+            f"baseline ({mean_without:.2f}) -- if this fails, the "
+            f"net-displacement fix may have regressed"
+        )
+
 
 # ===========================================================================
 # generate_melody (top-level dispatch)
