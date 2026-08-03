@@ -26,6 +26,7 @@ import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 from intervals.music.harmony import VoicedChord, CHROMATIC, MODES, key_to_midi_root
+from intervals.music.scale_degrees import pitch_classes, degree_to_pitch, pitch_to_degree
 from intervals.music.rhythm import remap_swing_ratio, swing_offset
 
 # ---------------------------------------------------------------------------
@@ -462,10 +463,19 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
         0, is consistent with this anyway).
       - The motif's remaining intervals/rhythm cycle from there, wrapping
         around if the chord's duration outlasts one full motif pass.
+      - `intervals` are diatonic scale-degree steps (not semitones) —
+        same contract as melody's motif_to_notes (see motif.py's
+        Motif.intervals docstring). Each step moves by that many scale
+        degrees, landing on a scale tone by construction, before the
+        chord-tone-preference check below runs.
       - Each resulting pitch snaps to the nearest chord tone (root/third/
-        fifth) if it's within a whole step of one, otherwise the nearest
-        scale tone — keeps the motif's shape recognizable without
-        clashing against the harmony it's walking through.
+        fifth) if it's within a whole step of one, otherwise stays on
+        the diatonic degree-walked scale tone — keeps the motif's shape
+        recognizable without clashing against the harmony it's walking
+        through. Degree tracking re-anchors to whichever pitch actually
+        gets played (including a chord-tone override), so the next
+        interval continues from the real position, not the pre-override
+        one — the same principle motif_to_notes uses for continuity.
       - Each chord restarts the motif fresh (not threaded continuously
         across chord boundaries) — this is what keeps the harmony legible
         under a moving bass line; it does mean the motif does not carry
@@ -493,6 +503,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
     cycle_len  = min(len(intervals), len(rhythm))
 
     scale = get_bass_scale_tones(key, mode)
+    pcs = pitch_classes(scale) if scale else []
     notes = []
     beat = 0.0
 
@@ -502,6 +513,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
         chord_tones = bass_chord_tones(chord)
 
         current = root
+        current_degree = pitch_to_degree(root, pcs) if pcs else None
         t = 0.0
         step = 0
 
@@ -514,7 +526,15 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 candidate = root
             else:
                 interval = intervals[step % cycle_len]
-                candidate = current + interval
+                if pcs:
+                    current_degree = current_degree + interval
+                    candidate = degree_to_pitch(current_degree, pcs)
+                else:
+                    # No scale available (shouldn't normally happen --
+                    # get_bass_scale_tones always returns something for a
+                    # real key/mode) -- fall back to the old literal
+                    # semitone addition rather than crash.
+                    candidate = current + interval
                 while candidate < BASS_OCTAVE_BOTTOM:
                     candidate += 12
                 while candidate > BASS_OCTAVE_TOP:
@@ -522,8 +542,12 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 nearest_chord_tone = min(chord_tones, key=lambda c: abs(c - candidate))
                 if abs(nearest_chord_tone - candidate) <= 2:
                     candidate = nearest_chord_tone
-                elif scale:
-                    candidate = nearest_scale_tone(candidate, scale)
+                if pcs:
+                    # Re-anchor degree tracking to whatever actually gets
+                    # played (a chord-tone override moves us off the raw
+                    # degree-walked position) so the NEXT interval
+                    # continues from the real note, not the discarded one.
+                    current_degree = pitch_to_degree(candidate, pcs, prev_degree=current_degree)
 
             actual_dur = min(dur, total - t)
             if not is_rest:

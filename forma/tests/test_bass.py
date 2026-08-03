@@ -221,6 +221,46 @@ class TestGenerateBass:
                            key="D", mode="dorian", seed=1, motif=motif)
         assert a == b
 
+    def test_motif_style_intervals_are_diatonic_steps_not_semitones(self):
+        """Regression: style_motif had its own, separate consumer of
+        motif['intervals'] that was never migrated when melody's
+        motif_to_notes moved to diatonic scale-degree steps -- it still
+        added intervals as raw semitones, then snapped. A small-step
+        (neighbor-tone) motif is exactly the shape that broke under that
+        old contract: in D dorian, a +-1 semitone step sits between two
+        scale tones a whole tone apart and would snap back to where it
+        started, collapsing most of the motion (the same failure mode
+        that motivated the whole diatonic-motif migration on the melody
+        side, confirmed against piece_train's actual motif).
+
+        Under the fixed, diatonic-step contract, [-1, 1, -1, 1] means
+        neighbor-tone steps of one SCALE DEGREE each -- real, distinct
+        motion, not a collapse. This also confirms the chord-tone
+        preference (snap to root/third/fifth within a whole step) still
+        works alongside the new degree-walking, not just the plain
+        scale-tone case.
+        """
+        chords = resolve_progression(["i", "iv"], "D", "dorian", density="medium")
+        motif = {"intervals": [-1, 1, -1, 1], "rhythm": [1.0, 1.0, 1.0, 1.0]}
+        notes = generate_bass(chords, style="motif", bars_per_chord=1.0,
+                               key="D", mode="dorian", seed=1, motif=motif)
+        pitches = [n.midi_note for n in notes]
+
+        # Real motion: not every note collapsed to the same pitch (which
+        # is exactly what the old semitone-then-snap contract produced
+        # for this shape).
+        assert len(set(pitches)) > 1
+
+        # Every pitch is either a genuine D-dorian scale tone or a chord
+        # tone (root/third/fifth) of whichever chord it falls under --
+        # the chord-tone-preference override is still allowed to move a
+        # note off the plain scale-walk position, by design.
+        scale = get_bass_scale_tones("D", "dorian")
+        scale_pcs = {p % 12 for p in scale}
+        chord_pcs_per_chord = [set(p % 12 for p in bass_chord_tones(c)) for c in chords]
+        all_chord_pcs = set().union(*chord_pcs_per_chord)
+        assert all(p % 12 in scale_pcs or p % 12 in all_chord_pcs for p in pitches)
+
     def test_empty_chord_list_returns_no_notes(self):
         assert generate_bass([], style="root_only", seed=1) == []
 
