@@ -40,6 +40,7 @@ from intervals.music.melody   import (
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
 from intervals.music.rhythm   import (
     RhythmEvent, arc_multiplier, blended_arc_multiplier, arc_blend_bars,
+    section_position_t,
     VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
     rhythm_pattern_to_events, _motif_rhythm_to_events, _slice_events_into_window,
 )
@@ -183,7 +184,7 @@ def velocity_envelope(
         t = 0.0
         blend_t = 0.0
     else:
-        t = bar_index / (total_bars - 1)
+        t = section_position_t(bar_index, total_bars)
         blend_t = blend_bars / (total_bars - 1)
 
     return blended_arc_multiplier(arc, t, prev_arc_end, blend_t)

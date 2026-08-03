@@ -40,6 +40,7 @@ from intervals.core.generator import (
     bpm_to_tempo,
     generate_piece,
     load_song,
+    velocity_envelope,
 )
 from intervals.core.schemas import PieceModel
 
@@ -90,6 +91,27 @@ def _midi_bytes(path: str) -> bytes:
 # ===========================================================================
 # Byte-identical full-render regression
 # ===========================================================================
+
+class TestVelocityEnvelopePositionExtraction:
+    """
+    Regression coverage for extracting velocity_envelope's inline
+    bar_index/total_bars -> t formula into rhythm.section_position_t
+    (done ahead of the apex/goal-tone pitch-bias mechanism, so pitch bias
+    and the dynamic arc share one position formula instead of two that
+    could drift apart). No test previously pinned velocity_envelope's
+    exact numeric output at all -- these values were hand-verified
+    against the 'build' curve's documented formula (m = 0.70 + 0.50*t**2)
+    before being pinned here, confirming the extraction changed nothing.
+    """
+
+    def test_build_curve_at_known_bar_positions(self):
+        assert velocity_envelope("build", 0, 5) == pytest.approx(0.70)
+        assert velocity_envelope("build", 2, 5) == pytest.approx(0.825)
+        assert velocity_envelope("build", 4, 5) == pytest.approx(1.20)
+
+    def test_single_bar_section_pins_neutral_start(self):
+        assert velocity_envelope("build", 0, 1) == pytest.approx(0.70)
+
 
 class TestByteIdenticalFullRender:
     @pytest.mark.parametrize("loader", [_load_shake, _load_broadway_boogie],

@@ -847,6 +847,39 @@ VELOCITY_CLAMP_MIN = 40
 VELOCITY_CLAMP_MAX = 120
 
 
+def section_position_t(bar_index: int, total_bars: int) -> float:
+    """
+    Melody's normalized position within a section: 0.0 at the first bar,
+    1.0 at the final bar. Single source of truth for "where are we in the
+    section" for melody — extracted so every melody-side consumer of this
+    concept (currently: generator.py's velocity_envelope for the dynamic
+    arc; eventually: apex/goal-tone pitch bias) computes it identically,
+    rather than each keeping its own copy that could silently drift apart.
+
+    That's not a hypothetical risk in this codebase — it's exactly the
+    shape Finding 0 was (two independent implementations of "apply this
+    transform," one got fixed, the other silently didn't). Two
+    independent implementations of "where are we in the section" would
+    mean a section's loudest moment and its melodic apex could stop
+    lining up the moment either formula changed, with nothing to catch it.
+
+    total_bars <= 1 pins t=0.0 (a single-bar section has no meaningful
+    position within itself) — matches velocity_envelope's existing
+    edge-case handling exactly, since this IS that handling, extracted.
+
+    Harmony's own position sense (arc_t in generator.py's harmony loop)
+    deliberately uses a different time base — beat offset within the
+    section, normalized by the final chord's onset, not bar index. That
+    split is intentional (documented where harmony's arc_t is computed):
+    each voice advances in whatever unit it naturally uses, kept in sync
+    at the musical-time level, not by sharing one raw t. This function is
+    melody's alone; it has no harmony equivalent to unify with.
+    """
+    if total_bars <= 1:
+        return 0.0
+    return bar_index / (total_bars - 1)
+
+
 def arc_multiplier(arc: str, t: float) -> float:
     """
     The single source of truth for what a declared `arc` means as a dynamic

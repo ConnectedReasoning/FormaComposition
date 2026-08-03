@@ -18,8 +18,36 @@ from intervals.music.rhythm import (
     get_pattern,
     groove_pattern,
     remap_swing_ratio,
+    section_position_t,
     swing_offset,
 )
+
+
+# ===========================================================================
+# section_position_t — melody's normalized position within a section
+# ===========================================================================
+# Extracted from generator.py's velocity_envelope so the upcoming
+# apex/goal-tone pitch bias computes "where are we in the section" using
+# the exact same formula the dynamic arc already uses, rather than a
+# second copy that could silently drift from it.
+
+class TestSectionPositionT:
+    def test_first_bar_is_zero(self):
+        assert section_position_t(0, 8) == 0.0
+
+    def test_last_bar_is_one(self):
+        assert section_position_t(7, 8) == 1.0
+
+    def test_midpoint(self):
+        assert section_position_t(4, 9) == pytest.approx(0.5)
+
+    def test_single_bar_section_pins_zero(self):
+        # A one-bar section has no meaningful position within itself --
+        # matches velocity_envelope's pre-extraction edge case exactly.
+        assert section_position_t(0, 1) == 0.0
+
+    def test_zero_bar_section_pins_zero(self):
+        assert section_position_t(0, 0) == 0.0
 
 
 # ===========================================================================
