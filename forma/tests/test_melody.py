@@ -424,6 +424,50 @@ class TestGenerateSparse:
                                  seed=1, rest_probability=1.0)
         assert all(n.is_rest for n in notes)
 
+    def test_no_melodic_arc_is_byte_identical_to_before_the_feature_existed(self):
+        a = generate_sparse(_events(5), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                             [60, 64, 67], 60, 80, seed=6)
+        b = generate_sparse(_events(5), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                             [60, 64, 67], 60, 80, seed=6, context={})
+        assert a == b
+
+    def test_apex_bias_shape_tracks_declared_position_statistically(self):
+        """Confirms the mechanism is mechanically active and directionally
+        correct, same metric as generate_generative's equivalent test.
+        This is NOT the real evidence bar for Phase 5, though -- passing
+        statistics can't tell you whether sparse still sounds like
+        sparse once biased. That's a judgment call for actual listening
+        (see the rendered comparison delivered alongside this phase),
+        not something a numeric test can certify. This test exists to
+        catch a regression in the mechanism itself, not to approve its
+        musical use in this behavior.
+        """
+        chords = resolve_progression(["I", "IV", "V"] * 4, "C", "ionian", density="medium")
+
+        def apex_minus_late(seed, with_apex):
+            arc = {"apex_degree": 4, "apex_position": 0.7} if with_apex else None
+            notes = generate_melody_for_progression(
+                chords, "C", "ionian", behavior="sparse",
+                bars_per_chord=1.0, beats_per_bar=4, seed=seed, melodic_arc=arc,
+            )
+            sounding = [n for n in notes if not n.is_rest]
+            if not sounding:
+                return None
+            total = max(n.start_beat for n in sounding)
+            apex_w = [n.midi_note for n in sounding if 0.55 <= n.start_beat / total < 0.75]
+            late_w = [n.midi_note for n in sounding if n.start_beat / total >= 0.9]
+            if not apex_w or not late_w:
+                return None
+            return sum(apex_w) / len(apex_w) - sum(late_w) / len(late_w)
+
+        seeds = range(30)
+        with_bias = [d for d in (apex_minus_late(s, True) for s in seeds) if d is not None]
+        without_bias = [d for d in (apex_minus_late(s, False) for s in seeds) if d is not None]
+        mean_with = sum(with_bias) / len(with_bias)
+        mean_without = sum(without_bias) / len(without_bias)
+
+        assert mean_with > mean_without
+
 
 # ===========================================================================
 # generate_develop

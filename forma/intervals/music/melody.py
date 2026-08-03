@@ -678,13 +678,34 @@ def generate_sparse(
     onsets), and at rest_probability=1.0 the section goes fully silent —
     matching the other three behaviors' contract instead of floor-locking
     at 10% no matter how high rest_probability climbs.
+
+    Apex/goal-tone bias (Phase 5 of the apex/goal-tone build, wired for
+    consistency across all four behaviors — the LAST of the four, and
+    deliberately given less confidence than the others): when
+    context["melodic_arc"] is present, this behavior's uniform
+    "chord tone anywhere in register" choice gets the same
+    apex_weighted_candidates/cadence_weighted_candidates treatment as
+    generate_generative, same strength, not softened. That's a
+    deliberate choice, not an oversight — softening it automatically
+    would be an implicit special-case baked into the engine; the real
+    control a composer has is simply whether to declare melodic_arc on
+    a sparse section at all. But sparse's entire identity is
+    unpredictable wide leaps, and a directional pull toward a peak is in
+    real tension with that — unlike the other three phases, passing
+    statistics here don't settle whether the result still sounds like
+    sparse. That's a judgment call for actual listening, not something
+    this docstring or the test suite can certify on its own.
     """
     rng = random.Random(seed) if seed is not None else random.Random()
 
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
 
-    for ev in rhythm_events:
+    melodic_arc = context.get("melodic_arc") if context else None
+    apex_pitch = context.get("apex_pitch") if context else None
+    apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
+
+    for i, ev in enumerate(rhythm_events):
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
             continue
@@ -694,7 +715,20 @@ def generate_sparse(
             continue
 
         # Wide leaps preferred — chord tones anywhere in register
-        note = rng.choice(chord_tones) if chord_tones else rng.choice(scale_tones)
+        candidates = list(chord_tones) if chord_tones else list(scale_tones)
+
+        if apex_pitch is not None:
+            position_t = _position_t_from_context(context, ev.start_beat)
+            candidates = apex_weighted_candidates(
+                candidates, current, apex_pitch, position_t, apex_position,
+            )
+
+        is_last_note = (i == len(rhythm_events) - 1)
+        if melodic_arc and is_last_note and context and context.get("is_cadential_chord"):
+            resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, current)
+            candidates = cadence_weighted_candidates(candidates, resolution_pitch)
+
+        note = rng.choice(candidates)
         vel = int(base_velocity * ev.velocity_scale * 0.85)  # slightly softer
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
