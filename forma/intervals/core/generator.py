@@ -687,6 +687,26 @@ def generate_section(
     section_nlr = nlr_model.as_tuple() if nlr_model is not None else None
     section_nlr_quantum = nlr_model.quantum if nlr_model is not None else 0.25
 
+    # Apex/goal-tone phrase shaping (Phase 6). Resolve to a plain dict for
+    # melody.py's functions, converting apex_degree from the schema's
+    # composer-facing 1-indexed convention (1=tonic, 5=dominant) to the
+    # engine's internal 0-indexed one (see MelodicArcModel's docstring).
+    # progression_cycle_length is the ORIGINAL, untiled progression length
+    # (section_model.progression, before resolved_progression()'s tiling)
+    # -- what generate_melody_for_progression needs to detect "every
+    # cycle" cadence boundaries correctly regardless of how many times
+    # the progression actually repeats to fill the section.
+    _arc_model = section_model.melodic_arc
+    melody_melodic_arc = None
+    if _arc_model is not None:
+        melody_melodic_arc = {
+            "apex_position": _arc_model.apex_position,
+            "resolve_every_cycle": _arc_model.resolve_every_cycle,
+        }
+        if _arc_model.apex_degree is not None:
+            melody_melodic_arc["apex_degree"] = _arc_model.apex_degree - 1
+    melody_progression_cycle_length = len(section_model.progression)
+
     melody_notes = generate_melody_for_progression(
         chords, key, mode,
         behavior=melody_beh,
@@ -709,6 +729,8 @@ def generate_section(
         arc=section_model.arc,
         note_length_range=section_nlr,
         note_length_quantum=section_nlr_quantum,
+        melodic_arc=melody_melodic_arc,
+        progression_cycle_length=melody_progression_cycle_length,
     )
 
     # Record melody snapshot for counterpoint and next-section memory

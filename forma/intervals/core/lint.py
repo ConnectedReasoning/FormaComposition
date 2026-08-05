@@ -470,6 +470,61 @@ def _check_note_length_range_vs_rhythm(section: SectionModel) -> Iterator[Contra
         )
 
 
+def _check_melodic_arc_apex_unreachable(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    apex_degree must actually fit the section's register (Phase 0 decision
+    #3: lint warns, the engine clamps at render time rather than crashing
+    — resolve_apex_pitch() always produces something playable, but a
+    clamped target usually isn't the note the composer actually asked
+    for, and nothing else would ever say so).
+
+    Deliberately limited, not a full resolution of the generator's own
+    key/mode/register inheritance chain: lint_section() only ever sees
+    one SectionModel, with no piece-level fallback available (key/mode
+    can be declared at the piece level and inherited silently) and no
+    access to the actual PieceModel this section belongs to. Rather than
+    guess at inherited values, this only fires when the section
+    explicitly declares its own key AND mode — the one case where every
+    fact this check needs is genuinely present on the section itself.
+    Register is resolved from section.melody's voice register if it's
+    given in dict/VoiceModel form, else the 'mid' default every melody
+    behavior falls back to.
+    """
+    arc = section.melodic_arc
+    if arc is None or arc.apex_degree is None:
+        return
+    if section.key is None or section.mode is None:
+        return
+
+    from intervals.music.melody import get_scale_tones, MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
+    from intervals.music.melodic_shape import apex_degree_reachable
+
+    octave_bottom, octave_top = MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
+    if isinstance(section.melody, VoiceModel):
+        bounds = section.melody.bounds()
+        if bounds is not None:
+            octave_bottom, octave_top = bounds
+
+    try:
+        scale_tones = get_scale_tones(section.key, section.mode, octave_bottom, octave_top)
+    except (KeyError, ValueError):
+        return  # invalid key/mode is a different check's job, not this one's
+
+    engine_degree = arc.apex_degree - 1  # schema is 1-indexed, engine is 0-indexed
+    if not apex_degree_reachable(engine_degree, scale_tones, octave_bottom, octave_top):
+        yield Contradiction(
+            where=f"section '{section.name or '?'}'",
+            setting=f"melodic_arc.apex_degree={arc.apex_degree}",
+            cause=f"register [{octave_bottom}, {octave_top}] doesn't span that "
+                  f"degree in {section.key} {section.mode} in any octave",
+            effect="the engine still renders (clamps to the nearest reachable "
+                   "degree instead of crashing) but that's very likely not the "
+                   "note actually intended",
+            fix="widen the section's/voice's register to fit apex_degree, or "
+                "lower apex_degree to something the current register spans.",
+        )
+
+
 def _check_even_chord_split(section: SectionModel) -> Iterator[Contradiction]:
     """
     chord_bars, not bars, is what actually controls each chord's duration.
@@ -880,6 +935,7 @@ CHECKS = [
     _check_bass_rest_on_continuous,
     _check_note_length_range_vs_groove,
     _check_note_length_range_vs_rhythm,
+    _check_melodic_arc_apex_unreachable,
     _check_even_chord_split,
     _check_develop_peer_voice_noop,
     _check_bass_swing_noop,

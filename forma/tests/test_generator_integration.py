@@ -214,6 +214,99 @@ class TestLoadersAndFullPipeline:
 
 
 # ===========================================================================
+# melodic_arc — real end-to-end render (Phase 6 of the apex/goal-tone build)
+# ===========================================================================
+
+class TestMelodicArcEndToEnd:
+    """
+    Confirms melodic_arc actually flows from a real piece dict through
+    generate_piece() to the rendered MIDI -- the first point in the whole
+    apex/goal-tone build where this happens through the real pipeline
+    rather than a direct generate_melody_for_progression() call. Every
+    prior phase's verification (2 through 5) was necessarily a
+    workaround, since generator.py couldn't read melodic_arc out of a
+    piece at all before this phase.
+    """
+
+    def _piece(self, apex_degree=5, apex_position=0.6, resolve_every_cycle=False):
+        return {
+            "title": "Melodic Arc End-to-End Test",
+            "key": "C", "mode": "ionian",
+            "tempo": {"min": 100, "max": 120},
+            "seed": 42,
+            "form_type": "song",
+            "form": ["verse"],
+            "sections": {
+                "verse": {
+                    "bars": 16,
+                    "progression": ["I", "vi", "IV", "V"],
+                    "density": "medium",
+                    "melody": "lyrical",
+                    "bass_style": "pedal",
+                    "arc": "plateau",
+                    "rhythm": "free",
+                    "note_length_range": {"min": 0.5, "max": 1.0},
+                    "harmony_rhythm": {"rhythm": "sustain"},
+                    "rest_probability": 0.0,
+                    "melodic_arc": {
+                        "apex_degree": apex_degree,
+                        "apex_position": apex_position,
+                        "resolve_every_cycle": resolve_every_cycle,
+                    },
+                }
+            },
+        }
+
+    def _melody_notes(self, path):
+        mid = mido.MidiFile(path)
+        melody_track = next(t for t in mid.tracks if t.name == "Melody")
+        abs_t = 0
+        notes = []
+        for msg in melody_track:
+            abs_t += msg.time
+            if msg.type == "note_on" and msg.velocity > 0:
+                notes.append((abs_t / mid.ticks_per_beat, msg.note))
+        return sorted(notes)
+
+    def test_renders_without_error(self, tmp_path):
+        path = generate_piece(self._piece(), str(tmp_path / "arc.mid"))
+        assert mido.MidiFile(path) is not None
+
+    def test_absent_melodic_arc_still_renders_normally(self, tmp_path):
+        """Sections without melodic_arc at all must be completely
+        unaffected -- the field is opt-in per section."""
+        piece = self._piece()
+        del piece["sections"]["verse"]["melodic_arc"]
+        path = generate_piece(piece, str(tmp_path / "no_arc.mid"))
+        assert mido.MidiFile(path) is not None
+
+    def test_apex_shape_present_in_real_rendered_output(self, tmp_path):
+        """The actual claim that matters: a rise toward the declared
+        apex_position, then a fall after it, measured in the real
+        rendered MIDI -- not a direct function call. Matches the
+        manual verification done during Phase 6 (early=71.9,
+        apex_window=75.1, late=64.6 for this exact piece shape) closely
+        enough to confirm the pipeline wiring reproduces it, without
+        pinning exact values a future seed/behavior tweak could
+        legitimately shift.
+        """
+        path = generate_piece(self._piece(apex_degree=5, apex_position=0.6),
+                               str(tmp_path / "shape.mid"))
+        notes = self._melody_notes(path)
+        assert notes, "expected sounding melody notes in the render"
+        total = max(b for b, _ in notes)
+
+        def avg(lo, hi):
+            vals = [n for b, n in notes if lo <= b / total < hi]
+            return sum(vals) / len(vals) if vals else None
+
+        early, apex_w, late = avg(0.0, 0.2), avg(0.5, 0.7), avg(0.9, 1.0)
+        assert None not in (early, apex_w, late)
+        assert apex_w > early, "expected a rise toward the declared apex"
+        assert apex_w > late, "expected a fall after the declared apex"
+
+
+# ===========================================================================
 # Structural / metadata assertions against the real fixtures
 # ===========================================================================
 

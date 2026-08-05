@@ -61,18 +61,37 @@ class TestApexDegreeReachable:
     def test_dominant_is_reachable_in_a_normal_register(self):
         assert apex_degree_reachable(4, C_IONIAN, 48, 84) is True
 
-    def test_unreachable_in_a_tight_one_octave_register(self):
-        # Register spans exactly one octave (60-71); degree 9 is 9 scale
-        # steps up from the tonic -- more than an octave away in a 7-note
-        # scale, so it cannot land inside a single-octave window in ANY
-        # placement.
-        assert apex_degree_reachable(9, C_IONIAN, 60, 71) is False
+    def test_unreachable_in_a_narrow_register(self):
+        """
+        Regression note: this test originally asserted degree 9 was
+        unreachable in a full one-octave register (60-71), reasoning
+        that "9 steps is more than an octave, so it can't fit in a
+        one-octave window." That reasoning was actually wrong, caught
+        during Phase 6 while writing the lint check that consumes this
+        function: apex_degree_reachable doesn't need degree 9 to be
+        voiced 9 steps above a co-located tonic instance -- it only
+        needs THAT degree's pitch class to recur somewhere in the
+        window, in any octave, and a diatonic scale's degrees recur
+        every 12 semitones regardless of how "far" the degree number
+        looks. degree 9 mod 7 = degree 2 (E in C ionian), and E
+        genuinely does fall inside 60-71 (at 64) -- confirmed
+        independently by resolve_apex_pitch, which was never buggy,
+        agreeing on the exact same placement. A real unreachable case
+        needs a window too narrow to contain the target pitch class in
+        ANY octave, not just "a large-looking degree number."
+        """
+        assert apex_degree_reachable(9, C_IONIAN, 60, 62) is False
 
     def test_reachable_once_register_is_widened_to_fit(self):
-        # Same degree, register widened by exactly the amount needed --
-        # confirms the function isn't just always returning False for
-        # large degrees, it's genuinely register-sensitive.
-        assert apex_degree_reachable(9, C_IONIAN, 60, 84) is True
+        # Same narrow case, register widened enough to contain the
+        # target pitch class -- confirms the function is genuinely
+        # register-sensitive, not just always False for a small window.
+        assert apex_degree_reachable(9, C_IONIAN, 60, 71) is True
+
+    def test_extreme_degree_still_correctly_evaluated(self):
+        # An absurd degree value must still be handled gracefully and
+        # correctly (Phase 0: never crash), not just avoid raising.
+        assert apex_degree_reachable(500, C_IONIAN, 60, 71) is False
 
 
 class TestApexWeightedCandidates:

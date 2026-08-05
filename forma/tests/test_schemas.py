@@ -26,6 +26,7 @@ from intervals.core.schemas import (
     HarmonyRhythmModel,
     MotifModel,
     NoteLengthRangeModel,
+    MelodicArcModel,
     PieceModel,
     RhythmPatternModel,
     SectionModel,
@@ -144,6 +145,44 @@ class TestNoteLengthRangeModel:
     def test_invalid_non_positive_min(self):
         with pytest.raises(ValidationError):
             NoteLengthRangeModel(min=0.0, max=1.0)
+
+
+# ===========================================================================
+# MelodicArcModel
+# ===========================================================================
+
+class TestMelodicArcModel:
+    def test_valid_full(self):
+        m = MelodicArcModel(apex_degree=5, apex_position=0.6, resolve_every_cycle=True)
+        assert m.apex_degree == 5
+        assert m.apex_position == 0.6
+        assert m.resolve_every_cycle is True
+
+    def test_defaults_when_only_apex_degree_given(self):
+        m = MelodicArcModel(apex_degree=5)
+        assert m.apex_position == 0.7  # matches generate_lyrical/generative's own default
+        assert m.resolve_every_cycle is False
+
+    def test_valid_with_no_apex_degree_cadence_only(self):
+        # A melodic_arc block can enable cadence pull on its own, with no
+        # climax target at all -- apex_degree stays None.
+        m = MelodicArcModel(resolve_every_cycle=True)
+        assert m.apex_degree is None
+        assert m.resolve_every_cycle is True
+
+    def test_apex_position_out_of_range_rejected(self):
+        with pytest.raises(ValidationError):
+            MelodicArcModel(apex_degree=5, apex_position=1.5)
+        with pytest.raises(ValidationError):
+            MelodicArcModel(apex_degree=5, apex_position=-0.1)
+
+    def test_apex_position_boundary_values_accepted(self):
+        assert MelodicArcModel(apex_degree=5, apex_position=0.0).apex_position == 0.0
+        assert MelodicArcModel(apex_degree=5, apex_position=1.0).apex_position == 1.0
+
+    def test_unknown_field_rejected(self):
+        with pytest.raises(ValidationError):
+            MelodicArcModel(apex_degree=5, strength=10)
 
 
 # ===========================================================================

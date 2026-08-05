@@ -159,11 +159,27 @@ def apex_degree_reachable(
     whether the target was honored as authored, for the Phase 6 lint
     warning that tells a composer their apex_degree doesn't fit the
     section's register before they render, not after).
+
+    BUG FIX (found during Phase 6's own lint-check test-writing, not by
+    inspection): the octave search here used to be centered on
+    apex_degree's own raw value near degree 0 (MIDI's near-zero octave),
+    not on the actual register. For a register far from that neighborhood
+    — which is to say, the ACTUAL DEFAULT melody register every behavior
+    uses (63-81, over five octaves above MIDI 0) — a completely ordinary
+    apex_degree like 4 (the dominant) could be reported unreachable, when
+    resolve_apex_pitch (which anchors to a given PITCH, not a raw degree
+    number) placed it correctly the whole time. Anchoring the search to
+    the register's own center pitch, the same way resolve_apex_pitch
+    anchors to wherever the melody actually is, fixes it.
     """
     pcs = pitch_classes(scale_tones)
     n = len(pcs)
+    register_center = (octave_bottom + octave_top) // 2
+    anchor_degree = pitch_to_degree(register_center, pcs)
+    anchor_octave = anchor_degree // n
     span_octaves = (octave_top - octave_bottom) // 12 + 2
-    for octave in range(-span_octaves, span_octaves + 1):
+    for octave_offset in range(-span_octaves, span_octaves + 1):
+        octave = anchor_octave + octave_offset
         pitch = degree_to_pitch(apex_degree + octave * n, pcs)
         if octave_bottom <= pitch <= octave_top:
             return True

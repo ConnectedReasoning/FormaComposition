@@ -37,6 +37,7 @@ from intervals.core.lint import (
     _check_harmony_pattern_silently_empty,
     _check_harmony_rest_on_sustain,
     _check_long_progression_seed_collision,
+    _check_melodic_arc_apex_unreachable,
     _check_melodic_variation_noop,
     _check_motif_never_developed,
     _check_note_length_range_vs_groove,
@@ -273,6 +274,67 @@ def test_check_note_length_range_vs_rhythm_fires_for_motif_rhythm():
 def test_check_note_length_range_vs_rhythm_silent_for_free_rhythm():
     section = _section(rhythm="free", note_length_range={"min": 0.25, "max": 1.0})
     assert list(_check_note_length_range_vs_rhythm(section)) == []
+
+
+# ===========================================================================
+# 18. _check_melodic_arc_apex_unreachable
+# ===========================================================================
+
+def test_check_melodic_arc_fires_when_apex_degree_unreachable():
+    # degree 51 (1-indexed schema value -> engine degree 50) confirmed
+    # unreachable in the default 'mid' register (63-81) before pinning.
+    section = _section(key="C", mode="ionian",
+                        melodic_arc={"apex_degree": 51, "apex_position": 0.7})
+    found = list(_check_melodic_arc_apex_unreachable(section))
+    assert len(found) == 1
+    assert "apex_degree=51" in found[0].setting
+    assert "C ionian" in found[0].cause
+
+
+def test_check_melodic_arc_silent_when_apex_degree_reachable():
+    # degree 5 (1-indexed -> engine degree 4, the dominant) confirmed
+    # reachable in the default register before pinning.
+    section = _section(key="C", mode="ionian",
+                        melodic_arc={"apex_degree": 5, "apex_position": 0.7})
+    assert list(_check_melodic_arc_apex_unreachable(section)) == []
+
+
+def test_check_melodic_arc_silent_when_no_melodic_arc():
+    section = _section(key="C", mode="ionian")
+    assert list(_check_melodic_arc_apex_unreachable(section)) == []
+
+
+def test_check_melodic_arc_silent_when_apex_degree_not_set():
+    # melodic_arc present but only enabling cadence pull, no apex target
+    # -- nothing for this check to evaluate.
+    section = _section(key="C", mode="ionian",
+                        melodic_arc={"resolve_every_cycle": True})
+    assert list(_check_melodic_arc_apex_unreachable(section)) == []
+
+
+def test_check_melodic_arc_silent_when_key_or_mode_not_declared_on_section():
+    # Documented limitation: this check only fires when the section
+    # explicitly declares its own key AND mode, since lint_section() has
+    # no access to piece-level inheritance. A section relying on the
+    # piece's key/mode is silently skipped, not incorrectly flagged.
+    section = _section(melodic_arc={"apex_degree": 51, "apex_position": 0.7})
+    assert section.key is None and section.mode is None
+    assert list(_check_melodic_arc_apex_unreachable(section)) == []
+
+
+def test_check_melodic_arc_uses_voice_register_when_melody_is_a_voice_model():
+    # degree 5 (dominant) is reachable in the default 'mid' register, but
+    # a narrow explicit voice register can make it genuinely unreachable
+    # -- confirms register resolution actually reads section.melody's
+    # VoiceModel form, not just falling back to the default every time.
+    section = _section(
+        key="C", mode="ionian",
+        melody={"register": "low", "behavior": "lyrical"},
+        melodic_arc={"apex_degree": 51, "apex_position": 0.7},
+    )
+    found = list(_check_melodic_arc_apex_unreachable(section))
+    assert len(found) == 1
+    assert "[36, 54]" in found[0].cause
 
 
 # ===========================================================================
@@ -518,8 +580,8 @@ def test_check_canon_interval_without_canonic_imitation_silent_without_interval_
 #                                         for the "motif" rhythm-source case
 # ===========================================================================
 
-def test_checks_registry_has_seventeen_entries_plus_melodic_variation_separately():
-    assert len(CHECKS) == 17
+def test_checks_registry_has_eighteen_entries_plus_melodic_variation_separately():
+    assert len(CHECKS) == 18
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS

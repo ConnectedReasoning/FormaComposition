@@ -296,6 +296,57 @@ class NoteLengthRangeModel(BaseModel):
     def as_tuple(self) -> tuple[float, float]:
         return (self.min, self.max)
 
+
+class MelodicArcModel(BaseModel):
+    """
+    Apex/goal-tone phrase shaping. Optional; absent means no apex or
+    cadence bias at all — every section without this field behaves
+    exactly as before this feature existed. See melody.py's
+    generate_lyrical/generate_generative/generate_sparse/generate_develop
+    docstrings and melodic_shape.py for the full mechanism.
+
+    apex_degree: 1-indexed scale degree the phrase builds toward (1 =
+    tonic, 5 = dominant — matching how a composer actually talks about
+    scale degrees, NOT the engine's internal 0-indexed convention;
+    generator.py converts by subtracting 1 at the wiring boundary — see
+    melodic_shape.py's module docstring on why that translation belongs
+    here and not baked into the primitive itself). None (default): no
+    apex bias, even if resolve_every_cycle is set — a melodic_arc block
+    can enable cadence pull on its own, without a climax target.
+
+    apex_position: 0.0-1.0, where in the section the peak should land.
+    Defaults to 0.7, matching generate_lyrical/generate_generative's own
+    default when this field is present but unset.
+
+    resolve_every_cycle: Phase 0's cadence decision. False (default): a
+    repeating progression only resolves once, at the section's true end
+    — a vamp/loop that keeps its groove through every repeat, the way
+    the "na-na-na" coda of "Hey Jude" rides an open vamp specifically so
+    it can extend indefinitely. True: resolves at the end of EVERY
+    progression cycle — a hook that lands every time it comes around,
+    the way Depeche Mode's "Just Can't Get Enough" resolves its short
+    repeating cell on every single pass. Both are real techniques, not
+    one "correct" default with an edge-case toggle.
+
+    Wired into all four melody behaviors (generative/lyrical/develop as
+    of Phase 2-4, sparse as of Phase 5). One documented caveat: combined
+    with `melody: "sparse"`, the effect is real and statistically
+    measurable but was confirmed via direct listening comparison to be
+    hard to perceive — sparse's wide-leap, low-density, long-silence
+    character buries a slow directional trend in noise. Left wired as a
+    genuine, deliberate choice rather than artificially strengthened for
+    that one behavior, which would trade away some of sparse's actual
+    unpredictable identity just to make the shape audible. Treat
+    melodic_arc on a sparse section as a subtle structural nudge, not a
+    foreground effect you should expect to hear clearly.
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    apex_degree:  Optional[int] = None
+    apex_position: Annotated[float, Field(ge=0.0, le=1.0)] = 0.7
+    resolve_every_cycle: bool = False
+
+
 class CounterpointModel(BaseModel):
     """Corresponds to section["counterpoint"] block."""
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -681,6 +732,12 @@ class SectionModel(BaseModel):
     # below behavior. Harmony/bass are untouched by design. No-op under a groove
     # or a "pattern"/"motif" rhythm source (lint flags both).
     note_length_range: Optional[NoteLengthRangeModel]           = None
+
+    # Apex/goal-tone phrase shaping (Phase 6 of the apex/goal-tone build).
+    # See MelodicArcModel's docstring for the full contract, including the
+    # documented sparse caveat. Optional; absent means every section
+    # behaves exactly as before this feature existed.
+    melodic_arc: Optional[MelodicArcModel] = None
 
     # ── Per-voice rest probability (independent of melody rest_probability) ────
     # These thin the harmony bed and bass line respectively. They are NOT
