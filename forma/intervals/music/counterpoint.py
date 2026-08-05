@@ -491,7 +491,15 @@ def score_candidate(
         elif leap <= 7:
             score += 5.0    # large leap — penalise
         else:
-            score += 15.0   # very large leap — avoid
+            # Very large leap — base penalty plus continuous scaling for
+            # every semitone past the threshold. Previously this was a
+            # flat +15.0 regardless of size, which meant an 8-semitone
+            # leap and a 30-semitone leap scored identically. Combined
+            # with the flat +/-50 register-side check, that let register
+            # correctness always outrank proximity once a leap cleared 7
+            # semitones, letting the voice teleport to a distant octave
+            # of a consonant pitch class instead of the nearest one.
+            score += 15.0 + (leap - 7) * 2.0
 
     # Prefer contrary motion
     if cp_prev is not None and melody_prev is not None:
@@ -813,7 +821,16 @@ def generate_free_species(
                 p = note_sounding_at(voice, beat)
                 if p is not None and p != melody_now:
                     sounding_others.append(p)
-        if against_notes:
+        elif against_notes:
+            # Time-agnostic fallback pool — only meaningful when no
+            # time-accurate against_voices data exists at all (true
+            # backward-compat / standalone-call case). When against_voices
+            # is present it already captures what's actually sounding at
+            # this beat; additionally dumping the whole flat section-wide
+            # pitch pool in here would check the candidate for "dissonance"
+            # against notes that aren't sounding at this moment, producing
+            # false hard-rule violations that swamp every other scoring
+            # factor.
             sounding_others.extend(against_notes)
 
         # What is the actual sounding chord right now, as a set of pitch
