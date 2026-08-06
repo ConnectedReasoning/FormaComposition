@@ -230,9 +230,15 @@ def _check_voice_motif(section: SectionModel) -> Iterator[Contradiction]:
 
     Counterpoint voices (species set) go through counterpoint.py, not the
     melody develop path, so the motif gate doesn't apply — skip them.
+    Voices with entry_role set (literal subject/answer) also skip: they
+    consume `motif` directly via generate_subject_entry, independent of
+    `behavior` entirely — the "ignores motifs" cause below would be false
+    for them.
     """
     for i, v in enumerate(section.voices or []):
         if v.species is not None:
+            continue
+        if v.entry_role is not None:
             continue
         if v.motif is None:
             continue
@@ -568,13 +574,18 @@ def _check_develop_peer_voice_noop(section: SectionModel) -> Iterator[Contradict
     generator.py's peer-voice melody-path call site doesn't pass one at all,
     not the voice's own override, not the theme's default. Scoped to voices
     with no `species` set (species present means counterpoint.py, a
-    different code path this gate doesn't apply to).
+    different code path this gate doesn't apply to) and no `entry_role` set
+    (entry_role means generate_subject_entry, which doesn't read `behavior`
+    at all — the "renders exactly as generative" claim below would be false
+    for it).
     """
     voices = section.voices or []
     for i, v in enumerate(voices):
         if i == DEVELOP_WORKING_VOICE_INDEX:
             continue
         if v.species is not None:
+            continue
+        if v.entry_role is not None:
             continue
         if v.behavior != "develop":
             continue
@@ -977,12 +988,23 @@ def _lead_behavior(section: SectionModel) -> Optional[str]:
     return None
 
 
+def _lead_uses_literal_entry(section: SectionModel) -> bool:
+    """True if this section's lead voice (voices[0]) has entry_role set —
+    generate_subject_entry plays the motif's pitch shape literally,
+    independent of `behavior`/MOTIF_CONSUMING_BEHAVIORS entirely, so this
+    counts as "the motif was heard" for _check_motif_never_developed the
+    same way behavior='develop' does."""
+    return bool(section.voices) and section.voices[0].entry_role is not None
+
+
 def _check_motif_never_developed(piece: PieceModel, sections: list[SectionModel]) -> Iterator[Contradiction]:
     """
     Piece-level, not per-section: if the piece defines a motif (real
     `intervals`, not just a name), at least one section needs to actually
     develop it, or the motif's pitch shape is never heard anywhere in the
-    piece — MOTIF_CONSUMING_BEHAVIORS is the only behavior that reads it.
+    piece — MOTIF_CONSUMING_BEHAVIORS is the only behavior that reads it
+    (entry_role's literal subject/answer path is the other way a motif's
+    pitch shape gets heard — see _lead_uses_literal_entry).
 
     Deliberately does NOT fire when no motif is defined at all — a piece
     with no motif block is an honest choice (purely generative/ambient),
@@ -993,7 +1015,8 @@ def _check_motif_never_developed(piece: PieceModel, sections: list[SectionModel]
     """
     if piece.primary_motif is None:
         return
-    if any(_lead_behavior(s) in MOTIF_CONSUMING_BEHAVIORS for s in sections):
+    if any(_lead_behavior(s) in MOTIF_CONSUMING_BEHAVIORS or _lead_uses_literal_entry(s)
+           for s in sections):
         return
     yield Contradiction(
         where=f"piece '{piece.title or '?'}'",

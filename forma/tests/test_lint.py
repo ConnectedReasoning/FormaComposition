@@ -46,7 +46,7 @@ from intervals.core.lint import (
     _check_transform_imitation_unimplemented,
     _check_voice_motif,
 )
-from intervals.core.schemas import CounterpointModel, SectionModel, VoiceModel
+from intervals.core.schemas import CounterpointModel, PieceModel, SectionModel, VoiceModel
 
 
 def _section(**overrides) -> SectionModel:
@@ -78,6 +78,16 @@ def test_check_voice_motif_fires_on_non_develop_behavior_with_motif():
 def test_check_voice_motif_does_not_fire_when_develop():
     section = _section(voices=[
         {"register": "soprano", "behavior": "develop", "motif": "call"},
+    ])
+    assert list(_check_voice_motif(section)) == []
+
+
+def test_check_voice_motif_does_not_fire_for_entry_role_voice():
+    """entry_role voices consume `motif` via generate_subject_entry,
+    independent of `behavior` — the default behavior='lyrical' left on
+    such a voice must not trip this check."""
+    section = _section(voices=[
+        {"register": "soprano", "entry_role": "subject", "motif": "call"},
     ])
     assert list(_check_voice_motif(section)) == []
 
@@ -385,6 +395,19 @@ def test_check_develop_peer_voice_noop_silent_for_lead_voice():
     assert list(_check_develop_peer_voice_noop(section)) == []
 
 
+def test_check_develop_peer_voice_noop_silent_for_entry_role_peer():
+    """A peer voice with entry_role set renders via generate_subject_entry
+    regardless of `behavior` — a leftover/explicit behavior='develop' on
+    it must not trip this check, since the "renders exactly as
+    generative" claim would be false."""
+    section = _section(voices=[
+        {"register": "soprano", "entry_role": "subject", "motif": "call"},
+        {"register": "alto", "entry_role": "answer", "motif": "call",
+         "behavior": "develop"},
+    ])
+    assert list(_check_develop_peer_voice_noop(section)) == []
+
+
 # ===========================================================================
 # 13. _check_bass_swing_noop
 # ===========================================================================
@@ -566,6 +589,48 @@ def test_check_canon_interval_without_canonic_imitation_silent_without_interval_
     own default (4 beats) internally -- nothing for the linter to flag."""
     section = _section(fugal_techniques={"canonic_imitation": True})
     assert list(_check_canon_interval_without_canonic_imitation(section)) == []
+
+
+# ===========================================================================
+# 19. _check_motif_never_developed
+# ===========================================================================
+
+def test_check_motif_never_developed_fires_with_no_develop_or_entry_role():
+    piece = PieceModel.model_validate({
+        "key": "C", "mode": "ionian", "tempo": 100,
+        "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
+        "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
+    })
+    section = _section(voices=[{"register": "soprano", "behavior": "lyrical"}])
+    found = list(_check_motif_never_developed(piece, [section]))
+    assert len(found) == 1
+    assert "no section's lead voice uses behavior='develop'" in found[0].cause
+
+
+def test_check_motif_never_developed_silent_when_lead_voice_develops():
+    piece = PieceModel.model_validate({
+        "key": "C", "mode": "ionian", "tempo": 100,
+        "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
+        "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
+    })
+    section = _section(voices=[{"register": "soprano", "behavior": "develop"}])
+    assert list(_check_motif_never_developed(piece, [section])) == []
+
+
+def test_check_motif_never_developed_silent_when_lead_voice_states_entry_role():
+    """entry_role='subject'/'answer' plays the motif's pitch shape
+    literally via generate_subject_entry -- this must count as "the
+    motif was heard" the same way behavior='develop' does, even though
+    the voice's `behavior` field itself stays at its unrelated default."""
+    piece = PieceModel.model_validate({
+        "key": "C", "mode": "ionian", "tempo": 100,
+        "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
+        "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
+    })
+    section = _section(voices=[
+        {"register": "soprano", "entry_role": "subject", "motif": "m"},
+    ])
+    assert list(_check_motif_never_developed(piece, [section])) == []
 
 
 # ===========================================================================

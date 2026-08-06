@@ -509,6 +509,163 @@ def to_dict(motif: Motif) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Literal subject/answer entry
+# ---------------------------------------------------------------------------
+
+def generate_subject_entry(
+    motif_value,
+    entry_role: str,
+    key: str,
+    mode: str,
+    total_beats: float,
+    register_bounds: "Optional[tuple[int, int]]" = None,
+    answer_interval: Optional[int] = None,
+    velocity: int = 64,
+    theme_pool: Optional[list] = None,
+) -> list:
+    """
+    Render a motif's `intervals` LITERALLY as a fugue-style subject or
+    tonal-answer statement, tiled across total_beats.
+
+    This is the "actually state the subject" path, as opposed to
+    generate_counterpoint's free-species improvisation against a reference
+    melody (counterpoint.py is untouched by this — a voice with `species`
+    set never reaches this function, and a voice with `entry_role` set
+    never reaches generate_counterpoint; schemas.py's VoiceModel enforces
+    that the two are mutually exclusive).
+
+    entry_role:
+      "subject" — anchored on the tonic, folded into register_bounds.
+      "answer"  — anchored on the tonic transposed by answer_interval
+                  semitones BEFORE folding (default: +7, the real/strict
+                  answer a perfect 5th above). Phase 1 ships real
+                  transposition only — tonal-answer mutation (the classic
+                  rule that adjusts an opening tonic-dominant leap so the
+                  answer doesn't imply early modulation) is an explicit,
+                  unimplemented Phase 2 TODO, not attempted here.
+
+    Pitch rendering reuses the SAME diatonic-scale-degree primitives
+    motif_to_notes (melody.py) is built on — pitch_classes / degree_to_pitch
+    / pitch_to_degree from scale_degrees.py, and fold_to_register's
+    centered-fold — so a subject/answer voice's pitches land on scale
+    tones by exactly the same construction every other motif-driven voice
+    in this engine does. It doesn't call motif_to_notes directly because
+    that function makes one pass over a single (already-sized) intervals/
+    rhythm pair; a subject/answer voice needs the motif's cell TILED
+    across total_beats with the diatonic walk continuing cumulatively
+    across tile boundaries (not resetting each cycle), which is timing
+    logic, not pitch logic — so the tiling loop below is the pitch-aware
+    counterpart to rhythm.py's _motif_rhythm_to_events / _tile_one_motif_
+    cycle: same onset math (per-slot onset within a cycle, "full"
+    articulation, a cycle re-emitted verbatim, the final partial cycle
+    trimmed to total_beats), reimplemented here only because those
+    functions return timing alone and have nowhere to hand back the
+    per-slot interval index a pitch walk needs. A rest slot still
+    advances the underlying diatonic walk (matching motif_to_notes'
+    contract) — it pauses the line, it doesn't reset its contour.
+
+    Returns a flat list of MelodyNote (sounding notes only, local section
+    time — start_beat 0 at section start), the same shape
+    generate_counterpoint() / generate_melody_for_progression() return, so
+    it drops into generator.py's existing canon_offset shifting, section-
+    boundary trimming, and cross-section snapshotting with zero special-
+    casing there.
+
+    Returns [] if motif_value resolves to nothing, or the motif has no
+    intervals/rhythm to render — an inert, not-a-crash outcome, consistent
+    with _resolve_voice_motif_rhythm's own "None in, None-ish out" gate.
+    """
+    # Lazy imports: melody.py imports motif.py at module level (Motif,
+    # apply_motif_transform), and motif_loader.py imports motif.py too —
+    # importing either back at module level here would be circular. Same
+    # pattern melody.py itself already uses for the reverse direction
+    # (see its generate_melody_for_progression fugal_techniques handling).
+    from intervals.core.motif_loader import resolve_motif_value
+    from intervals.music.melody import (
+        MelodyNote, get_scale_tones, fold_to_register,
+        MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
+    )
+    from intervals.music.harmony import key_to_midi_root
+    from intervals.music.scale_degrees import (
+        pitch_classes, degree_to_pitch, pitch_to_degree,
+    )
+
+    motif_obj = resolve_motif_value(motif_value, theme_pool=theme_pool)
+    if motif_obj is None:
+        return []
+
+    motif_dict = to_dict(motif_obj)
+    intervals = motif_dict.get("intervals") or []
+    rhythm    = motif_dict.get("rhythm") or []
+    rests     = motif_dict.get("rests")
+    # Motif carries no .velocities attribute (a pre-existing gap — see
+    # generator.py's _resolve_voice_motif_rhythm docstring); this stays
+    # None via to_dict exactly as it does for every other motif-driven
+    # voice, kept here only so a future velocities field needs no change
+    # to this function.
+    velocities = motif_dict.get("velocities")
+
+    n = min(len(intervals), len(rhythm))
+    if n == 0 or total_beats <= 0:
+        return []
+
+    octave_bottom, octave_top = register_bounds or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
+
+    scale_tones = get_scale_tones(key, mode, octave_bottom, octave_top)
+    pcs = pitch_classes(scale_tones)
+    if not pcs:
+        return []
+
+    # Anchor pitch: tonic, folded into this voice's register. "answer"
+    # transposes by answer_interval semitones (default +7, real answer)
+    # BEFORE folding, so the fold lands on the closest in-register octave
+    # of the TRANSPOSED pitch class, not of the tonic itself.
+    tonic = key_to_midi_root(key, octave=4)
+    if entry_role == "answer":
+        transposition = answer_interval if answer_interval is not None else 7
+        tonic += transposition
+    start_pitch = fold_to_register(tonic, octave_bottom, octave_top)
+    current_degree = pitch_to_degree(start_pitch, pcs)
+
+    # Onset offset of each slot within one cycle — identical math to
+    # rhythm.py's _tile_one_motif_cycle (cumulative sum of durations).
+    onsets_in_cycle = []
+    t = 0.0
+    for idx in range(n):
+        onsets_in_cycle.append(t)
+        t += rhythm[idx]
+    cycle_length = t
+    if cycle_length <= 0:
+        return []
+
+    notes = []
+    cycle_offset = 0.0
+    while cycle_offset < total_beats:
+        for idx in range(n):
+            abs_onset = cycle_offset + onsets_in_cycle[idx]
+            if abs_onset >= total_beats:
+                break
+
+            current_degree += intervals[idx]
+            pitch = degree_to_pitch(current_degree, pcs)
+            pitch = fold_to_register(pitch, octave_bottom, octave_top)
+
+            if rests is not None and idx < len(rests) and rests[idx]:
+                continue  # rest slot: walk advances, nothing sounds
+
+            dur = min(rhythm[idx], total_beats - abs_onset)
+            if dur < 0.25:
+                continue
+            vscale = (velocities[idx] if velocities and idx < len(velocities) else 0.8)
+            notes.append(MelodyNote(
+                pitch, abs_onset, dur, int(velocity * vscale), False,
+            ))
+        cycle_offset += cycle_length
+
+    return notes
+
+
+# ---------------------------------------------------------------------------
 # Quick test / demo
 # ---------------------------------------------------------------------------
 

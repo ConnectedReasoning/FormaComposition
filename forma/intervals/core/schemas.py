@@ -477,6 +477,65 @@ class VoiceModel(BaseModel):
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
 
+    # ── Literal subject/answer entry (fugue-style) ──────────────────────
+    # When set, this voice renders `motif` literally via
+    # generate_subject_entry() instead of going through generate_counterpoint
+    # (species path) or generate_melody_for_progression (free melody path).
+    # None (the default) is a strict no-op — every existing piece JSON is
+    # unaffected. See motif.py's generate_subject_entry docstring for the
+    # rendering contract.
+    entry_role: Optional[Literal["subject", "answer"]] = None
+
+    # Semitone transposition applied when entry_role == "answer". None
+    # (the default) means the real answer: +7 semitones (perfect 5th
+    # above). Tonal-answer mutation is out of scope for Phase 1 — see
+    # generate_subject_entry's docstring.
+    answer_interval: Optional[int] = None
+
+    @field_validator("entry_role", mode="after")
+    @classmethod
+    def _validate_entry_role_needs_motif(cls, v, info):
+        """entry_role renders `motif` literally — without one there is
+        nothing to render. Raising here beats the alternative (a voice
+        that validates cleanly and then silently produces zero notes),
+        matching how this schema treats every other silent-gap risk."""
+        if v is not None and info.data.get("motif") is None:
+            raise ValueError(
+                f"entry_role='{v}' requires this voice's `motif` field "
+                f"to be set — there is nothing to render literally "
+                f"without one."
+            )
+        return v
+
+    @field_validator("answer_interval", mode="after")
+    @classmethod
+    def _validate_answer_interval_needs_answer(cls, v, info):
+        """answer_interval only means something for entry_role='answer'.
+        Setting it alongside 'subject' (or with entry_role unset) would
+        otherwise validate cleanly and do nothing."""
+        if v is not None and info.data.get("entry_role") != "answer":
+            raise ValueError(
+                "answer_interval is only meaningful when "
+                "entry_role='answer' (it has no effect on 'subject' or "
+                "when entry_role is unset)."
+            )
+        return v
+
+    @model_validator(mode="after")
+    def _validate_entry_role_species_exclusive(self):
+        """entry_role and species pick different, mutually-exclusive
+        rendering paths for this voice (generate_subject_entry vs.
+        generate_counterpoint) — generator.py's dispatch checks entry_role
+        first, which would silently strand a `species` value set alongside
+        it. Forcing the composer to pick one avoids that silent-ignore."""
+        if self.entry_role is not None and self.species is not None:
+            raise ValueError(
+                "entry_role and species are mutually exclusive on a "
+                "voice — entry_role renders the motif literally; species "
+                "generates free counterpoint against the melody. Pick one."
+            )
+        return self
+
     def bounds(self) -> "Optional[tuple[int, int]]":
         """
         Absolute (bottom, top) MIDI range for this voice's register, or None

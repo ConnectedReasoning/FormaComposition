@@ -44,7 +44,10 @@ from intervals.music.rhythm   import (
     VELOCITY_CLAMP_MIN, VELOCITY_CLAMP_MAX,
     rhythm_pattern_to_events, _motif_rhythm_to_events, _slice_events_into_window,
 )
-from intervals.music.motif    import from_dict as motif_from_dict, to_dict as motif_to_dict, Motif, transform as apply_motif_transform
+from intervals.music.motif    import (
+    from_dict as motif_from_dict, to_dict as motif_to_dict, Motif,
+    transform as apply_motif_transform, generate_subject_entry,
+)
 from intervals.music.percussion import generate_drums, DrumHit
 
 from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme, resolve_motif_value
@@ -707,31 +710,54 @@ def generate_section(
             melody_melodic_arc["apex_degree"] = _arc_model.apex_degree - 1
     melody_progression_cycle_length = len(section_model.progression)
 
-    melody_notes = generate_melody_for_progression(
-        chords, key, mode,
-        behavior=melody_beh,
-        density=density,
-        bars_per_chord=bars_list,
-        beats_per_bar=beats_per_bar,
-        motif=melody_motif_def,
-        motif_pool=melody_motif_pool,
-        groove=groove,
-        swing=swing,
-        seed=base_seed + seed_offset,
-        section_name=section_model.name or "",
-        octave_bottom=lead_octave_bottom,
-        octave_top=lead_octave_top,
-        base_velocity=lead_velocity,
-        rhythm_events_override=melody_rhythm_events,
-        fugal_techniques=section_model.fugal_techniques,
-        rest_probability=lead_rest_prob,
-        piece_ctx=piece_ctx,
-        arc=section_model.arc,
-        note_length_range=section_nlr,
-        note_length_quantum=section_nlr_quantum,
-        melodic_arc=melody_melodic_arc,
-        progression_cycle_length=melody_progression_cycle_length,
-    )
+    if lead_voice is not None and lead_voice.entry_role is not None:
+        # Literal subject/answer entry (fugue-style) — the lead voice
+        # states lead_voice.motif's intervals literally instead of going
+        # through melody.py's behavior-driven generation. See motif.py's
+        # generate_subject_entry docstring. This is the same field/path
+        # peer voices (section.voices[1:]) use below in generate_piece()
+        # — wired here too so entry_role also works on voices[0], where a
+        # fugue's subject conventionally states first.
+        _entry_desc = (lead_voice.motif if isinstance(lead_voice.motif, str)
+                       else "(inline motif)")
+        print(f"    Melody: literal {lead_voice.entry_role} entry "
+              f"('{_entry_desc}')")
+        melody_notes = generate_subject_entry(
+            lead_voice.motif,
+            entry_role=lead_voice.entry_role,
+            key=key, mode=mode,
+            total_beats=total_beats_section,
+            register_bounds=(lead_octave_bottom, lead_octave_top),
+            answer_interval=lead_voice.answer_interval,
+            velocity=lead_velocity,
+            theme_pool=motif_pool,
+        )
+    else:
+        melody_notes = generate_melody_for_progression(
+            chords, key, mode,
+            behavior=melody_beh,
+            density=density,
+            bars_per_chord=bars_list,
+            beats_per_bar=beats_per_bar,
+            motif=melody_motif_def,
+            motif_pool=melody_motif_pool,
+            groove=groove,
+            swing=swing,
+            seed=base_seed + seed_offset,
+            section_name=section_model.name or "",
+            octave_bottom=lead_octave_bottom,
+            octave_top=lead_octave_top,
+            base_velocity=lead_velocity,
+            rhythm_events_override=melody_rhythm_events,
+            fugal_techniques=section_model.fugal_techniques,
+            rest_probability=lead_rest_prob,
+            piece_ctx=piece_ctx,
+            arc=section_model.arc,
+            note_length_range=section_nlr,
+            note_length_quantum=section_nlr_quantum,
+            melodic_arc=melody_melodic_arc,
+            progression_cycle_length=melody_progression_cycle_length,
+        )
 
     # Record melody snapshot for counterpoint and next-section memory
     if sec_ctx is not None:
@@ -1134,7 +1160,26 @@ def generate_piece(
                 v_rest = (v.rest_probability if v.rest_probability is not None
                           else section_model.rest_probability)
 
-                if v.species is not None:
+                if v.entry_role is not None:
+                    # Literal subject/answer entry — states v.motif's
+                    # intervals literally instead of either free
+                    # counterpoint (species) or generative melody. See
+                    # motif.py's generate_subject_entry docstring. Ahead
+                    # of both other branches, per schemas.py's VoiceModel
+                    # validator: entry_role and species are mutually
+                    # exclusive on a voice, so there's no ambiguity about
+                    # which path a given voice takes.
+                    peer_notes = generate_subject_entry(
+                        v.motif,
+                        entry_role=v.entry_role,
+                        key=theme["key"], mode=theme["mode"],
+                        total_beats=total_beats,
+                        register_bounds=vb,
+                        answer_interval=v.answer_interval,
+                        velocity=v.velocity,
+                        theme_pool=_cp_motif_pool,
+                    )
+                elif v.species is not None:
                     peer_notes = generate_counterpoint(
                         melody_notes,
                         key=theme["key"], mode=theme["mode"],
