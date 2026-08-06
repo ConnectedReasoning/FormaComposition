@@ -1,0 +1,193 @@
+{
+  "piece": {
+    "name": "algorithmic_fugue_v2",
+    "title": "Grand Algorithmic Fugue in D Minor (v2 — literal entries)",
+    "key": "D",
+    "mode": "aeolian",
+    "tempo": 85,
+    "seed": 1750,
+    "form_type": "narrative",
+    "motif": {
+      "name": "fugue_subject",
+      "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
+      "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "transform_pool": ["inversion", "retrograde"]
+    },
+    "notes": "v2: the exposition now actually states the subject and a real tonal/real answer (entry_role), instead of free-species voices that only shared the subject's rhythm. Section 1a (exposition_entries, 4 bars) is a strict S-A-T-B canon on tonic/dominant -- entry_role tiles each voice across its full available time, so earlier entrants (smaller canon_offset) restate more times before being joined by the next voice, building to a full 4-voice canon by bar 4. Section 1b (exposition_continuation, 12 bars) picks up with the original free-composed development once all voices have entered. Section 2 (Stretto Development) and Section 3 (Coda) are unchanged from v1 -- the coda's augmentation effect is done via fugal_techniques.motif_transform, which entry_role deliberately doesn't replace (Phase 1 ships literal/untransformed statement only).",
+    "sections": [
+      {
+        "name": "exposition_entries",
+        "bars": 4,
+        "progression": ["i", "V", "i", "V"],
+        "chord_bars": [1, 1, 1, 1],
+        "density": "medium",
+        "rhythm": "free",
+        "bass_style": "root_only",
+        "bass_rest_probability": 1.0,
+        "arc": "build",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "entry_role": "subject",
+            "motif": "fugue_subject",
+            "velocity": 90
+          },
+          {
+            "register": "alto",
+            "entry_role": "answer",
+            "motif": "fugue_subject",
+            "canon_offset": 4.0,
+            "velocity": 85
+          },
+          {
+            "register": "tenor",
+            "entry_role": "subject",
+            "motif": "fugue_subject",
+            "canon_offset": 8.0,
+            "velocity": 80
+          },
+          {
+            "register": "bass",
+            "entry_role": "answer",
+            "motif": "fugue_subject",
+            "canon_offset": 12.0,
+            "velocity": 80
+          }
+        ]
+      },
+      {
+        "name": "exposition_continuation",
+        "bars": 12,
+        "progression": ["i", "iv", "V", "i", "V", "i"],
+        "chord_bars": [2, 2, 2, 2, 2, 2],
+        "density": "medium",
+        "rhythm": "motif",
+        "bass_style": "root_only",
+        "bass_rest_probability": 1.0,
+        "arc": "build",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 90
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 0.0,
+            "velocity": 85
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 0.0,
+            "velocity": 80
+          },
+          {
+            "register": "bass",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 0.0,
+            "velocity": 80
+          }
+        ]
+      },
+      {
+        "name": "stretto_development",
+        "bars": 12,
+        "progression": ["i", "IV", "V", "i", "iv", "V"],
+        "chord_bars": [2, 2, 2, 2, 2, 2],
+        "density": "full",
+        "rhythm": "motif",
+        "bass_style": "root_only",
+        "bass_rest_probability": 1.0,
+        "arc": "swell",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 95
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 2.0,
+            "velocity": 90
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 4.0,
+            "velocity": 85
+          },
+          {
+            "register": "bass",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 6.0,
+            "velocity": 85
+          }
+        ]
+      },
+      {
+        "name": "augmentation_coda",
+        "bars": 16,
+        "progression": ["i", "v", "i", "V", "i", "iv", "V", "i"],
+        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "density": "full",
+        "rhythm": "motif",
+        "bass_style": "pedal",
+        "bass_rest_probability": 0.0,
+        "arc": "fade_out",
+        "beats_per_bar": 4,
+        "fugal_techniques": {
+          "motif_transform": "augmentation"
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 90
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 8.0,
+            "velocity": 85
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 16.0,
+            "velocity": 85
+          }
+        ]
+      }
+    ]
+  }
+}

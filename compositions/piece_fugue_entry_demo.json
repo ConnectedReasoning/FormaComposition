@@ -1,0 +1,45 @@
+{
+  "title": "Subject/Answer Entry Demo",
+  "key": "D",
+  "mode": "dorian",
+  "tempo": 96,
+  "seed": 11,
+  "motif": {
+    "name": "fugue_subject",
+    "intervals": [0, 2, 1, -1, -2, 1],
+    "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
+    "transform_pool": ["inversion", "retrograde", "augmentation"]
+  },
+  "sections": [
+    {
+      "name": "exposition",
+      "bars": 8,
+      "beats_per_bar": 4,
+      "rhythm": "free",
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "progression": ["i", "iv", "v", "i"],
+      "voices": [
+        {
+          "register": "mid",
+          "entry_role": "subject",
+          "motif": "fugue_subject",
+          "velocity": 85
+        },
+        {
+          "register": "above",
+          "entry_role": "answer",
+          "motif": "fugue_subject",
+          "velocity": 78,
+          "canon_offset": 5.0
+        },
+        {
+          "register": "below",
+          "species": "free",
+          "dissonance": "passing",
+          "velocity": 62,
+          "canon_offset": 10.0
+        }
+      ]
+    }
+  ]
+}
