@@ -1,0 +1,261 @@
+{
+  "piece": {
+    "name": "discreet_landscapes",
+    "title": "Discreet Landscapes (Music for Quiet Rooms)",
+    "key": "D",
+    "mode": "lydian",
+    "tempo": 60,
+    "seed": 1975,
+    "notes": "A 30-minute continuous ambient composition generated according to background music guidelines. Uses D Lydian for floating, open harmonic color (#4). Features ultra-long chord holds (16-27 bars per chord), zero-motion sustained harmony beds, pedal and root-only bass, and high rest-probability generative melody lines. Counterpoint voices act as asynchronous Brian Eno-style tape loop reflections and high bell-like flourishes.",
+    "motif": {
+      "name": "ambient_loop_cell",
+      "intervals": [
+        0,
+        4,
+        2,
+        -2,
+        -4
+      ],
+      "rhythm": [
+        4.0,
+        3.0,
+        5.0,
+        4.0,
+        6.0
+      ],
+      "velocities": [
+        0.45,
+        0.55,
+        0.5,
+        0.4,
+        0.35
+      ],
+      "transform_pool": [
+        "augmentation",
+        "diminution"
+      ]
+    },
+    "sections": [
+      {
+        "name": "i_first_light_drift",
+        "bars": 72,
+        "progression": [
+          "I",
+          "II",
+          "IV",
+          "I"
+        ],
+        "chord_bars": [
+          18,
+          18,
+          18,
+          18
+        ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": {
+          "behavior": "sparse",
+          "register": "soprano",
+          "velocity": 62
+        },
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rest_probability": 0.45,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 48
+          }
+        ],
+        "notes": "Opening movement (~4.8 minutes). D Lydian I-II-IV-I cycle with 18 bars per chord. Tonic pedal bass anchors sustained chord pads while high-register counterpoint acts as a delicate tape-loop shimmer."
+      },
+      {
+        "name": "ii_unfolding_expanse",
+        "bars": 96,
+        "progression": [
+          "I",
+          "I",
+          "II",
+          "IV",
+          "I",
+          "II"
+        ],
+        "chord_bars": [
+          16,
+          16,
+          16,
+          16,
+          16,
+          16
+        ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "alto",
+          "velocity": 68
+        },
+        "bass_style": "root_only",
+        "arc": "swell",
+        "rest_probability": 0.4,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 52
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "free",
+            "velocity": 45
+          }
+        ],
+
+        "notes": "Second movement (~6.4 minutes). Expands the texture with two independent counterpoint voices providing Frippertronics-style overlapping reflections below and above."
+      },
+      {
+        "name": "iii_plateau_of_stillness",
+        "bars": 108,
+        "progression": [
+          "I",
+          "IV",
+          "II",
+          "I"
+        ],
+        "chord_bars": [
+          27,
+          27,
+          27,
+          27
+        ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": {
+          "behavior": "generative",
+          "register": "tenor",
+          "velocity": 60
+        },
+        "bass_style": "pedal",
+        "arc": "plateau",
+        "rest_probability": 0.5,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 50
+          }
+        ],
+        "notes": "Central movement (~7.2 minutes). Ultra-long 27-bar chord holds create an immobile, timeless glass-like surface. Minimal generative melody in tenor register."
+      },
+      {
+        "name": "iv_reflected_horizon",
+        "bars": 96,
+        "progression": [
+          "II",
+          "IV",
+          "I",
+          "II",
+          "I",
+          "I"
+        ],
+        "chord_bars": [
+          16,
+          16,
+          16,
+          16,
+          16,
+          16
+        ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": {
+          "behavior": "sparse",
+          "register": "soprano",
+          "velocity": 64
+        },
+        "bass_style": "steady",
+        "arc": "swell",
+        "rest_probability": 0.42,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 54
+          }
+        ],
+        "notes": "Fourth movement (~6.4 minutes). Lydian II chord (E major) brings floating, optimistic brightness into the high register before returning home to I."
+      },
+      {
+        "name": "v_dissolving_into_air",
+        "bars": 78,
+        "progression": [
+          "IV",
+          "I",
+          "IV",
+          "I"
+        ],
+        "chord_bars": [
+          20,
+          20,
+          19,
+          19
+        ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": {
+          "behavior": "sparse",
+          "register": "soprano",
+          "velocity": 55
+        },
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rest_probability": 0.55,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "velocity": 42
+          }
+        ],
+        "notes": "Final movement (~5.2 minutes). Plagal IV-I oscillation with a long fade_out arc. Total duration across all 5 sections = 450 bars = exactly 30 minutes at 60 BPM."
+      }
+    ]
+  }
+}

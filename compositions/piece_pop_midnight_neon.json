@@ -1,0 +1,202 @@
+{
+  "piece": {
+    "name": "midnight_neon_pop",
+    "title": "Midnight Neon (Upbeat Pop Anthem)",
+    "key": "E",
+    "mode": "ionian",
+    "tempo": 124,
+    "seed": 2026,
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse_1",
+      "chorus",
+      "verse_2",
+      {
+        "section": "chorus",
+        "exact_repeat": true
+      },
+      "bridge",
+      {
+        "section": "chorus",
+        "exact_repeat": true
+      },
+      "outro"
+    ],
+    "motif": {
+      "name": "neon_hook",
+      "intervals": [ 0, 2, 1, -3, 2, -2 ],
+      "rhythm": [ 0.75, 0.25, 0.5, 0.5, 1.0, 1.0 ],
+      "velocities": [ 0.71, 0.59, 0.67, 0.63, 0.83, 0.75 ],
+      "transform_pool": [
+        "original",
+        "sequence",
+        "shuffle"
+      ]
+    },
+    "notes": "An upbeat, driving pop anthem designed according to pop_music_guidelines.md. Features the classic 4-chord I-V-vi-IV loop in the chorus with a recognizable motif, high energy density, and strong 4-on-the-floor drum/pulse bass foundation. The verse pulls back to a sparser texture (I-vi-IV-V) with lyrical melody, while the bridge introduces a build arc and a minor-leaning progression.",
+    "sections": {
+      "intro": {
+        "bars": 8,
+        "progression": [ "I", "IV"],
+        "chord_bars": [ 4, 4   ],
+        "density": "sparse",
+        "melody": {
+          "behavior": "sparse",
+          "register": "tenor",
+          "velocity": 75
+        },
+        "bass_style": "root_only",
+        "arc": "swell",
+        "rhythm": "free",
+        "rest_probability": 0.4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "drums": {
+          "pattern": "minimal",
+          "density": "sparse"
+        }
+      },
+      "verse_1": {
+        "bars": 16,
+        "progression": [ "I", "vi", "IV", "V", "I", "vi", "IV", "V" ],
+        "chord_bars": [ 2, 2, 2, 2, 2, 2, 2, 2 ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "alto",
+          "velocity": 85
+        },
+        "bass_style": "steady",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.3,
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "syncopated"
+        },
+        "drums": {
+          "pattern": "backbeat",
+          "density": "medium"
+        }
+      },
+      "verse_2": {
+        "bars": 16,
+        "progression": [ "I", "vi", "IV", "V", "I", "vi", "IV", "V" ],
+        "chord_bars": [ 2, 2, 2, 2, 2, 2, 2, 2   ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "alto",
+          "velocity": 88
+        },
+        "bass_style": "walking",
+        "arc": "breath",
+        "rhythm": "free",
+        "rest_probability": 0.2,
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "medium",
+          "groove": "syncopated"
+        },
+        "drums": {
+          "pattern": "backbeat",
+          "density": "full"
+        },
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "velocity": 65
+          }
+   ],
+        "harmony_pattern": {
+          "onsets": [   0.0,   0.5,   1.5,   2.5 ],
+          "durations": [   0.5,   1.0,   1.0,   1.5 ]
+        }
+      },
+      "chorus": {
+        "bars": 16,
+        "progression": [ "I", "V", "vi", "IV", "I", "V", "vi", "IV" ],
+        "chord_bars": [ 2, 2, 2, 2, 2, 2, 2, 2 ],
+        "density": "full",
+        "melody": {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 105
+        },
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "rest_probability": 0.25,
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "full",
+          "groove": "driving"
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "full"
+        },
+        "harmony_pattern": {
+          "onsets": [ 0.0,   0.5,   1.5,   2.0,   2.5,   3.5  ],
+          "durations": [ 0.5,   1.0,   0.5,   0.5,   1.0,   0.5  ]
+        }
+      },
+      "bridge": {
+        "bars": 8,
+        "progression": [ "vi", "IV", "ii", "V" ],
+        "chord_bars": [ 2, 2, 2, 2 ],
+        "density": "medium",
+        "melody": {
+          "behavior": "generative",
+          "register": "tenor",
+          "velocity": 95
+        },
+        "bass_style": "steady",
+        "arc": "build",
+        "rhythm": "free",
+        "rest_probability": 0.2,
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "medium",
+          "groove": "straight"
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "medium"
+        },
+        "harmony_pattern": {
+          "onsets": [ 0.0, 0.5, 1.0, 2.0 ],
+          "durations": [ 0.5, 0.5, 1.0, 2.0 ]
+        }
+      },
+      "outro": {
+        "bars": 8,
+        "progression": [ "I", "IV", "I", "I" ],
+        "chord_bars": [ 2, 2, 2, 2 ],
+        "density": "sparse",
+        "melody": {
+          "behavior": "sparse",
+          "register": "alto",
+          "velocity": 70
+        },
+        "bass_style": "root_only",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "rest_probability": 0.3,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "drums": {
+          "pattern": "minimal",
+          "density": "sparse"
+        }
+      }
+    }
+  }
+}

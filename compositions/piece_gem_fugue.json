@@ -1,0 +1,148 @@
+{
+  "piece": {
+    "name": "algorithmic_fugue",
+    "title": "Grand Algorithmic Fugue in D Minor",
+    "key": "D",
+    "mode": "aeolian",
+    "tempo": 85,
+    "seed": 1750,
+    "form_type": "narrative",
+    "motif": {
+      "name": "fugue_subject",
+      "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
+      "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "transform_pool": ["inversion", "retrograde"]
+    },
+    "notes": "A 4-part algorithmic fugue. Section 1 is the Exposition, with voices entering every 4 beats (Soprano -> Alto -> Tenor -> Bass). Section 2 is the Stretto Development, compressing the entries to every 2 beats. Section 3 is the Coda, applying 'augmentation' to stretch the subject to twice its length over a massive pedal point.",
+    "sections": [
+      {
+        "name": "exposition",
+        "bars": 16,
+        "progression": ["i", "v", "i", "iv", "V", "i", "V", "i"],
+        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "density": "medium",
+        "rhythm": "motif",
+        "bass_style": "root_only",
+        "bass_rest_probability": 1.0,
+        "arc": "build",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 90
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 4.0,
+            "velocity": 85
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 8.0,
+            "velocity": 80
+          },
+          {
+            "register": "bass",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 12.0,
+            "velocity": 80
+          }
+        ]
+      },
+      {
+        "name": "stretto_development",
+        "bars": 12,
+        "progression": ["i", "IV", "V", "i", "iv", "V"],
+        "chord_bars": [2, 2, 2, 2, 2, 2],
+        "density": "full",
+        "rhythm": "motif",
+        "bass_style": "root_only",
+        "bass_rest_probability": 1.0,
+        "arc": "swell",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 95
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 2.0,
+            "velocity": 90
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 4.0,
+            "velocity": 85
+          },
+          {
+            "register": "bass",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 6.0,
+            "velocity": 85
+          }
+        ]
+      },
+      {
+        "name": "augmentation_coda",
+        "bars": 16,
+        "progression": ["i", "v", "i", "V", "i", "iv", "V", "i"],
+        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "density": "full",
+        "rhythm": "motif",
+        "bass_style": "pedal",
+        "bass_rest_probability": 0.0,
+        "arc": "fade_out",
+        "beats_per_bar": 4,
+        "fugal_techniques": {
+          "motif_transform": "augmentation"
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 90
+          },
+          {
+            "register": "alto",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 8.0,
+            "velocity": 85
+          },
+          {
+            "register": "tenor",
+            "species": "free",
+            "motif": "fugue_subject",
+            "canon_offset": 16.0,
+            "velocity": 85
+          }
+        ]
+      }
+    ]
+  }
+}
