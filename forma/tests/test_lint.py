@@ -36,6 +36,7 @@ from intervals.core.lint import (
     _check_harmony_motif_without_motif_rhythm,
     _check_harmony_pattern_silently_empty,
     _check_harmony_rest_on_sustain,
+    _check_lead_velocity_margin,
     _check_long_progression_seed_collision,
     _check_melodic_arc_apex_unreachable,
     _check_melodic_variation_noop,
@@ -634,6 +635,48 @@ def test_check_motif_never_developed_silent_when_lead_voice_states_entry_role():
 
 
 # ===========================================================================
+# _check_lead_velocity_margin
+# ===========================================================================
+
+def test_check_lead_velocity_margin_silent_on_plain_default_section():
+    """A section that never touches velocity at all (bare melody string,
+    no voices[]) must not trip its own new default — LEAD_VELOCITY_DEFAULT
+    is chosen specifically to clear LEAD_VELOCITY_MARGIN_TRIGGER."""
+    section = _section(melody="generative")
+    assert list(_check_lead_velocity_margin(section)) == []
+
+
+def test_check_lead_velocity_margin_fires_on_low_explicit_lead_velocity():
+    section = _section(voices=[
+        {"register": "soprano", "behavior": "lyrical", "velocity": 64},
+    ])
+    found = list(_check_lead_velocity_margin(section))
+    assert len(found) == 1
+    c = found[0]
+    assert "lead velocity=64" in c.setting
+    assert "bass defaults to 70" in c.cause
+    assert "QUIETER" in c.cause  # 64 < 70: lead is actually below bass
+
+
+def test_check_lead_velocity_margin_fires_when_margin_thin_but_positive():
+    # 80 - 70 = 10, below the 15-point trigger, but still nominally louder.
+    section = _section(voices=[
+        {"register": "soprano", "behavior": "lyrical", "velocity": 80},
+    ])
+    found = list(_check_lead_velocity_margin(section))
+    assert len(found) == 1
+    assert "QUIETER" not in found[0].cause
+    assert "10 points" in found[0].cause
+
+
+def test_check_lead_velocity_margin_silent_when_explicit_lead_velocity_clears_it():
+    section = _section(voices=[
+        {"register": "soprano", "behavior": "lyrical", "velocity": 90},
+    ])
+    assert list(_check_lead_velocity_margin(section)) == []
+
+
+# ===========================================================================
 # Sanity: CHECKS registry contains all 17 section-only checks. Three more
 # are piece-level and invoked directly by lint_piece instead of through this
 # registry, because each needs context beyond a single SectionModel:
@@ -645,8 +688,9 @@ def test_check_motif_never_developed_silent_when_lead_voice_states_entry_role():
 #                                         for the "motif" rhythm-source case
 # ===========================================================================
 
-def test_checks_registry_has_eighteen_entries_plus_melodic_variation_separately():
-    assert len(CHECKS) == 18
+def test_checks_registry_has_nineteen_entries_plus_melodic_variation_separately():
+    assert len(CHECKS) == 19
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS
+    assert _check_lead_velocity_margin in CHECKS

@@ -95,6 +95,18 @@ PROGRAM_COUNTERPOINT = 2
 PROGRAM_BASS         = 3
 PROGRAM_DRUMS        = 0   # channel 9 ignores program in GM, but emit for completeness
 
+# Lead voice's fallback base velocity — used when section.melody is a bare
+# behavior string (no voice dict, so no explicit velocity to read). Was 72
+# (mf, barely above bass's own default of 70 and harmony's 65 — see
+# bass.py's BassNote.velocity and harmony.py's HarmonyContext.base_velocity),
+# leaving the lead with little to no headroom over the accompaniment by
+# default. Raised to clear lint.py's LEAD_VELOCITY_MARGIN_TRIGGER (15 points)
+# over the louder of the two accompaniment defaults (bass, 70) with room to
+# spare, so a section that never touches velocity at all renders clean under
+# _check_lead_velocity_margin — that check exists for sections that set an
+# explicit lead velocity too low, not to immediately flag its own default.
+LEAD_VELOCITY_DEFAULT = 88
+
 # Track names shown in Logic Pro
 TRACK_NAME_MELODY       = "Melody"
 TRACK_NAME_HARMONY      = "Harmony"
@@ -440,7 +452,7 @@ def generate_section(
     lead_voice = section_model.lead_voice()
     lead_octave_bottom = MELODY_OCTAVE_BOTTOM
     lead_octave_top    = MELODY_OCTAVE_TOP
-    lead_velocity      = 72
+    lead_velocity      = LEAD_VELOCITY_DEFAULT
     lead_rest_prob     = section_model.rest_probability
     if lead_voice is not None:
         melody_beh = lead_voice.behavior
