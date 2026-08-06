@@ -1047,9 +1047,17 @@ class SectionModel(BaseModel):
         # or harmony_rhythm resolves against motifs declared inline in the
         # theme before the external library. model_dump each MotifModel to the
         # plain-dict shape resolve_motif_value matches names against.
+        #
+        # Falls back to the singular `motif` field when `motifs` isn't set,
+        # mirroring primary_motif's own fallback — otherwise a piece using
+        # the standard single-motif format could never have a voice
+        # reference its own top-level motif by name (item MT-1).
+        pool_source = theme_model.motifs or (
+            [theme_model.motif] if theme_model.motif is not None else None
+        )
         theme_pool = None
-        if theme_model.motifs:
-            theme_pool = [m.model_dump(exclude_none=True) for m in theme_model.motifs]
+        if pool_source:
+            theme_pool = [m.model_dump(exclude_none=True) for m in pool_source]
 
         voice_motif    = _resolve_motif_value_safe(voice_motif_value, theme_pool)
         harmony_motif  = _resolve_motif_value_safe(harmony_motif_value, theme_pool)
