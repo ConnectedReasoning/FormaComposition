@@ -269,13 +269,56 @@ def apply_transform(
         return list(intervals)
 
 
-def fold_to_register(pitch: int, octave_bottom: int, octave_top: int) -> int:
+def fold_to_register(pitch: int, octave_bottom: int, octave_top: int,
+                      near: Optional[int] = None,
+                      scale_tones: Optional[list[int]] = None) -> int:
     """
-    Bring `pitch` into [octave_bottom, octave_top] by whole-octave shifts,
-    choosing the in-register octave-equivalent closest to the register's
-    CENTER rather than the first one reached by walking toward the nearest
-    wall — but ONLY when `pitch` is actually out of bounds. An already-valid
-    pitch is returned untouched.
+    Bring `pitch` into [octave_bottom, octave_top] — but ONLY when `pitch`
+    is actually out of bounds. An already-valid pitch is returned untouched.
+
+    Once `pitch` is genuinely out of bounds, normalizing it toward the
+    register by whole octaves (the loop below) always converges to a
+    window exactly 12 semitones wide, sitting just outside whichever wall
+    was crossed — so at most ONE octave-equivalent of `pitch` ever lands
+    back in [octave_bottom, octave_top] (proven exhaustively, not just
+    argued: swept every out-of-bounds pitch against several register
+    widths from 12 to 80 semitones, zero cases produced more than one
+    in-bounds candidate). Practically: this function's own "pick whichever
+    candidate is closest to X" step never actually has more than one
+    option to choose between. `near`'s only real effect is through the
+    scale_tones fallback below — it is NOT a meaningful lever on the pure
+    octave-shift path, and no caller should rely on it being one there.
+
+    scale_tones: when given together with `near`, this is where the actual
+    fix lives. It picks the closest ACTUAL scale tone in [octave_bottom,
+    octave_top] to `near`, rather than accepting whatever single octave-
+    equivalent the shift above produces — because that one forced option
+    can be far from where the line actually is. A register box under ~2
+    octaves wide (a soprano/mid box is 18 semitones — not even 1.5
+    octaves) makes this common: reported directly against a rendered
+    fugue, a subject voice hovering around MIDI 64-65 (just above its
+    63-note floor) would occasionally compute a raw next-degree pitch one
+    step below the floor; the ONLY octave-equivalent inside the box was
+    74, so every such step surfaced as an isolated note roughly a 9th
+    above its neighbors, recurring at the same point in the subject's
+    tiling cycle on every repeat. Landing on the nearest scale tone to the
+    previous note instead — even if that means repeating it, or landing on
+    a different scale degree than the raw unfolded computation implied —
+    keeps the line where the ear expects it; manually correcting these by
+    ear (pulling the note back down next to its neighbors) is exactly this
+    policy applied by hand.
+
+    Deliberately NOT wired into every caller: generate_develop's cadence-
+    pull mechanism back-calculates a retile anchor as resolution_pitch
+    minus the motif's net diatonic displacement, an equation that assumes
+    register-folding only ever shifts pitch by whole octaves (true of the
+    plain path below, false of the scale_tones fallback). So
+    motif_to_notes (melody.py, shared by cadence-pull) passes `near` alone
+    — inert per the proof above, but harmless, and kept for the day this
+    function's normalization changes and a real multi-candidate case
+    becomes reachable. generate_subject_entry (motif.py) — which has no
+    cadence-pull mechanism to break — passes both `near` and scale_tones,
+    getting the actual fix.
 
     That "only when out of bounds" guard was missing in the first version of
     this function, and it was a real bug, not a tuning choice: the function
@@ -284,34 +327,46 @@ def fold_to_register(pitch: int, octave_bottom: int, octave_top: int) -> int:
     directly from a reported artifact (a neighbor-tone step that should have
     been E-F#-E rendering as E-F#[an octave low]-E): pitch=78 with bounds
     (63, 81) was folded down to 66, even though 78 sits comfortably inside
-    the register with room to spare. 78 and 66 are equidistant from the
-    center (72), so the tie-break silently dragged a perfectly valid note
-    down an octave — and the same mechanism was doing it to any in-bounds
-    note whose octave-equivalent happened to sit closer to center, not just
-    exact ties (measured on a real render: 63->75, 64->76, both moved a
-    full octave for no reason). This was pulling melodic content toward the
-    register's center far more aggressively than intended, which is the
-    "voice feels limited" complaint in stronger form than a width tuning
-    issue would produce on its own.
-
-    The centering behavior below is still correct and still needed for
-    pitches that genuinely fall outside the register (that's the original
-    floor-clustering fix from the register-narrowing work), it just no
-    longer fires on pitches that were never out of bounds to begin with.
+    the register with room to spare — the pre-guard code still ran the full
+    candidate search on an already-valid pitch, where p itself (78) and
+    p-12 (66) are BOTH valid candidates (this is the one regime that really
+    does produce more than one option — an in-bounds pitch that should
+    never have reached this logic at all). 78 and 66 are equidistant from
+    the center (72), so the tie-break silently dragged a perfectly valid
+    note down an octave — and the same mechanism was doing it to any
+    in-bounds note whose octave-equivalent happened to sit closer to
+    center, not just exact ties (measured on a real render: 63->75,
+    64->76, both moved a full octave for no reason). This was pulling
+    melodic content toward the register's center far more aggressively
+    than intended, which is the "voice feels limited" complaint in
+    stronger form than a width tuning issue would produce on its own. The
+    guard below is what actually fixed that bug; everything past it only
+    ever runs on pitches that are genuinely out of bounds.
     """
     if octave_bottom <= pitch <= octave_top:
         return pitch
+
+    if near is not None and scale_tones:
+        in_register = [s for s in scale_tones if octave_bottom <= s <= octave_top]
+        if in_register:
+            return min(in_register, key=lambda s: (abs(s - near), s))
 
     p = pitch
     while p < octave_bottom - 12:
         p += 12
     while p > octave_top + 12:
         p -= 12
-    center = (octave_bottom + octave_top) / 2
     candidates = [c for c in (p - 12, p, p + 12) if octave_bottom <= c <= octave_top]
     if not candidates:
         return max(octave_bottom, min(octave_top, p))
-    return min(candidates, key=lambda c: (abs(c - center), c))
+    if len(candidates) == 1:
+        return candidates[0]
+    # Unreachable for genuinely out-of-bounds input per the proof above —
+    # kept as a deterministic, documented fallback rather than an
+    # unguarded assumption, in case a future change to the normalization
+    # loop above ever makes this reachable again.
+    target = near if near is not None else (octave_bottom + octave_top) / 2
+    return min(candidates, key=lambda c: (abs(c - target), c))
 
 
 def motif_to_notes(
@@ -324,10 +379,30 @@ def motif_to_notes(
     octave_top: int,
     snap_to_scale: bool = True,
     rests: Optional[list[bool]] = None,
+    prefer_neighbor_fold: bool = False,
 ) -> list[tuple[int, float]]:
     """
     Convert a motif (interval sequence + rhythm) to (midi_note, duration) pairs
     starting from start_midi.
+
+    prefer_neighbor_fold: when True, an out-of-bounds step folds to the
+    nearest ACTUAL scale tone to the previous rendered pitch (fold_to_
+    register's scale_tones fallback) instead of being stuck with whatever
+    single octave-equivalent the plain shift produces — see fold_to_
+    register's docstring for why a narrow register makes that single
+    option regularly land a 9th-or-more from the line's actual
+    neighborhood. Defaults to False because generate_develop's cadence-
+    pull mechanism (see its call site) predicts the walk's LAST note by
+    assuming register-folding only ever shifts pitch by whole octaves;
+    the scale_tones fallback can land on a different scale degree
+    entirely, which breaks that prediction. generate_develop passes True
+    whenever melodic_arc is absent for the whole progression (not just at
+    the cadential chord -- a preceding statement's altered ending pitch
+    still feeds the next statement's anchor, so the flag has to stay
+    consistent across an entire melodic_arc-bearing progression, not just
+    the cadential moment; see generate_develop's arc_bias_active comment).
+    generate_subject_entry always passes True; it has no cadence-pull
+    mechanism to break.
 
     intervals: diatonic scale-degree steps (Phase B2 of the diatonic-motif
     migration — see motif.py's Motif.intervals docstring for the full
@@ -371,6 +446,7 @@ def motif_to_notes(
 
     current_pitch = start_midi
     current_degree = pitch_to_degree(start_midi, pcs) if walk_degrees else None
+    prev_pitch = start_midi
 
     for idx, (interval, dur) in enumerate(pairs):
         if walk_degrees:
@@ -378,11 +454,16 @@ def motif_to_notes(
             current_pitch = degree_to_pitch(current_degree, pcs)
         else:
             current_pitch = current_pitch + interval
-        # Clamp to register — centered fold, not nearest-wall (see fold_to_register).
-        # Folding by whole octaves preserves pitch class exactly, so a pitch
-        # that was already on-scale from the degree walk above stays on-scale
-        # after folding; no re-snap is needed here.
-        current_pitch = fold_to_register(current_pitch, octave_bottom, octave_top)
+        # Clamp to register. See prefer_neighbor_fold's docstring above for
+        # when the stronger (scale_tones) fallback is and isn't safe to use.
+        # Folding by whole octaves preserves pitch class exactly, so a
+        # pitch that was already on-scale from the degree walk above stays
+        # on-scale after folding either way; no re-snap is needed here.
+        current_pitch = fold_to_register(
+            current_pitch, octave_bottom, octave_top, near=prev_pitch,
+            scale_tones=scale_tones if prefer_neighbor_fold else None,
+        )
+        prev_pitch = current_pitch
         if rests is not None and idx < len(rests) and rests[idx]:
             continue
         notes.append((current_pitch, dur))
@@ -901,6 +982,48 @@ def generate_develop(
             iv, rh, rs = result[0], result[1], result[2]
             last_transform = result[3] if len(result) > 3 else None
             anchor = motif_notes[-1][0] if motif_notes else start
+            # prefer_neighbor_fold is only active when melodic_arc is
+            # absent (see the fuller explanation a few lines down, at the
+            # motif_to_notes call) -- compute it here too since the
+            # register-health pull just below needs to know before the
+            # apex/cadence block runs.
+            arc_bias_active = melodic_arc is not None
+
+            if not arc_bias_active and motif_notes:
+                # Register-health restoring pull, companion to
+                # prefer_neighbor_fold (see motif_to_notes' docstring):
+                # neighbor-folding an out-of-bounds note keeps it close to
+                # its immediate predecessor but supplies NO pull back
+                # toward the register's center, so repeated corrections
+                # across many CHAINED statements (this statement's anchor
+                # is the previous one's last note) can lock the whole line
+                # onto one corner of the register instead of just fixing
+                # the single note that triggered a fold. Measured directly
+                # on a real piece: without this pull, out-of-bounds
+                # corrections grew from 24 to 52 over the piece, and 59%
+                # of a 352-note melody ended up on just two adjacent
+                # pitches near the register floor (vs 22%, spread across
+                # more pitches, before prefer_neighbor_fold existed at
+                # all) -- a piece-wide "gravity well" invisible in any
+                # single statement, only visible in the aggregate.
+                # A mild, CAPPED degree-nudge toward center when the
+                # anchor is already sitting near a wall -- not a hard
+                # reset -- restores the same restoring force center-fold
+                # always provided, without reintroducing the within-
+                # statement forced leaps prefer_neighbor_fold exists to
+                # avoid: an anchor that's healthily centered already gets
+                # left alone (directed_anchor_shift is a no-op at zero
+                # distance), and even a wall-hugging one only moves by
+                # ANCHOR_SHIFT_MAX_STEP diatonic steps, not straight to
+                # the center.
+                register_center = (MELODY_OCTAVE_BOTTOM + MELODY_OCTAVE_TOP) // 2
+                wall_margin = 4
+                if (anchor <= MELODY_OCTAVE_BOTTOM + wall_margin
+                        or anchor >= MELODY_OCTAVE_TOP - wall_margin):
+                    anchor = directed_anchor_shift(
+                        anchor, register_center, scale_tones,
+                        position_t=0.0, apex_position=1.0,
+                    )
 
             # Apex/cadence bias (Phase 4 of the apex/goal-tone build).
             # develop has no per-note candidate list to weight the way
@@ -947,9 +1070,29 @@ def generate_develop(
                     position_t=0.0, apex_position=1.0,  # always-approach, see docstring
                 )
 
+            # Cadence-pull's math (just above, when it fires) predicts this
+            # statement's last note by assuming register-folding only ever
+            # shifts pitch by whole octaves -- the stronger neighbor-fold
+            # fallback can break that prediction (see motif_to_notes'
+            # prefer_neighbor_fold docstring). Scoping this off ONLY on the
+            # cadential chord's own statement isn't enough: this statement's
+            # `anchor` is literally the previous statement's last rendered
+            # pitch (a few lines up), and directed_anchor_shift only nudges
+            # by a capped number of degrees from wherever the anchor
+            # already sits -- so a PRECEDING, non-cadential statement's
+            # altered ending pitch changes the anchor the cadential
+            # statement starts from, and the capped nudge can't fully
+            # absorb that (measured: scoping to only the cadential call
+            # made the regression WORSE, not better -- confirming the
+            # contamination flows through anchor-chaining, not just the
+            # cadential call itself). Any statement in a melodic_arc-
+            # bearing progression can feed a later cadential one, so the
+            # flag stays off for the whole progression whenever
+            # melodic_arc is set at all, not just at the cadential moment.
             motif_notes = motif_to_notes(
                 anchor, iv, rh, scale_tones, chord_tones,
-                MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rs
+                MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rs,
+                prefer_neighbor_fold=not arc_bias_active,
             )
             statement_idx = 0
             if not motif_notes:
@@ -982,7 +1125,8 @@ def generate_develop(
                 # mask is reapplied here to decide what actually sounds.
                 all_slot_notes = motif_to_notes(
                     anchor, iv, rh, scale_tones, chord_tones,
-                    MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=None
+                    MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=None,
+                    prefer_neighbor_fold=not arc_bias_active,
                 )
                 t = ev.start_beat
                 vel = int(base_velocity * ev.velocity_scale)

@@ -22,6 +22,7 @@ from intervals.music.melody import (
     generate_melody,
     generate_melody_for_progression,
     generate_sparse,
+    fold_to_register,
     get_chord_tones_in_register,
     get_scale_tones,
     motif_to_notes,
@@ -64,6 +65,66 @@ class TestScaleAndChordHelpers:
 # ===========================================================================
 # motif_to_notes
 # ===========================================================================
+
+class TestFoldToRegister:
+    """
+    Regression coverage for a reported artifact: rendered pieces (a fugue's
+    subject/answer voices in particular) showed isolated notes landing
+    roughly a 9th-to-octave away from their immediate neighbors, at
+    regular points in the render. Traced to fold_to_register's out-of-
+    bounds handling -- see this function's own docstring for the full
+    story, and generate_subject_entry's TestGenerateSubjectEntry* classes
+    below for the end-to-end version of this same regression.
+    """
+
+    def test_in_bounds_pitch_is_returned_untouched(self):
+        assert fold_to_register(70, 63, 81) == 70
+        assert fold_to_register(70, 63, 81, near=64) == 70
+        assert fold_to_register(70, 63, 81, near=64, scale_tones=[64, 67, 71]) == 70
+
+    def test_out_of_bounds_pitch_folds_to_its_one_in_register_octave_equivalent(self):
+        # Once a pitch is genuinely out of bounds, normalizing it by whole
+        # octaves always converges to exactly ONE in-register candidate --
+        # never a real choice between two (see the docstring's exhaustive
+        # proof). 93 is 9 above the ceiling (84); folding down by one
+        # octave gives 81, the only candidate regardless of `near`.
+        assert fold_to_register(93, 60, 84) == 81
+
+    def test_near_has_no_effect_on_the_plain_octave_shift_path(self):
+        # `near` only has real teeth via the scale_tones fallback below --
+        # on its own it cannot change this function's output, because
+        # there is never more than one octave-equivalent to choose from.
+        # Pinned explicitly so this doesn't quietly get "fixed" into
+        # something that looks meaningful but still can't fire.
+        assert fold_to_register(93, 60, 84, near=61) == fold_to_register(93, 60, 84, near=83)
+
+    def test_scale_tones_fallback_lands_on_nearest_actual_scale_tone_to_near(self):
+        # A soprano/mid-width register (18 semitones -- not even 1.5
+        # octaves), the exact width that produced the reported artifact.
+        # A raw pitch one step below the floor has only ONE octave-
+        # equivalent that's back in bounds (74) -- an 11th above where the
+        # phrase actually sits (63). Without scale_tones, that forced leap
+        # is all fold_to_register can offer:
+        assert fold_to_register(62, 63, 81, near=63) == 74
+        # With the register's actual scale tones supplied, it lands on the
+        # closest real scale tone to the previous note instead -- no leap.
+        scale = [63, 65, 67, 68, 70, 72, 74, 75, 77, 79, 81]  # D aeolian-ish
+        assert fold_to_register(62, 63, 81, near=63, scale_tones=scale) == 63
+
+    def test_scale_tones_fallback_can_repeat_the_previous_pitch(self):
+        # When the nearest in-register scale tone to `near` IS `near`
+        # itself, repeating it is the correct, intended outcome -- better
+        # than a forced octave leap, and not a bug in the fallback.
+        scale = [63, 65, 67, 68, 70, 72, 74, 75, 77, 79, 81]
+        assert fold_to_register(61, 63, 81, near=63, scale_tones=scale) == 63
+
+    def test_scale_tones_fallback_ignored_without_near(self):
+        # scale_tones alone (no near) doesn't opt into the fallback --
+        # only sequential callers that supply BOTH get the stronger
+        # behavior; one-shot anchor calls are unaffected.
+        scale = [63, 65, 67, 68, 70, 72, 74, 75, 77, 79, 81]
+        assert fold_to_register(62, 63, 81, scale_tones=scale) == 74
+
 
 class TestMotifToNotes:
     def test_hand_verified_diatonic_walk(self):
@@ -125,6 +186,30 @@ class TestMotifToNotes:
         # degree 2 -> +1 -> degree 3 (65, rest -- omitted, trajectory continues)
         # degree 3 -> +1 -> degree 4 (67, sounding)
         assert result == [(64, 1.0), (67, 1.0)]
+
+    def test_register_fold_stays_octave_preserving_not_nearest_scale_tone(self):
+        # motif_to_notes deliberately does NOT get fold_to_register's
+        # scale_tones fallback (that lives only in generate_subject_entry,
+        # motif.py) -- giving it here would let an out-of-bounds step land
+        # on a different scale degree than the diatonic walk computed,
+        # which breaks generate_develop's cadence-pull math (it assumes
+        # register-folding only ever shifts pitch by whole octaves). This
+        # pins that scoping decision with a deliberately tiny (one-octave)
+        # register that forces a fold on every step.
+        # C ionian, degree 35 (=60, start). -1 -> degree 34 -> pcs[6]=11,
+        # oct 4 -> 59 (below floor 60) -> only in-bounds octave-equivalent
+        # is 71. -1 again -> degree 33 -> pcs[5]=9, oct 4 -> 57 (below
+        # floor) -> only in-bounds octave-equivalent is 69. Both stay
+        # exactly the octave-equivalent of the walked pitch -- neither
+        # snaps to some OTHER nearby scale tone the way
+        # generate_subject_entry's fold now deliberately can.
+        result = motif_to_notes(
+            60, [-1, -1], [1.0, 1.0],
+            scale_tones=[60, 62, 64, 65, 67, 69, 71],
+            chord_tones=[60],
+            octave_bottom=60, octave_top=72,
+        )
+        assert result == [(71, 1.0), (69, 1.0)]
 
 
 # ===========================================================================
@@ -501,7 +586,8 @@ class TestGenerateDevelop:
         expected = motif_to_notes(60, [2, -1, 3], [1.0, 1.0, 1.0],
                                    scale_tones=scale, chord_tones=[60, 64, 67],
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
-                                   octave_top=MELODY_OCTAVE_TOP)
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   prefer_neighbor_fold=True)
         assert [(n.midi_note, n.duration_beats) for n in notes] == expected
 
     def test_degenerate_all_rest_motif_falls_back_honestly(self):
@@ -540,7 +626,8 @@ class TestGenerateDevelop:
         expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
                                    scale_tones=scale, chord_tones=[60, 64, 67],
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
-                                   octave_top=MELODY_OCTAVE_TOP)
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   prefer_neighbor_fold=True)
         assert [(n.midi_note, n.duration_beats) for n in notes] == expected
 
         # And confirm it's NOT the untransformed baseline -- the actual
@@ -568,7 +655,8 @@ class TestGenerateDevelop:
         expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
                                    scale_tones=scale, chord_tones=[60, 64, 67],
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
-                                   octave_top=MELODY_OCTAVE_TOP)
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   prefer_neighbor_fold=True)
         assert [(n.midi_note, n.duration_beats) for n in notes] == expected
 
     def test_original_in_transform_pool_does_not_crash(self):
@@ -636,7 +724,8 @@ class TestGenerateDevelop:
                                    scale_tones=scale, chord_tones=[60, 64, 67],
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
                                    octave_top=MELODY_OCTAVE_TOP,
-                                   rests=transformed.rests)
+                                   rests=transformed.rests,
+                                   prefer_neighbor_fold=True)
         expected_pitches = [note for note, _ in expected][:3]
         assert [n.midi_note for n in notes] == expected_pitches
 
@@ -783,7 +872,7 @@ class TestGenerateDevelop:
         assert mean_with > mean_without
         assert mean_with > 2.0
 
-    def test_cadence_pull_accounts_for_motif_net_displacement(self):
+    def test_cadence_pull_accounts_for_motif_net_displacement(self, monkeypatch):
         """Regression for a real bug this phase's own statistical
         verification caught: the first version of develop's cadence
         branch shifted the anchor straight toward the resolution pitch.
@@ -808,7 +897,33 @@ class TestGenerateDevelop:
         measurably weaker (though still correctly directional, not
         backwards) because the first shifted statement's ending
         position isn't accounted for when computing the second shift.
+
+        Pins fold_to_register's `near`/`scale_tones` fix at
+        prefer_neighbor_fold=False for BOTH conditions here (generate_
+        develop's actual default varies it with melodic_arc -- see
+        motif_to_notes' docstring). Without pinning, the "without"
+        (unbiased) condition legitimately gets BETTER on its own once the
+        neighbor-fold fix is active there (fewer register-forced leaps
+        tightens the final-note distribution around chord/scale tones
+        generally, which happens to reduce distance-to-any-reference-tone
+        on average) -- a real improvement, but one that swamps and
+        destabilizes this specific comparison across seeds (measured:
+        the unpinned version passes or fails depending on register width
+        and seed count, because the "without" side's own improvement
+        varies unpredictably from sample to sample). Pinning both sides
+        to the same fold behavior isolates what this test actually
+        exists to check -- cadence-pull's own directional correctness --
+        from that separate, legitimate change.
         """
+        import intervals.music.melody as melody_mod
+        real_motif_to_notes = melody_mod.motif_to_notes
+
+        def pinned_motif_to_notes(*args, **kwargs):
+            kwargs["prefer_neighbor_fold"] = False
+            return real_motif_to_notes(*args, **kwargs)
+
+        monkeypatch.setattr(melody_mod, "motif_to_notes", pinned_motif_to_notes)
+
         chords = resolve_progression(["I", "IV", "V"], "C", "ionian", density="medium")
         motif = {"intervals": [2, -1, 3, -2], "rhythm": [1.0, 1.0, 1.0, 1.0],
                   "transform_pool": ["inversion", "retrograde"]}
@@ -836,6 +951,150 @@ class TestGenerateDevelop:
             f"resolution tone ({mean_with:.2f}) below the unbiased "
             f"baseline ({mean_without:.2f}) -- if this fails, the "
             f"net-displacement fix may have regressed"
+        )
+
+    def test_develop_gets_neighbor_fold_only_without_melodic_arc(self):
+        """
+        Pins the actual scoping decision behind the orphan-note fix in
+        generate_develop: prefer_neighbor_fold is on whenever melodic_arc
+        is absent, and off whenever it's present (see the arc_bias_active
+        comment at generate_develop's motif_to_notes call sites for why
+        cadence-pull needs the WHOLE progression pinned, not just the
+        cadential chord). Same seed, same narrow register, same motif;
+        only melodic_arc differs -- and it's specifically why the leap
+        does or doesn't reappear.
+        """
+        chords = resolve_progression(["i", "iv", "v", "i"] * 3, "D", "aeolian",
+                                      density="medium")
+        motif = {"intervals": [0, -1, 1, -2, 1, -1, 2, -1], "rhythm": [1.0] * 8}
+        kwargs = dict(
+            behavior="develop", bars_per_chord=2.0, beats_per_bar=4,
+            seed=7, motif=motif, octave_bottom=63, octave_top=81,
+        )
+
+        without_arc = generate_melody_for_progression(chords, "D", "aeolian", **kwargs)
+        pitches = [n.midi_note for n in without_arc if not n.is_rest]
+        leaps = [abs(pitches[i] - pitches[i - 1]) for i in range(1, len(pitches))]
+        assert max(leaps) < 9, (
+            f"expected no orphan leap without melodic_arc, got {max(leaps)}"
+        )
+
+        arc = {"apex_degree": 4, "apex_position": 0.7, "resolve_every_cycle": False}
+        with_arc = generate_melody_for_progression(
+            chords, "D", "aeolian", melodic_arc=arc, **kwargs
+        )
+        pitches2 = [n.midi_note for n in with_arc if not n.is_rest]
+        leaps2 = [abs(pitches2[i] - pitches2[i - 1]) for i in range(1, len(pitches2))]
+        assert max(leaps2) >= 9, (
+            "expected this seed to still show the unfixed leap with "
+            "melodic_arc active -- if it doesn't, the scoping guard may "
+            "have been removed or widened without re-verifying the "
+            "cadence-pull test still passes"
+        )
+
+    def test_chained_statements_dont_collapse_toward_one_register_wall(self, monkeypatch):
+        """
+        Regression for a second-order bug the neighbor-fold fix itself
+        introduced: reported directly against a rendered fugue, after
+        prefer_neighbor_fold started keeping isolated out-of-bounds notes
+        near their neighbors (fixing the orphan-leap artifact), a
+        352-note Melody track ended up with 59% of its notes on just two
+        adjacent pitches near the register FLOOR -- a "flattened melody"
+        complaint, not an isolated leap.
+
+        Root cause: generate_develop chains a fresh statement's anchor
+        from the PREVIOUS statement's last rendered pitch (anchor =
+        motif_notes[-1][0]). Neighbor-folding keeps a correction close to
+        its immediate predecessor but supplies no pull back toward the
+        register's center -- so once one statement's ending pitch drifts
+        near a wall, the next statement starts from there too, and is
+        itself more likely to need another wall-hugging correction. Over
+        many chained statements this compounds with no restoring force
+        (center-fold's old behavior always had one; that's what actually
+        got lost). Confirmed on the real piece via monkeypatch: disabling
+        the restoring pull raised the top pitch's share from 26% to 39%
+        of a 352-note melody.
+
+        Fixed with a mild, CAPPED (directed_anchor_shift) pull toward
+        register center whenever a fresh statement's anchor is within
+        wall_margin of a wall and melodic_arc is absent (see the
+        anchor-health comment at generate_develop's anchor assignment).
+        This test disables that pull via monkeypatch (an identity
+        wrapper around directed_anchor_shift) to confirm concentration
+        measurably worsens without it, and stays bounded with it --
+        using the actual reported motif/register/transform combination,
+        not a simplified stand-in (a scaled-down synthetic version of
+        this scenario did not reliably reproduce the compounding drift
+        within a reasonable statement count).
+        """
+        import intervals.music.melody as melody_mod
+        from intervals.core import generator as generator_mod
+        from collections import Counter
+
+        piece = {
+            "name": "flatten_regression", "key": "D", "mode": "aeolian", "tempo": 85,
+            "seed": 1750,
+            "motif": {
+                "name": "fugue_subject",
+                "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
+                "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                "transform_pool": ["inversion", "retrograde"],
+            },
+            "sections": [
+                {
+                    "name": "continuation", "bars": 12,
+                    "progression": ["i", "iv", "V", "i", "V", "i"],
+                    "chord_bars": [2, 2, 2, 2, 2, 2],
+                    "rhythm": "motif", "bass_style": "root_only",
+                    "bass_rest_probability": 1.0, "beats_per_bar": 4,
+                    "voices": [{"register": "soprano", "behavior": "develop", "velocity": 90}],
+                },
+                {
+                    "name": "stretto", "bars": 12,
+                    "progression": ["i", "IV", "V", "i", "iv", "V"],
+                    "chord_bars": [2, 2, 2, 2, 2, 2],
+                    "rhythm": "motif", "bass_style": "root_only",
+                    "bass_rest_probability": 1.0, "beats_per_bar": 4,
+                    "voices": [{"register": "soprano", "behavior": "develop", "velocity": 95}],
+                },
+            ],
+        }
+
+        def melody_top_pitch_fraction():
+            out = generator_mod.generate_piece(piece, "/tmp/_test_flatten_regression.mid")
+            import mido
+            mid = mido.MidiFile(out)
+            for tr in mid.tracks:
+                if tr.name != "Melody":
+                    continue
+                pitches = [msg.note for msg in tr
+                           if msg.type == "note_on" and msg.velocity > 0]
+                c = Counter(pitches)
+                return len(pitches), c.most_common(1)[0][1] / len(pitches)
+            raise AssertionError("no Melody track in rendered output")
+
+        n_with, frac_with = melody_top_pitch_fraction()
+        assert n_with > 100  # sanity: this scenario actually exercises enough notes
+
+        real_shift = melody_mod.directed_anchor_shift
+        monkeypatch.setattr(
+            melody_mod, "directed_anchor_shift",
+            lambda anchor, target_pitch, scale_tones, position_t, apex_position,
+                   max_step_degrees=None: anchor,
+        )
+        n_without, frac_without = melody_top_pitch_fraction()
+        monkeypatch.setattr(melody_mod, "directed_anchor_shift", real_shift)
+
+        assert n_with == n_without  # same note count either way -- only pitches differ
+        assert frac_with < frac_without, (
+            f"expected the restoring pull to reduce the top pitch's share "
+            f"({frac_with:.2f}) below the no-pull baseline ({frac_without:.2f}) "
+            f"-- if this fails, the anchor-health fix may have regressed"
+        )
+        assert frac_with < 0.35, (
+            f"top pitch still accounts for {frac_with:.2f} of the melody "
+            f"even with the restoring pull active -- concentration is back "
+            f"to roughly the unfixed level"
         )
 
 

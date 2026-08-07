@@ -103,6 +103,44 @@ class TestGenerateSubjectEntrySubject:
         )
         assert len(notes) == 1  # doesn't crash without register_bounds
 
+    def test_register_hovering_near_the_floor_does_not_produce_orphan_leaps(self):
+        """
+        Regression for a reported artifact: a rendered fugue's subject/
+        answer voices showed isolated notes landing roughly a 9th above
+        their neighbors, recurring at the same point in the tiling cycle
+        on every repeat. Traced to the soprano/mid register (63-81, only
+        18 semitones -- not even 1.5 octaves) forcing a full-octave-plus
+        leap whenever the diatonic walk dipped one step below the floor,
+        because that was the ONLY in-register octave-equivalent available
+        (see fold_to_register's docstring for the exhaustive proof this
+        is structural, not incidental).
+
+        This motif's net displacement is -1 diatonic step per 8-note
+        cycle, so over 64 beats it drifts steadily down toward (and then
+        along) the register floor -- exactly the condition that triggered
+        the artifact. Fully deterministic: generate_subject_entry has no
+        RNG, so these are the actual pitches, not a statistical sample.
+        """
+        notes = generate_subject_entry(
+            {"name": "s", "intervals": [0, -1, 1, -2, 1, -1, 2, -1],
+             "rhythm": [1.0] * 8},
+            entry_role="subject", key="D", mode="aeolian",
+            total_beats=64.0, register_bounds=(63, 81),
+        )
+        pitches = [n.midi_note for n in notes]
+        assert len(pitches) == 64
+        leaps = [abs(pitches[i] - pitches[i - 1]) for i in range(1, len(pitches))]
+        # A 9th (>=9 semitones) between consecutive notes is the reported
+        # artifact's signature; a stepwise-drifting motif in this register
+        # should never need one. (The unfixed version of this exact
+        # scenario produces leaps of 9-11 semitones repeatedly.)
+        assert max(leaps) < 9, f"orphan leap reappeared: {max(leaps)} semitones"
+        # All pitches must still be on-scale -- the fix trades exact
+        # degree-walk fidelity for register proximity, never off-scale
+        # pitches.
+        assert all(p % 12 in {64 % 12, 65 % 12, 67 % 12, 69 % 12, 70 % 12,
+                               72 % 12, 74 % 12} for p in pitches)
+
 
 class TestGenerateSubjectEntryAnswer:
     def test_default_answer_transposes_up_a_fifth(self):

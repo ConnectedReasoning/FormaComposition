@@ -546,10 +546,10 @@ def generate_subject_entry(
 
     Pitch rendering reuses the SAME diatonic-scale-degree primitives
     motif_to_notes (melody.py) is built on — pitch_classes / degree_to_pitch
-    / pitch_to_degree from scale_degrees.py, and fold_to_register's
-    centered-fold — so a subject/answer voice's pitches land on scale
-    tones by exactly the same construction every other motif-driven voice
-    in this engine does. It doesn't call motif_to_notes directly because
+    / pitch_to_degree from scale_degrees.py, and fold_to_register folding
+    toward the previous rendered pitch — so a subject/answer voice's
+    pitches land on scale tones by exactly the same construction every
+    other motif-driven voice in this engine does. It doesn't call motif_to_notes directly because
     that function makes one pass over a single (already-sized) intervals/
     rhythm pair; a subject/answer voice needs the motif's cell TILED
     across total_beats with the diatonic walk continuing cumulatively
@@ -640,6 +640,7 @@ def generate_subject_entry(
 
     notes = []
     cycle_offset = 0.0
+    prev_pitch = start_pitch
     while cycle_offset < total_beats:
         for idx in range(n):
             abs_onset = cycle_offset + onsets_in_cycle[idx]
@@ -648,7 +649,17 @@ def generate_subject_entry(
 
             current_degree += intervals[idx]
             pitch = degree_to_pitch(current_degree, pcs)
-            pitch = fold_to_register(pitch, octave_bottom, octave_top)
+            # Fold toward the previous rendered pitch — via the
+            # scale_tones fallback, not the octave-shift path, which is
+            # inert on its own (see melody.fold_to_register's docstring).
+            # A subject/answer voice tiles its cell across total_beats, so
+            # an unfolded degree walk regularly drifts out of bounds at
+            # the same point each cycle; without this, the single forced
+            # octave-equivalent landed that step a 9th-or-more from its
+            # neighbors on every repeat.
+            pitch = fold_to_register(pitch, octave_bottom, octave_top,
+                                      near=prev_pitch, scale_tones=scale_tones)
+            prev_pitch = pitch
 
             if rests is not None and idx < len(rests) and rests[idx]:
                 continue  # rest slot: walk advances, nothing sounds
