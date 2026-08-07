@@ -1,0 +1,84 @@
+{
+  "title": "Neon Thunder",
+  "key": "E",
+  "mode": "aeolian",
+  "tempo": 138,
+  "form_type": "song",
+  "form": ["intro", "verse", "chorus", "verse", "chorus", "bridge", "chorus", "outro"],
+  "motif": {
+    "name": "stadium_riff",
+    "intervals": [3, 2, -5, 2, 0],
+    "rhythm": [0.5, 0.5, 1.0, 0.5, 1.5],
+    "transform_pool": ["inversion", "retrograde", "transpose_up"]
+  },
+  "sections": {
+    "intro": {
+      "name": "intro",
+      "bars": 8,
+      "progression": ["i", "VI", "III", "VII"],
+      "density": "sparse",
+      "melody": "generative",
+      "bass_style": "steady",
+      "drums": "backbeat",
+      "rhythm": "motif",
+      "arc": "fade_in"
+    },
+    "verse": {
+      "name": "verse",
+      "bars": 16,
+      "progression": ["i", "i", "VI", "VII"],
+      "density": "sparse",
+      "melody": "sparse",
+      "bass_style": "steady",
+      "drums": "backbeat",
+      "rhythm": "motif",
+      "harmony_pattern": {
+        "onsets": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+        "durations": [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25],
+        "velocities": [0.90, 0.60, 0.80, 0.60, 0.90, 0.60, 0.80, 0.60]
+      },
+      "arc": "swell"
+    },
+    "chorus": {
+      "name": "chorus",
+      "bars": 16,
+      "progression": ["i", "III", "VII", "iv"],
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "steady",
+      "drums": "backbeat",
+      "rhythm": "motif",
+      "arc": "build"
+    },
+    "bridge": {
+      "name": "bridge",
+      "bars": 8,
+      "progression": ["VI", "VII", "v", "i"],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "melodic",
+      "drums": "four_on_floor",
+      "rhythm": "free",
+      "harmony_rhythm": {
+        "rhythm": "sustain"
+      },
+      "arc": "plateau"
+    },
+    "outro": {
+      "name": "outro",
+      "bars": 8,
+      "progression": ["i", "VI", "iv", "i"],
+      "density": "sparse",
+      "melody": "sparse",
+      "bass_style": "steady",
+      "drums": "halftime",
+      "rhythm": "motif",
+      "harmony_pattern": {
+        "onsets": [0.0, 1.5, 2.5, 3.0],
+        "durations": [1.0, 0.5, 0.5, 1.0],
+        "velocities": [0.75, 0.65, 0.55, 0.45]
+      },
+      "arc": "fade_out"
+    }
+  }
+}
