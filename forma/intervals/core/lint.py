@@ -177,30 +177,6 @@ COUPLINGS: list[str] = [
 # passes them as an override, bypassing get_pattern's range branch).
 GRID_OVERRIDING_RHYTHM_SOURCES: frozenset[str] = frozenset({"pattern", "motif"})
 
-# Accompaniment velocity defaults — same nature as _check_harmony_melody_ratio
-# above (a heuristic, not a silent-gate fact): bass.py's BassNote.velocity and
-# harmony.py's HarmonyContext.base_velocity. Neither is schema-configurable —
-# generator.py never passes a velocity override into generate_bass() or
-# harmony's resolve_harmony_section_events(), so these bare dataclass defaults
-# are exactly what renders. Kept here rather than imported from those modules
-# since they're plain literals, not named constants there; if either default
-# changes, update it here too (same discipline as every other engine fact in
-# this file).
-BASS_DEFAULT_VELOCITY: int = 70
-HARMONY_DEFAULT_VELOCITY: int = 65
-
-# generator.py: the lead voice's own fallback base velocity when no explicit
-# voice dict sets one (LEAD_VELOCITY_DEFAULT in generator.py — mirrored here
-# for the same reason as the two constants above). Deliberately clears
-# LEAD_VELOCITY_MARGIN_TRIGGER below on its own, so a section that never
-# touches velocity doesn't immediately trip _check_lead_velocity_margin.
-LEAD_VELOCITY_DEFAULT: int = 88
-
-# How much velocity headroom the lead needs over the louder of bass/harmony's
-# defaults to reasonably expect to read as "the lead" in a mix. A judgment
-# call, not a measured fact — tune freely.
-LEAD_VELOCITY_MARGIN_TRIGGER: int = 15
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Finding type
@@ -960,53 +936,6 @@ def _check_harmony_melody_ratio(section: SectionModel, primary_motif: Optional[d
     )
 
 
-def _check_lead_velocity_margin(section: SectionModel) -> Iterator[Contradiction]:
-    """
-    Velocity-axis companion to _check_harmony_melody_ratio (which catches the
-    same "lead gets buried" symptom on the density axis — several times the
-    note count wins the mix regardless of velocity). This one predicts
-    whether the lead's *velocity* actually clears the accompaniment's.
-
-    Resolves the lead's effective velocity the same way generate_section()
-    does: section.lead_voice().velocity if a voice dict was used, else
-    LEAD_VELOCITY_DEFAULT (the bare-string fallback). Compares against the
-    louder of bass/harmony's defaults — neither is schema-configurable per
-    section (see BASS_DEFAULT_VELOCITY / HARMONY_DEFAULT_VELOCITY above), so
-    this is exact, not an estimate.
-
-    A heuristic like the ratio check, not a silent-gate fact: nothing is
-    dropped or ignored here, just under-separated. Not in COUPLINGS for the
-    same reason the ratio check isn't.
-    """
-    lead = section.lead_voice()
-    lead_velocity = lead.velocity if lead is not None else LEAD_VELOCITY_DEFAULT
-    accompaniment_velocity = max(BASS_DEFAULT_VELOCITY, HARMONY_DEFAULT_VELOCITY)
-    margin = lead_velocity - accompaniment_velocity
-
-    if margin >= LEAD_VELOCITY_MARGIN_TRIGGER:
-        return
-
-    if margin >= 0:
-        cause = (f"bass defaults to {BASS_DEFAULT_VELOCITY}, harmony to "
-                  f"{HARMONY_DEFAULT_VELOCITY} — only {margin} points of headroom")
-    else:
-        cause = (f"bass defaults to {BASS_DEFAULT_VELOCITY}, harmony to "
-                  f"{HARMONY_DEFAULT_VELOCITY} — the lead is {-margin} points "
-                  f"QUIETER than the accompaniment")
-
-    yield Contradiction(
-        where=f"section '{section.name or '?'}'",
-        setting=f"lead velocity={lead_velocity}",
-        cause=cause,
-        effect="the lead has little to no velocity separation from the "
-               "accompaniment and risks getting buried in the mix, "
-               "independent of instrument choice or DAW gain staging",
-        fix="raise this voice's velocity (or the section's lead voice "
-            "velocity), or lower bass/harmony's, to restore separation — "
-            f"aim for at least {LEAD_VELOCITY_MARGIN_TRIGGER} points",
-    )
-
-
 CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
@@ -1026,7 +955,6 @@ CHECKS = [
     _check_long_progression_seed_collision,
     _check_harmony_pattern_silently_empty,
     _check_canon_interval_without_canonic_imitation,
-    _check_lead_velocity_margin,
 ]
 
 
