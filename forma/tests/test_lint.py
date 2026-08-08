@@ -46,6 +46,7 @@ from intervals.core.lint import (
     _check_note_length_range_vs_rhythm,
     _check_section_motif_override,
     _check_transform_imitation_unimplemented,
+    _check_voice_dissonance_without_species,
     _check_voice_motif,
 )
 from intervals.core.schemas import CounterpointModel, PieceModel, SectionModel, VoiceModel
@@ -694,6 +695,79 @@ def test_check_fugal_techniques_works_with_voices_form():
 
 
 # ===========================================================================
+# _check_voice_dissonance_without_species (known-issues #5)
+# ===========================================================================
+
+def test_check_voice_dissonance_fires_on_lead_voice():
+    """voices[0] never reaches generate_counterpoint, regardless of
+    dissonance or species — dead on the lead unconditionally."""
+    section = _section(voices=[
+        {"register": "soprano", "dissonance": "free"},
+    ])
+    found = list(_check_voice_dissonance_without_species(section))
+    assert len(found) == 1
+    assert "dissonance='free'" in found[0].setting
+    assert "lead voice" in found[0].cause
+
+
+def test_check_voice_dissonance_fires_on_lead_voice_even_with_species_set():
+    """Species on the lead voice is itself ignored — generator.py's lead
+    generation path never checks it — so dissonance stays dead too."""
+    section = _section(voices=[
+        {"register": "soprano", "species": "first", "dissonance": "free"},
+    ])
+    found = list(_check_voice_dissonance_without_species(section))
+    assert len(found) == 1
+    assert "lead voice" in found[0].cause
+
+
+def test_check_voice_dissonance_fires_on_peer_voice_without_species():
+    section = _section(voices=[
+        {"register": "soprano"},
+        {"register": "alto", "dissonance": "neighbor"},
+    ])
+    found = list(_check_voice_dissonance_without_species(section))
+    assert len(found) == 1
+    assert "voice 2 (alto)" in found[0].where
+    assert "species is not set" in found[0].cause
+
+
+def test_check_voice_dissonance_silent_on_peer_voice_with_species():
+    section = _section(voices=[
+        {"register": "soprano"},
+        {"register": "alto", "species": "first", "dissonance": "neighbor"},
+    ])
+    assert list(_check_voice_dissonance_without_species(section)) == []
+
+
+def test_check_voice_dissonance_silent_on_default_value():
+    """dissonance='passing' is the schema default — nothing was actually
+    set, so nothing to flag, even on the lead."""
+    section = _section(voices=[
+        {"register": "soprano", "dissonance": "passing"},
+        {"register": "alto"},
+    ])
+    assert list(_check_voice_dissonance_without_species(section)) == []
+
+
+def test_check_voice_dissonance_fires_on_melody_dict_form_lead():
+    """No voices[] array at all — section.melody given as a VoiceModel
+    dict is still the lead, still dead."""
+    section = _section(melody={"behavior": "lyrical", "dissonance": "none"})
+    found = list(_check_voice_dissonance_without_species(section))
+    assert len(found) == 1
+    assert "melody (dict form)" in found[0].where
+
+
+def test_check_voice_dissonance_silent_on_bare_string_melody():
+    """A bare-string melody has no VoiceModel to carry dissonance at
+    all — nothing to check."""
+    section = _section(melody="lyrical")
+    assert list(_check_voice_dissonance_without_species(section)) == []
+
+
+
+# ===========================================================================
 # 18. _check_canon_interval_without_canonic_imitation
 # ===========================================================================
 
@@ -832,13 +906,14 @@ def test_check_lead_velocity_margin_silent_when_explicit_lead_velocity_clears_it
 #                                         for the "motif" rhythm-source case
 # ===========================================================================
 
-def test_checks_registry_has_twenty_entries_plus_melodic_variation_separately():
-    # 19 (from #6's addition) + 1 for _check_fugal_techniques_require_develop
-    # (known-issues #4) = 20.
-    assert len(CHECKS) == 20
+def test_checks_registry_has_twentyone_entries_plus_melodic_variation_separately():
+    # 20 (through #4's addition) + 1 for
+    # _check_voice_dissonance_without_species (known-issues #5) = 21.
+    assert len(CHECKS) == 21
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS
     assert _check_lead_velocity_margin in CHECKS
     assert _check_inherited_motif_coerced_to_free in CHECKS
     assert _check_fugal_techniques_require_develop in CHECKS
+    assert _check_voice_dissonance_without_species in CHECKS
