@@ -25,15 +25,53 @@ makes sense for a single piece; use `--outdir`/`-d` for batch runs.
 | Field | Type | Required | Values |
 |---|---|---|---|
 | `key` | string | yes | `C, C#, D, D#, E, F, F#, G, G#, A, A#, B, Db, Eb, Gb, Ab, Bb` |
-| `mode` | string | yes | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian` |
+| `mode` | string | yes | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian, harmonic_minor, melodic_minor, pentatonic_major, pentatonic_minor, blues, whole_tone, diminished, augmented_hexatonic, pelog, arabic, hirajoshi, insen` — 19 total, see Modes reference below |
 | `motif` | object | one of motif/motifs | see Motif section below |
 | `motifs` | array | one of motif/motifs | array of motif objects — see Motif section below |
 | `tempo` | object or int | yes | `{min,max}` or bare int |
 | `name` | string | no | free text — absorbed from the retired theme-file format; same idea as `title` |
 
 - `key`/`mode` at this level **are** enum-checked — an invalid value raises a validation error naming the valid set, not a silent pass-through.
+- **This piece-level `mode` accepts all 19 modes** (the 7 traditional + 12 new). `section.mode` (the per-section override) does **not** — it's still validated against only the original 7. See the Section table note and the Modes reference below.
 - If both `motif` and `motifs` are set, `motifs` wins.
 - A bare int for `tempo` is auto-coerced to a fixed range.
+
+### Modes reference
+
+The 7 traditional modes plus 12 additions (all in `harmony.py`'s `MODES` dict, all enum-checked at the piece level).
+
+| Mode | Notes | Character / source |
+|---|---|---|
+| `ionian` | 7 | major |
+| `dorian` | 7 | minor with a natural 6th |
+| `phrygian` | 7 | minor with a flat 2nd |
+| `lydian` | 7 | major with a sharp 4th |
+| `mixolydian` | 7 | major with a flat 7th |
+| `aeolian` | 7 | natural minor |
+| `locrian` | 7 | diminished tonic, unstable |
+| `harmonic_minor` | 7 | raised 7th — fugues, dramatic cadences |
+| `melodic_minor` | 7 | jazz minor (ascending form) |
+| `arabic` | 7 | double harmonic major / Byzantine / Hijaz Kar — two augmented-second leaps give it a "two semitones flanking wide gaps" character. Common Western umbrella term; real maqam practice uses quarter-tone inflections a 12TET scale can't represent |
+| `pentatonic_major` | 5 | open, no tension |
+| `pentatonic_minor` | 5 | blues foundation |
+| `hirajoshi` | 5 | Japanese pentatonic (koto tuning) — NOT the same scale as `pentatonic_minor`/`blues`; different semitone steps (2-1-4-1-4) and no minor 7th, which is exactly what gives it a "Japanese" rather than "blues" character despite both being 5-note scales |
+| `insen` | 5 | symmetric, no clear tonal center — suits static/non-functional ambient fields |
+| `blues` | 6 | pentatonic minor + flat 5 |
+| `whole_tone` | 6 | all whole steps — Debussy, dreamy |
+| `augmented_hexatonic` | 6 | alternating minor-3rd/half-step steps (the "augmented scale") — symmetric, ambiguous tonal center, no traditional tonal function |
+| `pelog` | 6 | gapped, wide leaps — not an authentic Javanese pelog tuning (real pelog is non-12TET and varies by ensemble); this is Satie's own 12TET approximation, the exact scale of *Gnossienne No. 3* (D-E-F-G#-A-B), written after he heard gamelan at the 1889 Paris Exposition — an impressionistic gesture toward pelog's character, not a transcription |
+| `diminished` | 8 | alternating whole/half steps — tension |
+
+#### Roman-numeral aliasing caveat (non-heptatonic modes)
+
+`ROMAN_TO_DEGREE` only defines I–VII as scale-degree positions 0–6, on the assumption of a 7-note scale. Any mode with a different note count breaks that assumption in one of two ways:
+
+- **5-note modes** (`pentatonic_major`, `pentatonic_minor`, `hirajoshi`, `insen`): `VI` aliases onto the same root as `I`; `VII` aliases onto the same root as `II`.
+- **6-note modes** (`blues`, `whole_tone`, `augmented_hexatonic`, `pelog`): `VII` aliases onto the same root as `I`. (`VI` is fine — it's the mode's own unique 6th degree.)
+- **8-note mode** (`diminished`): the opposite problem — `I`–`VII` all land on distinct, valid tones (no aliasing), but the scale's 8th tone is simply unreachable by any bare roman numeral, and chord-quality construction (which stacks thirds `% 8` instead of `% 7`) doesn't line up with the usual diatonic expectation.
+- **`arabic` (7 notes) is unaffected** — don't assume every new mode needs this caveat.
+
+This is schema-legal and produces **no error or warning** — it silently builds a different chord than the roman numeral implies. Keep progressions within a mode's actual degree count (I–VI for a 6-note mode, I–V for any 5-note mode) until a lint check for this exists.
 
 ### `tempo`
 | Field | Values |
@@ -45,12 +83,14 @@ makes sense for a single piece; use `--outdir`/`-d` for batch runs.
 |---|---|---|---|
 | `intervals` | array of int | yes | diatonic scale-degree steps (NOT semitones — migrated; see below) |
 | `rhythm` | array of float | no | — |
+| `rests` | array of bool | no, must match `rhythm` length if set | `true` = silent slot. The underlying diatonic walk still advances through a rest — it just doesn't sound. Consumed across bass.py, melody.py, motif.py, and rhythm.py — this is a general motif field, not `entry_role`-specific |
 | `transform_pool` | array | no, default `[]` | `original, inversion, retrograde, retrograde_inversion, augmentation, diminution, transpose_up, transpose_down, shuffle, expand, compress, sequence` |
 | `velocities` | array of float | no | 0.0–1.0 |
 | `name` | string | no | free text |
 | `melodic_scale` | string | no | 7 standard modes, or `pentatonic_major`, `pentatonic_minor`, `blues` |
 
 - `rhythm` is needed for `rhythm: "motif"`.
+- `rests`, if set, must be the same length as `rhythm` (validation error otherwise).
 - **`intervals` are diatonic scale-degree steps**, resolved against the mode (or `melodic_scale`, if set) — not semitones. `[2, -1, 3]` means up 2 scale degrees, down 1, up 3. Every resulting note lands on a scale tone by construction; there's no separate quantization step to silently erase a small interval the way the old semitone contract could (a ±1-semitone neighbor-tone step could land exactly between two scale tones a whole-tone apart and snap back to where it started — the bug that motivated this migration). Chromatic alterations (borrowed chords, secondary-dominant coloring) are intentionally out of scope for this field — author those by hand in Logic after render.
 - **All `transform_pool` values now genuinely work in `develop`**, including pitch variation: `inversion`, `retrograde`, `retrograde_inversion`, `transpose_up`, `transpose_down`, `shuffle`, `expand`, `compress`, `sequence` (harmony-aware), and `original` (explicit no-op). Earlier versions of this doc listed `transpose_up`/`transpose_down` as dead and `retrograde_inversion`/`expand`/`compress` as pitch no-ops — that was accurate at the time (a routing gap meant those names fell through to a silent no-op in `develop` specifically) and has since been fixed.
 - **`augmentation`/`diminution` now genuinely stretch/compress real output**, not just an internally-computed value that got discarded — a statement using either drives its actual timing from the transformed (doubled/halved) rhythm, clamped to fit the available span exactly, rather than reusing the section's pre-built onset grid. Half as many notes at twice the length (augmentation) or twice as many at half the length (diminution), same total span.
@@ -67,15 +107,19 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 | Consumer | Default | Override |
 |---|---|---|
 | Bass (`bass_style: "motif"`) | always primary | none — hardwired |
-| Melody (`rhythm: "motif"`) | primary | `voices[0].motif` |
+| Melody rhythm (`rhythm: "motif"`) | primary | `voices[0].motif` |
+| Melody pitch (any voice, `behavior: "develop"`) | primary | `voices[].motif` |
 | Harmony (`harmony_rhythm.rhythm: "motif"`) | primary | `harmony_rhythm.motif` |
 | Counterpoint (free species, `counterpoint[]`) | none | `counterpoint[].motif` — rhythm only, never pitch |
 | Peer voice, species set (`voices[1:]`, `species` set) | none | `voices[].motif` — rhythm only, never pitch (same rule as `counterpoint[]`) |
 | Peer voice, literal entry (`voices[1:]`, `entry_role` set) | none | `voices[].motif` — rhythm **and** pitch, rendered literally (see `entry_role` below) |
 
+**Two independent gates, easy to conflate — they are not the same mechanism:**
+- **`rhythm: "motif"`** (section-level) controls the RHYTHM/timing grid — which motif's onset pattern gets tiled as the melody's durations.
+- **`behavior: "develop"`** (per-voice) controls whether that motif's PITCH INTERVALS get used at all — every other behavior (`lyrical`/`generative`/`sparse`) receives no motif pitch data whatsoever, even if the voice has a `motif` field set and even if `rhythm: "motif"` is active. A voice can mix these freely (e.g. `rhythm: "free"` + `behavior: "develop"` for a pitch-driven line on a free rhythm grid, or `rhythm: "motif"` + `behavior: "generative"` for a rhythmically-tiled but freely-pitched line) — but a `motif` field on a non-`develop` voice is a silent no-op for pitch. `lint.py`'s `_check_voice_motif` flags exactly this.
 - `transform_sequence` (piece-level) varies the primary's *transform* per section — doesn't change which motif plays.
 - `melodic_variation: "isorhythmic"` is the only way to get pitch variety from the rest of the pool (rhythm stays anchored to primary, pitch redraws from other pool members).
-- Section-level `motif`/`motifs` fields do nothing.
+- Section-level `motif`/`motifs` fields do nothing (see the Section table note).
 - Unknown motif name → validation error, not a render-time crash.
 - `fugal_techniques.motif_transform` (see below) applies a transform to whichever motif a section resolves — a different mechanism from `transform_sequence`, scoped to one section rather than stepping through the piece.
 - `entry_role` is the one place a peer voice's own `motif` drives pitch, not just rhythm — everywhere else in this table, a peer/counterpoint voice's `motif` field is rhythm-only.
@@ -119,7 +163,9 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 | `melodic_arc` | object | — | see `melodic_arc` table below |
 | `melodic_variation` | enum | — | `isorhythmic` |
 | `melody` | enum or object | `generative` (bare) / `lyrical` (dict, unset `behavior`) | `lyrical, generative, sparse, develop` |
-| `mode` | string | — | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian` |
+| `mode` | string | — | `ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian` — **only the 7 traditional modes**, unlike the piece-level `mode` (see note below) |
+| `motif` | string, object, or array | — | **does nothing — see note below** |
+| `motifs` | array | — | **does nothing — see note below** |
 | `name` | string | — | free text — section label, used in lint messages and render logs |
 | `note_length_range` | object | — | `{min, max, quantum?}` |
 | `notes` | string | — | free text — composer documentation, not read by the engine |
@@ -131,19 +177,22 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 | `voices` | array | — | up to 4 total — see Voices table below |
 
 - `bars`: no literal schema default. If omitted and `chord_bars` is given, `bars` is derived from it. If both are omitted, the engine falls back to 8 bars and warns (`"no 'bars' or 'chord_bars' — defaulting to 8 bars"`) — the same effective number this doc previously listed as the default, just arrived at differently.
+- **`bars` without `chord_bars` splits evenly across every chord in `progression`** — `bars / len(progression)`, so the number of chords you happened to write becomes the duration divisor, even though "which chords" and "how long each one lasts" are independent decisions. Silent — no warning below a 4-bars/chord split; `lint.py` only flags it above that threshold, on the assumption a short split (e.g. 2 bars/chord) is intentional. Set `chord_bars` explicitly to control duration independent of chord count.
 - `bass_rest_probability` is refused on `walking`/`melodic` bass styles.
 - `bass_style: "motif"` needs a theme motif with `intervals`+`rhythm`. Swing on bass is only audible on `melodic`/`motif`.
 - `chord_bars` must match `progression` length; tiles to fill `bars` if shorter.
 - `counterpoint`: up to 3 voices; `voices[]` overrides if both set.
 - `drums` string is a pattern name; object form uses the Drums table.
 - `fugal_techniques.canon_interval` needs `canonic_imitation: true` or it's a no-op.
-- `harmony_pattern` is required if `harmony_rhythm.rhythm: "pattern"`.
+- `harmony_pattern` is required if `harmony_rhythm.rhythm: "pattern"` is set **explicitly**. If `harmony_rhythm` is omitted entirely and `section.rhythm: "pattern"` is inherited, there is no such requirement enforced — and no `harmony_pattern` block in that case means **harmony renders completely silent for the section**: no events, no print, no error. This inherited case isn't schema-checked, only lint-checked. Set `harmony_rhythm.rhythm` explicitly (to `"pattern"` with a block, or to `"sustain"`/`"free"`/`"motif"`) to avoid it.
 - `harmony_rest_probability` is a no-op under `sustain`.
 - `harmony_rhythm` must be an object, not a bare string.
-- `key`/`mode` here override the theme-level key/mode.
+- **`harmony_rhythm.rhythm` does *not* inherit `"motif"` from `section.rhythm`.** Density/groove both cascade from the section when unset on `harmony_rhythm` — but an *inherited* `"motif"` (i.e. `section.rhythm: "motif"` with no explicit `harmony_rhythm.rhythm`) is silently coerced to `"free"` instead. Harmony's own motif-tiling only activates when `harmony_rhythm.rhythm: "motif"` is set explicitly, on that block itself.
+- `key`/`mode` here override the theme-level key/mode. **`mode` here is restricted to the 7 traditional modes only** — none of the 12 new modes (see Modes reference) can be set at the section level, only at the piece level. Trying to use e.g. `pelog` as a section override raises a validation error even though it's valid as the piece's own `mode`.
 - `melodic_variation: "isorhythmic"` needs `rhythm: "motif"` + multi-motif pool + no lead motif override.
 - `melody: "develop"` is lead-voice only — no-op on peer voices.
-- `note_length_range` applies to melody + free-species counterpoint only; needs `rhythm: "free"`; ignored under `groove` or `pattern`/`motif` rhythm.
+- **`motif` / `motifs` at the section level do nothing at render time** — only the theme's/piece's own motif pool is ever consulted. Schema-legal, warned by neither validation nor default output; `lint.py`'s `_check_section_motif_override` catches it. Define the motif at the piece level, or attach it to a specific voice with `behavior: "develop"`, instead.
+- `note_length_range` applies to melody + free-species counterpoint only; needs `rhythm: "free"`; ignored under `groove` or `pattern`/`motif` rhythm. `quantum` (default `0.25`) snaps sampled lengths to a grid so they stay legible in the DAW — `0.5` = eighth-note legible, `0.25` = sixteenth (default), smaller = more fluid/less quantized.
 - `rest_probability` is melody only.
 - `rhythm` (timing) is separate from `melody` (behavior).
 - `swing` on bass is audible only via `melodic`/`motif` bass styles.
@@ -193,6 +242,9 @@ different mechanism from the piece-level `transform_sequence` (which steps throu
 transforms section by section) and from `voices[].canon_offset` (the peer-voice
 equivalent of `canon_interval`, delaying that voice's own line instead of the lead's).
 
+- **`motif_transform` / `stretto_compression` / `subject_fragmentation` only take effect when the lead voice's `behavior: "develop"`.** These three transform the motif object before generation, but the transformed motif is only forwarded into the note-generating function under `develop` — every other behavior (`lyrical`/`generative`/`sparse`) drops it, exactly like the `voice.motif` pitch gate above. Set unconditionally with no warning otherwise.
+- **`canonic_imitation` / `canon_interval` are exempt from that gate** — they're applied as a pass over the *already-generated* note list, after generation, regardless of behavior. These two work on any behavior; the other three don't.
+
 ### `harmony_rhythm`
 | Field | Values |
 |---|---|
@@ -207,7 +259,8 @@ equivalent of `canon_interval`, delaying that voice's own line instead of the le
 - `groove` is inert under `sustain`/`motif`, audible only under `free`.
 - `motif` is harmony's own motif, independent of melody's; only resolves under `rhythm: "motif"`.
 - `rhythm: "sustain"` = zero internal motion.
-- `transform_imitation: "strict"` hard-crashes at render time.
+- `rhythm` does **not** inherit `"motif"` from `section.rhythm` — an inherited `"motif"` is silently coerced to `"free"`. Must be set explicitly here to activate harmony's own motif tiling. (Inherited `"pattern"` has a related, separate trap — see the Section table note on `harmony_pattern`.)
+- `transform_imitation: "strict"` hard-crashes at render time — but **only when paired with `rhythm: "motif"` on this same block** (the only branch that reads `transform_imitation` at all). Paired with any other `rhythm` value it's a silent no-op, not a crash. Simplest is still: don't set it.
 
 ### `counterpoint[]`
 | Field | Default | Values |
@@ -241,9 +294,11 @@ equivalent of `canon_interval`, delaying that voice's own line instead of the le
 | `species` | — | `free, first, second, third, fourth, fifth` |
 | `velocity` | 64 | 1–127 |
 
-- `behavior: "develop"` is a no-op on peer voices (`voices[1:]`).
-- `canon_offset`: beat offset for this voice's entry when used as part of a canon — the peer-voice counterpart to `fugal_techniques.canon_interval`, delaying this specific voice's line rather than the whole section's lead.
-- `motif` applies to any voice, lead or peer — see the Motif selection table above for exactly what each path does with it (rhythm only under `species`, rhythm *and* pitch under `entry_role`).
+- `behavior: "develop"` is a no-op on peer voices (`voices[1:]`) — see the Motif selection table's develop-gate note for what "no-op" means specifically (pitch, not rhythm).
+- **`behavior`-path pitch content (`voice.motif`'s intervals) is only read when this voice's `behavior: "develop"`.** Every other behavior ignores the motif's pitch shape entirely, even with `motif` set. See Motif selection above.
+- **`canon_offset` only works on peer voices (`voices[1:]`) — it is never consumed on `voices[0]` (the lead).** Schema-legal on the lead voice, silently ignored at render time; there's no validation error to catch the mistake. If you want the lead's entrance delayed, use `fugal_techniques.canon_interval` + `canonic_imitation: true` at the section level instead — that's the actual lead-voice equivalent, not this field.
+- **`dissonance` only has an effect when `species` is also set on this same voice.** It's read exclusively inside the counterpoint-path call (`generate_counterpoint`); a lead voice, a melody-path peer voice (no `species`), or an `entry_role` voice all silently ignore it.
+- `motif` applies to any voice, lead or peer — see the Motif selection table above for exactly what each path does with it (rhythm only under `species`, pitch only under `behavior: "develop"`, rhythm *and* pitch under `entry_role`).
 - `register` is absolute (unlike counterpoint's relative `above`/`below`).
 - `rest_probability` overrides the section default.
 - Setting `species` switches the voice onto the counterpoint path.
@@ -365,7 +420,7 @@ on import in Logic.
 |---|---|---|
 | Chord sequence | `progression` | list of Roman numerals, not enum-validated |
 | Per-chord duration | `chord_bars` | must match `progression` length |
-| No length cap | — | keep ≤10 chords/section (seed-collision risk above that, unless `rhythm: "sustain"`) |
+| No length cap | — | keep ≤10 chords/section (seed-collision risk above that, unless the effective harmony source is `"sustain"` or `"pattern"` — only `"free"`/`"motif"` consume the chord-level seed that can collide) |
 
 `progression` entries take more than a bare numeral:
 
@@ -450,9 +505,74 @@ Motif-identity reuse is unreliable under ~40 notes — treat WARN on a short sec
 | A progression that doesn't loop into monotony | check `bars / sum(chord_bars)` |
 | Real classical species counterpoint | `species: "first"` or `"free"` only |
 | Audible bass swing | `bass_style: "melodic"` or `"motif"` |
-| Avoid the harmony-seed collision | ≤10 chords/section, or use `sustain` |
+| Avoid the harmony-seed collision | ≤10 chords/section, or use `sustain`/`pattern` |
 | A hand-played groove imported as JSON | `rhythm_extract.py` on the exported MIDI |
+| A delayed lead-voice entrance (canon/stretto) | `fugal_techniques.canon_interval` + `canonic_imitation: true` at the section level — **not** `voices[0].canon_offset`, which is never read |
+| A delayed peer-voice entrance | `voices[N].canon_offset` (`N > 0` only) |
+| Non-traditional color (blues, whole-tone, gamelan-ish, etc.) | one of the 12 new `mode` values — piece-level only, see Modes reference |
 | A render that's actually good, not just valid | read the `slop_metrics.py` section table — check every row |
+
+---
+
+## Changelog (v12 → v13)
+
+Source-code audit against the full codebase (schemas.py, lint.py's COUPLINGS registry,
+harmony.py, melody.py, generator.py). No engine behavior changed — this is entirely a
+doc-completeness pass. Two real code issues turned up along the way; they are **not**
+fixed here and are tracked separately (see `forma_known_issues.md`) rather than folded
+into this reference doc.
+
+**New (previously undocumented in code, not just in this doc):**
+- **12 new `mode` values** (piece-level only) — `harmonic_minor`, `melodic_minor`,
+  `pentatonic_major`, `pentatonic_minor`, `blues`, `whole_tone`, `diminished`,
+  `augmented_hexatonic`, `pelog`, `arabic`, `hirajoshi`, `insen`. New `## Modes
+  reference` section with note count and character for all 19 modes — including
+  `augmented_hexatonic`, which had no character description anywhere, even in the
+  source comments; written fresh for this doc.
+- **Roman-numeral aliasing caveat**, fully enumerated by mode for the first time:
+  which specific roman numerals alias onto which degree, split out by 5-note/6-note/
+  8-note mode, with `arabic` (7 notes) explicitly confirmed unaffected.
+- **`section.mode`'s restricted enum** — only the 7 traditional modes, unlike the
+  piece-level `mode` which accepts all 19. This asymmetry existed in code but was
+  invisible in the doc (the two `mode` fields looked identical).
+- **`motif`/`motifs[].rests`** field — real, actively-consumed (bass.py, melody.py,
+  motif.py, rhythm.py), previously absent from the motif table entirely.
+
+**Silent no-op traps, newly documented (behavior unchanged, now written down):**
+- `voice.motif`'s pitch content requires `behavior: "develop"` — previously implied
+  only via the Motif selection table's `rhythm: "motif"` row, which is a *different*
+  mechanism; now split into two explicit rows plus a clarifying note.
+- `fugal_techniques.motif_transform` / `stretto_compression` / `subject_fragmentation`
+  are *also* gated by `behavior: "develop"` — previously undocumented entirely.
+  `canonic_imitation`/`canon_interval` are NOT gated the same way (behavior-independent
+  post-pass) — now stated explicitly as the exception.
+- **`voices[0].canon_offset` (the lead voice) is never read** — only `voices[1:]` and
+  `counterpoint[]` consume it. Previously implied ("peer-voice counterpart") but not
+  stated as a hard restriction on the field itself. Quick decision guide now points to
+  `fugal_techniques.canon_interval` as the actual lead-voice mechanism.
+- `voices[].dissonance` only has an effect when `species` is also set on that voice —
+  previously undocumented.
+- `harmony_rhythm.rhythm` does not inherit `"motif"` from `section.rhythm` (silently
+  coerced to `"free"` instead) — previously undocumented.
+- An inherited `"pattern"` harmony source (via `section.rhythm`, no explicit
+  `harmony_rhythm` block, no `harmony_pattern`) renders **completely silent harmony,
+  no error** — a gap the schema's "pattern needs a block" check doesn't cover, since
+  that check only fires for an explicit `harmony_rhythm.rhythm: "pattern"`. Previously
+  undocumented; the existing `harmony_pattern` note only covered the explicit case.
+- `bars` without `chord_bars` splitting evenly across every chord — the mechanism and
+  its 4-bars/chord lint threshold were both previously undocumented.
+- `section.motif`/`section.motifs` doing nothing was documented in the Motif selection
+  prose but absent from the Section field table itself — now listed there too, so it's
+  discoverable by scanning the table, not just by reading every bullet underneath it.
+
+**Corrections to existing entries:**
+- Seed-collision exemption — was listed as `sustain` only; `pattern` is equally exempt
+  (`SEED_COLLISION_RISK_HARMONY_SOURCES` only covers `free`/`motif`).
+- `transform_imitation: "strict"` — was stated as an unconditional hard-crash; it only
+  crashes when paired with `rhythm: "motif"` on the same `harmony_rhythm` block. With
+  any other `rhythm` value it's a silent no-op, not a crash. (Still: don't set it.)
+- `note_length_range.quantum` — default (`0.25`) and meaning (DAW-legibility snap grid)
+  were both missing; table only showed the field existed.
 
 ---
 

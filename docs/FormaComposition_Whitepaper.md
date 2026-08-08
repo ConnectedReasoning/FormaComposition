@@ -1,7 +1,7 @@
 # FormaComposition
 ## Technical & Compositional Whitepaper
 
-**Connected Reasoning · Version 2.1 · April 2026**
+**Connected Reasoning · Version 2.2 · August 2026**
 
 *A generative music composition engine grounded in classical compositional theory, built for the modern composer-developer.*
 
@@ -14,11 +14,10 @@
 3. [The Motif System](#3-the-motif-system)
 4. [Statefulness: Context-Aware Generation](#4-statefulness-context-aware-generation)
 5. [Compositional Techniques & Form](#5-compositional-techniques--form)
-6. [Live MIDI Integration](#6-live-midi-integration)
-7. [Production Toolchain](#7-production-toolchain)
-8. [Composition Case Studies](#8-composition-case-studies)
-9. [Roadmap & Known Issues](#9-roadmap--known-issues)
-10. [Closing](#10-closing-the-system-proposes-the-composer-disposes)
+6. [Production Toolchain](#6-production-toolchain)
+7. [Composition Case Studies](#7-composition-case-studies)
+8. [Roadmap & Known Issues](#8-roadmap--known-issues)
+9. [Closing](#9-closing-the-system-proposes-the-composer-disposes)
 
 ---
 
@@ -52,7 +51,7 @@ The misunderstanding was productive. The imagined depth of Eno's system became t
 
 The misreading of Eno's depth does not diminish what he genuinely demonstrated: the feedback loop. His workflow — starting the system, leaving the room, returning to adjust parameters, listening for what works — frames composition as curation. The creative act is not writing notes. It is tuning the system until it produces music the composer wants to live with.
 
-That feedback loop — the tight connection between parameter adjustment and auditory result — remains the aspirational model for FormaComposition's live MIDI integration work.
+That feedback loop — the tight connection between parameter adjustment and auditory result — remains the aspirational model for FormaComposition's ongoing work.
 
 ### 1.4 Artistic Influences
 
@@ -78,18 +77,17 @@ That feedback loop — the tight connection between parameter adjustment and aud
 
 ## 2. System Architecture
 
-### 2.1 The Four-Level Hierarchy
+### 2.1 The Three-Level Hierarchy
 
-FormaComposition organizes every composition into a four-level hierarchy that separates musical concerns cleanly:
+FormaComposition organizes every composition into three levels that separate musical concerns cleanly:
 
 | Level | Purpose |
 |---|---|
 | **Motif** | The atomic musical idea — a short melodic/rhythmic figure with defined intervals, durations, and a transform pool. Lives independently of key or mode. |
-| **Theme** | A musical world — defines tonality (key + mode), tempo range, and references a motif by name. Multiple themes can share the same motif. |
-| **Piece** | The arrangement — references a theme, defines section structure (verse/chorus/bridge/etc.) with specific tempo within the theme's range. |
-| **Section** | Local variation — overrides theme defaults, defines harmonic progression, arc, density, groove, and per-voice behavior. |
+| **Piece** | The tonal and formal home — key, mode, tempo range, section structure, and motif references all live here. |
+| **Section** | Local variation — overrides piece defaults, defines harmonic progression, arc, density, groove, and per-voice behavior. |
 
-This separation enables a critical workflow: the same melodic DNA (motif) can be heard in D Dorian, F Lydian, and A Phrygian without rewriting a note. Experimentation is cheap because concerns are isolated.
+> **What changed since v2.1:** earlier versions split tonal identity into a separate Theme file that pieces referenced — a four-level hierarchy (Motif/Theme/Piece/Section). That split is gone. Theme's fields (key, mode, tempo, motif pool) are absorbed directly into the piece — one JSON file per piece instead of a paired `theme.json` + `piece.json`. What actually mattered about the original split is unchanged: a motif still carries no key information, so the same melodic DNA can be heard in D Dorian, F Lydian, and A Phrygian without rewriting a note.
 
 ### 2.2 File Structure
 
@@ -99,8 +97,8 @@ compositions/
 │   ├── motif_ascending_hope.json
 │   ├── motif_descending_melancholy.json
 │   └── motif_<name>.json
-├── theme_*.json          # Themes reference motifs by name
-└── *.json                # Pieces reference themes by name
+└── *.json                # Pieces — key, mode, tempo, section structure,
+                           # and motif references all live in one file
 ```
 
 ### 2.3 Core Python Modules
@@ -108,14 +106,13 @@ compositions/
 | Module | Role | Description |
 |---|---|---|
 | `generator.py` | Main engine | Reads JSON, resolves motifs, applies transforms, writes MIDI via mido. Includes `create_chord_context()` for statefulness. |
-| `motif_loader.py` | Motif resolution | Loads standalone motif files, supports all three formats: name reference, embedded dict,  x phrase. |
+| `motif_loader.py` | Motif resolution | Resolves a motif reference to a `Motif` object — a string name (checked first against motifs declared inline on the piece, then against the external library) or an embedded dict. |
 | `melody.py` | Melody generation | Four behavior modes: generative, lyrical, sparse, develop. All accept optional chord context for statefulness. |
-| `bass.py` | Bass generation | Three behaviors: steady, melodic, walking. Responds to harmonic context. |
+| `bass.py` | Bass generation | Eight styles: root_only, root_fifth, walking, steady, melodic, pulse, pedal, motif. Responds to harmonic context. |
 | `percussion.py` | Drum patterns | Five named patterns rendered to MIDI ch.9 with groove templates, swing, and humanization. |
 | `rhythm_extract.py` | Rhythm import | Imports hand-played Logic Pro MIDI loops, auto-detects boundaries, quantizes, outputs JSON rhythm patterns. |
 | `context.py` | Cross-voice memory | `SectionContext` (cross-voice awareness) and `PieceContext` (cross-section memory). |
-| `streamer.py` / `live.py` | Live MIDI | IAC Driver integration for real-time MIDI streaming to Logic Pro. JSON file-watch triggers mid-playback regeneration. |
-| `validate_piece()` | Pre-generation checks | Catches bar count mismatches, obsolete fields, invalid enums, `chord_bars`/progression mismatches. |
+| `schemas.py` | Validation | Pydantic v2 models — the single source of validation truth. `PieceModel.model_validate()` replaces the old `validate_piece()` function. |
 
 ---
 
@@ -129,7 +126,7 @@ A motif in FormaComposition is the smallest self-contained musical idea. It has 
 - **Rhythm** — the duration in beats for each note (e.g., `[1.0, 1.0, 0.5, 1.5]`)
 - **Transform Pool** — the Bach-style transforms available for variation
 
-Critically, the motif carries no key information. It is a pure intervallic and rhythmic idea. The theme assigns it to a tonal world.
+Critically, the motif carries no key information. It is a pure intervallic and rhythmic idea. The piece assigns it to a tonal world.
 
 ### 3.2 Motif File Format
 
@@ -170,13 +167,13 @@ Every motif can be transformed using classical compositional techniques. Each ha
 
 > **Bach Principle:** The genius of Bach is intentional rule-breaking. FormaComposition's transform system enables surprise, not just correctness. Subverting harmonic expectations rather than confirming them is the target.
 
-### 3.4 Theme-Motif Relationship
+### 3.4 Motif Resolution
 
-Themes reference motifs by name rather than embedding them. This separation allows the same motif to inhabit multiple harmonic worlds:
+Pieces reference motifs rather than always embedding them, so the same motif can live inside multiple pieces:
 
 ```json
 {
-  "theme": {
+  "piece": {
     "name": "Dorian Dawn",
     "key": "D",
     "mode": "dorian",
@@ -186,12 +183,15 @@ Themes reference motifs by name rather than embedding them. This separation allo
 }
 ```
 
-The loader supports three motif resolution strategies, all backward-compatible:
+A `motif` field resolves one of two ways:
 
 | Format | Resolution |
 |---|---|
-| `"motif": "ascending_hope"` | String → load from `motifs/motif_ascending_hope.json` |
-| `"motif": {"intervals": [...]}` | Dict → use embedded definition (legacy support) | d 
+| `"motif": "ascending_hope"` | String — checked first against motifs the piece declares inline (its own `motifs` pool), then against the external library at `motifs/motif_ascending_hope.json` |
+| `"motif": {"intervals": [...]}` | Dict — used directly as the embedded definition |
+
+This means a motif can now be named and referenced entirely within a single piece file, with no separate library entry required, while existing library-file references keep working unchanged.
+
 ---
 
 ## 4. Statefulness: Context-Aware Generation
@@ -204,7 +204,7 @@ The result is music that sounds *generated* rather than *composed*. The notes ar
 
 ### 4.2 The Solution: Chord Context
 
-FormaComposition 2.1 introduces a chord context system. For each chord in a progression, the generator builds a context dictionary:
+FormaComposition introduces a chord context system. For each chord in a progression, the generator builds a context dictionary:
 
 | Key | Value |
 |---|---|
@@ -265,7 +265,27 @@ Every piece operates across three independent axes. Melody lives at their inters
 
 A common failure mode in generative music is treating harmony and rhythm as one concern. FormaComposition treats them as separate clocks, creating natural-feeling phasing even when chord changes and rhythmic patterns have different periodicities.
 
-### 5.2 Dynamics Arcs
+### 5.2 Modal Palette
+
+Harmony in FormaComposition isn't limited to major/minor. The mode list spans the seven diatonic modes (Ionian through Locrian) and a set of non-diatonic additions — harmonic minor, melodic minor, pentatonic major, pentatonic minor, blues, whole tone, diminished, and augmented hexatonic — plus, new this month, four modes chosen for real musicological reference points rather than as generic "more presets":
+
+- **Pelog** — not an authentic Javanese pelog tuning (real pelog is non-12-TET and varies by ensemble), but Satie's own 12-TET approximation of it: the exact six-note scale of *Gnossienne No. 3*, written after he heard gamelan at the 1889 Paris Exposition. Same honesty level as Debussy's pentatonic "Pagodes" — an impressionistic gesture, not a transcription.
+- **Arabic** (double harmonic major / Hijaz Kar) — two augmented-second leaps give it its character. The common Western umbrella term "Arabic scale" covers real maqam practice, which actually uses quarter-tone inflections a 12-TET scale can't represent.
+- **Hirajoshi** — Japanese koto pentatonic tuning. Not the same shape as the pentatonic minor / blues scales above — different interval steps, no minor 7th — which is exactly what gives it a distinct "Japanese" character instead of reading as "blues with different notes."
+- **Insen** — a symmetric five-note scale with no clear tonal center. Where the other three above are borrowed color from a specific tradition, this one earns its place through ambiguity: static, non-functional, well suited to ambient fields that aren't trying to resolve anywhere.
+
+> **Known caveat:** Roman numeral progressions assume seven scale degrees. On the non-heptatonic modes above — pelog (6 notes), hirajoshi / pentatonic major / pentatonic minor (5 notes) — a numeral beyond the mode's actual note count silently wraps and aliases onto an earlier degree instead of erroring. On pelog, "VII" lands on the same root as "I." On hirajoshi, "VI" wraps to "I" and "VII" wraps to "II." No crash, no warning — just a different chord than the numeral implies. Until a lint check exists for this, keep progressions within a mode's actual degree count: I–VI for pelog, I–V for any pentatonic mode.
+
+### 5.3 Harmonic Authorship: From Sampling to Structure
+
+Recent work moved harmonic choice away from random sampling within a mode and toward deliberate structural control. Two moves in particular:
+
+- **Pedal and drone bass anchoring.** A `pedal` bass style holds a single tone — the tonic — under the whole progression regardless of what the chords above are doing. The harmonic field stays static while the surface moves: an Eno-ish drone rather than a bassline that walks or outlines every chord change.
+- **Canon-offset call-and-response.** A `canon_offset` parameter delays a voice's entry by a set number of beats relative to another voice — the mechanism for genuine question-and-answer between voices, not just parallel harmony.
+
+Together these make the two catalog strategies actually distinct instead of variations on the same randomness: ambient/background work leans on the static harmonic field and pedal anchoring, with no functional dominant pull; pop/song-form work keeps functional harmonic motion, exact-repeat hooks, and transform development. Applying them inconsistently is what made earlier output feel arbitrary. The fix wasn't a new algorithm — it was choosing on purpose which strategy a given piece is using.
+
+### 5.4 Dynamics Arcs
 
 Every section carries a named arc that shapes energy across its duration. These drive which notes are chosen, how densely they're voiced, and how generators select from available candidates — not just post-production volume.
 
@@ -277,7 +297,7 @@ Every section carries a named arc that shapes energy across its duration. These 
 | `breath` | Releases tension deliberately — the exhale after a climax, preparation for return |
 | `fade_out` | Recedes toward silence — closing, reflection, dissolution |
 
-### 5.3 Sonata Form in FormaComposition
+### 5.5 Sonata Form in FormaComposition
 
 "Threshold" demonstrates full sonata form — 98 bars, ~5 minutes — implemented entirely in the JSON schema. This is not an approximation; it is Exposition, Development, Recapitulation, and Coda with proper harmonic relationships.
 
@@ -293,7 +313,7 @@ Every section carries a named arc that shapes energy across its duration. These 
 | Recapitulation B (14 bars) | Answer reharmonized — stays in home key now | swell, resolution |
 | Coda (12 bars) | Augmented subject — half speed, reflective, fades to silence | fade_out, reflection |
 
-### 5.4 Fugal Techniques
+### 5.6 Fugal Techniques
 
 Every technique serves an emotional purpose:
 
@@ -305,7 +325,7 @@ Every technique serves an emotional purpose:
 
 None of these is deployed as an academic exercise. Each serves the arc: stability → adventure → homecoming → reflection.
 
-### 5.5 The Rhythm Extraction Philosophy
+### 5.7 The Rhythm Extraction Philosophy
 
 FormaComposition originally attempted to generate rhythms algorithmically. The results were technically correct but musically unconvincing. The solution was to stop fighting it.
 
@@ -315,67 +335,16 @@ The implication: the best rhythm generation is no rhythm generation. Record it b
 
 ---
 
-## 6. Live MIDI Integration
+## 6. Production Toolchain
 
-### 6.1 The Problem: The Round-Trip Barrier
-
-The current workflow:
-
-```
-Edit JSON → Run Python → Export MIDI file → Import into Logic → Assign instruments → Listen → Repeat
-```
-
-Every iteration requires a full round trip. The composer cannot hear the effect of a parameter change without re-running the engine, re-importing the file, and re-listening. This breaks the feedback loop. The system and the listener do not occupy the same moment.
-
-### 6.2 The IAC Driver Solution
-
-macOS includes a virtual MIDI bus — the IAC (Inter-Application Communication) Driver — that allows any application to send MIDI to any other as if connected by a physical cable. Logic Pro does not need to know or care that MIDI is coming from a Python script.
-
-The proposed integration closes the loop:
-
-```
-Parameter change → Python regenerates future events → IAC Driver → Logic → Audio
-```
-
-### 6.3 Implementation Phases
-
-| Phase | Goal |
-|---|---|
-| Phase 1 — Proof of Concept | Enable IAC, modify `generator.py` to stream events via mido. Success: hear FormaComposition through Logic instruments in real-time, no file export. |
-| Phase 2 — Swift GUI Integration | WebSocket server in Python, wire Swift app Generate button. Success: click Generate, hear music. |
-| Phase 3 — Hot Parameter Control | Sliders in Swift GUI (density, bass behavior, dynamics). Success: move slider, hear change within one bar. |
-| Phase 4 — Incremental Generation | Refactor generator to produce events bar-by-bar. Success: 30+ minute continuous sessions with coherent transitions. |
-| Phase 5 — Record and Capture | Logic records the incoming MIDI stream. Success: complete a distributable track using only the live workflow. |
-
-### 6.4 Streaming Strategies
-
-**Option A — Pre-compute then stream:** Generate the full event list (as today), then play it back in real-time over IAC. Parameter changes trigger regeneration of upcoming events while scheduled events continue. Simpler; may introduce brief gaps during recomputation.
-
-**Option B — Generate on the fly:** The engine runs a real-time loop, deciding what to play each bar based on current parameters. More responsive; requires rethinking the generator from batch to incremental.
-
-> **Recommendation:** Start with Option A. It preserves the existing generator architecture entirely. Option B is the full "live instrument" mode but is a significant refactor — build Phase 1 first and earn the right to attempt it.
-
-### 6.5 Threading Model
-
-| Thread | Responsibility |
-|---|---|
-| Playback thread | Sends MIDI events at precise wall-clock intervals using `time.perf_counter()`. Must never be blocked by parameter changes or regeneration. |
-| Control thread | Listens for WebSocket messages from the Swift GUI, updates shared parameter state, triggers regeneration when needed. |
-
-A thread-safe parameter store (`queue.Queue` or `threading.Lock`-protected dict) mediates between the two. For ambient music at 60–120 BPM, `time.sleep()` precision (~1ms) is adequate — sixteenth notes at 120 BPM are 125ms apart, well above perceptual jitter threshold.
-
----
-
-## 7. Production Toolchain
-
-### 7.1 Hardware
+### 6.1 Hardware
 
 | Device | Role |
 |---|---|
 | Mac Studio M1 (32GB) | Primary development and performance machine |
 | Arturia Keystep | Manual motif input |
 
-### 7.2 Software Instruments (Arturia V Collection)
+### 6.2 Software Instruments (Arturia V Collection)
 
 | Instrument | Character |
 |---|---|
@@ -387,7 +356,7 @@ A thread-safe parameter store (`queue.Queue` or `threading.Lock`-protected dict)
 | Modular V3 | Experimental sound design |
 | Augmented Collection | Hybrid acoustic/electronic textures |
 
-### 7.3 Effects Chain
+### 6.3 Effects Chain
 
 | Effect | Role |
 |---|---|
@@ -399,7 +368,7 @@ A thread-safe parameter store (`queue.Queue` or `threading.Lock`-protected dict)
 | Arturia Comp TUBE-STA | Compression with tube character |
 | Arturia Rev LX-24 | Hall reverb for counterpoint voices |
 
-### 7.4 Distribution
+### 6.4 Distribution
 
 | Tool | Purpose |
 |---|---|
@@ -408,7 +377,7 @@ A thread-safe parameter store (`queue.Queue` or `threading.Lock`-protected dict)
 | Pixelmator | Album artwork — SVG to PNG conversion |
 | Python / Pillow | Generative album artwork creation |
 
-### 7.5 Mixing Philosophy: Stacking Warmth
+### 6.5 Mixing Philosophy: Stacking Warmth
 
 A key technical lesson from the Connected Reasoning catalog: stacking warmth across all channels creates low-mid competition that muddies the mix. Each voice must give something up for the whole mix to work.
 
@@ -416,9 +385,9 @@ Practically: if the pad is warm, the melody should be bright. If the bass is ful
 
 ---
 
-## 8. Composition Case Studies
+## 7. Composition Case Studies
 
-### 8.1 City Night Patrol — What Works Without Melody
+### 7.1 City Night Patrol — What Works Without Melody
 
 "City Night Patrol" is a released Connected Reasoning track that works specifically because it avoids carrying a melody. The insight is counterintuitive: many ambient and cinematic pieces succeed not through melodic development but through harmonic motion, rhythm, texture, and space.
 
@@ -426,7 +395,7 @@ The most compelling moments came from reverb tails, sustain, and effects artifac
 
 > **Key Craft Lesson:** Melody is a craft requiring deliberate effort. Pieces that avoid carrying melody succeed more reliably than those leading with it before the melodic craft is strong enough to carry the piece.
 
-### 8.2 Return — Testing Statefulness in Practice
+### 7.2 Return — Testing Statefulness in Practice
 
 "Return" (D Mixolydian, 62 BPM) was composed specifically as a test bed for the statefulness system. Its concept — *returning to a place that's home but changed* — maps directly onto its harmonic structure.
 
@@ -439,7 +408,7 @@ D Mixolydian was chosen deliberately: the flattened seventh (C natural) creates 
 | Recognition (20 bars) | bVII reveal (C major) — the Mixolydian color becomes obvious. Walking bass, motif transforms. |
 | Settling (16 bars) | I-bVII-IV-I loop, sparse — acceptance without resolution. The piece doesn't end; it accepts. |
 
-### 8.3 Threshold — Full Sonata Form
+### 7.3 Threshold — Full Sonata Form
 
 "Threshold" is the most formally ambitious composition in the FormaComposition catalog, implementing complete sonata form (98 bars, ~5 minutes) using Evening Water as its thematic material (D Dorian / A Aeolian, 70 BPM, seed 137).
 
@@ -451,17 +420,23 @@ The stretto climax in Development C (0.45x compression, 8 bars) is the turning p
 
 ---
 
-## 9. Roadmap & Known Issues
+## 8. Roadmap & Known Issues
 
-### 9.1 Active Development
+### 8.1 Active Development
 
 | Item | Status |
 |---|---|
 | Per-chord embedded rhythm patterns | **Critical.** Harmony voices holding whole notes while melody articulates above creates lifeless output. The fix is per-chord onset/duration/velocity patterns so chord changes "swing." Toto's "Africa" is the reference model. |
 | `motif_transform` wiring | Function signatures updated in `generator.py` and `melody.py`; wiring into `generate_develop` and validator incomplete. |
-| Live MIDI Phase 1 | IAC Driver integration proof of concept — the blocking gap between the system and the listener. |
+| IAC MIDI streaming (proof of concept) | Round-trip via file export today; an IAC Driver bridge would let generated MIDI stream straight into Logic in real time. Early-stage — no GUI, no live parameter control yet. |
 
-### 9.2 Backlog
+### 8.2 Known Issues
+
+| Item | Status |
+|---|---|
+| Roman numeral aliasing on non-heptatonic modes | Roman numerals I–VII assume 7 scale degrees. On 5- or 6-note modes (pelog, hirajoshi, both pentatonics) numerals beyond the mode's actual degree count silently wrap onto an earlier degree rather than erroring — see §5.2 for specifics. Keep progressions within the mode's real degree count until a lint check exists. |
+
+### 8.3 Backlog
 
 | Item | Notes |
 |---|---|
@@ -469,33 +444,27 @@ The stretto climax in Development C (0.45x compression, 8 bars) is the turning p
 | Counterpoint context | Counterpoint generator could avoid voice-leading conflicts by knowing melody and bass context. |
 | LinnDrum MIDI library | Integration of LinnDrum pattern library for historical rhythm authenticity. |
 | Fugal mode flag | Optional — test on a few pieces before committing. Not foundational. |
-| Theme-awareness | Generator reads any theme JSON, adjusts chord vocabulary to mode automatically. |
+| Piece-awareness | Generator reads any piece JSON, adjusts chord vocabulary to mode automatically. |
 | Per-section lock toggles | Swift companion app — lock individual sections during generation. |
 | Motif blending | Interpolate between two motifs over time: `motif_a`, `motif_b`, `blend: 0.5`. |
 | Motif chains | Sequence of motifs: A → B → A' → C for larger-scale melodic planning. |
 | Open-source release | GitHub release of FormaComposition. Potential `Forma` GitHub organization. |
 
-### 9.3 Production Target
+### 8.4 Production Target
 
 Two pieces per week under Connected Reasoning. Released catalog includes: City Night Patrol, The Circle at Ember Grove, Rebecca, Still Cove (~4 min, D Dorian, 68 BPM), and others.
 
 The quality filter is active and intentional: one strong song beats two weak ones.
 
-### 9.4 AI Model Selection in the Workflow
+### 8.5 AI in the Workflow — Two Different Claims
 
-Claude is used for complex design decisions and architectural debugging. Claude Haiku is appropriate for well-defined, architecturally clear implementation tasks once the design is settled.
+FormaComposition does not use AI or statistical models to generate music. Every note the engine writes comes from constraint satisfaction over encoded music theory — voice leading rules from Piston, harmonic function, mode and scale definitions, transform logic. There is no trained model anywhere in the generation path; the same JSON input with the same seed produces the same output every time, because it's deterministic code, not sampling from a distribution.
 
-The LLM-assisted composition pipeline:
-
-```
-Constraint-informed prompt → LLM → JSON schema → FormaComposition → MIDI → Logic ear check
-```
-
-Prompt templates guide LLMs toward sound compositional strategies rather than generic defaults.
+Separately: Claude was used to help *build* the tool — pair-programming the engine itself, the way you'd use any collaborator, with Claude Haiku handling narrower, already-scoped implementation work once a design is settled. That's a claim about how the software was written, not about how the software writes music. Conflating "AI helped build this" with "AI is generating your music" would be exactly the misunderstanding this audience is primed to assume — worth stating both halves plainly, separately, and without hedging.
 
 ---
 
-## 10. Closing: The System Proposes, the Composer Disposes
+## 9. Closing: The System Proposes, the Composer Disposes
 
 FormaComposition exists at the intersection of two moments separated by three decades: the study of Walter Piston's *Harmony* in the 1990s, which provided the compositional vocabulary, and the emergence of accessible tools — Python, mido, Logic Pro, Arturia's instrument libraries — that finally made it possible to express that vocabulary as realized music.
 
@@ -507,4 +476,4 @@ The system proposes. The composer disposes. Thirty years in the making.
 
 ---
 
-*Connected Reasoning · FormaComposition v2.1 · April 2026*
+*Connected Reasoning · FormaComposition v2.2 · August 2026*
