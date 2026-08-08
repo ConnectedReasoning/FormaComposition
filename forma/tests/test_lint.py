@@ -35,6 +35,7 @@ from intervals.core.lint import (
     _check_harmony_motif_groove_noop,
     _check_harmony_motif_without_motif_rhythm,
     _check_harmony_rest_on_sustain,
+    _check_fugal_techniques_require_develop,
     _check_inherited_motif_coerced_to_free,
     _check_lead_velocity_margin,
     _check_long_progression_seed_collision,
@@ -589,6 +590,110 @@ def test_check_inherited_motif_coerced_to_free_silent_when_explicit_other_source
 
 
 # ===========================================================================
+# _check_fugal_techniques_require_develop (known-issues #4)
+# ===========================================================================
+
+def test_check_fugal_techniques_fires_on_motif_transform_with_wrong_behavior():
+    section = _section(
+        melody={"behavior": "lyrical"},
+        fugal_techniques={"motif_transform": "inversion"},
+    )
+    found = list(_check_fugal_techniques_require_develop(section))
+    assert len(found) == 1
+    assert "motif_transform='inversion'" in found[0].setting
+    assert "behavior='lyrical'" in found[0].cause
+
+
+def test_check_fugal_techniques_fires_on_stretto_compression_with_wrong_behavior():
+    section = _section(
+        melody="generative",
+        fugal_techniques={"stretto_compression": 0.5},
+    )
+    found = list(_check_fugal_techniques_require_develop(section))
+    assert len(found) == 1
+    assert "stretto_compression=0.5" in found[0].setting
+
+
+def test_check_fugal_techniques_fires_on_subject_fragmentation_with_wrong_behavior():
+    section = _section(
+        melody="sparse",
+        fugal_techniques={"subject_fragmentation": 3},
+    )
+    found = list(_check_fugal_techniques_require_develop(section))
+    assert len(found) == 1
+    assert "subject_fragmentation=3" in found[0].setting
+
+
+def test_check_fugal_techniques_fires_once_for_multiple_fields():
+    """All three no-op fields set at once should be one Contradiction
+    listing all of them, not three separate ones."""
+    section = _section(
+        melody="lyrical",
+        fugal_techniques={
+            "motif_transform": "retrograde",
+            "stretto_compression": 2.0,
+            "subject_fragmentation": 2,
+        },
+    )
+    found = list(_check_fugal_techniques_require_develop(section))
+    assert len(found) == 1
+    assert "motif_transform" in found[0].setting
+    assert "stretto_compression" in found[0].setting
+    assert "subject_fragmentation" in found[0].setting
+
+
+def test_check_fugal_techniques_silent_when_behavior_is_develop():
+    section = _section(
+        melody={"behavior": "develop"},
+        fugal_techniques={"motif_transform": "inversion"},
+    )
+    assert list(_check_fugal_techniques_require_develop(section)) == []
+
+
+def test_check_fugal_techniques_silent_when_no_fugal_techniques():
+    section = _section(melody="lyrical")
+    assert list(_check_fugal_techniques_require_develop(section)) == []
+
+
+def test_check_fugal_techniques_silent_on_noop_default_values():
+    """motif_transform='none', stretto_compression=1.0,
+    subject_fragmentation=0 are all schema-legal but already no-ops on
+    their own terms (the code's own `if transform_name and != "none"`
+    etc. guards) — nothing is actually being discarded, so no warning."""
+    section = _section(
+        melody="lyrical",
+        fugal_techniques={
+            "motif_transform": "none",
+            "stretto_compression": 1.0,
+            "subject_fragmentation": 0,
+        },
+    )
+    assert list(_check_fugal_techniques_require_develop(section)) == []
+
+
+def test_check_fugal_techniques_silent_on_canonic_imitation_alone():
+    """canonic_imitation/canon_interval are NOT gated by 'develop' — read
+    unconditionally in melody.py — so a fugal_techniques block containing
+    only those must not trigger this check."""
+    section = _section(
+        melody="lyrical",
+        fugal_techniques={"canonic_imitation": True, "canon_interval": 2.0},
+    )
+    assert list(_check_fugal_techniques_require_develop(section)) == []
+
+
+def test_check_fugal_techniques_works_with_voices_form():
+    """Same check via voices[] instead of bare/dict melody — behavior
+    still resolves through melody_behavior()."""
+    section = _section(
+        voices=[{"register": "soprano", "behavior": "generative"}],
+        fugal_techniques={"motif_transform": "augmentation"},
+    )
+    found = list(_check_fugal_techniques_require_develop(section))
+    assert len(found) == 1
+
+
+# ===========================================================================
 # 18. _check_canon_interval_without_canonic_imitation
 # ===========================================================================
 
@@ -727,16 +832,13 @@ def test_check_lead_velocity_margin_silent_when_explicit_lead_velocity_clears_it
 #                                         for the "motif" rhythm-source case
 # ===========================================================================
 
-def test_checks_registry_has_nineteen_entries_plus_melodic_variation_separately():
-    # Net unchanged at 19: _check_harmony_pattern_silently_empty was
-    # retired (known-issues #7 — promoted to a schema ValidationError, so
-    # the lint check's trigger condition became unreachable and was
-    # deleted rather than left as dead code), and
-    # _check_inherited_motif_coerced_to_free was added (known-issues #6 —
-    # a genuinely new check, not a replacement for #7's).
-    assert len(CHECKS) == 19
+def test_checks_registry_has_twenty_entries_plus_melodic_variation_separately():
+    # 19 (from #6's addition) + 1 for _check_fugal_techniques_require_develop
+    # (known-issues #4) = 20.
+    assert len(CHECKS) == 20
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS
     assert _check_lead_velocity_margin in CHECKS
     assert _check_inherited_motif_coerced_to_free in CHECKS
+    assert _check_fugal_techniques_require_develop in CHECKS

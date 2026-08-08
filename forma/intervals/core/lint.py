@@ -782,6 +782,66 @@ def _check_inherited_motif_coerced_to_free(section: SectionModel) -> Iterator[Co
     )
 
 
+def _check_fugal_techniques_require_develop(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    Known-issues #4: section.fugal_techniques.motif_transform /
+    stretto_compression / subject_fragmentation are all read and applied to
+    build a transformed motif in melody.py's generate_melody_for_progression
+    (see the "Apply fugal techniques to motif" block) -- but that
+    transformed motif (effective_motif / chord_motif) is only ever handed to
+    the actual note-generating function when the lead voice's behavior is
+    'develop'. generate_melody()'s own dispatch forwards `motif` to `fn`
+    only on the develop branch; lyrical/generative/sparse call the same
+    function without it. So for any other behavior, all three fields are
+    computed and thrown away -- more wasted than most silent no-ops here,
+    since building the transformed Motif object is real work (motif.py
+    transform calls, rhythm rescaling, interval truncation), not just a
+    skipped read.
+
+    canonic_imitation/canon_interval (the other two fugal_techniques
+    fields) are NOT gated by 'develop' -- confirmed above the chord loop in
+    melody.py, they're read unconditionally -- so they're correctly left
+    out of this check; see _check_canon_interval_without_canonic_imitation
+    for their own (different) no-op case.
+    """
+    ft = section.fugal_techniques
+    if not ft:
+        return
+    if section.melody_behavior() == "develop":
+        return
+
+    triggered = []
+    transform_name = ft.get("motif_transform")
+    if transform_name and transform_name != "none":
+        triggered.append(f"motif_transform={transform_name!r}")
+    compression = ft.get("stretto_compression")
+    if compression and compression != 1.0:
+        triggered.append(f"stretto_compression={compression!r}")
+    fragment_size = ft.get("subject_fragmentation")
+    if fragment_size and isinstance(fragment_size, int) and fragment_size > 0:
+        triggered.append(f"subject_fragmentation={fragment_size!r}")
+
+    if not triggered:
+        return
+
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"fugal_techniques: {', '.join(triggered)}",
+        cause=f"lead voice behavior='{section.melody_behavior()}' (not "
+              f"'develop') — generate_melody() only forwards the "
+              f"fugal-transformed motif to the note generator on the "
+              f"develop branch",
+        effect="the transform is fully computed (motif.py transform call, "
+               "rhythm rescaling, or interval truncation, depending on "
+               "which field) and then discarded — the rendered line is "
+               "identical to what this behavior would produce with no "
+               "fugal_techniques block at all",
+        fix="set this section's lead voice behavior to 'develop' to "
+            "actually hear these transforms, or drop the fugal_techniques "
+            "fields that don't apply to this behavior.",
+    )
+
+
 def _check_canon_interval_without_canonic_imitation(section: SectionModel) -> Iterator[Contradiction]:
     """
     fugal_techniques.canon_interval only takes effect when
@@ -1043,6 +1103,7 @@ CHECKS = [
     _check_canon_interval_without_canonic_imitation,
     _check_lead_velocity_margin,
     _check_inherited_motif_coerced_to_free,
+    _check_fugal_techniques_require_develop,
 ]
 
 

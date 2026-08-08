@@ -962,6 +962,46 @@ class SectionModel(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _warn_lead_canon_offset_is_dead(self) -> "SectionModel":
+        """
+        Known-issues #3: canon_offset is schema-legal on every VoiceModel
+        instance, but generator.py only ever reads it in two places — the
+        peer-voice loop (section.voices[1:]) and the counterpoint[] loop —
+        neither of which the lead voice passes through. The lead voice is
+        section.voices[0] when voices[] is used, OR section.melody when
+        given in VoiceModel dict form (lead_voice() resolves whichever one
+        actually applies) — canon_offset is equally dead on both, since
+        generator.py never touches section.melody's VoiceModel at all and
+        never iterates voices[0].
+
+        Pydantic has no way to know a given VoiceModel instance is "the
+        lead" vs. "a peer" — that's positional/contextual, not something
+        the field itself can express — so this can only be caught here, at
+        the section level, not on VoiceModel itself.
+
+        Warning, not an error: the field simply does nothing, same category
+        as the engine's other silent-no-op traps (#4/#5/#6) rather than
+        #7's total-output-loss case — the section still renders fully,
+        just without the (never-applied) canon shift on this one voice.
+        """
+        lead = self.lead_voice()
+        if lead is not None and lead.canon_offset > 0:
+            source = "voices[0]" if self.voices else "melody (dict form)"
+            warnings.warn(
+                f"Section '{self.name}': {source}.canon_offset="
+                f"{lead.canon_offset} is set on the LEAD voice, but "
+                f"generator.py never reads canon_offset for the lead — only "
+                f"peer voices (section.voices[1:]) and counterpoint[] "
+                f"entries apply it. This value is silently ignored; the "
+                f"lead's timing is unaffected. If you meant to offset a "
+                f"peer voice, set canon_offset on a voices[1:] entry "
+                f"instead — canon_offset on the lead has no mechanism to "
+                f"apply it against.",
+                stacklevel=4,
+            )
+        return self
+
+    @model_validator(mode="after")
     def _validate_bars(self) -> "SectionModel":
         """
         Migrated from validate_piece() bar/chord_bars checks, extended with

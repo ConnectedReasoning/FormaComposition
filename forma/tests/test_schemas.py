@@ -535,6 +535,50 @@ class TestSectionModel:
         assert s.model_extra.get("totally_made_up_key") == 1
         assert any("unknown field" in str(w.message) for w in caught)
 
+    def test_lead_canon_offset_warns_when_set_on_voices0(self):
+        """Known-issues #3: canon_offset on voices[0] (the lead) is dead —
+        generator.py's peer-voice loop only reads voices[1:]."""
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            SectionModel.model_validate(_minimal_section(voices=[
+                {"register": "soprano", "canon_offset": 2.0},
+            ]))
+        assert any("canon_offset" in str(w.message) and "never reads" in str(w.message)
+                    for w in caught)
+
+    def test_lead_canon_offset_warns_when_set_on_melody_dict_form(self):
+        """Same dead field, reached via section.melody given as a VoiceModel
+        dict instead of voices[] — lead_voice() resolves either, and
+        generator.py never touches section.melody's VoiceModel at all."""
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            SectionModel.model_validate(_minimal_section(
+                melody={"behavior": "lyrical", "canon_offset": 1.5},
+            ))
+        assert any("canon_offset" in str(w.message) and "never reads" in str(w.message)
+                    for w in caught)
+
+    def test_lead_canon_offset_silent_when_zero(self):
+        """Default canon_offset=0.0 shouldn't warn — nothing is actually
+        being ignored when there's no offset to apply in the first place."""
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            SectionModel.model_validate(_minimal_section(voices=[
+                {"register": "soprano"},
+            ]))
+        assert not any("never reads" in str(w.message) for w in caught)
+
+    def test_peer_voice_canon_offset_does_not_warn(self):
+        """canon_offset on voices[1:] (a real peer, not the lead) IS
+        honored by generator.py — must not trigger this warning."""
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            SectionModel.model_validate(_minimal_section(voices=[
+                {"register": "soprano"},
+                {"register": "alto", "canon_offset": 2.0},
+            ]))
+        assert not any("never reads" in str(w.message) for w in caught)
+
 
 # ===========================================================================
 # SectionModel.validate_against_theme (cross-model)
