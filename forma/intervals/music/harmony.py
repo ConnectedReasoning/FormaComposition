@@ -1171,10 +1171,15 @@ def resolve_harmony_section_events(
 
     Returns (harmony_section_events, description):
       harmony_section_events — "sustain" | list[RhythmEvent] | None.
-        None means "free": the _FreeHarmonyStrategy density grid handles it,
-        including the case where "pattern" was declared but no harmony_pattern
-        was actually supplied (silent no-op, preserved from the original
-        switchboard rather than "fixed" here — a relocation, not a bug hunt).
+        None means "free": the _FreeHarmonyStrategy density grid handles it.
+        The "pattern declared but no harmony_pattern supplied" branch below
+        is now unreachable through normal validated construction — schemas.py's
+        SectionModel._validate_rhythm_dependencies (known-issues #7 fix)
+        rejects that combination at validation time, for both the explicit
+        harmony_rhythm.rhythm='pattern' case and the inherited
+        section.rhythm='pattern' case. The branch is left in place as
+        defense-in-depth for callers that construct events without going
+        through schema validation, not as the primary guard anymore.
       description — a ready-to-print string, possibly containing an embedded
         newline (the inherited-motif coercion case produces two lines, exactly
         as the original two separate print() calls did), or None when nothing

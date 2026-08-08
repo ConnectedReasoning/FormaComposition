@@ -738,33 +738,47 @@ def _check_long_progression_seed_collision(section: SectionModel) -> Iterator[Co
     )
 
 
-def _check_harmony_pattern_silently_empty(section: SectionModel) -> Iterator[Contradiction]:
+def _check_inherited_motif_coerced_to_free(section: SectionModel) -> Iterator[Contradiction]:
     """
-    An INHERITED "pattern" harmony source (section.rhythm='pattern', no
-    harmony_rhythm.rhythm set explicitly) with no harmony_pattern block
-    produces zero harmony events: no print, no error, no lint elsewhere.
-    The schema's "pattern needs a block" check only fires for an EXPLICIT
-    harmony_rhythm.rhythm='pattern' — this is the gap it doesn't cover.
+    Known-issues #6: unlike density/groove (which cascade cleanly from
+    section.* when unset on harmony_rhythm), 'motif' is deliberately NOT
+    allowed to cascade — harmony.py's resolve_harmony_section_events()
+    coerces an inherited 'motif' source to 'free' rather than activating
+    harmony's own independent motif mechanism. This is intentional (see
+    that function's own comment: falling back to section.rhythm would
+    silently turn on harmony's motif-driven comping on nearly every
+    melodic section, since 'motif' is a common melody rhythm source, and
+    that mechanism needs its own rhythm-bearing motif to even work).
+
+    The coercion itself is correct and should NOT change — the gap is that
+    it was only visible as a print() at render time (harmony.py's two-line
+    status message), not as a lint warning before render. This check closes
+    that visibility gap without changing the coercion behavior.
     """
     hr = section.harmony_rhythm
     explicit = hr.rhythm if hr is not None else None
     if explicit is not None:
-        return  # explicit case is schema-enforced already, not this gap
-    if section.rhythm != "pattern":
-        return
-    if section.harmony_pattern is not None:
+        return  # explicit harmony_rhythm.rhythm is honored, not this gap
+    if section.rhythm != "motif":
         return
     yield Contradiction(
         where=f"section '{section.name or '?'}'",
-        setting="harmony_rhythm is unset, inheriting rhythm='pattern' from "
-                "the section",
-        cause="no harmony_pattern block, and the inherited case isn't "
-              "schema-checked the way an explicit harmony_rhythm.rhythm="
-              "'pattern' is",
-        effect="harmony renders completely silent for this section — no "
-               "events, no print, no error",
-        fix="add a harmony_pattern block, or set harmony_rhythm.rhythm "
-            "explicitly to something else ('sustain'/'free'/'motif').",
+        setting="harmony_rhythm is unset (or set without .rhythm), "
+                "inheriting rhythm='motif' from the section",
+        cause="'motif' is the one harmony_rhythm.rhythm value that does "
+              "NOT cascade from section.rhythm — it's coerced to 'free' "
+              "instead, by design, to avoid silently activating harmony's "
+              "own independent motif mechanism on every motif-driven "
+              "melody section",
+        effect="harmony renders with the 'free' density grid, not a "
+               "motif-driven comping pattern — audible, not silent, but "
+               "easy to assume you're getting motif-cascaded harmony when "
+               "you're not",
+        fix="this is expected behavior, not a bug — no action needed unless "
+            "you actually want harmony's own motif mechanism, in which case "
+            "set harmony_rhythm.rhythm='motif' explicitly (and give it a "
+            "motif with a 'rhythm' field, via harmony_rhythm.motif or the "
+            "theme's motif).",
     )
 
 
@@ -1026,9 +1040,9 @@ CHECKS = [
     _check_counterpoint_species_unimplemented,
     _check_transform_imitation_unimplemented,
     _check_long_progression_seed_collision,
-    _check_harmony_pattern_silently_empty,
     _check_canon_interval_without_canonic_imitation,
     _check_lead_velocity_margin,
+    _check_inherited_motif_coerced_to_free,
 ]
 
 

@@ -34,8 +34,8 @@ from intervals.core.lint import (
     _check_harmony_melody_ratio,
     _check_harmony_motif_groove_noop,
     _check_harmony_motif_without_motif_rhythm,
-    _check_harmony_pattern_silently_empty,
     _check_harmony_rest_on_sustain,
+    _check_inherited_motif_coerced_to_free,
     _check_lead_velocity_margin,
     _check_long_progression_seed_collision,
     _check_melodic_arc_apex_unreachable,
@@ -521,40 +521,71 @@ def test_check_long_progression_seed_collision_silent_for_non_risk_source():
 
 
 # ===========================================================================
-# 17. _check_harmony_pattern_silently_empty
+# 17. _check_harmony_pattern_silently_empty — RETIRED (known-issues #7).
+#
+# This check used to catch the INHERITED "pattern" harmony gap (section.
+# rhythm='pattern', no explicit harmony_rhythm.rhythm, no harmony_pattern
+# block -> harmony renders completely silent, no print, no error). That gap
+# is now closed one layer upstream: SectionModel._validate_rhythm_
+# dependencies() in schemas.py raises ValueError for both the explicit and
+# the inherited case, so a SectionModel with this problem can no longer be
+# constructed at all -- this lint check's trigger condition became
+# unreachable. Keeping an unreachable check around is its own kind of silent
+# trap (a future reader could believe it's still doing something), so it was
+# deleted rather than left as dead code. The three cases it used to cover
+# are now asserted as schema ValidationErrors instead -- see
+# test_schemas.py's harmony-pattern-inheritance tests.
 # ===========================================================================
 
-def test_check_harmony_pattern_silently_empty_fires():
-    section = _section(
-        rhythm="pattern",
-        rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-        # harmony_rhythm left unset -> inherits 'pattern', no harmony_pattern block
-    )
-    found = list(_check_harmony_pattern_silently_empty(section))
+
+# ===========================================================================
+# _check_inherited_motif_coerced_to_free (known-issues #6)
+#
+# Unlike #7, this ISN'T a schema-error candidate: the coercion (inherited
+# 'motif' -> 'free') is intentional, documented, deliberate behavior in
+# harmony.py, not a bug. The gap was purely visibility -- a print-only
+# status line at render time, nothing before render, nothing in lint. This
+# check makes the same fact visible earlier, without changing what happens.
+# ===========================================================================
+
+def test_check_inherited_motif_coerced_to_free_fires():
+    section = _section(rhythm="motif")
+    found = list(_check_inherited_motif_coerced_to_free(section))
     assert len(found) == 1
-    assert "inheriting rhythm='pattern'" in found[0].setting
-    assert "completely silent" in found[0].effect
+    assert "inheriting rhythm='motif'" in found[0].setting
+    assert "coerced to 'free'" in found[0].cause
 
 
-def test_check_harmony_pattern_silently_empty_silent_when_block_present():
+def test_check_inherited_motif_coerced_to_free_fires_with_empty_harmony_rhythm_block():
+    """A harmony_rhythm block that sets other fields (density/groove) but
+    not .rhythm still inherits 'motif' -> still coerced -> still warns."""
+    section = _section(rhythm="motif", harmony_rhythm={"density": "sparse"})
+    found = list(_check_inherited_motif_coerced_to_free(section))
+    assert len(found) == 1
+
+
+def test_check_inherited_motif_coerced_to_free_silent_when_explicit_motif():
+    """harmony_rhythm.rhythm='motif' set explicitly is honored, not
+    coerced -- this check must stay silent."""
     section = _section(
-        rhythm="pattern",
-        rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-        harmony_pattern={"onsets": [0.0], "durations": [1.0]},
+        rhythm="motif",
+        harmony_rhythm={"rhythm": "motif", "motif": {
+            "intervals": [0, 2, 4], "rhythm": [1.0, 1.0, 2.0],
+        }},
     )
-    assert list(_check_harmony_pattern_silently_empty(section)) == []
+    assert list(_check_inherited_motif_coerced_to_free(section)) == []
 
 
-def test_check_harmony_pattern_silently_empty_silent_when_explicit_harmony_rhythm():
-    """The explicit-harmony_rhythm.rhythm='pattern' case is already
-    schema-enforced (requires harmony_pattern) -- this check only covers
-    the *inherited* gap, so it must stay silent here."""
-    section = _section(
-        rhythm="pattern",
-        rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-        harmony_rhythm={"rhythm": "sustain"},
-    )
-    assert list(_check_harmony_pattern_silently_empty(section)) == []
+def test_check_inherited_motif_coerced_to_free_silent_when_section_rhythm_not_motif():
+    section = _section(rhythm="free")
+    assert list(_check_inherited_motif_coerced_to_free(section)) == []
+
+
+def test_check_inherited_motif_coerced_to_free_silent_when_explicit_other_source():
+    """Section rhythm is 'motif' but harmony_rhythm explicitly opts into a
+    different source ('sustain') -- no coercion happens, nothing to warn."""
+    section = _section(rhythm="motif", harmony_rhythm={"rhythm": "sustain"})
+    assert list(_check_inherited_motif_coerced_to_free(section)) == []
 
 
 # ===========================================================================
@@ -697,8 +728,15 @@ def test_check_lead_velocity_margin_silent_when_explicit_lead_velocity_clears_it
 # ===========================================================================
 
 def test_checks_registry_has_nineteen_entries_plus_melodic_variation_separately():
+    # Net unchanged at 19: _check_harmony_pattern_silently_empty was
+    # retired (known-issues #7 — promoted to a schema ValidationError, so
+    # the lint check's trigger condition became unreachable and was
+    # deleted rather than left as dead code), and
+    # _check_inherited_motif_coerced_to_free was added (known-issues #6 —
+    # a genuinely new check, not a replacement for #7's).
     assert len(CHECKS) == 19
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS
     assert _check_lead_velocity_margin in CHECKS
+    assert _check_inherited_motif_coerced_to_free in CHECKS

@@ -1035,19 +1035,54 @@ class SectionModel(BaseModel):
         Theme-dependent checks (rhythm='motif' requires theme motif.rhythm)
         live in validate_against_theme() below.
         Migrated from validate_piece() rhythm cross-validate block.
+
+        The harmony_rhythm 'pattern' check covers BOTH the explicit case
+        (harmony_rhythm.rhythm='pattern' set directly) and the inherited
+        case (section.rhythm='pattern', no harmony_rhythm override) — see
+        known-issues #7. Previously only the explicit case was caught here;
+        the inherited case reached harmony.py's resolve_harmony_section_
+        events() and returned silently with zero events, zero print, zero
+        warning.
         """
         if self.rhythm == "pattern" and self.rhythm_pattern is None:
             raise ValueError(
                 f"Section '{self.name}': rhythm='pattern' requires a "
                 f"rhythm_pattern block"
             )
-        if self.harmony_rhythm is not None:
-            hr = self.harmony_rhythm
-            if hr.rhythm == "pattern" and self.harmony_pattern is None:
+        # Effective harmony rhythm source, mirroring the exact cascade
+        # harmony.py's resolve_harmony_section_events() applies at render
+        # time (source = explicit_source or melody_rhythm_source): an
+        # explicit harmony_rhythm.rhythm always wins; otherwise harmony
+        # inherits section.rhythm. Computed once here so both the explicit
+        # and inherited "pattern" cases below are governed by the same
+        # dependency check instead of only catching the explicit one.
+        explicit_hr_rhythm = self.harmony_rhythm.rhythm if self.harmony_rhythm else None
+        effective_hr_source = explicit_hr_rhythm or self.rhythm
+        if effective_hr_source == "pattern" and self.harmony_pattern is None:
+            if explicit_hr_rhythm == "pattern":
                 raise ValueError(
                     f"Section '{self.name}': harmony_rhythm.rhythm='pattern' "
                     f"requires a harmony_pattern block"
                 )
+            # Inherited case: no harmony_rhythm block at all, or one present
+            # but not setting rhythm, so harmony silently falls back to
+            # section.rhythm='pattern' with nothing to render — total
+            # silence at render time (zero harmony events, no print, no
+            # warning) rather than the coerced-but-audible outcome the
+            # 'motif' inheritance case gets. Known-issues #7: promoted from
+            # lint-warning candidate straight to a schema error, since the
+            # failure mode is total output loss, not a degraded result.
+            raise ValueError(
+                f"Section '{self.name}': rhythm='pattern' is inherited by "
+                f"harmony (no harmony_rhythm.rhythm override, or harmony_rhythm "
+                f"omitted entirely), but no harmony_pattern block is present — "
+                f"harmony would render zero events with no warning. Either add "
+                f"a harmony_pattern block, or set harmony_rhythm.rhythm to "
+                f"something else ('sustain', 'free', 'motif') to opt harmony "
+                f"out of the inherited pattern source."
+            )
+        if self.harmony_rhythm is not None:
+            hr = self.harmony_rhythm
             # harmony_rhythm.transform_imitation='strict' is schema-legal
             # (Literal["strict"]) but NOT implemented — resolve_harmony_
             # section_events() in harmony.py raises ValueError whenever it's

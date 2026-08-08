@@ -478,6 +478,48 @@ class TestSectionModel:
                 harmony_rhythm={"rhythm": "pattern"},
             ))
 
+    def test_invalid_inherited_pattern_requires_harmony_pattern_block(self):
+        """Known-issues #7: section.rhythm='pattern' with no harmony_rhythm
+        override at all inherits 'pattern' for harmony too — previously this
+        rendered zero harmony events with no warning. Now a schema error,
+        same as the explicit case just above."""
+        with pytest.raises(ValidationError, match="inherited by harmony"):
+            SectionModel.model_validate(_minimal_section(
+                rhythm="pattern",
+                rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
+            ))
+
+    def test_invalid_inherited_pattern_with_empty_harmony_rhythm_block(self):
+        """Same gap, but with an explicit harmony_rhythm block present that
+        doesn't set rhythm (e.g. only overrides density/groove) — still
+        inherits 'pattern' from the section, still needs harmony_pattern."""
+        with pytest.raises(ValidationError, match="inherited by harmony"):
+            SectionModel.model_validate(_minimal_section(
+                rhythm="pattern",
+                rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
+                harmony_rhythm={"density": "sparse"},
+            ))
+
+    def test_valid_inherited_pattern_with_harmony_pattern_block(self):
+        """The inherited case is fine once a harmony_pattern block is
+        supplied — should not raise."""
+        SectionModel.model_validate(_minimal_section(
+            rhythm="pattern",
+            rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
+            harmony_pattern={"onsets": [0.0], "durations": [1.0]},
+        ))
+
+    def test_valid_inherited_pattern_with_explicit_harmony_rhythm_override(self):
+        """Opting harmony out of the inherited 'pattern' source with an
+        explicit override (e.g. 'sustain') should not raise, even with no
+        harmony_pattern block — the pattern source never actually applies
+        to harmony in this case."""
+        SectionModel.model_validate(_minimal_section(
+            rhythm="pattern",
+            rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
+            harmony_rhythm={"rhythm": "sustain"},
+        ))
+
     def test_invalid_transform_imitation_strict_with_motif_rhythm(self):
         with pytest.raises(ValidationError, match="not implemented"):
             SectionModel.model_validate(_minimal_section(
