@@ -77,6 +77,11 @@ from intervals.core.strategies_typed import build_harmony_rhythm_context_from_mo
 
 PPQ = 480  # pulses per quarter note — standard resolution
 
+# Bare-string melody fallback (no voice dict, so no explicit velocity given).
+# lint.py imports this rather than re-declaring it, so the two can't drift
+# apart the way LEAD_VELOCITY_DEFAULT and this value did previously.
+LEAD_VELOCITY_DEFAULT: int = 72
+
 # MIDI channels (0-indexed, channel 9 reserved for drums)
 CHANNEL_MELODY       = 0
 CHANNEL_HARMONY      = 1
@@ -452,7 +457,7 @@ def generate_section(
     lead_voice = section_model.lead_voice()
     lead_octave_bottom = MELODY_OCTAVE_BOTTOM
     lead_octave_top    = MELODY_OCTAVE_TOP
-    lead_velocity      = 72
+    lead_velocity      = LEAD_VELOCITY_DEFAULT
     lead_rest_prob     = section_model.rest_probability
     if lead_voice is not None:
         melody_beh = lead_voice.behavior

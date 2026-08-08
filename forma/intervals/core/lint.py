@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from typing import Iterator, Optional
 
 from intervals.core.schemas import PieceModel, SectionModel, VoiceModel
+from intervals.core.generator import LEAD_VELOCITY_DEFAULT
 from intervals.music.rhythm import get_pattern
 from intervals.music.harmony import DENSITY_TONES
 
@@ -190,11 +191,12 @@ BASS_DEFAULT_VELOCITY: int = 70
 HARMONY_DEFAULT_VELOCITY: int = 65
 
 # generator.py: the lead voice's own fallback base velocity when no explicit
-# voice dict sets one (LEAD_VELOCITY_DEFAULT in generator.py — mirrored here
-# for the same reason as the two constants above). Deliberately clears
-# LEAD_VELOCITY_MARGIN_TRIGGER below on its own, so a section that never
-# touches velocity doesn't immediately trip _check_lead_velocity_margin.
-LEAD_VELOCITY_DEFAULT: int = 88
+# voice dict sets one. Imported directly from generator.py (unlike the two
+# constants above) rather than re-declared, so the two can never drift apart
+# again — that drift (88 here vs. the real 72) previously masked real
+# lead-buried-in-the-mix warnings for every bare-string "melody": "generative"
+# section. NOTE: this value does NOT clear LEAD_VELOCITY_MARGIN_TRIGGER on its
+# own (margin = 72 - 70 = 2), so a plain-default section now correctly warns.
 
 # How much velocity headroom the lead needs over the louder of bass/harmony's
 # defaults to reasonably expect to read as "the lead" in a mix. A judgment

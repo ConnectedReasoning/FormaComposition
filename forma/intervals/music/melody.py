@@ -1367,8 +1367,9 @@ def generate_melody_for_progression(
             {"apex_degree": 4, "apex_position": 0.7}. Absent (the
             default) means no apex or cadence bias at all — every call
             site that doesn't pass this behaves exactly as before this
-            feature existed. Currently wired into generate_lyrical only;
-            the other three behaviors don't consult it yet.
+            feature existed. Wired into all four behaviors (generative,
+            lyrical, sparse, develop) — see schemas.py's MelodicArcModel
+            docstring for the same fact stated the correct way.
         progression_cycle_length: The ORIGINAL (untiled) progression
             length, for cadence detection (Phase 0's "resolve every
             cycle" decision) — REQUIRED if melodic_arc's

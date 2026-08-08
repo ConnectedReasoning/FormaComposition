@@ -638,12 +638,20 @@ def test_check_motif_never_developed_silent_when_lead_voice_states_entry_role():
 # _check_lead_velocity_margin
 # ===========================================================================
 
-def test_check_lead_velocity_margin_silent_on_plain_default_section():
+def test_check_lead_velocity_margin_fires_on_plain_default_section():
     """A section that never touches velocity at all (bare melody string,
-    no voices[]) must not trip its own new default — LEAD_VELOCITY_DEFAULT
-    is chosen specifically to clear LEAD_VELOCITY_MARGIN_TRIGGER."""
+    no voices[]) resolves to the real generator.py fallback (72), which
+    clears bass/harmony's defaults (70/65) by only 2 points — well under
+    LEAD_VELOCITY_MARGIN_TRIGGER (15). This SHOULD warn: it's the exact
+    "lead nearly buried" case this check exists to catch. (Previously this
+    was silent because lint.py re-declared LEAD_VELOCITY_DEFAULT as 88
+    instead of importing the real 72 from generator.py — see known-issues
+    #1. Fixed by importing the constant directly.)"""
     section = _section(melody="generative")
-    assert list(_check_lead_velocity_margin(section)) == []
+    found = list(_check_lead_velocity_margin(section))
+    assert len(found) == 1
+    assert "lead velocity=72" in found[0].setting
+    assert "2 points" in found[0].cause
 
 
 def test_check_lead_velocity_margin_fires_on_low_explicit_lead_velocity():
