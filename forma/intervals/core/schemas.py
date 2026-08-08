@@ -1439,6 +1439,15 @@ class PieceModel(BaseModel):
         VALID_MODES = {
             "ionian", "dorian", "phrygian", "lydian",
             "mixolydian", "aeolian", "locrian",
+            # 2026-08: unblocked — these were already fully implemented in
+            # harmony.py's MODES dict (imported by melody/bass/counterpoint
+            # too) but rejected here before ever reaching the generator.
+            "harmonic_minor", "melodic_minor",
+            "pentatonic_major", "pentatonic_minor",
+            "blues", "whole_tone", "diminished",
+            # 2026-08: new — see harmony.py's MODES dict for interval
+            # sourcing/caveats (non-heptatonic roman numeral aliasing).
+            "pelog", "arabic", "hirajoshi", "insen", "augmented_hexatonic"
         }
         if v.lower() not in VALID_MODES:
             raise ValueError(

@@ -41,7 +41,48 @@ MODES = {
     "blues":           [0, 3, 5, 6, 7, 10],      # pentatonic minor + flat 5
     "whole_tone":      [0, 2, 4, 6, 8, 10],      # all whole steps — Debussy, dreamy
     "diminished":      [0, 2, 3, 5, 6, 8, 9, 11],# alternating whole/half — tension
+    "augmented_hexatonic":[ 0, 3, 4, 7, 8, 11],
+    # 2026-08: four new modes, added for the drone_blues / gamelan exploration.
+    # Non-heptatonic (6 or 5 notes) — see the ROMAN NUMERAL CAVEAT note below
+    # before writing progressions in these modes.
+    "pelog":     [0, 2, 3, 6, 7, 9],       # hexatonic, gapped wide leaps — not
+        # an authentic Javanese pelog tuning (real pelog is non-12TET and
+        # varies by gamelan ensemble). This is Satie's own 12TET approximation:
+        # the exact scale of Gnossienne No. 3 (D-E-F-G#-A-B), written after he
+        # heard gamelan at the 1889 Paris Exposition. An impressionistic
+        # gesture toward pelog's character, same honesty level as Debussy's
+        # pentatonic "Pagodes" approximation — not a transcription.
+    "arabic":    [0, 1, 4, 5, 7, 8, 11],   # double harmonic major / Byzantine /
+        # Hijaz Kar — two augmented-second leaps (b2-3, b6-7) give it the
+        # "two semitones flanking wide gaps" character. Common Western
+        # umbrella term "Arabic scale"; real maqam practice uses quarter-tone
+        # inflections this 12TET approximation can't represent.
+    "hirajoshi": [0, 2, 3, 7, 8],          # Japanese pentatonic (koto tuning).
+        # NOT the same scale as pentatonic_minor/blues above — hirajoshi's
+        # semitone steps (2-1-4-1-4) land in different places and it has no
+        # minor 7th, which is exactly what gives it a distinct "Japanese"
+        # rather than "blues" character despite both being 5-note scales.
+    "insen":[0, 1, 5, 7, 10], #symmetric, no clear tonal center,
+        # which is exactly the kind of harmonic ambiguity that suits static/non-functional
+        # ambient fields.
+
 }
+
+# ─────────────────────────────────────────────────────────────────────────
+# ROMAN NUMERAL CAVEAT (non-heptatonic modes)
+# ─────────────────────────────────────────────────────────────────────────
+# mode_chord_quality() below indexes MODES[mode] with `% len(intervals)`, so
+# it will not crash on a 5- or 6-note scale. But ROMAN_TO_DEGREE (below)
+# hardcodes I-VII as degrees 0-6, assuming 7 scale degrees. On "pelog" (6
+# notes) or "hirajoshi"/"pentatonic_major"/"pentatonic_minor" (5 notes),
+# high-numbered romans wrap and ALIAS onto earlier degrees:
+#   pelog:      VII (degree 6) % 6 = 0  -> same root as I
+#   hirajoshi:  VI (degree 5)  % 5 = 0  -> same root as I
+#               VII (degree 6) % 5 = 1  -> same root as II
+# This is schema-legal and won't error or warn anywhere yet — it will just
+# silently produce a different chord than the roman numeral implies. Keep
+# progressions within the mode's actual degree count (I-VI for pelog, I-V
+# for any pentatonic) until a lint check for this is written.
 
 # Roman numeral → scale degree index (0-based)
 ROMAN_TO_DEGREE = {
