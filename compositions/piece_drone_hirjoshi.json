@@ -1,0 +1,44 @@
+{
+  "key": "D",
+  "mode": "pelog",
+  "tempo": 62,
+  "form_type": "song",
+  "form": [
+    {
+      "section": "drone_verse"
+    }
+  ],
+  "sections": {
+    "drone_verse": {
+      "name": "drone_verse",
+      "bars": 64,
+      "progression": [ "I" ],
+      "chord_bars": [ 64 ],
+      "density": "sparse",
+      "bass_style": "pedal",
+      "arc": "plateau",
+      "rhythm": "free",
+      "harmony_rhythm": {
+        "rhythm": "sustain"
+      },
+      "harmony_rest_probability": 0.0,
+      "voices": [
+        {
+          "register": "mid",
+          "behavior": "lyrical",
+          "velocity": 88,
+          "rest_probability": 0.35,
+          "canon_offset": 0.0
+        },
+        {
+          "register": "low_mid",
+          "behavior": "sparse",
+          "velocity": 78,
+          "rest_probability": 0.55,
+          "canon_offset": 2.0
+        }
+      ],
+      "notes": "Call/response pair over a pedal drone: voice 0 is the call (lyrical, denser), voice 1 answers 2 beats later (sparse, thinner) via canon_offset."
+    }
+  }
+}
