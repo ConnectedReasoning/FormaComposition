@@ -1,0 +1,82 @@
+{
+  "name": "drone_recolored",
+  "title": "Drone (Recolored)",
+  "key": "D",
+  "mode": "ionian",
+  "tempo": 58,
+  "seed": 42,
+  "sections": [
+    {
+      "name": "i_tonic_plane",
+      "bars": 64,
+      "progression": ["I", "IV", "ii", "IV", "bVII", "I"],
+      "chord_bars": [8, 16, 8, 16, 8, 8],
+      "density": "sparse",
+      "melody": { "behavior": "lyrical", "register": "mid", "velocity": 86 },
+      "bass_style": "pedal",
+      "arc": "plateau",
+      "rhythm": "free",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "rest_probability": 0.4,
+      "counterpoint": [
+        { "species": "free", "register": "above", "dissonance": "passing", "velocity": 58, "rhythm_density": "sparse" },
+        { "species": "free", "register": "below", "dissonance": "passing", "velocity": 50, "rhythm_density": "sparse" }
+      ],
+      "notes": "I opens and closes the cycle but only holds 16 of 64 bars total (25%, down from the original's 50/50 I/IV split). ii and bVII give real color without leaving the D pedal, since bass_style=pedal locks to the FIRST chord's root (I=D) for the whole section."
+    },
+    {
+      "name": "ii_subdominant_tide",
+      "bars": 56,
+      "progression": ["IV", "bVII", "vi", "bVI", "IV"],
+      "chord_bars": [12, 10, 12, 10, 12],
+      "density": "sparse",
+      "melody": { "behavior": "lyrical", "register": "mid", "velocity": 85 },
+      "bass_style": "pedal",
+      "arc": "breath",
+      "rhythm": "free",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "rest_probability": 0.5,
+      "counterpoint": [
+        { "species": "free", "register": "above", "dissonance": "passing", "velocity": 54, "rhythm_density": "sparse" },
+        { "species": "free", "register": "below", "dissonance": "passing", "velocity": 48, "rhythm_density": "sparse" }
+      ],
+      "notes": "No I chord at all in this section. Progression starts on IV, so pedal (style_pedal locks to chords[0]'s root) shifts to G for the whole section -- a real key-center drift, not just a different chord above the same bass. bVI (Bb) and bVII (C) pull toward Mixolydian/Aeolian color; the ear loses the D anchor entirely for roughly 3.5 minutes."
+    },
+    {
+      "name": "iii_dominant_haze",
+      "bars": 48,
+      "progression": ["v", "bVII", "IV", "v"],
+      "chord_bars": [12, 12, 12, 12],
+      "density": "sparse",
+      "melody": { "behavior": "sparse", "register": "mid", "velocity": 85 },
+      "bass_style": "pedal",
+      "arc": "fade_out",
+      "rhythm": "free",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "rest_probability": 0.55,
+      "counterpoint": [
+        { "species": "free", "register": "above", "dissonance": "passing", "velocity": 48, "rhythm_density": "sparse" }
+      ],
+      "notes": "Pedal moves again, this time to A (v = A minor is chords[0], so bass locks to A). Using the minor dominant rather than major V keeps this non-functional/non-cadential -- no leading tone pulling back to D, just another plane to sit on. No I chord anywhere in this section."
+    },
+    {
+      "name": "iv_return_recolored",
+      "bars": 64,
+      "progression": ["I", "bVII", "vi", "IV", "bVI", "I"],
+      "chord_bars": [6, 12, 12, 12, 14, 8],
+      "density": "sparse",
+      "melody": { "behavior": "lyrical", "register": "mid", "velocity": 86 },
+      "bass_style": "pedal",
+      "arc": "fade_in",
+      "rhythm": "free",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "rest_probability": 0.45,
+      "counterpoint": [
+        { "species": "free", "register": "above", "dissonance": "passing", "velocity": 56, "rhythm_density": "sparse" },
+        { "species": "free", "register": "below", "dissonance": "passing", "velocity": 48, "rhythm_density": "sparse" }
+      ],
+      "notes": "D pedal returns (chords[0]=I) for a sense of homecoming after two sections away, but I itself only holds 14 of 64 bars (22%) -- vi, bVII and bVI do most of the work. This mirrors the original's ABA instinct without the original's I/IV 50-50 monotony."
+    }
+  ]
+}
+w

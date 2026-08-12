@@ -4,14 +4,25 @@
   "tempo": 58,
   "form_type": "song",
   "form": [
-    { "section": "drone_verse" }
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse",
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse",
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse",
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse",
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse",
+       "drone_verse","drone_verse","drone_verse","drone_verse","drone_verse"
   ],
   "sections": {
     "drone_verse": {
       "name": "drone_verse",
-      "bars": 64,
-      "progression": ["I"],
-      "chord_bars": [64],
+      "bars": 32,
+      "progression": [
+        "I",
+        "IV"
+      ],
+      "chord_bars": [
+        24,
+        8
+      ],
       "density": "sparse",
       "bass_style": "pedal",
       "arc": "plateau",
@@ -26,17 +37,17 @@
           "behavior": "lyrical",
           "velocity": 88,
           "rest_probability": 0.35,
-          "canon_offset": 0.0
+          "canon_offset": 0.0,
+          "leap_probability": 0.25
         },
         {
           "register": "low_mid",
           "behavior": "sparse",
           "velocity": 78,
-          "rest_probability": 0.55,
+          "rest_probability": 0.30,
           "canon_offset": 2.0
         }
-      ],
-      "notes": "Symmetric augmented hexatonic (no clear tonal center) over pedal drone. Progression stays on I only — 6 notes, so VII would already alias per the roman-numeral caveat."
+      ]
     }
   }
 }

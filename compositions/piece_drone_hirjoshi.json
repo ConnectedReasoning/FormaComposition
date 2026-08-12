@@ -34,7 +34,7 @@
           "register": "low_mid",
           "behavior": "sparse",
           "velocity": 78,
-          "rest_probability": 0.55,
+          "rest_probability": 0.30,
           "canon_offset": 2.0
         }
       ],
