@@ -126,6 +126,31 @@ def nearest_scale_tone(note: int, scale_tones: list[int]) -> int:
     return min(scale_tones, key=lambda s: abs(s - note))
 
 
+def _skip_degree_candidates(current: int, scale_tones: list[int]) -> list[int]:
+    """
+    Return the scale tones 2 scale-DEGREE steps away from `current` (one
+    above, one below), not 2 semitones away. scale_tones is sorted/deduped
+    (see get_scale_tones), so index math here means "skip one degree of
+    THIS mode" — whatever semitone distance that actually is for pelog,
+    arabic, hirajoshi, etc. This is deliberately not a hardcoded semitone
+    number the way generate_lyrical's stepwise/chord_nearby filters are:
+    a fixed semitone leap would need re-tuning per mode to mean the same
+    musical thing, and would silently misrepresent modes whose degree
+    spacing doesn't match whatever number got picked. Empty scale_tones
+    (shouldn't happen — get_scale_tones always returns at least an
+    octave's worth for a non-empty mode) returns [].
+    """
+    if not scale_tones:
+        return []
+    idx = min(range(len(scale_tones)), key=lambda i: abs(scale_tones[i] - current))
+    out = []
+    if idx - 2 >= 0:
+        out.append(scale_tones[idx - 2])
+    if idx + 2 < len(scale_tones):
+        out.append(scale_tones[idx + 2])
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Motif engine
 # ---------------------------------------------------------------------------
@@ -671,8 +696,21 @@ def generate_lyrical(
     generalizing the existing next-chord-tone extension below (which stays
     unconditional; it's a different, always-useful thing: smooth
     voice-leading into whatever comes next, not a harmonic arrival).
+
+    Skip-degree leap (2026-08): context["leap_probability"] (default 0.0,
+    absent context also 0.0 — byte-identical to before this existed) is a
+    per-note chance to additionally offer the 2-scale-degree-away tones
+    (see _skip_degree_candidates) alongside the normal stepwise/chord-
+    adjacent pool. Exists because this behavior's stepwise/chord_nearby
+    filters below are hardcoded to <=3/<=5 semitones regardless of mode,
+    so non-heptatonic modes with wide degree gaps (pelog, hirajoshi,
+    insen) never got to show that gap character through generative
+    melody. Still subject to the same direction/apex/cadence weighting
+    as every other candidate once added to the pool — this only expands
+    what's eligible, it doesn't bypass the rest of the note-choice logic.
     """
     rng = random.Random(seed) if seed is not None else random.Random()
+    leap_probability = (context.get("leap_probability", 0.0) if context else 0.0)
 
     notes_out = []
     current = _pick_start_note(chord_tones, scale_tones, prev_note)
@@ -698,6 +736,8 @@ def generate_lyrical(
         chord_nearby = [n for n in chord_tones if abs(n - current) <= 5]
 
         candidates = stepwise + chord_nearby
+        if leap_probability > 0 and rng.random() < leap_probability:
+            candidates = candidates + _skip_degree_candidates(current, scale_tones)
         if not candidates:
             candidates = scale_tones
 
@@ -1332,6 +1372,7 @@ def generate_melody_for_progression(
     note_length_quantum: float = 0.25,
     melodic_arc: Optional[dict] = None,
     progression_cycle_length: Optional[int] = None,
+    leap_probability: float = 0.0,
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -1573,6 +1614,10 @@ def generate_melody_for_progression(
             # the one place that decision is made, so every behavior's
             # notion of "is this cadential" means the same thing.
             "is_cadential_chord": (i % effective_cycle_length) == (effective_cycle_length - 1),
+            # 2026-08: see generate_lyrical's docstring / VoiceModel's
+            # leap_probability field. Default 0.0 -- no-op unless a caller
+            # explicitly passes a nonzero value through this function.
+            "leap_probability": leap_probability,
         }
 
         # Slice rhythm events for this chord's time window

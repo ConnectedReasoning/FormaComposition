@@ -460,6 +460,20 @@ class VoiceModel(BaseModel):
     dissonance: DissonanceLiteral                           = "passing"
     canon_offset: Annotated[float, Field(ge=0.0)]           = 0.0
 
+    # 2026-08: opt-in, defaults to 0.0 (byte-identical to pre-existing
+    # behavior). Per-note probability that "lyrical" behavior considers a
+    # skip-a-degree leap (2 scale-degree steps) instead of only its normal
+    # stepwise/chord-adjacent motion. Added because generate_lyrical's
+    # candidate filter was hardcoded to <=3/<=5 semitones regardless of
+    # mode, which meant non-heptatonic modes (pelog, hirajoshi, insen,
+    # etc.) never got to show the wide "gap" leaps that are their actual
+    # distinguishing character — see melody.py's generate_lyrical
+    # docstring and _skip_degree_candidates for the mechanism. Only
+    # consumed by "lyrical"; schema-legal but currently a no-op on other
+    # behaviors (generative/sparse already permit wider motion natively;
+    # develop reads motif intervals literally and ignores this field).
+    leap_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+
     @field_validator("species", mode="after")
     @classmethod
     def _validate_species_implemented(cls, v):

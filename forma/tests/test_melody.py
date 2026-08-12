@@ -486,6 +486,66 @@ class TestGenerateLyrical:
             f"should have settled after the declared apex, not kept climbing"
         )
 
+    def test_leap_probability_absent_is_byte_identical_to_before(self):
+        """No leap_probability key (or context=None) must produce the exact
+        same output as before this feature existed -- existing catalog
+        pieces must not change on regeneration."""
+        a = generate_lyrical(_events(6), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                              [60, 64, 67], 60, 80, seed=11)
+        b = generate_lyrical(_events(6), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                              [60, 64, 67], 60, 80, seed=11, context={})
+        c = generate_lyrical(_events(6), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                              [60, 64, 67], 60, 80, seed=11,
+                              context={"leap_probability": 0.0})
+        assert a == b == c
+
+    def test_leap_probability_zero_never_exceeds_prior_max_interval(self):
+        """Sanity check on the pre-existing ceiling this feature is meant
+        to raise: with leap_probability at its default, consecutive notes
+        never exceed the stepwise(<=3)/chord_nearby(<=5) filters' reach."""
+        notes = generate_lyrical(_events(20), _chord(), [60, 62, 64, 65, 67, 69, 71],
+                                  [60, 64, 67], 60, 80, seed=4)
+        sounding = [n.midi_note for n in notes if not n.is_rest]
+        diffs = [abs(sounding[i + 1] - sounding[i]) for i in range(len(sounding) - 1)]
+        assert all(d <= 5 for d in diffs)
+
+    def test_leap_probability_one_produces_wider_intervals_statistically(self):
+        """leap_probability=1.0 forces a skip-degree candidate to be
+        offered on every note. Across many seeds, the resulting max
+        interval per run should exceed the 5-semitone ceiling that holds
+        at leap_probability=0.0 -- checked statistically (max-per-run,
+        then compared across seeds) since candidates still compete with
+        the normal stepwise/chord_nearby pool and direction filtering,
+        so no single seed is guaranteed to pick the wider option."""
+        # hirajoshi specifically (not an arbitrary hand-picked scale):
+        # verified via get_scale_tones that its 4-semitone single-step gap
+        # compounds to a 6-semitone 2-degree skip -- genuinely beyond the
+        # 5-semitone ceiling stepwise/chord_nearby impose alone. Not every
+        # mode benefits this way (blues/pelog/arabic/augmented_hexatonic's
+        # widest 2-degree skip tops out at 4-5, already inside the old
+        # ceiling) -- hirajoshi and insen are the two modes this mechanism
+        # actually extends reach for.
+        scale = get_scale_tones("D", "hirajoshi", 60, 79)
+
+        def max_interval(seed, leap_prob):
+            notes = generate_lyrical(_events(15), _chord(), scale, scale[:2],
+                                      scale[0], 80, seed=seed,
+                                      context={"leap_probability": leap_prob})
+            sounding = [n.midi_note for n in notes if not n.is_rest]
+            diffs = [abs(sounding[i + 1] - sounding[i]) for i in range(len(sounding) - 1)]
+            return max(diffs) if diffs else 0
+
+        seeds = range(20)
+        baseline = [max_interval(s, 0.0) for s in seeds]
+        with_leaps = [max_interval(s, 1.0) for s in seeds]
+
+        assert max(with_leaps) > max(baseline), (
+            f"expected leap_probability=1.0 to produce at least one wider "
+            f"interval across {len(seeds)} seeds than leap_probability=0.0 "
+            f"ever does (baseline max={max(baseline)}, with leaps max="
+            f"{max(with_leaps)})"
+        )
+
 
 # ===========================================================================
 # generate_sparse

@@ -774,6 +774,7 @@ def generate_section(
             note_length_quantum=section_nlr_quantum,
             melodic_arc=melody_melodic_arc,
             progression_cycle_length=melody_progression_cycle_length,
+            leap_probability=(lead_voice.leap_probability if lead_voice is not None else 0.0),
         )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -1226,6 +1227,7 @@ def generate_piece(
                         base_velocity=v.velocity,
                         rest_probability=v_rest,
                         groove=groove, swing=swing,
+                        leap_probability=v.leap_probability,
                     )
 
                 # Canon offset (shift forward, trim past section end).
