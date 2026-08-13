@@ -563,6 +563,31 @@ class VoiceModel(BaseModel):
         """True for 'above'/'below' — positioned relative to the lead voice."""
         return self.v_register in ("above", "below")
 
+class DrumFillModel(BaseModel):
+    """
+    Corresponds to section["drums"]["fills"]. Describes a single-bar (or
+    short multi-bar) fill spliced into the drum pattern on eligible bars --
+    the mechanism scoped as item 2 in the EDM/house/techno work: fills and
+    a true multi-bar accelerando roll are different mechanisms (this is
+    only the former; see percussion.py's _generate_fill_slots docstring).
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    placement:      Literal["phrase_end", "section_end"] = "phrase_end"
+    phrase_bars:    int = Field(default=8, ge=1)   # only consulted for "phrase_end"
+    bars:           int = Field(default=1, ge=1)   # span of the fill, ending at the boundary
+    instrument:     Literal["kick", "snare", "hi_hat", "ride", "sidestick",
+                             "tom_hi", "tom_mid", "tom_lo"] = "hi_hat"
+    subdivision:    Annotated[float, Field(gt=0.0, le=1.0)] = 0.25   # 0.25 = 16th notes
+    velocity_start: Annotated[float, Field(ge=0.0, le=1.0)] = 0.5
+    velocity_end:   Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
+    # Rolled once per fill EVENT (a whole `bars`-span group), not once per
+    # bar -- a multi-bar fill never fires on only part of its span. Thins
+    # which otherwise-eligible fills occur; placement itself stays
+    # structural via `placement`/`phrase_bars`, not probabilistic.
+    probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
+
+
 class DrumModel(BaseModel):
     """
     Corresponds to section["drums"].
@@ -579,6 +604,7 @@ class DrumModel(BaseModel):
     density: Optional[DensityLiteral]    = None   # None → inherit from section
     groove:  Optional[GrooveLiteral]      = None   # None → inherit from section
     swing:   Optional[float]             = None   # None → inherit from section
+    fills:   Optional[DrumFillModel]      = None   # None → no fills (unchanged behavior)
 
     def resolve(
         self,

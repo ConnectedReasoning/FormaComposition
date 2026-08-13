@@ -1472,6 +1472,7 @@ def generate_piece(
                 swing=drums_swing,
                 beats_per_bar=section_model.beats_per_bar,
                 seed=base_seed + seed_offsets[i],
+                fill=drum_model.fills.model_dump() if drum_model.fills is not None else None,
             )
 
             # Offset drum hits by global beat, with the same arc-driven

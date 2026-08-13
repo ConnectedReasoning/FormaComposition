@@ -161,19 +161,100 @@ VALID_DRUM_PATTERNS = list(DRUM_PATTERNS.keys())
 # Percussion Generation
 # ---------------------------------------------------------------------------
 
-def _select_slots_for_bar(active_slots: list, bar_index: int, total_bars: int) -> list:
+def _compute_fill_bar_groups(
+    fill: dict,
+    total_bars: int,
+) -> list[range]:
+    """
+    Which section-relative bar indices belong to a fill, grouped by fill
+    instance (a "group" = one fill event, possibly spanning `bars` > 1
+    consecutive bars). Grouping matters only so probability is rolled once
+    per fill EVENT, not once per bar within it -- a bars=2 fill should never
+    fire on only its second bar.
+
+    placement="phrase_end": one group ending on the last bar of every
+        phrase_bars-bar block (bar indices phrase_bars-1, 2*phrase_bars-1, ...).
+        A section shorter than phrase_bars produces zero groups.
+    placement="section_end": exactly one group, ending on the section's
+        final bar.
+    """
+    groups: list[range] = []
+    bars = max(1, fill.get("bars", 1))
+    placement = fill.get("placement", "phrase_end")
+
+    if placement == "phrase_end":
+        phrase_bars = max(1, fill.get("phrase_bars", 8))
+        end = phrase_bars - 1
+        while end < total_bars:
+            start = max(0, end - bars + 1)
+            groups.append(range(start, end + 1))
+            end += phrase_bars
+    elif placement == "section_end":
+        if total_bars > 0:
+            end = total_bars - 1
+            start = max(0, end - bars + 1)
+            groups.append(range(start, end + 1))
+
+    return groups
+
+
+def _generate_fill_slots(fill: dict, beats_per_bar: int) -> list[tuple]:
+    """
+    One fill bar's worth of (instrument, beat_in_bar, velocity_scale,
+    priority) slots, at `fill["subdivision"]` resolution across the bar,
+    velocity ramping linearly from velocity_start to velocity_end WITHIN
+    this bar. If a fill spans multiple bars (bars > 1), each bar gets this
+    same independent ramp -- consecutive identical ramps, not one ramp
+    stretched across the whole span. A true multi-bar accelerando (the
+    subdivision itself tightening bar over bar, e.g. 16ths -> 32nds) is a
+    different, stateful mechanism and out of scope here.
+    """
+    instrument = fill.get("instrument", "hi_hat")
+    subdivision = fill.get("subdivision", 0.25)
+    vel_start = fill.get("velocity_start", 0.5)
+    vel_end = fill.get("velocity_end", 1.0)
+
+    n = max(1, round(beats_per_bar / subdivision))
+    slots = []
+    for i in range(n):
+        beat_in_bar = i * subdivision
+        if beat_in_bar >= beats_per_bar:
+            break
+        t = i / (n - 1) if n > 1 else 1.0
+        vel_scale = vel_start + (vel_end - vel_start) * t
+        slots.append((instrument, beat_in_bar, vel_scale, 1))
+    return slots
+
+
+def _select_slots_for_bar(
+    active_slots: list,
+    bar_index: int,
+    fill: Optional[dict],
+    fill_bar_set: set,
+    beats_per_bar: int,
+) -> list:
     """
     Per-bar slot selection seam for generate_drums()'s tiling loop.
 
-    Identity today: always returns active_slots unchanged. This is the
-    explicit extension point for future per-bar variation (fills on a
-    phrase's last bar, hat density ramps into a build) -- it exists now,
-    ahead of that work, so the tiling loop's shape doesn't need to change
-    again when that work lands. bar_index is section-relative and 0-based;
-    total_bars is the section's bar count from generate_drums()'s
-    total_beats / beats_per_bar.
+    Identity unless `fill` is set and `bar_index` is in `fill_bar_set` (the
+    precomputed, probability-filtered set of bars that actually get a fill
+    this render). When it fires: every existing slot for the fill's target
+    instrument is stripped from this bar only (the rest of the kit --
+    typically kick -- keeps playing underneath, per design: fills replace
+    one voice's part for a bar, they don't silence the groove), and
+    replaced with the fill's own onsets.
+
+    This remains the general extension point for future per-bar variation
+    beyond fills; bar_index/total_bars are still available to any future
+    caller of this seam even though the current fill logic only needs the
+    precomputed set membership.
     """
-    return active_slots
+    if fill is None or bar_index not in fill_bar_set:
+        return active_slots
+
+    target_instrument = fill.get("instrument", "hi_hat")
+    filtered = [s for s in active_slots if s[0] != target_instrument]
+    return filtered + _generate_fill_slots(fill, beats_per_bar)
 
 
 def generate_drums(
@@ -185,6 +266,7 @@ def generate_drums(
     swing: float = 0.0,
     beats_per_bar: int = 4,
     seed: Optional[int] = None,
+    fill: Optional[dict] = None,
 ) -> list[DrumHit]:
     """
     Generate drum hits that track the bass and lock to density/rhythm.
@@ -194,6 +276,7 @@ def generate_drums(
     2. Filters by density (sparse/medium/full)
     3. Reinforces bass note onsets with kick hits
     4. Applies swing
+    5. Splices in a fill on eligible bars, if `fill` is set
 
     Args:
         total_beats:    Total beats to fill
@@ -215,8 +298,46 @@ def generate_drums(
                         Converted internally via remap_swing_ratio() before
                         being applied — do not confuse with the internal
                         0.5-straight swing_ratio scale used downstream.
+                        _apply_swing_to_drums()'s gate is purely "beat-
+                        fraction exactly 0.5 AND hi_hat/ride" -- it has no
+                        concept of a fill onset specifically. A fine-
+                        subdivision fill's grid still touches the 0.5 point
+                        periodically (every other 16th, every 4th 32nd), so
+                        THOSE specific onsets get swung along with the rest
+                        of the fill staying straight -- not a clean "fills
+                        are exempt from swing," which was an earlier,
+                        inaccurate claim about this function.
         beats_per_bar:  Beats per bar (default 4)
         seed:           Random seed
+        fill:           Optional dict describing a per-bar fill, mirroring
+                        the dict-based convention generate_bass() already
+                        uses for its `motif` argument (kept as a plain dict
+                        rather than a pydantic model so this module stays
+                        decoupled from the schema layer). Keys:
+                          placement:      "phrase_end" | "section_end"
+                                          (default "phrase_end")
+                          phrase_bars:    int, default 8 (only used by
+                                          "phrase_end")
+                          bars:           int, default 1 -- span of the fill,
+                                          ending at the boundary
+                          instrument:     drum-kit key, default "hi_hat".
+                                          Only this instrument's existing
+                                          slots are replaced on a fill bar;
+                                          everything else (kick, etc.) keeps
+                                          playing underneath by design.
+                          subdivision:    beats between fill onsets, default
+                                          0.25 (16th notes)
+                          velocity_start: 0.0-1.0, default 0.5
+                          velocity_end:   0.0-1.0, default 1.0
+                          probability:    0.0-1.0, default 1.0 -- rolled once
+                                          per fill EVENT (not per bar), so a
+                                          multi-bar fill never fires partway.
+                                          This thins which otherwise-eligible
+                                          fills occur; it is not the primary
+                                          placement mechanism, which stays
+                                          structural via `placement`.
+                        Omitted (None, the default): no fills, output
+                        unchanged from before this feature existed.
 
     Returns:
         List of DrumHit
@@ -257,18 +378,24 @@ def generate_drums(
     bar_duration = beats_per_bar
     total_bars = math.ceil(total_beats / bar_duration) if bar_duration > 0 else 0
 
+    # Which bars actually get a fill this render. Probability is rolled once
+    # per fill EVENT (group of `bars` consecutive bars), using the same rng
+    # as everything else here so fill placement stays deterministic under a
+    # fixed seed like the rest of the engine.
+    fill_bar_set: set = set()
+    if fill is not None:
+        for group in _compute_fill_bar_groups(fill, total_bars):
+            if rng.random() < fill.get("probability", 1.0):
+                fill_bar_set.update(group)
+
     bar_index = 0
     bar_start = 0.0
     while bar_start < total_beats:
-        # Per-bar slot selection seam. Currently an identity pass -- every
-        # bar renders the same active_slots regardless of bar_index /
-        # total_bars. This is the hook a future fills/builds pass extends
-        # (e.g. thinning hats on the last bar of a phrase, or swapping in a
-        # different template near a section's end) without needing to
-        # restructure this loop again. Kept as an explicit, named seam
-        # rather than an inline conditional so its purpose is legible even
-        # while it's a no-op.
-        bar_slots = _select_slots_for_bar(active_slots, bar_index, total_bars)
+        # Per-bar slot selection seam -- identity unless this bar is in
+        # fill_bar_set (see _select_slots_for_bar's docstring).
+        bar_slots = _select_slots_for_bar(
+            active_slots, bar_index, fill, fill_bar_set, beats_per_bar,
+        )
 
         for instrument, beat_in_bar, velocity_scale, _priority in bar_slots:
             abs_beat = bar_start + beat_in_bar
