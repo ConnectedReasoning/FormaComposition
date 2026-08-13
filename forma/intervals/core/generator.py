@@ -1474,13 +1474,30 @@ def generate_piece(
                 seed=base_seed + seed_offsets[i],
             )
 
-            # Offset drum hits by global beat
+            # Offset drum hits by global beat, with the same arc-driven
+            # velocity envelope melody uses above (drums previously had no
+            # dynamic shaping at all -- an arc:"build" section produced
+            # byte-identical kick velocity from bar 1 to the last bar).
+            # bar_index is recomputed from start_beat here rather than
+            # trusting DrumHit.bar_index directly, matching how melody
+            # derives its own bar_index from mn.start_beat two blocks up --
+            # one source of truth for "which bar is this note in" at write
+            # time, consistent across voices.
             for dh in drum_hits:
+                vel = dh.velocity
+                bar_index = int(dh.start_beat // beats_per_bar)
+                mult = velocity_envelope(
+                    section_arc, bar_index, env_total_bars,
+                    prev_arc_end, melody_blend_bars,
+                )
+                if mult != 1.0:
+                    vel = int(round(vel * mult))
+                    vel = max(VELOCITY_CLAMP_MIN, min(VELOCITY_CLAMP_MAX, vel))
                 all_drum_hits.append(DrumHit(
                     midi_note=dh.midi_note,
                     start_beat=dh.start_beat + global_beat,
                     duration_beats=dh.duration_beats,
-                    velocity=dh.velocity,
+                    velocity=vel,
                 ))
 
         # This section's ending dynamic becomes the next section's entry point.

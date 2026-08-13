@@ -20,6 +20,7 @@ MIDI channels:
   Sidestick:  note 37 (C#1)
 """
 
+import math
 import random
 from dataclasses import dataclass
 from typing import Optional
@@ -38,6 +39,15 @@ class DrumHit:
     start_beat: float
     duration_beats: float = 0.1  # brief attack/release
     velocity: int = 80
+    # Section-relative bar index (0-based) this hit was tiled into, and the
+    # section's total bar count. Both default to 0 for callers that build a
+    # DrumHit directly (bass-reinforcement, swing) without a phrase context.
+    # Purely descriptive metadata at this stage -- nothing reads it yet. It
+    # exists so a future per-bar pattern-selection pass (fills, builds) has
+    # bar position already threaded through the pipeline instead of having
+    # to re-derive it a second time from start_beat downstream.
+    bar_index: int = 0
+    total_bars: int = 0
 
     def __repr__(self):
         names = {36: "KICK", 38: "SNARE", 42: "HI-HAT", 51: "RIDE", 37: "SIDESTICK"}
@@ -151,6 +161,21 @@ VALID_DRUM_PATTERNS = list(DRUM_PATTERNS.keys())
 # Percussion Generation
 # ---------------------------------------------------------------------------
 
+def _select_slots_for_bar(active_slots: list, bar_index: int, total_bars: int) -> list:
+    """
+    Per-bar slot selection seam for generate_drums()'s tiling loop.
+
+    Identity today: always returns active_slots unchanged. This is the
+    explicit extension point for future per-bar variation (fills on a
+    phrase's last bar, hat density ramps into a build) -- it exists now,
+    ahead of that work, so the tiling loop's shape doesn't need to change
+    again when that work lands. bar_index is section-relative and 0-based;
+    total_bars is the section's bar count from generate_drums()'s
+    total_beats / beats_per_bar.
+    """
+    return active_slots
+
+
 def generate_drums(
     total_beats: float,
     bass_notes: list[BassNote],
@@ -229,11 +254,23 @@ def generate_drums(
 
     # Generate hits by tiling the pattern across bars
     hits = []
-    bar_start = 0.0
     bar_duration = beats_per_bar
+    total_bars = math.ceil(total_beats / bar_duration) if bar_duration > 0 else 0
 
+    bar_index = 0
+    bar_start = 0.0
     while bar_start < total_beats:
-        for instrument, beat_in_bar, velocity_scale, _priority in active_slots:
+        # Per-bar slot selection seam. Currently an identity pass -- every
+        # bar renders the same active_slots regardless of bar_index /
+        # total_bars. This is the hook a future fills/builds pass extends
+        # (e.g. thinning hats on the last bar of a phrase, or swapping in a
+        # different template near a section's end) without needing to
+        # restructure this loop again. Kept as an explicit, named seam
+        # rather than an inline conditional so its purpose is legible even
+        # while it's a no-op.
+        bar_slots = _select_slots_for_bar(active_slots, bar_index, total_bars)
+
+        for instrument, beat_in_bar, velocity_scale, _priority in bar_slots:
             abs_beat = bar_start + beat_in_bar
             if abs_beat >= total_beats:
                 continue
@@ -252,10 +289,13 @@ def generate_drums(
                     start_beat=abs_beat,
                     duration_beats=0.1,
                     velocity=base_vel,
+                    bar_index=bar_index,
+                    total_bars=total_bars,
                 )
             )
 
         bar_start += bar_duration
+        bar_index += 1
 
     # Reinforce bass note onsets with soft kick hits
     hits.extend(_reinforce_bass_with_kick(bass_notes, total_beats, max_priority))
