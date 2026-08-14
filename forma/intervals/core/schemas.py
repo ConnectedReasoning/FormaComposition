@@ -588,6 +588,35 @@ class DrumFillModel(BaseModel):
     probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
 
 
+class DrumAccelerandoModel(BaseModel):
+    """
+    Corresponds to section["drums"]["accelerando"]. A multi-bar roll whose
+    subdivision tightens continuously across its whole span (e.g. 16ths
+    easing toward 64ths over 4 bars) -- item B from the EDM/house/techno
+    scoping, a genuinely different mechanism from DrumFillModel, not a
+    bigger version of it. See percussion.py's _generate_accelerando_hits
+    docstring for the full design rationale, including the documented
+    approximate-landing tradeoff.
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    placement:         Literal["phrase_end", "section_end"] = "section_end"
+    phrase_bars:       int = Field(default=8, ge=1)   # only consulted for "phrase_end"
+    bars:              int = Field(default=4, ge=1)   # span of the whole roll
+    instrument:        Literal["kick", "snare", "hi_hat", "ride", "sidestick",
+                                "tom_hi", "tom_mid", "tom_lo"] = "snare"
+    subdivision_start: Annotated[float, Field(gt=0.0, le=1.0)] = 0.25    # 16ths
+    subdivision_end:   Annotated[float, Field(gt=0.0, le=1.0)] = 0.0625  # 64ths
+    velocity_start:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.5
+    velocity_end:      Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
+    # "exponential": quadratic ease, slow-then-fast tightening, matching
+    # rhythm.arc_multiplier()'s "build" curve shape. "linear": straight
+    # interpolation from subdivision_start to subdivision_end.
+    curve:             Literal["exponential", "linear"] = "exponential"
+    # Rolled once per roll EVENT, same semantics as DrumFillModel.probability.
+    probability:       Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
+
+
 class DrumModel(BaseModel):
     """
     Corresponds to section["drums"].
@@ -600,11 +629,12 @@ class DrumModel(BaseModel):
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    pattern: DrumPatternLiteral           = "four_on_floor"
-    density: Optional[DensityLiteral]    = None   # None → inherit from section
-    groove:  Optional[GrooveLiteral]      = None   # None → inherit from section
-    swing:   Optional[float]             = None   # None → inherit from section
-    fills:   Optional[DrumFillModel]      = None   # None → no fills (unchanged behavior)
+    pattern:      DrumPatternLiteral            = "four_on_floor"
+    density:      Optional[DensityLiteral]      = None   # None → inherit from section
+    groove:       Optional[GrooveLiteral]       = None   # None → inherit from section
+    swing:        Optional[float]               = None   # None → inherit from section
+    fills:        Optional[DrumFillModel]        = None   # None → no fills (unchanged behavior)
+    accelerando:  Optional[DrumAccelerandoModel] = None   # None → no roll (unchanged behavior)
 
     def resolve(
         self,

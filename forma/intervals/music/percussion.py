@@ -257,6 +257,87 @@ def _select_slots_for_bar(
     return filtered + _generate_fill_slots(fill, beats_per_bar)
 
 
+def _generate_accelerando_hits(
+    accelerando: dict,
+    group_start_beat: float,
+    span_beats: float,
+) -> list["DrumHit"]:
+    """
+    One accelerando roll's absolute-beat onsets, covering `span_beats`
+    starting at `group_start_beat`.
+
+    This is a genuinely different mechanism from _generate_fill_slots, not
+    a bigger version of it. A fill is called once per bar from the tiling
+    loop's per-bar seam, stateless between calls -- fine, because a
+    single-bar fill doesn't need to remember anything. An accelerando's
+    subdivision tightens continuously across its WHOLE span (e.g. bar 3 of
+    4 needs to know it's 75% of the way through the roll), which the
+    per-bar seam has no way to carry between calls. So this generates the
+    entire multi-bar span in one call up front, as a flat DrumHit list,
+    the same way _reinforce_bass_with_kick builds a separate flat list
+    that gets merged into `hits` rather than threaded through the tiling
+    loop.
+
+    subdivision: interpolated via a quadratic ("exponential") ease by
+    default -- slow to tighten early, rapidly tightening near the end,
+    matching the same quadratic shape rhythm.arc_multiplier()'s "build"
+    curve already uses elsewhere in this engine. curve="linear" opts into
+    a straight interpolation instead.
+
+    velocity: ramps linearly start->end, independent of the subdivision
+    curve and using the same convention _generate_fill_slots uses (a
+    0.0-1.0 multiplier of the same base-80 velocity scale). This is an
+    explicit design choice, not an oversight: a section's own arc:"build"
+    (if present) already shapes velocity at the whole-section level: a
+    roll's crescendo is usually sharper and more localized than that, so
+    the two are deliberately allowed to stack rather than one being
+    folded into the other.
+
+    Landing is APPROXIMATE, not exact: onsets are stepped greedily (the
+    same "while position < end" pattern used everywhere else in this
+    file), so the last onset typically lands within one subdivision_end
+    of the span's actual end -- a fraction of a beat, not exactly on it.
+    An exact-landing version exists (solve analytically for onset count
+    given start/end subdivision and total span) but adds real complexity
+    for a difference unlikely to be audible as anything other than "rolls
+    right up to the drop." This is the pragmatic choice, flagged
+    explicitly rather than picked silently.
+    """
+    instrument = accelerando.get("instrument", "snare")
+    sub_start = accelerando.get("subdivision_start", 0.25)
+    sub_end = accelerando.get("subdivision_end", 0.0625)
+    vel_start = accelerando.get("velocity_start", 0.5)
+    vel_end = accelerando.get("velocity_end", 1.0)
+    curve = accelerando.get("curve", "exponential")
+
+    midi_note = DRUM_KIT.get(instrument)
+    if midi_note is None:
+        return []
+
+    hits = []
+    elapsed = 0.0
+    while elapsed < span_beats - 0.001:
+        t = elapsed / span_beats if span_beats > 0 else 1.0
+        eased = t * t if curve == "exponential" else t
+        cur_subdivision = sub_start + (sub_end - sub_start) * eased
+        # Guard against a pathological start/end pair collapsing to a
+        # near-zero step, which would spin this loop effectively forever.
+        cur_subdivision = max(cur_subdivision, 0.01)
+
+        vel_scale = vel_start + (vel_end - vel_start) * t
+        base_vel = max(40, min(120, int(round(80 * vel_scale))))
+
+        hits.append(DrumHit(
+            midi_note=midi_note,
+            start_beat=group_start_beat + elapsed,
+            duration_beats=0.1,
+            velocity=base_vel,
+        ))
+        elapsed += cur_subdivision
+
+    return hits
+
+
 def generate_drums(
     total_beats: float,
     bass_notes: list[BassNote],
@@ -267,6 +348,7 @@ def generate_drums(
     beats_per_bar: int = 4,
     seed: Optional[int] = None,
     fill: Optional[dict] = None,
+    accelerando: Optional[dict] = None,
 ) -> list[DrumHit]:
     """
     Generate drum hits that track the bass and lock to density/rhythm.
@@ -338,6 +420,38 @@ def generate_drums(
                                           structural via `placement`.
                         Omitted (None, the default): no fills, output
                         unchanged from before this feature existed.
+        accelerando:    Optional dict describing a multi-bar accelerando
+                        roll -- a DIFFERENT mechanism from `fill` (see
+                        _generate_accelerando_hits's docstring for why),
+                        not a bigger version of it. Keys:
+                          placement:         "phrase_end" | "section_end"
+                                              (default "section_end")
+                          phrase_bars:        int, default 8 (only used by
+                                              "phrase_end")
+                          bars:               int, default 4 -- span of the
+                                              whole roll
+                          instrument:         drum-kit key, default "snare".
+                                              Only this instrument's existing
+                                              hits are replaced across the
+                                              roll's bars; everything else
+                                              keeps playing underneath, same
+                                              design as `fill`.
+                          subdivision_start:  beats between onsets at the
+                                              roll's start, default 0.25
+                                              (16ths)
+                          subdivision_end:    beats between onsets at the
+                                              roll's end, default 0.0625
+                                              (64ths)
+                          velocity_start:     0.0-1.0, default 0.5
+                          velocity_end:       0.0-1.0, default 1.0
+                          curve:              "exponential" (default) |
+                                              "linear" -- how subdivision
+                                              interpolates from start to end
+                          probability:        0.0-1.0, default 1.0 -- rolled
+                                              once per roll EVENT, same as
+                                              `fill`'s probability
+                        Omitted (None, the default): no accelerando, output
+                        unchanged from before this feature existed.
 
     Returns:
         List of DrumHit
@@ -388,6 +502,24 @@ def generate_drums(
             if rng.random() < fill.get("probability", 1.0):
                 fill_bar_set.update(group)
 
+    # Accelerando: same group/probability computation as fills (placement,
+    # phrase_bars, bars, probability mean the same thing for both -- see
+    # _compute_fill_bar_groups's docstring, reused here rather than
+    # duplicated), but the roll itself is generated as one flat multi-bar
+    # list up front, not per-bar through the tiling seam below. See
+    # _generate_accelerando_hits's docstring for why.
+    accel_hits: list[DrumHit] = []
+    accel_bar_set: set = set()
+    if accelerando is not None:
+        for group in _compute_fill_bar_groups(accelerando, total_bars):
+            if rng.random() < accelerando.get("probability", 1.0):
+                accel_bar_set.update(group)
+                group_start_beat = group.start * bar_duration
+                span_beats = len(group) * bar_duration
+                accel_hits.extend(
+                    _generate_accelerando_hits(accelerando, group_start_beat, span_beats)
+                )
+
     bar_index = 0
     bar_start = 0.0
     while bar_start < total_beats:
@@ -423,6 +555,15 @@ def generate_drums(
 
         bar_start += bar_duration
         bar_index += 1
+
+    # Splice in the accelerando: strip this instrument's normal
+    # pattern-tiled hits within the roll's bars (same "this instrument's
+    # part is replaced, everything else keeps playing" design as fills),
+    # then merge in the precomputed roll.
+    if accelerando is not None and accel_bar_set:
+        accel_note = DRUM_KIT.get(accelerando.get("instrument", "snare"))
+        hits = [h for h in hits if not (h.midi_note == accel_note and h.bar_index in accel_bar_set)]
+    hits.extend(accel_hits)
 
     # Reinforce bass note onsets with soft kick hits
     hits.extend(_reinforce_bass_with_kick(bass_notes, total_beats, max_priority))
