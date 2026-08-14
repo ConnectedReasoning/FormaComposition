@@ -678,6 +678,8 @@ def generate_section(
         swing=swing,
         rhythm_events_override=bass_rhythm_events,
         rest_probability=section_model.bass_rest_probability,
+        bass_subdivision=section_model.bass_subdivision,
+        bass_offset=section_model.bass_offset,
     )
 
     # Record bass snapshot so melody/counterpoint can read it

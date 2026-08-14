@@ -567,18 +567,32 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
 # ---------------------------------------------------------------------------
 
 def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
-                velocity=75, subdivision=1.0, swing_ratio: float = 0.5, **kwargs):
-    """Repeated root notes on every subdivision."""
+                velocity=75, subdivision=1.0, offset=0.0, swing_ratio: float = 0.5, **kwargs):
+    """
+    Repeated root notes on every subdivision, optionally phase-shifted by
+    `offset` within each chord's span.
+
+    offset=0.0 (default): unchanged from before this parameter existed --
+    the pulse starts on the downbeat.
+
+    offset=0.5, subdivision=1.0: the classic offbeat house/garage bass --
+    quarter notes landing purely on the "and" of each beat, never
+    coinciding with a four-on-floor kick on the downbeat. This is
+    distinct from just using subdivision=0.5 with offset=0.0, which
+    produces eighth notes on BOTH the beat and the offbeat.
+    """
     notes = []
     beat = 0.0
     for i, chord in enumerate(chords):
         total = bars_per_chord[i] * beats_per_bar
         root = bass_root(chord)
-        t = 0.0
+        t = offset
+        first_in_chord = True
         while t < total - 0.01:
-            vel = velocity if t == 0.0 else max(55, velocity - 15)
+            vel = velocity if first_in_chord else max(55, velocity - 15)
             notes.append(BassNote(root, beat + t, subdivision, vel))
             t += subdivision
+            first_in_chord = False
         beat += total
     return notes
 
@@ -708,6 +722,8 @@ def generate_bass(
     swing: float = 0.0,
     rhythm_events_override: Optional[list] = None,
     rest_probability: float = 0.0,
+    bass_subdivision: Optional[float] = None,
+    bass_offset: Optional[float] = None,
     **kwargs,
 ) -> list[BassNote]:
     """
@@ -733,9 +749,40 @@ def generate_bass(
                                 motif rhythm, pitches are chord roots in bass register.
                                 This is the "anchor" articulation path: the bass follows
                                 the motif's primary beats, one root per onset.
+        bass_subdivision:       Only consumed by style="pulse" (via style_pulse's
+                                 `subdivision` param). None inherits style_pulse's own
+                                 default (1.0, quarter notes). Ignored, with a warning,
+                                 for every other style — including when
+                                 rhythm_events_override is active, which bypasses style
+                                 dispatch (and therefore style_pulse) entirely regardless
+                                 of what `style` is set to.
+        bass_offset:            Only consumed by style="pulse" (via style_pulse's
+                                 `offset` param). None = 0.0 (on the downbeat). Same
+                                 ignored-with-warning behavior as bass_subdivision above.
+                                 bass_subdivision=1.0, bass_offset=0.5 is the classic
+                                 offbeat house/garage bass.
     """
     if isinstance(bars_per_chord, (int, float)):
         bars_per_chord = [float(bars_per_chord)] * len(chords)
+
+    # Neither knob has any effect once the motif-rhythm-override path fires
+    # below (it bypasses style dispatch, and therefore style_pulse, outright)
+    # or under any style other than "pulse". Warn rather than silently drop
+    # them — same discipline as the rest_probability guard further down.
+    _pulse_only_set = bass_subdivision is not None or bass_offset is not None
+    _override_active = (
+        rhythm_events_override is not None and rhythm_events_override and style != "motif"
+    )
+    if _pulse_only_set and (style != "pulse" or _override_active):
+        reason = (
+            "rhythm_events_override is active (bypasses style dispatch entirely)"
+            if _override_active else
+            f"style='{style}' (only 'pulse' consumes them)"
+        )
+        warnings.warn(
+            f"bass_subdivision/bass_offset set but ignored: {reason}.",
+            stacklevel=2,
+        )
 
     # ── Motif rhythm override path ───────────────────────────────────
     # When the motif provides timing, bypass the style functions entirely.
@@ -748,7 +795,7 @@ def generate_bass(
     # bass_style. If both are set — rhythm: "motif" AND bass_style:
     # "motif" — the more specific, explicit instruction (bass_style)
     # should win, not lose silently to the generic anchor-root behavior.
-    if rhythm_events_override is not None and rhythm_events_override and style != "motif":
+    if _override_active:
         # Build a lookup: beat → chord index
         chord_start_beats = []
         beat = 0.0
@@ -795,9 +842,22 @@ def generate_bass(
     # (rhythm.swing_offset) works on the internal 0.5-straight scale, so convert
     # once here — the same conversion melody does before calling apply_swing.
     swing_ratio = remap_swing_ratio(swing) if swing and swing > 0 else 0.5
+
+    # bass_subdivision/bass_offset are explicit named params (not folded
+    # into **kwargs) specifically so the guard above can warn on misuse
+    # instead of letting them silently vanish into style functions that
+    # don't read them. Forward only what's actually set, so style_pulse's
+    # own defaults (subdivision=1.0, offset=0.0) still apply when unset.
+    _pulse_kwargs = {}
+    if style == "pulse":
+        if bass_subdivision is not None:
+            _pulse_kwargs["subdivision"] = bass_subdivision
+        if bass_offset is not None:
+            _pulse_kwargs["offset"] = bass_offset
+
     notes = fn(chords, bars_per_chord, beats_per_bar, density, velocity,
                key=key, mode=mode, seed=seed, motif=motif,
-               swing_ratio=swing_ratio, **kwargs)
+               swing_ratio=swing_ratio, **_pulse_kwargs, **kwargs)
 
     # Swing is applied uniformly here, once, regardless of style — see
     # _apply_swing_to_bass()'s docstring. Every style's output passes

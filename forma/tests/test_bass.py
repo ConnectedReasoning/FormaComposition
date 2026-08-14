@@ -141,6 +141,39 @@ class TestStylePulse:
         assert notes[0].velocity == 75
         assert all(n.velocity == 60 for n in notes[1:])
 
+    def test_default_offset_is_zero_unchanged_from_before_offset_existed(self):
+        chords = [_root_position_chord("D")]
+        notes = style_pulse(chords, [1.0], beats_per_bar=4, subdivision=1.0, velocity=75)
+        assert notes[0].start_beat == 0.0
+
+    def test_offset_shifts_the_whole_grid_classic_offbeat_house_bass(self):
+        chords = [_root_position_chord("D")]
+        notes = style_pulse(chords, [1.0], beats_per_bar=4, subdivision=1.0,
+                             offset=0.5, velocity=75)
+        # lands purely on the "and" of each beat -- never coincides with a
+        # four-on-floor kick on the downbeat
+        assert [n.start_beat for n in notes] == [0.5, 1.5, 2.5, 3.5]
+        assert 0.0 not in [n.start_beat for n in notes]
+
+    def test_offset_first_note_still_gets_full_velocity(self):
+        # Regression guard: the original implementation keyed the velocity
+        # accent off "t == 0.0" literally. With offset > 0 that condition
+        # is never true, which would have silently softened every single
+        # note of an offbeat pulse. Must key off note ORDER, not position.
+        chords = [_root_position_chord("D")]
+        notes = style_pulse(chords, [1.0], beats_per_bar=4, subdivision=1.0,
+                             offset=0.5, velocity=75)
+        assert notes[0].velocity == 75
+        assert all(n.velocity == 60 for n in notes[1:])
+
+    def test_offset_resets_per_chord_not_carried_across(self):
+        chords = [_root_position_chord("D"), _root_position_chord("G", notes=(67, 71, 74, 77))]
+        notes = style_pulse(chords, [1.0, 1.0], beats_per_bar=4, subdivision=1.0, offset=0.5)
+        starts = [n.start_beat for n in notes]
+        assert starts == [0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5]
+        # second chord's first note (beat 4.5) gets full velocity again
+        assert notes[4].velocity == 75
+
 
 # ===========================================================================
 # style_pedal
@@ -263,6 +296,64 @@ class TestGenerateBass:
 
     def test_empty_chord_list_returns_no_notes(self):
         assert generate_bass([], style="root_only", seed=1) == []
+
+
+# ===========================================================================
+# bass_subdivision / bass_offset — only consumed by style="pulse", warn
+# (not silently ignore) otherwise. See style_pulse's `offset` param and
+# generate_bass's guard for the rhythm_events_override-bypass interaction.
+# ===========================================================================
+
+class TestBassSubdivisionAndOffset:
+    def test_forwarded_to_style_pulse(self):
+        chords = [_root_position_chord("D")]
+        notes = generate_bass(chords, style="pulse", bars_per_chord=1.0,
+                               seed=1, bass_subdivision=0.5, bass_offset=0.0)
+        assert [n.start_beat for n in notes] == [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5]
+
+    def test_offbeat_bass_end_to_end(self):
+        chords = [_root_position_chord("D")]
+        notes = generate_bass(chords, style="pulse", bars_per_chord=1.0,
+                               seed=1, bass_subdivision=1.0, bass_offset=0.5)
+        assert [n.start_beat for n in notes] == [0.5, 1.5, 2.5, 3.5]
+
+    def test_unset_matches_pre_feature_behavior_exactly(self):
+        chords = [_root_position_chord("D")]
+        a = generate_bass(chords, style="pulse", bars_per_chord=1.0, seed=1)
+        b = generate_bass(chords, style="pulse", bars_per_chord=1.0, seed=1,
+                           bass_subdivision=None, bass_offset=None)
+        assert a == b
+
+    def test_warns_and_ignores_on_non_pulse_style(self):
+        chords = [_root_position_chord("D")]
+        with pytest.warns(UserWarning, match="bass_subdivision/bass_offset set but ignored"):
+            notes = generate_bass(chords, style="steady", bars_per_chord=1.0,
+                                   seed=1, key="D", mode="dorian", bass_subdivision=0.5)
+        # style_steady's normal output, not silently mutated
+        baseline = generate_bass(chords, style="steady", bars_per_chord=1.0,
+                                  seed=1, key="D", mode="dorian")
+        assert notes == baseline
+
+    def test_warns_and_ignores_when_rhythm_override_bypasses_style_dispatch(self):
+        from intervals.music.rhythm import RhythmEvent
+        chords = [_root_position_chord("D")]
+        override = [RhythmEvent(start_beat=0.0, duration_beats=1.0,
+                                 velocity_scale=1.0, is_rest=False)]
+        with pytest.warns(UserWarning, match="rhythm_events_override is active"):
+            notes = generate_bass(chords, style="pulse", bars_per_chord=1.0, seed=1,
+                                   rhythm_events_override=override,
+                                   bass_subdivision=0.25, bass_offset=0.5)
+        # override path won outright -- one anchor-root note, not a pulse grid
+        assert len(notes) == 1
+        assert notes[0].start_beat == 0.0
+
+    def test_no_warning_when_unset(self):
+        import warnings as _warnings
+        chords = [_root_position_chord("D")]
+        with _warnings.catch_warnings():
+            _warnings.simplefilter("error")
+            generate_bass(chords, style="steady", bars_per_chord=1.0,
+                          seed=1, key="D", mode="dorian")  # must not raise
 
 
 # ===========================================================================

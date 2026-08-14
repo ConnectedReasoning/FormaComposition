@@ -852,6 +852,20 @@ class SectionModel(BaseModel):
     harmony_rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     bass_rest_probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
+    # Only consumed by bass_style="pulse" -- generate_bass() warns (does not
+    # silently ignore) if either is set with any other style, same pattern
+    # as bass_rest_probability's walking/melodic guard above.
+    #   bass_subdivision: beats between pulse onsets. None inherits
+    #     style_pulse()'s own default (1.0, quarter notes) -- unchanged
+    #     behavior for every existing piece.
+    #   bass_offset: phase-shifts the pulse grid's start within each chord.
+    #     None = 0.0 (on the downbeat, unchanged behavior). The classic
+    #     offbeat house/garage bass is bass_subdivision=1.0,
+    #     bass_offset=0.5 -- quarter notes landing purely on the "and",
+    #     never coinciding with a four-on-floor kick on the downbeat.
+    bass_subdivision: Optional[Annotated[float, Field(gt=0.0, le=4.0)]] = None
+    bass_offset:      Optional[Annotated[float, Field(ge=0.0, lt=4.0)]] = None
+
     # ── Optional voices ───────────────────────────────────────────────────────
     counterpoint: Optional[list[CounterpointModel]] = None
     voices:       Optional[list[VoiceModel]]  = None   # peer voices (replaces melody+counterpoint)
