@@ -28,6 +28,7 @@ from intervals.music.melody import (
     motif_to_notes,
     nearest_scale_tone,
 )
+from intervals.music.melodic_shape import directed_anchor_shift
 from intervals.music.rhythm import RhythmEvent
 from intervals.music.motif import Motif, transform as motif_transform
 
@@ -39,6 +40,32 @@ def _chord(root="C", quality="major", notes=(60, 64, 67)):
 
 def _events(n=2, dur=1.0):
     return [RhythmEvent(float(i) * dur, dur, 1.0, False) for i in range(n)]
+
+
+def _resolved_start(chord_tones, scale_tones, prev_note,
+                     octave_bottom=MELODY_OCTAVE_BOTTOM, octave_top=MELODY_OCTAVE_TOP,
+                     arc_bias_active=False, wall_margin=6, max_step_degrees=4):
+    """Replicates generate_develop's opening-anchor wall-check (see its
+    docstring / the scoping conversation that added it, and its later
+    strengthening -- margin 4->6, step 2->4 -- after real-catalog
+    measurement showed the narrower nudge still left substantial floor
+    clustering) for hand-verified expected-value tests: when `prev_note`
+    carries continuity from a previous chord and the resulting start sits
+    within `wall_margin` of either register wall, it gets nudged toward
+    center exactly the same way a retile-boundary anchor already did.
+    Kept as a single shared helper so every hand-verification test
+    replicates the identical logic rather than each hand-rolling their
+    own (and silently drifting from generate_develop's real behavior if
+    that logic ever changes)."""
+    start = _pick_start_note(chord_tones, scale_tones, prev_note)
+    if not arc_bias_active and prev_note is not None:
+        register_center = (octave_bottom + octave_top) // 2
+        if start <= octave_bottom + wall_margin or start >= octave_top - wall_margin:
+            start = directed_anchor_shift(
+                start, register_center, scale_tones, position_t=0.0, apex_position=1.0,
+                max_step_degrees=max_step_degrees,
+            )
+    return start
 
 
 # ===========================================================================
@@ -639,12 +666,14 @@ class TestGenerateDevelop:
         choice involved."""
         motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0], "transform_pool": []}
         scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
         notes = generate_develop(
-            _events(3), _chord(), scale, [60, 64, 67],
+            _events(3), _chord(), scale, chord_tones,
             prev_note=60, base_velocity=80, seed=5, motif=motif,
         )
-        expected = motif_to_notes(60, [2, -1, 3], [1.0, 1.0, 1.0],
-                                   scale_tones=scale, chord_tones=[60, 64, 67],
+        start = _resolved_start(chord_tones, scale, prev_note=60)
+        expected = motif_to_notes(start, [2, -1, 3], [1.0, 1.0, 1.0],
+                                   scale_tones=scale, chord_tones=chord_tones,
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
                                    octave_top=MELODY_OCTAVE_TOP,
                                    prefer_neighbor_fold=True)
@@ -676,15 +705,17 @@ class TestGenerateDevelop:
         motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
                   "transform_pool": ["transpose_up"]}
         scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
         notes = generate_develop(
-            _events(3), _chord(), scale, [60, 64, 67],
+            _events(3), _chord(), scale, chord_tones,
             prev_note=60, base_velocity=80, seed=5, motif=motif,
         )
         transformed = motif_transform(
             Motif(intervals=[2, -1, 3], rhythm=[1.0, 1.0, 1.0]), "transpose_up"
         )
-        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
-                                   scale_tones=scale, chord_tones=[60, 64, 67],
+        start = _resolved_start(chord_tones, scale, prev_note=60)
+        expected = motif_to_notes(start, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=chord_tones,
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
                                    octave_top=MELODY_OCTAVE_TOP,
                                    prefer_neighbor_fold=True)
@@ -705,15 +736,17 @@ class TestGenerateDevelop:
         motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0],
                   "transform_pool": ["retrograde_inversion"]}
         scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
         notes = generate_develop(
-            _events(3), _chord(), scale, [60, 64, 67],
+            _events(3), _chord(), scale, chord_tones,
             prev_note=60, base_velocity=80, seed=5, motif=motif,
         )
         transformed = motif_transform(
             Motif(intervals=[2, -1, 3], rhythm=[1.0, 1.0, 1.0]), "retrograde_inversion"
         )
-        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
-                                   scale_tones=scale, chord_tones=[60, 64, 67],
+        start = _resolved_start(chord_tones, scale, prev_note=60)
+        expected = motif_to_notes(start, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=chord_tones,
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
                                    octave_top=MELODY_OCTAVE_TOP,
                                    prefer_neighbor_fold=True)
@@ -763,9 +796,10 @@ class TestGenerateDevelop:
             "transform_pool": ["shuffle"],
         }
         scale = [60, 62, 64, 65, 67, 69, 71]
+        chord_tones = [60, 64, 67]
         seed = 5
         notes = generate_develop(
-            _events(3, dur=1.0), _chord(), scale, [60, 64, 67],
+            _events(3, dur=1.0), _chord(), scale, chord_tones,
             prev_note=60, base_velocity=80, seed=seed, motif=motif,
         )
 
@@ -780,8 +814,9 @@ class TestGenerateDevelop:
                   rests=[False, True, False, False]),
             "shuffle", seed=sub_seed,
         )
-        expected = motif_to_notes(60, transformed.intervals, transformed.rhythm,
-                                   scale_tones=scale, chord_tones=[60, 64, 67],
+        start = _resolved_start(chord_tones, scale, prev_note=60)
+        expected = motif_to_notes(start, transformed.intervals, transformed.rhythm,
+                                   scale_tones=scale, chord_tones=chord_tones,
                                    octave_bottom=MELODY_OCTAVE_BOTTOM,
                                    octave_top=MELODY_OCTAVE_TOP,
                                    rests=transformed.rests,
@@ -1156,6 +1191,216 @@ class TestGenerateDevelop:
             f"even with the restoring pull active -- concentration is back "
             f"to roughly the unfixed level"
         )
+
+
+# ===========================================================================
+# generate_develop -- section register propagation (bug fix)
+#
+# generate_develop's motif_to_notes() calls and its register-health wall
+# check previously used MELODY_OCTAVE_BOTTOM/TOP (the "mid" register)
+# directly, ignoring context["octave_bottom"]/["octave_top"] entirely --
+# unlike generate_lyrical, which already reads context with the module
+# constant only as a fallback. Confirmed against a real piece: with an
+# "alto" section register (58-76), chained develop statements' anchors got
+# stuck at 63, exactly MELODY_OCTAVE_BOTTOM under the WRONG "mid" bounds.
+# ===========================================================================
+
+class TestGenerateDevelopRegisterPropagation:
+    def test_context_octave_bounds_change_output_pitches(self):
+        # Same everything except context's register bounds -- output must
+        # differ, proving context is actually consulted now.
+        motif = {"intervals": [0, -2, 3, -1, 2, -3, 1, -2],
+                  "rhythm": [0.5] * 8, "transform_pool": ["original"]}
+        scale = [58, 60, 61, 63, 65, 67, 68, 70, 72, 73, 75]
+        chord_tones = [60, 63, 65, 68, 72, 75]
+        kwargs = dict(
+            rhythm_events=_events(8, dur=0.5), chord=_chord(notes=(60, 63, 65)),
+            scale_tones=scale, chord_tones=chord_tones,
+            prev_note=None, base_velocity=90, seed=909, motif=motif,
+        )
+        mid_notes = generate_develop(context={"octave_bottom": 63, "octave_top": 81}, **kwargs)
+        alto_notes = generate_develop(context={"octave_bottom": 58, "octave_top": 76}, **kwargs)
+        mid_pitches = [n.midi_note for n in mid_notes if not n.is_rest]
+        alto_pitches = [n.midi_note for n in alto_notes if not n.is_rest]
+        assert mid_pitches != alto_pitches
+
+    def test_no_context_falls_back_to_module_default_unchanged(self):
+        # No context at all -> MELODY_OCTAVE_BOTTOM/TOP fallback, same as
+        # explicitly passing the "mid" bounds. Regression guard for every
+        # existing caller that doesn't supply a context dict.
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0], "transform_pool": []}
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        kwargs = dict(
+            rhythm_events=_events(3), chord=_chord(), scale_tones=scale,
+            chord_tones=[60, 64, 67], prev_note=60, base_velocity=80,
+            seed=5, motif=motif,
+        )
+        no_context = generate_develop(context=None, **kwargs)
+        explicit_mid = generate_develop(
+            context={"octave_bottom": MELODY_OCTAVE_BOTTOM, "octave_top": MELODY_OCTAVE_TOP},
+            **kwargs,
+        )
+        assert no_context == explicit_mid
+
+    def test_context_without_octave_keys_falls_back_to_module_default(self):
+        # context IS provided (e.g. carries other keys like next_chord) but
+        # doesn't include octave_bottom/octave_top -- .get()'s default,
+        # not a KeyError, and not silently treated as "no context".
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0], "transform_pool": []}
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        kwargs = dict(
+            rhythm_events=_events(3), chord=_chord(), scale_tones=scale,
+            chord_tones=[60, 64, 67], prev_note=60, base_velocity=80,
+            seed=5, motif=motif,
+        )
+        partial_context = generate_develop(context={"is_cadential_chord": False}, **kwargs)
+        no_context = generate_develop(context=None, **kwargs)
+        assert partial_context == no_context
+
+    def test_anchor_no_longer_walls_at_mid_register_floor_under_alto(self):
+        # The actual reported symptom, reproduced directly: with an "alto"
+        # register, chained develop statements' anchors should range across
+        # alto's real floor (58), not get stuck at 63 (mid's floor, which
+        # sits comfortably inside alto's own range and should never act as
+        # a wall for it).
+        motif = {"intervals": [0, -2, 3, -1, 2, -3, 1, -2],
+                  "rhythm": [0.5] * 8, "transform_pool": ["original", "transpose_up", "sequence"]}
+        scale = [58, 60, 61, 63, 65, 67, 68, 70, 72, 73, 75]
+        chord_tones = [60, 63, 65, 68, 72, 75]
+        notes = generate_develop(
+            rhythm_events=_events(64, dur=0.5), chord=_chord(notes=(60, 63, 65)),
+            scale_tones=scale, chord_tones=chord_tones,
+            prev_note=None, base_velocity=90, seed=909, motif=motif,
+            context={"octave_bottom": 58, "octave_top": 76, "progression_root_degree": 0},
+        )
+        pitches = [n.midi_note for n in notes if not n.is_rest]
+        # No more than 3 consecutive identical pitches anywhere -- the
+        # reported symptom was FIVE in a row (all 63) within a single
+        # 8-note statement under the wrong bounds.
+        run = 1
+        max_run = 1
+        for a, b in zip(pitches, pitches[1:]):
+            run = run + 1 if a == b else 1
+            max_run = max(max_run, run)
+        assert max_run <= 3, f"found a run of {max_run} identical pitches: {pitches}"
+
+
+# ===========================================================================
+# generate_develop -- opening-anchor wall-check (bug fix)
+#
+# The register-health nudge previously only ran at a RETILE boundary --
+# the moment a statement finishes and a new one begins WITHIN a single
+# generate_develop() call. It never ran on that call's own first
+# statement, because the check required a prior statement's motif_notes
+# to exist. generate_develop is invoked once PER CHORD (see
+# generate_melody_for_progression), so whenever a chord's duration is
+# shorter than the motif's own cycle length, every call computes exactly
+# one statement, ever -- meaning the nudge was structurally never able to
+# fire at all, not just weak. Confirmed directly on a real piece: a
+# 4-beat chord against an 8-beat motif cycle produced 0-of-60 statements
+# ever satisfying the retile-boundary check, with anchors drifting to the
+# register floor and staying there across many consecutive chords.
+# ===========================================================================
+
+class TestGenerateDevelopOpeningAnchorWallCheck:
+    def test_wall_adjacent_start_gets_nudged_when_prev_note_set(self):
+        # prev_note=60 against default "mid" bounds (63,81): 60 maps to a
+        # start at or near the floor, well within wall_margin=4 of 63.
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
+        nudged_start = _resolved_start(chord_tones, scale, prev_note=60)
+        unnudged_start = _pick_start_note(chord_tones, scale, 60)
+        assert nudged_start != unnudged_start
+
+    def test_no_nudge_without_prev_note(self):
+        # Section's very first chord: prev_note is None, nothing to
+        # correct drift from -- must be a pure no-op, byte-identical to
+        # before this fix existed.
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0], "transform_pool": []}
+        notes = generate_develop(
+            _events(3), _chord(), scale, chord_tones,
+            prev_note=None, base_velocity=80, seed=5, motif=motif,
+        )
+        start = _pick_start_note(chord_tones, scale, None)
+        expected = motif_to_notes(start, [2, -1, 3], [1.0, 1.0, 1.0],
+                                   scale_tones=scale, chord_tones=chord_tones,
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   prefer_neighbor_fold=True)
+        assert [(n.midi_note, n.duration_beats) for n in notes] == expected
+
+    def test_no_nudge_when_start_is_well_centered(self):
+        # prev_note near register center: start should already be well
+        # clear of both walls, so the nudge is a no-op -- must not perturb
+        # ordinary, non-wall-adjacent continuity.
+        scale = [58, 60, 61, 63, 65, 67, 68, 70, 72, 73, 75]
+        chord_tones = [63, 67, 70]
+        centered_prev_note = 67  # dead center of alto (58,76)
+        nudged = _resolved_start(chord_tones, scale, prev_note=centered_prev_note,
+                                  octave_bottom=58, octave_top=76)
+        unnudged = _pick_start_note(chord_tones, scale, centered_prev_note)
+        assert nudged == unnudged
+
+    def test_no_nudge_when_melodic_arc_present(self):
+        # arc_bias_active gates this the same way it gates the
+        # retile-boundary nudge -- a section with an apex/cadence arc
+        # manages its own pitch shape and shouldn't get a second,
+        # independent pull fighting it.
+        scale = [60, 62, 63, 65, 67, 69, 70]
+        chord_tones = [60, 64, 67]
+        motif = {"intervals": [2, -1, 3], "rhythm": [1.0, 1.0, 1.0], "transform_pool": []}
+        notes = generate_develop(
+            _events(3), _chord(), scale, chord_tones,
+            prev_note=60, base_velocity=80, seed=5, motif=motif,
+            context={"melodic_arc": {"apex_position": 0.7}},
+        )
+        # Unnudged start (arc active -> nudge must not fire, regardless of
+        # how wall-adjacent the raw start would otherwise be). prefer_neighbor_fold
+        # must also be False here -- generate_develop passes `not arc_bias_active`,
+        # and arc_bias_active is True whenever melodic_arc is set.
+        start = _pick_start_note(chord_tones, scale, 60)
+        expected = motif_to_notes(start, [2, -1, 3], [1.0, 1.0, 1.0],
+                                   scale_tones=scale, chord_tones=chord_tones,
+                                   octave_bottom=MELODY_OCTAVE_BOTTOM,
+                                   octave_top=MELODY_OCTAVE_TOP,
+                                   prefer_neighbor_fold=False)
+        assert [(n.midi_note, n.duration_beats) for n in notes] == expected
+
+    def test_short_chord_vs_long_motif_no_longer_walls_across_many_chords(self):
+        # Direct reproduction of the confirmed real-world case: a motif
+        # cycle LONGER than the chord duration, called repeatedly via
+        # generate_melody_for_progression (not a single generate_develop
+        # call) so continuity actually crosses multiple chord boundaries
+        # the way the real piece did.
+        motif = {"intervals": [0, 2, 2, 1, 1, -1, -1, -2], "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0],
+                  "transform_pool": ["retrograde", "inversion", "sequence"]}
+        chords = [_chord(notes=(58 + i % 3, 62 + i % 3, 65 + i % 3)) for i in range(12)]
+        notes = generate_melody_for_progression(
+            chords, key="F", mode="mixolydian", behavior="develop",
+            density="full", bars_per_chord=1.0, beats_per_bar=4,
+            base_velocity=85, motif=motif, seed=909,
+            octave_bottom=58, octave_top=76,  # alto
+        )
+        pitches = [n.midi_note for n in notes if not n.is_rest]
+        run = 1
+        max_run = 1
+        for a, b in zip(pitches, pitches[1:]):
+            run = run + 1 if a == b else 1
+            max_run = max(max_run, run)
+        # The real piece measured runs up to 14 before this fix. Not
+        # asserting perfection here -- as documented in the fix itself, a
+        # single statement can still fold a note or two (or, worst case,
+        # its full ~8-note length) even from a well-centered anchor if the
+        # transform's own excursion is large enough; this fix eliminates
+        # cross-CHORD drift (the anchor wandering and staying near a wall
+        # across many consecutive chords with zero correction), not
+        # every possible single-statement wall-touch. 8 is the motif's own
+        # statement length here -- a run at or below that is consistent
+        # with "one statement legitimately spent time at the wall," not
+        # the multi-statement drift this fix targets.
+        assert max_run <= 8, f"found a run of {max_run} identical pitches: {pitches}"
 
 
 # ===========================================================================

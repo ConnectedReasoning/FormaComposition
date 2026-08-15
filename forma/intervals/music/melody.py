@@ -985,12 +985,80 @@ def generate_develop(
         return transformed.intervals, transformed.rhythm, transformed.rests, transform_name
 
     notes_out = []
+
+    # Section's actual register (e.g. "alto" -> 58,76), falling back to the
+    # module default ("mid") only when context doesn't supply one -- same
+    # pattern generate_lyrical already uses. Previously this function used
+    # MELODY_OCTAVE_BOTTOM/TOP directly everywhere below, silently ignoring
+    # whatever register a section actually requested: motif_to_notes()
+    # (both call sites) and the register-health wall check all built anchors
+    # against the "mid" register's bounds even when the section's own
+    # register was completely different, walling the melody's anchor at a
+    # pitch belonging to the wrong register -- confirmed directly: with a
+    # section register of "alto" (58-76), successive develop statements'
+    # anchors got stuck at 63, exactly MELODY_OCTAVE_BOTTOM under the WRONG
+    # "mid" bounds this function was using, not the section's real floor of
+    # 58. generate_generative/lyrical/sparse were never affected -- they
+    # pick each note's candidates fresh rather than chaining anchors
+    # statement-to-statement, so a register mismatch there just biases one
+    # note's local choice instead of compounding across repetitions.
+    resolved_octave_bottom = (context.get("octave_bottom", MELODY_OCTAVE_BOTTOM)
+                               if context else MELODY_OCTAVE_BOTTOM)
+    resolved_octave_top = (context.get("octave_top", MELODY_OCTAVE_TOP)
+                            if context else MELODY_OCTAVE_TOP)
+    melodic_arc = context.get("melodic_arc") if context else None
+    arc_bias_active = melodic_arc is not None
+
     start = _pick_start_note(chord_tones, scale_tones, prev_note)
+
+    # Opening-anchor wall-check (companion to the retile-boundary nudge
+    # further down). This function is invoked once PER CHORD, not once per
+    # section -- generate_melody_for_progression calls it fresh for every
+    # chord, carrying pitch continuity forward via `prev_note`, but each
+    # call's own local anchor-memory (motif_notes) starts empty every time.
+    # The retile-boundary nudge below only fires once THIS call has
+    # completed at least one full statement and started a second -- so
+    # whenever a chord's duration is shorter than the motif's own cycle
+    # length (a real, confirmed case: a 4-beat chord against an 8-beat
+    # motif cycle), every call computes exactly ONE statement, ever, and
+    # the retile-boundary nudge structurally never gets the chance to run
+    # -- not weak, absent. Measured directly on a real piece: 0 of 60
+    # statements in one section ever satisfied the retile-boundary check,
+    # and the anchor was free to drift to the register floor and stay
+    # there across many consecutive chords with no correction at all,
+    # compounding into double-digit runs of identical pitches.
+    # This check closes that gap the same way the retile-boundary one
+    # does -- wider wall_margin and a stronger max_step than the
+    # apex/cadence calls to directed_anchor_shift use (which stay at the
+    # function's own default of ANCHOR_SHIFT_MAX_STEP=2 -- deliberately
+    # NOT changed here, since a bigger cadence/apex nudge would introduce
+    # unrelated behavior change for those calls). Widened from the
+    # original margin=4/step=2 after real-catalog measurement showed that
+    # combo still left substantial floor-clustering on pieces with a
+    # short chord/motif-cycle mismatch (piece_broadway_boogie_v8: still
+    # 140 wall-cluster hits even with the narrower nudge in place) --
+    # margin=6 catches anchors further from the wall before they're
+    # already in trouble, and step=4 gives each correction enough reach
+    # to actually clear the wall's neighborhood in one nudge rather than
+    # creeping toward it 2 degrees at a time while the next transform's
+    # own dip re-drags it back.
+    REGISTER_WALL_MARGIN = 6
+    REGISTER_WALL_MAX_STEP = 4
+    if not arc_bias_active and prev_note is not None:
+        register_center = (resolved_octave_bottom + resolved_octave_top) // 2
+        wall_margin = REGISTER_WALL_MARGIN
+        if (start <= resolved_octave_bottom + wall_margin
+                or start >= resolved_octave_top - wall_margin):
+            start = directed_anchor_shift(
+                start, register_center, scale_tones,
+                position_t=0.0, apex_position=1.0,
+                max_step_degrees=REGISTER_WALL_MAX_STEP,
+            )
+
     motif_notes: list[tuple[int, float]] = []
     statement_idx = 0
     last_transform: Optional[str] = None
 
-    melodic_arc = context.get("melodic_arc") if context else None
     apex_pitch = context.get("apex_pitch") if context else None
     apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
     is_cadential_chord = bool(context and context.get("is_cadential_chord"))
@@ -1022,11 +1090,12 @@ def generate_develop(
             iv, rh, rs = result[0], result[1], result[2]
             last_transform = result[3] if len(result) > 3 else None
             anchor = motif_notes[-1][0] if motif_notes else start
-            # prefer_neighbor_fold is only active when melodic_arc is
-            # absent (see the fuller explanation a few lines down, at the
-            # motif_to_notes call) -- compute it here too since the
-            # register-health pull just below needs to know before the
-            # apex/cadence block runs.
+            # arc_bias_active still gates the register-health restoring
+            # pull just below (unchanged) -- NOT prefer_neighbor_fold
+            # anymore. prefer_neighbor_fold is permanently False at both
+            # motif_to_notes call sites in this function now (reverted;
+            # see the fuller explanation a few lines down, at the
+            # motif_to_notes call, for why).
             arc_bias_active = melodic_arc is not None
 
             if not arc_bias_active and motif_notes:
@@ -1053,16 +1122,23 @@ def generate_develop(
                 # statement forced leaps prefer_neighbor_fold exists to
                 # avoid: an anchor that's healthily centered already gets
                 # left alone (directed_anchor_shift is a no-op at zero
-                # distance), and even a wall-hugging one only moves by
-                # ANCHOR_SHIFT_MAX_STEP diatonic steps, not straight to
-                # the center.
-                register_center = (MELODY_OCTAVE_BOTTOM + MELODY_OCTAVE_TOP) // 2
-                wall_margin = 4
-                if (anchor <= MELODY_OCTAVE_BOTTOM + wall_margin
-                        or anchor >= MELODY_OCTAVE_TOP - wall_margin):
+                # distance). Margin/step widened from the original 4/2
+                # after real-catalog measurement (piece_broadway_boogie_v8:
+                # still 140 wall-cluster hits with the narrower nudge) --
+                # see the opening-anchor wall-check's matching comment a
+                # few dozen lines up for the full reasoning. Deliberately
+                # local to these two register-wall call sites, not a
+                # change to ANCHOR_SHIFT_MAX_STEP itself, which the
+                # apex/cadence calls to directed_anchor_shift still use
+                # unmodified.
+                register_center = (resolved_octave_bottom + resolved_octave_top) // 2
+                wall_margin = REGISTER_WALL_MARGIN
+                if (anchor <= resolved_octave_bottom + wall_margin
+                        or anchor >= resolved_octave_top - wall_margin):
                     anchor = directed_anchor_shift(
                         anchor, register_center, scale_tones,
                         position_t=0.0, apex_position=1.0,
+                        max_step_degrees=REGISTER_WALL_MAX_STEP,
                     )
 
             # Apex/cadence bias (Phase 4 of the apex/goal-tone build).
@@ -1110,29 +1186,48 @@ def generate_develop(
                     position_t=0.0, apex_position=1.0,  # always-approach, see docstring
                 )
 
-            # Cadence-pull's math (just above, when it fires) predicts this
-            # statement's last note by assuming register-folding only ever
-            # shifts pitch by whole octaves -- the stronger neighbor-fold
-            # fallback can break that prediction (see motif_to_notes'
-            # prefer_neighbor_fold docstring). Scoping this off ONLY on the
-            # cadential chord's own statement isn't enough: this statement's
-            # `anchor` is literally the previous statement's last rendered
-            # pitch (a few lines up), and directed_anchor_shift only nudges
-            # by a capped number of degrees from wherever the anchor
-            # already sits -- so a PRECEDING, non-cadential statement's
-            # altered ending pitch changes the anchor the cadential
-            # statement starts from, and the capped nudge can't fully
-            # absorb that (measured: scoping to only the cadential call
-            # made the regression WORSE, not better -- confirming the
-            # contamination flows through anchor-chaining, not just the
-            # cadential call itself). Any statement in a melodic_arc-
-            # bearing progression can feed a later cadential one, so the
-            # flag stays off for the whole progression whenever
-            # melodic_arc is set at all, not just at the cadential moment.
+            # prefer_neighbor_fold REVERTED here (was conditionally on via
+            # `not arc_bias_active`, now permanently False at both
+            # motif_to_notes call sites in this function). It was built to
+            # fix a real, different, verified bug: an isolated, jarring
+            # octave leap in a fugue subject when a degree walk's single
+            # legal octave-equivalent landed far from its neighbors (see
+            # motif.py's generate_subject_entry, which keeps its OWN
+            # independent, unconditional call to fold_to_register with
+            # near/scale_tones -- that fix is untouched by this revert;
+            # it never routed through this function's parameter).
+            #
+            # But "nearest actual scale tone to the PREVIOUS note" has no
+            # restoring force. Center-folding always pulls back toward
+            # register middle regardless of history; neighbor-folding does
+            # the opposite once a line is pinned near a wall -- "nearest
+            # to previous" just returns the SAME wall-adjacent tone again,
+            # because the previous note is already sitting there. For a
+            # motif with large excursions (piece_broadway_boogie_v8's
+            # boogie_cell: inversion dips 6 diatonic degrees) inside a
+            # register whose own box is narrow (alto: 18 semitones), that
+            # self-reinforcing collapse is exactly the "weak on the floor"
+            # symptom the composer reported by ear, then confirmed
+            # empirically: 45% of that piece's melody notes sat within 4
+            # semitones of a wall with prefer_neighbor_fold active, vs 40%
+            # with it forced off -- matching a known-good render from
+            # before prefer_neighbor_fold existed (39%) almost exactly.
+            # Cadence-pull's math a few lines up (when it fires) also
+            # assumes register-folding only ever shifts pitch by whole
+            # octaves -- true again now that the stronger fallback is off,
+            # so that assumption is no longer silently violated either.
+            #
+            # This is a real, deliberate tradeoff, not a free win: whatever
+            # isolated-leap case motivated prefer_neighbor_fold in the
+            # first place can recur in develop specifically (motif.py's
+            # subject-entry fix for that same failure mode is untouched
+            # and still active). Reverted here on the composer's explicit
+            # instruction after confirming the mechanism, not discovering
+            # it by accident.
             motif_notes = motif_to_notes(
                 anchor, iv, rh, scale_tones, chord_tones,
-                MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=rs,
-                prefer_neighbor_fold=not arc_bias_active,
+                resolved_octave_bottom, resolved_octave_top, rests=rs,
+                prefer_neighbor_fold=False,
             )
             statement_idx = 0
             if not motif_notes:
@@ -1165,8 +1260,8 @@ def generate_develop(
                 # mask is reapplied here to decide what actually sounds.
                 all_slot_notes = motif_to_notes(
                     anchor, iv, rh, scale_tones, chord_tones,
-                    MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP, rests=None,
-                    prefer_neighbor_fold=not arc_bias_active,
+                    resolved_octave_bottom, resolved_octave_top, rests=None,
+                    prefer_neighbor_fold=False,
                 )
                 t = ev.start_beat
                 vel = int(base_velocity * ev.velocity_scale)

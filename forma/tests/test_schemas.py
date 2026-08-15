@@ -617,6 +617,127 @@ class TestSectionValidateAgainstTheme:
 
 
 # ===========================================================================
+# SectionModel._check_develop_motif_cycle_vs_chord_length
+# (secondary guardrail from the broadway_boogie_v8 investigation)
+# ===========================================================================
+
+class TestDevelopMotifCycleVsChordLength:
+    def test_warns_when_cycle_exceeds_shortest_chord(self):
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "boogie_cell", "intervals": [0, 2, 2, 1, 1, -1, -1, -2],
+                    "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0]},  # 8 beats
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody={"behavior": "develop"},
+        ))
+        with pytest.warns(UserWarning, match="behavior='develop'.*boogie_cell.*8.*4"):
+            section.validate_against_theme(piece)
+
+    def test_no_warning_when_cycle_fits_shortest_chord(self):
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "short_cell", "intervals": [0, 2, -1, 1],
+                    "rhythm": [1.0, 1.0, 1.0, 1.0]},  # 4 beats
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody={"behavior": "develop"},
+        ))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            section.validate_against_theme(piece)
+        assert not any("behavior='develop'" in str(w.message) for w in caught)
+
+    def test_no_warning_when_cycle_exactly_equals_shortest_chord(self):
+        # Boundary case: equal, not longer -- must not false-positive.
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "exact_fit", "intervals": [0, 2, -1, 1],
+                    "rhythm": [1.0, 1.0, 1.0, 1.0]},  # exactly 4 beats
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v"], chord_bars=[1.0, 1.0], bars=2.0,  # exactly 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody={"behavior": "develop"},
+        ))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            section.validate_against_theme(piece)
+        assert not any("behavior='develop'" in str(w.message) for w in caught)
+
+    def test_no_warning_for_non_develop_behavior(self):
+        # Same mismatched cycle/chord lengths, but behavior="lyrical" --
+        # only develop chains anchors statement-to-statement, so only
+        # develop is vulnerable to this.
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "boogie_cell", "intervals": [0, 2, 2, 1, 1, -1, -1, -2],
+                    "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0]},  # 8 beats
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody={"behavior": "lyrical"},
+        ))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            section.validate_against_theme(piece)
+        assert not any("behavior='develop'" in str(w.message) for w in caught)
+
+    def test_bare_string_melody_shorthand_still_checked(self):
+        # Regression guard: lead_voice() returns None for the bare-string
+        # form ("melody": "develop"), which would have silently skipped
+        # this check entirely if gated on lead.behavior directly instead
+        # of melody_behavior().
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "boogie_cell", "intervals": [0, 2, 2, 1, 1, -1, -1, -2],
+                    "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0]},  # 8 beats
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody="develop",  # bare string, not a dict
+        ))
+        with pytest.warns(UserWarning, match="behavior='develop'"):
+            section.validate_against_theme(piece)
+
+    def test_voice_motif_override_used_over_theme_motif(self):
+        # The lead voice's own .motif override should be what's checked,
+        # not the theme's primary motif -- matches what generator.py
+        # actually feeds generate_develop at render time (melody_motif_def
+        # prefers the voice override; see generator.py).
+        piece = PieceModel.model_validate(_minimal_piece(
+            motif={"name": "theme_cell", "intervals": [0, 2], "rhythm": [1.0, 1.0]},  # fits fine
+        ))
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
+            beats_per_bar=4, rhythm="free",
+            melody={
+                "behavior": "develop",
+                "motif": {"name": "voice_override_cell",
+                          "intervals": [0, 2, 2, 1, 1, -1, -1, -2],
+                          "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0]},  # 8 beats
+            },
+        ))
+        with pytest.warns(UserWarning, match="voice_override_cell"):
+            section.validate_against_theme(piece)
+
+    def test_no_warning_when_develop_has_no_motif_at_all(self):
+        # develop with no motif anywhere falls back to purely generative
+        # behavior in generate_develop() -- nothing to cycle-check.
+        piece = PieceModel.model_validate(_minimal_piece())  # no motif field
+        section = SectionModel.model_validate(_minimal_section(
+            progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,
+            beats_per_bar=4, rhythm="free",
+            melody={"behavior": "develop"},
+        ))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            section.validate_against_theme(piece)
+        assert not any("behavior='develop'" in str(w.message) for w in caught)
+
+
+# ===========================================================================
 # PieceModel
 # ===========================================================================
 

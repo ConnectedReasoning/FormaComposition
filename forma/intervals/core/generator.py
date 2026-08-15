@@ -1476,6 +1476,7 @@ def generate_piece(
                 seed=base_seed + seed_offsets[i],
                 fill=drum_model.fills.model_dump() if drum_model.fills is not None else None,
                 accelerando=drum_model.accelerando.model_dump() if drum_model.accelerando is not None else None,
+                trap_hats=drum_model.trap_hats.model_dump() if drum_model.trap_hats is not None else None,
             )
 
             # Offset drum hits by global beat, with the same arc-driven

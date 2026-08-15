@@ -617,6 +617,45 @@ class DrumAccelerandoModel(BaseModel):
     probability:       Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
 
 
+class TrapHatModel(BaseModel):
+    """
+    Corresponds to section["drums"]["trap_hats"]. A continuous,
+    procedurally varying hi-hat texture -- a third mechanism, distinct
+    from both DrumFillModel and DrumAccelerandoModel. Those are events
+    layered onto an otherwise-steady pattern; this REPLACES the target
+    instrument's hits for the WHOLE section, because a trap hi-hat part is
+    the beat's primary rhythmic identity rather than punctuation on top of
+    one. See percussion.py's _generate_trap_hat_hits docstring for the
+    full design rationale.
+
+    Runs at full intensity regardless of the section's `density` -- an
+    explicit choice, confirmed with the composer, not an oversight.
+    `density` continues to govern the rest of the kit as normal; it simply
+    has no effect on this specific instrument's texture.
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    # Locked to "hi_hat": the open/closed articulation swap and the
+    # open_hat_probability field below only have defined meaning for a
+    # hi-hat pair. Not a general-purpose continuous-texture generator for
+    # any instrument.
+    instrument:           Literal["hi_hat"] = "hi_hat"
+    base_subdivision:     Annotated[float, Field(gt=0.0, le=1.0)] = 0.25
+    accent_probability:   Annotated[float, Field(ge=0.0, le=1.0)] = 0.3
+    accent_velocity:      Annotated[float, Field(ge=0.0, le=1.0)] = 1.0
+    ghost_velocity:       Annotated[float, Field(ge=0.0, le=1.0)] = 0.35
+    # Fraction of ACCENTED steps (never ghosts) that use the open hi-hat.
+    open_hat_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.15
+    # Rolled once per beat boundary, while no burst is already active.
+    burst_probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.15
+    # 0.125 = 32nds (clean grid, stays aligned with everything else in this
+    # engine). 0.0833 = a true triplet feel, deliberately off-grid relative
+    # to the surrounding 16ths -- more authentically "trap," but its onsets
+    # won't line up with bar lines the way every other mechanism here does.
+    burst_subdivision:    Literal[0.125, 0.0833] = 0.125
+    burst_span_beats:     Annotated[float, Field(gt=0.0, le=4.0)] = 0.5
+
+
 class DrumModel(BaseModel):
     """
     Corresponds to section["drums"].
@@ -635,6 +674,7 @@ class DrumModel(BaseModel):
     swing:        Optional[float]               = None   # None → inherit from section
     fills:        Optional[DrumFillModel]        = None   # None → no fills (unchanged behavior)
     accelerando:  Optional[DrumAccelerandoModel] = None   # None → no roll (unchanged behavior)
+    trap_hats:    Optional[TrapHatModel]         = None   # None → no trap texture (unchanged behavior)
 
     def resolve(
         self,
@@ -1366,6 +1406,82 @@ class SectionModel(BaseModel):
                 self._check_bar_alignment(
                     peer_motif.name, peer_motif.rhythm, label, where="voices[].motif"
                 )
+
+        # Motif-cycle vs chord-length guardrail (item: broadway_boogie_v8
+        # investigation). Independent of the uses_motif_rhythm block above
+        # -- this is about develop's own PITCH-motif source, not the
+        # onset-timing grid rhythm="motif" controls; a section can use
+        # behavior="develop" with rhythm="free" and still hit this. Only
+        # develop is checked -- generate_develop is the only behavior that
+        # chains anchors statement-to-statement (see melody.py's
+        # generate_develop docstring), so it's the only one where a motif
+        # cycle longer than a chord's own duration can compound into
+        # audible drift; generative/lyrical/sparse pick each note's
+        # candidates fresh and were never vulnerable to this.
+        # melody_behavior() rather than lead.behavior directly: lead_voice()
+        # returns None for the bare-string melody shorthand ("melody":
+        # "develop"), which would have silently skipped this check for
+        # that whole form -- melody_behavior() is the helper that already
+        # exists specifically to handle all three melody forms uniformly.
+        if self.melody_behavior() == "develop":
+            effective_motif = voice_motif if voice_motif is not None else primary
+            self._check_develop_motif_cycle_vs_chord_length(effective_motif, label)
+
+    def _check_develop_motif_cycle_vs_chord_length(
+        self,
+        motif,
+        label: str,
+    ) -> None:
+        """
+        Warn (not error, unlike _check_bar_alignment) when melody uses
+        behavior="develop" and the resolved motif's own rhythm cycle is
+        longer than the SHORTEST chord in this section's progression.
+
+        generate_develop() is invoked once PER CHORD (see
+        generate_melody_for_progression) and retiles the motif once per
+        full cycle within that call. If a chord's duration is shorter than
+        the motif's own cycle, every call to generate_develop() for that
+        chord computes at most one PARTIAL statement before returning --
+        confirmed directly on a real catalog piece (piece_broadway_
+        boogie_v8.json): a 4-beat chord against an 8-beat motif cycle
+        produced runs of up to 14 identical consecutive pitches near the
+        register floor, because the anchor-continuity machinery (including
+        the opening-anchor wall-check that mitigates this) gets far fewer
+        chances to run than in a piece where chords are at least as long
+        as the motif's own cycle.
+
+        Not a hard error: this is a real, playable configuration -- many
+        pieces with a shallow-contour motif or a wide register may never
+        show an audible issue -- just a structurally riskier one for
+        behavior="develop" specifically. A composer's call to make, not a
+        validation failure the way true bar-misalignment (which corrupts
+        EVERY repeat's phase, unconditionally) is.
+        """
+        if motif is None or not motif.rhythm:
+            return
+        cycle_beats = sum(motif.rhythm)
+        if not self.progression:
+            return
+        chord_beats = [b * self.beats_per_bar for b in self.bars_list()]
+        if not chord_beats:
+            return
+        shortest = min(chord_beats)
+        if cycle_beats > shortest + 1e-6:
+            warnings.warn(
+                f"Section '{label}': melody uses behavior='develop' with "
+                f"motif '{motif.name or '?'}' whose rhythm cycle totals "
+                f"{cycle_beats:g} beats, but the shortest chord in this "
+                f"section's progression is only {shortest:g} beats. "
+                f"Chords shorter than the motif's own cycle mean "
+                f"generate_develop() rarely or never completes a full "
+                f"statement before moving to the next chord, which can "
+                f"produce audible pitch clustering near the register floor "
+                f"or ceiling even with register-drift mitigations in "
+                f"place. Consider lengthening this section's chord_bars, "
+                f"or shortening the motif's rhythm to fit within its "
+                f"shortest chord.",
+                stacklevel=4,
+            )
 
     def _check_bar_alignment(
         self,

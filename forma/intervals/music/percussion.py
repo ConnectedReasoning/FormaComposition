@@ -60,14 +60,18 @@ class DrumHit:
 # ---------------------------------------------------------------------------
 
 DRUM_KIT = {
-    "kick":     36,    # Bass drum
-    "snare":    38,    # Snare
-    "hi_hat":   42,    # Closed hi-hat
-    "ride":     51,    # Ride cymbal
-    "sidestick": 37,   # Sidestick / cross-stick
-    "tom_hi":   50,    # High tom
-    "tom_mid":  48,    # Mid tom
-    "tom_lo":   45,    # Low tom
+    "kick":       36,    # Bass drum
+    "snare":      38,    # Snare
+    "hi_hat":     42,    # Closed hi-hat
+    "hi_hat_open": 46,   # Open hi-hat -- added for the trap hat generator's
+                         # accent articulation; no existing DRUM_PATTERNS
+                         # entry references it, so this is additive and
+                         # doesn't change any prior pattern's output.
+    "ride":       51,    # Ride cymbal
+    "sidestick":  37,    # Sidestick / cross-stick
+    "tom_hi":     50,    # High tom
+    "tom_mid":    48,    # Mid tom
+    "tom_lo":     45,    # Low tom
 }
 
 
@@ -338,6 +342,96 @@ def _generate_accelerando_hits(
     return hits
 
 
+def _generate_trap_hat_hits(
+    trap: dict,
+    total_beats: float,
+    rng: "random.Random",
+) -> list["DrumHit"]:
+    """
+    A continuous, procedurally varying hi-hat texture spanning the WHOLE
+    section -- a third mechanism, distinct from both _generate_fill_slots
+    (single-bar event) and _generate_accelerando_hits (multi-bar event
+    with a directional curve). Trap hats aren't an event at all: the
+    hi-hat IS the beat's primary rhythmic identity for its whole duration,
+    not punctuation on top of an otherwise-steady pattern, so this doesn't
+    build on the fill/accelerando group-and-probability machinery -- it's
+    a standalone continuous pass.
+
+    Two independent layers of texture, per-step, both drawn from the
+    shared `rng` the caller already seeded (same determinism convention as
+    fills/accelerando -- reused sequentially, not re-seeded here):
+
+    1. Ghost/accent velocity on the base grid: every step independently
+       rolls `accent_probability` to be an accent (loud) or ghost (quiet).
+       This is what makes a trap hat pattern read as alive rather than a
+       flat machine-gun of identical hits.
+    2. Burst injection: once per integer-beat boundary (while no burst is
+       already active), roll `burst_probability`. If it fires, the next
+       `burst_span_beats` switch from `base_subdivision` to the much
+       tighter `burst_subdivision` -- the classic trap hi-hat "buzz roll" --
+       then return to the base grid.
+
+    Accented steps have a further `open_hat_probability` chance of using
+    the open hi-hat note instead of closed (a real genre texture element;
+    ghost notes never open, since an open ghost note doesn't read as a
+    ghost note).
+
+    Velocity clamp here is 20-120, wider than the 40-120 clamp everywhere
+    else in this file -- a deliberate deviation, not an oversight. Ghost
+    notes need to sit quieter than 40 to read as ghosts rather than just
+    "medium-soft," which is the whole point of the accent/ghost contrast.
+    """
+    closed_instrument = trap.get("instrument", "hi_hat")
+    base_subdivision = trap.get("base_subdivision", 0.25)
+    accent_probability = trap.get("accent_probability", 0.3)
+    accent_velocity = trap.get("accent_velocity", 1.0)
+    ghost_velocity = trap.get("ghost_velocity", 0.35)
+    open_hat_probability = trap.get("open_hat_probability", 0.15)
+    burst_probability = trap.get("burst_probability", 0.15)
+    burst_subdivision = trap.get("burst_subdivision", 0.125)
+    burst_span_beats = trap.get("burst_span_beats", 0.5)
+
+    closed_note = DRUM_KIT.get(closed_instrument)
+    open_note = DRUM_KIT.get("hi_hat_open")
+    if closed_note is None:
+        return []
+
+    hits: list[DrumHit] = []
+    elapsed = 0.0
+    burst_until = -1.0        # beat position an active burst ends; -1 = none active
+    rolled_beat_indices: set = set()
+
+    while elapsed < total_beats - 0.001:
+        beat_idx = int(elapsed)
+        if beat_idx not in rolled_beat_indices and elapsed >= burst_until:
+            rolled_beat_indices.add(beat_idx)
+            if rng.random() < burst_probability:
+                burst_until = elapsed + burst_span_beats
+
+        cur_subdivision = burst_subdivision if elapsed < burst_until else base_subdivision
+        cur_subdivision = max(cur_subdivision, 0.01)  # guard against a runaway step size
+
+        is_accent = rng.random() < accent_probability
+        vel_scale = accent_velocity if is_accent else ghost_velocity
+        base_vel = max(20, min(120, int(round(80 * vel_scale))))
+
+        use_open = (
+            is_accent and open_note is not None
+            and rng.random() < open_hat_probability
+        )
+        midi_note = open_note if use_open else closed_note
+
+        hits.append(DrumHit(
+            midi_note=midi_note,
+            start_beat=elapsed,
+            duration_beats=0.1,
+            velocity=base_vel,
+        ))
+        elapsed += cur_subdivision
+
+    return hits
+
+
 def generate_drums(
     total_beats: float,
     bass_notes: list[BassNote],
@@ -349,6 +443,7 @@ def generate_drums(
     seed: Optional[int] = None,
     fill: Optional[dict] = None,
     accelerando: Optional[dict] = None,
+    trap_hats: Optional[dict] = None,
 ) -> list[DrumHit]:
     """
     Generate drum hits that track the bass and lock to density/rhythm.
@@ -451,6 +546,42 @@ def generate_drums(
                                               once per roll EVENT, same as
                                               `fill`'s probability
                         Omitted (None, the default): no accelerando, output
+                        unchanged from before this feature existed.
+        trap_hats:      Optional dict describing a continuous trap hi-hat
+                        texture -- a THIRD mechanism, distinct from both
+                        `fill` and `accelerando` (see
+                        _generate_trap_hat_hits's docstring for why). Keys:
+                          instrument:           "hi_hat" only (closed-hat
+                                                base; open hi-hat used
+                                                automatically for some
+                                                accents)
+                          base_subdivision:     default 0.25 (16ths)
+                          accent_probability:   default 0.3 -- per-step
+                                                odds of an accent vs ghost
+                          accent_velocity:      0.0-1.0, default 1.0
+                          ghost_velocity:       0.0-1.0, default 0.35
+                          open_hat_probability: default 0.15 -- fraction of
+                                                ACCENTED steps that use the
+                                                open hat instead of closed
+                          burst_probability:    default 0.15 -- rolled once
+                                                per beat boundary
+                          burst_subdivision:    0.125 (32nds, clean grid) or
+                                                0.0833 (true triplet feel,
+                                                off-grid) -- composer's
+                                                choice, default 0.125
+                          burst_span_beats:     default 0.5
+                        Runs at FULL intensity regardless of `density` --
+                        an explicit choice, not an oversight: trap hats are
+                        inherently a full-intensity texture by genre
+                        convention, so `density` only continues to govern
+                        the rest of the kit (kick/snare/etc.), not this.
+                        If `fill` or `accelerando` also target "hi_hat",
+                        trap_hats wins outright for the whole section --
+                        applied last, after both -- since those mechanisms
+                        exist to punctuate an otherwise-static hi-hat,
+                        which doesn't apply once the hi-hat itself is the
+                        continuously-varying voice.
+                        Omitted (None, the default): no trap hats, output
                         unchanged from before this feature existed.
 
     Returns:
@@ -564,6 +695,16 @@ def generate_drums(
         accel_note = DRUM_KIT.get(accelerando.get("instrument", "snare"))
         hits = [h for h in hits if not (h.midi_note == accel_note and h.bar_index in accel_bar_set)]
     hits.extend(accel_hits)
+
+    # Splice in trap hats: unlike fills/accelerando, this claims its
+    # instrument (closed AND open hi-hat, since accents can use either)
+    # for the WHOLE section, not specific bars -- applied last, after both
+    # of the above, so it wins outright if either also targeted "hi_hat".
+    if trap_hats is not None:
+        trap_closed = DRUM_KIT.get(trap_hats.get("instrument", "hi_hat"))
+        trap_open = DRUM_KIT.get("hi_hat_open")
+        hits = [h for h in hits if h.midi_note not in (trap_closed, trap_open)]
+        hits.extend(_generate_trap_hat_hits(trap_hats, total_beats, rng))
 
     # Reinforce bass note onsets with soft kick hits
     hits.extend(_reinforce_bass_with_kick(bass_notes, total_beats, max_priority))
