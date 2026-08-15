@@ -1,0 +1,321 @@
+{
+  "piece": {
+    "name": "Test House v1",
+    "title": "Pulse Field",
+    "key": "A",
+    "mode": "aeolian",
+    "tempo": 124,
+    "seed": 7712,
+    "form_type": "song",
+    "notes": "ZERO-NEW-PYTHON house/techno probe. Everything here uses fields that already exist in schemas.py as of this audit. Purpose: hear how far the current engine gets toward a house/techno feel before deciding what to build. Key devices: four_on_floor drums, pulse bass (quarter notes, locked to kick), harmony_pattern with hand-authored offbeat onsets for the classic house chord stab, arc:build on the riser section.",
+    "motif": {
+      "name": "pulse_field",
+      "intervals": [
+        0,
+        3,
+        -1,
+        2,
+        -2,
+        4,
+        -1,
+        -2
+      ],
+      "rhythm": [
+        0.25,
+        0.25,
+        0.5,
+        1.5,
+        0.25,
+        0.25,
+        0.5,
+        0.5
+      ],
+      "transform_pool": [
+        "original",
+        "transpose_up",
+        "sequence"
+      ]
+    },
+    "form": [
+      "intro_hats",
+      "groove_a",
+      "build",
+      "drop",
+      "breakdown",
+      "build",
+      "drop"
+    ],
+    "sections": {
+      "intro_hats": {
+        "name": "intro_hats",
+        "bars": 8,
+        "notes": "Drums enter alone-ish. Sparse density drops the offbeat hi-hats (priority 2) so the kick reads bare. Pedal bass under a sustained pad.",
+        "progression": [
+          "i",
+          "i"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "density": "sparse",
+        "melody": {
+          "behavior": "generative",
+          "register": "alto",
+          "velocity": 96
+        },
+        "rest_probability": 0.15,
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "harmony_rest_probability": 0.0,
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "sparse"
+        }
+      },
+      "groove_a": {
+        "name": "groove_a",
+        "bars": 16,
+        "notes": "Core loop. pulse bass = quarter notes, sitting exactly on the four_on_floor kick. harmony_pattern hand-authors the offbeat stab (0.5/1.5/2.5/3.5) which is the actual house signature \u2014 no groove name in GROOVES produces this against a chord bed.",
+        "progression": [
+          "i",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "generative",
+          "register": "alto",
+          "velocity": 96
+        },
+        "rest_probability": 0.2,
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "full"
+        },
+        "harmony_pattern": {
+          "onsets": [
+            0.5,
+            1.5,
+            2.5,
+            3.5
+          ],
+          "durations": [
+            0.4,
+            0.4,
+            0.4,
+            0.4
+          ],
+          "velocities": [
+            0.8,
+            0.7,
+            0.8,
+            0.7
+          ],
+          "length_beats": 4.0
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "full",
+          "fills": {
+            "placement": "phrase_end",
+            "phrase_bars": 8,
+            "bars": 1,
+            "instrument": "hi_hat",
+            "subdivision": 0.25,
+            "velocity_start": 0.5,
+            "velocity_end": 1.0,
+            "probability": 1.0
+          }
+        },
+        "bass_subdivision": 1.0,
+        "bass_offset": 0.5
+      },
+      "build": {
+        "name": "build",
+        "bars": 8,
+        "notes": "Riser. arc:build is the ONLY dynamic device available \u2014 audit confirms it is a velocity multiplier (0.70 -> 1.20, quadratic) applied to melody/harmony only. Drums get no arc at all, so listen for whether the kick/hat bed stays dynamically flat here. That flatness is the finding.",
+        "progression": [
+          "i",
+          "VII"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "develop",
+          "register": "alto",
+          "velocity": 96
+        },
+        "rest_probability": 0.25,
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "full"
+        },
+        "harmony_pattern": {
+          "onsets": [
+            0.5,
+            1.5,
+            2.5,
+            3.5
+          ],
+          "durations": [
+            0.4,
+            0.4,
+            0.4,
+            0.4
+          ],
+          "velocities": [
+            0.75,
+            0.8,
+            0.85,
+            0.9
+          ],
+          "length_beats": 4.0
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "full",
+          "fills": {
+            "placement": "phrase_end",
+            "phrase_bars": 8,
+            "bars": 1,
+            "instrument": "hi_hat",
+            "subdivision": 0.25,
+            "velocity_start": 0.5,
+            "velocity_end": 1.0,
+            "probability": 1.0
+          }
+        },
+        "bass_subdivision": 1.0,
+        "bass_offset": 0.5
+      },
+      "drop": {
+        "name": "drop",
+        "bars": 16,
+        "notes": "Full arrangement. Same harmonic loop as groove_a but melody committed (develop, low rest) so there is a hook. exact_repeat is not used here because the form array already repeats this section literally.",
+        "progression": [
+          "i",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "develop",
+          "register": "alto",
+          "velocity": 96
+        },
+        "rest_probability": 0.2,
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "rhythm": "pattern",
+          "density": "full"
+        },
+        "harmony_pattern": {
+          "onsets": [
+            0.5,
+            1.5,
+            2.5,
+            3.5
+          ],
+          "durations": [
+            0.45,
+            0.45,
+            0.45,
+            0.45
+          ],
+          "velocities": [
+            0.9,
+            0.8,
+            0.9,
+            0.8
+          ],
+          "length_beats": 4.0
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "density": "full",
+          "fills": {
+            "placement": "phrase_end",
+            "phrase_bars": 8,
+            "bars": 1,
+            "instrument": "hi_hat",
+            "subdivision": 0.25,
+            "velocity_start": 0.5,
+            "velocity_end": 1.0,
+            "probability": 1.0
+          },
+          "accelerando": {
+            "placement": "section_end",
+            "bars": 2,
+            "instrument": "snare",
+            "subdivision_start": 0.25,
+            "subdivision_end": 0.0625,
+            "velocity_start": 0.5,
+            "velocity_end": 1.0,
+            "curve": "exponential",
+            "probability": 1.0
+          }
+        },
+        "bass_subdivision": 1.0,
+        "bass_offset": 0.5
+      },
+      "breakdown": {
+        "name": "breakdown",
+        "bars": 8,
+        "notes": "Drums out entirely (no drums key = no drum track for this section). Pedal bass, sustained pad, breath arc. This is the one place the existing dynamics vocabulary does what EDM needs, because there are no drums to be left behind.",
+        "progression": [
+          "VI",
+          "III"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "alto",
+          "velocity": 96
+        },
+        "rest_probability": 0.4,
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        }
+      }
+    }
+  }
+}

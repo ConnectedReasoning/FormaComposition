@@ -1,0 +1,140 @@
+{
+  "piece": {
+    "name": "Test LoFi v1",
+    "title": "Rainy Window",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": 78,
+    "seed": 4114,
+    "form_type": "song",
+    "notes": "ZERO-new-Python lo-fi probe. Jazz-extended harmony (maj7/m7/9ths, already fully built in CHORD_INTERVALS), backbeat pattern + swing for the boom-bap pocket, sparse/lyrical melody, pedal/walking bass. Correlated micro-timing humanization deliberately left to Logic's own Humanize MIDI Transform, not modeled here -- that's a performance-layer concern, not composition.",
+    "motif": {
+      "name": "window_haze",
+      "intervals": [
+        0,
+        2,
+        -1,
+        1,
+        -2,
+        1
+      ],
+      "rhythm": [
+        1.5,
+        0.25,
+        0.75,
+        1.0,
+        0.25,
+        0.25
+      ],
+      "transform_pool": [
+        "original",
+        "sequence"
+      ]
+    },
+    "form": [
+      "intro",
+      "verse",
+      "verse",
+      "outro"
+    ],
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 8,
+        "notes": "Chords alone, establishing the jazz-extended harmony bed before drums enter.",
+        "progression": [
+          "i9",
+          "iv9",
+          "bVIImaj7",
+          "V9"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "sparse",
+          "register": "alto",
+          "velocity": 88
+        },
+        "rest_probability": 0.7,
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "swing": 0.55
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 16,
+        "notes": "backbeat + swing for the boom-bap pocket. Melody stays sparse/lyrical, never fighting the chord bed's own color.",
+        "progression": [
+          "i9",
+          "iv9",
+          "bVIImaj7",
+          "V9"
+        ],
+        "chord_bars": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "develop",
+          "register": "alto",
+          "velocity": 95
+        },
+        "rest_probability": 0.5,
+        "bass_style": "walking",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "swing": 0.6,
+        "drums": {
+          "pattern": "backbeat",
+          "density": "medium",
+          "swing": 0.6
+        }
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 8,
+        "notes": "Drums drop out, back to the bare chord bed for a soft landing.",
+        "progression": [
+          "iv9",
+          "V9"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "sparse",
+          "register": "alto",
+          "velocity": 85
+        },
+        "rest_probability": 0.75,
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "sparse"
+        },
+        "swing": 0.5
+      }
+    }
+  }
+}
