@@ -134,6 +134,65 @@ CHORD_INTERVALS = {
     "dominant11":   (4, 7, 10, 14, 17),
 }
 
+# Display symbol for each CHORD_INTERVALS quality, for human-readable chord
+# charts (see chord_symbol() below). Deliberately NOT derived by inverting
+# QUALITY_SYMBOLS -- that dict only covers the qualities with an explicit
+# override abbreviation (maj7, m7, 7, ...) and has no entries at all for
+# the plain triads (major/minor/diminished/augmented) or the b9 variants,
+# so inverting it would silently drop symbols for exactly the chords a
+# real chart needs the most (the plain i/iv/v triads that make up most of
+# a progression). This covers every key in CHORD_INTERVALS explicitly.
+CHORD_QUALITY_SYMBOLS = {
+    "major":        "",
+    "minor":        "m",
+    "diminished":   "dim",
+    "augmented":    "aug",
+    "major7":       "maj7",
+    "minor7":       "m7",
+    "dominant7":    "7",
+    "diminished7":  "dim7",
+    "minor9":       "m9",
+    "major9":       "maj9",
+    "dominant9":    "9",
+    "minor7b9":     "m7b9",
+    "major7b9":     "maj7b9",
+    "dominant7b9":  "7b9",
+    "minor11":      "m11",
+    "dominant11":   "11",
+}
+
+
+def chord_symbol(chord: "VoicedChord", show_inversion: bool = True) -> str:
+    """
+    Human-readable chord symbol for a resolved VoicedChord (e.g. "Dm9",
+    "Cmaj7", "G7b9") -- letter-name, not Roman numeral, since a musician
+    reading a chart while playing along needs the directly-playable name,
+    not a numeral requiring mental transposition against the key.
+
+    Falls back to the raw quality string (rather than raising) for any
+    quality not in CHORD_QUALITY_SYMBOLS, so an unrecognized future
+    quality degrades to a readable-if-inelegant label instead of crashing
+    chart generation entirely.
+
+    show_inversion: when True (the default) and the chord is voiced in a
+    non-root inversion, appends "/<bass note>" -- standard lead-sheet
+    slash-chord notation, and genuinely useful for an accompanist: which
+    note is in the bass changes the voicing choice on keys or guitar even
+    when the chord itself is unchanged. Uses midi_notes[0] (the actual
+    lowest voiced pitch) rather than assuming from `inversion` alone,
+    so it stays correct even if voicing logic changes independently of
+    the inversion field.
+    """
+    symbol = CHORD_QUALITY_SYMBOLS.get(chord.quality, chord.quality)
+    label = f"{chord.root_name}{symbol}"
+    if show_inversion and chord.inversion != 0 and chord.midi_notes:
+        bass_pc = chord.midi_notes[0] % 12
+        root_pc = CHROMATIC.index(chord.root_name) if chord.root_name in CHROMATIC else None
+        if root_pc is None or bass_pc != root_pc:
+            label += f"/{CHROMATIC[bass_pc]}"
+    return label
+
+
 # Density → maximum number of chord tones to voice
 DENSITY_TONES = {
     "sparse": 3,    # triad only

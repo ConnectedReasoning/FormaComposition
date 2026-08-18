@@ -28,7 +28,7 @@ import mido
 from mido import MidiFile, MidiTrack, Message, MetaMessage
 
 from intervals.music.harmony  import (
-    resolve_progression, VoicedChord, CHROMATIC,
+    resolve_progression, VoicedChord, CHROMATIC, chord_symbol,
     HarmonyStrategyRegistry, HarmonyRhythmContext, build_harmony_chord_context,
     resolve_harmony_section_events,
 )
@@ -237,6 +237,40 @@ def build_metadata_track(
         time=0,
     ))
     track.append(MetaMessage("set_tempo", tempo=bpm_to_tempo(bpm), time=0))
+    return track
+
+
+def build_chord_marker_track(chord_markers: list[tuple[float, str]]) -> MidiTrack:
+    """
+    Build a marker track containing one MIDI marker meta-event per
+    resolved chord, labelled with its human-readable chord symbol (see
+    harmony.chord_symbol) -- a chord chart an accompanist can follow
+    directly in Logic's marker ruler/track while playing along on keys
+    or guitar, without needing to already know the chart by ear or
+    reverse-engineer it from the Harmony track's raw notes.
+
+    Track name is fixed ("Chord Chart") rather than reusing any of the
+    other TRACK_NAME_* constants, since this isn't a performance voice
+    at all -- it carries no notes, only marker meta-events, and DAWs
+    (Logic included) display marker tracks differently from normal
+    instrument tracks regardless of name.
+
+    Sorts defensively by abs_beat before delta-encoding -- callers
+    accumulate markers section-by-section in order, so this should
+    already be monotonic, but delta-time encoding silently produces a
+    corrupt track (negative deltas clamped to 0, markers landing at the
+    wrong position) if that assumption is ever violated, so the sort
+    costs nothing and removes that failure mode entirely.
+    """
+    track = MidiTrack()
+    track.append(MetaMessage("track_name", name="Chord Chart", time=0))
+    prev_tick = 0
+    for abs_beat, text in sorted(chord_markers, key=lambda m: m[0]):
+        tick = beats_to_ticks(abs_beat)
+        delta = max(0, tick - prev_tick)
+        track.append(MetaMessage("marker", text=_midi_safe(text), time=delta))
+        prev_tick = tick
+    track.append(MetaMessage("end_of_track", time=0))
     return track
 
 
@@ -1104,6 +1138,12 @@ def generate_piece(
     # on its own MIDI track instead of being merged into one.
     all_cp_notes: dict[int, list] = {}
     all_drum_hits     = []
+    # Chord chart markers -- (abs_beat, chord_symbol_text), one per resolved
+    # chord across the whole piece, for accompanists reading along on keys
+    # or guitar. Populated per-section below (chords/bars_list/beats_per_bar
+    # are all in scope there); written out as its own MIDI marker track
+    # after the main loop, once global_beat has finished accumulating.
+    all_chord_markers: list[tuple[float, str]] = []
 
     global_beat = 0.0
 
@@ -1137,6 +1177,21 @@ def generate_piece(
         density                = res.density
         section_model          = res.section_model
         harmony_section_events = res.harmony_section_events
+
+        # Chord chart markers: one per resolved chord slot in this section
+        # (chords is already tiled 1:1 with bars_list -- see
+        # progression_cycle_length's docstring above for why). Not
+        # deduplicating consecutive identical symbols -- a marker at every
+        # slot's start accurately reflects the harmonic rhythm exactly as
+        # authored (chord_bars), which is what an accompanist following
+        # bar-by-bar actually wants; collapsing repeats into fewer markers
+        # would need its own explicit design decision, not a default.
+        _chord_cursor = 0.0
+        for _chord, _bars in zip(chords, bars_list):
+            all_chord_markers.append(
+                (global_beat + _chord_cursor, chord_symbol(_chord))
+            )
+            _chord_cursor += _bars * beats_per_bar
 
         # Section-level rhythm defaults (used by melody, bass)
         groove = section_model.groove
@@ -1552,6 +1607,9 @@ def generate_piece(
         time_sig_numerator=time_sig_num,
         piece_name=piece.get("title", "Intervals Piece")
     ))
+
+    # Chord chart marker track (see build_chord_marker_track's docstring).
+    mid.tracks.append(build_chord_marker_track(all_chord_markers))
 
     # Melody track
     mid.tracks.append(build_melody_track(all_melody_notes))
