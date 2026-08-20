@@ -1,0 +1,507 @@
+{
+  "title": "Liquid Air (Long Form)",
+  "key": "Bb",
+  "mode": "ionian",
+  "tempo": {
+    "min": 63,
+    "max": 66
+  },
+  "seed": 217,
+  "form_type": "song",
+  "form": [
+    "Intro",
+    "A",
+    {
+      "section": "A",
+      "exact_repeat": true
+    },
+    "B",
+    "A",
+    "A2",
+    {
+      "section": "A2",
+      "exact_repeat": true
+    },
+    "B",
+    "A2",
+    "A_c",
+    {
+      "section": "A_c",
+      "exact_repeat": true
+    },
+    "B_c",
+    "A_c",
+    "A_c",
+    "B_c",
+    "A_c",
+    "B_c",
+    "A_c",
+    "A_c",
+    "B_c",
+    "A_c",
+    "A",
+    "B",
+    "A2",
+    "A",
+    "A_hi",
+    "B_hi",
+    "A_hi",
+    "B_hi",
+    "Coda"
+  ],
+  "motifs": [
+    {
+      "name": "sigh",
+      "intervals": [
+        0,
+        2,
+        1,
+        -1,
+        2
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "velocities": [
+        0.55,
+        0.5,
+        0.6,
+        0.52,
+        0.65
+      ],
+      "transform_pool": [
+        "inversion",
+        "sequence",
+        "augmentation"
+      ]
+    }
+  ],
+  "sections": {
+    "A": {
+      "bars": 8,
+      "progression": [
+        "I",
+        "vi",
+        "ii",
+        "V7",
+        "I",
+        "IVmin",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 86,
+        "motif": "sigh",
+        "leap_probability": 0.15
+      },
+      "melodic_arc": {
+        "apex_degree": 6,
+        "apex_position": 0.65,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "swell",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 1.0,
+        "max": 3.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.3
+      },
+      "swing": 0.5,
+      "rest_probability": 0.15
+    },
+    "B": {
+      "bars": 8,
+      "progression": [
+        "IV",
+        "V7/vi",
+        "vi",
+        "V7/V",
+        "V7",
+        "I",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 90,
+        "motif": "sigh",
+        "leap_probability": 0.2
+      },
+      "melodic_arc": {
+        "apex_degree": 3,
+        "apex_position": 0.55,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "root_fifth",
+      "arc": "build",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 0.75,
+        "max": 2.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.45
+      },
+      "swing": 0.55,
+      "rest_probability": 0.1
+    },
+    "A2": {
+      "bars": 8,
+      "progression": [
+        "I",
+        "vi",
+        "ii",
+        "V7",
+        "I",
+        "IVmin",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 86,
+        "motif": "sigh",
+        "leap_probability": 0.15
+      },
+      "melodic_arc": {
+        "apex_degree": 6,
+        "apex_position": 0.65,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "swell",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 1.0,
+        "max": 3.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.3
+      },
+      "swing": 0.5,
+      "rest_probability": 0.15
+    },
+    "Intro": {
+      "bars": 4,
+      "progression": [
+        "I"
+      ],
+      "chord_bars": [
+        4
+      ],
+      "density": "medium",
+      "melody": {
+        "behavior": "sparse",
+        "register": "alto",
+        "velocity": 86,
+        "leap_probability": 0.05
+      },
+      "melodic_arc": {
+        "apex_degree": 1,
+        "apex_position": 0.9,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "fade_in",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 1.5,
+        "max": 3.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "medium",
+        "swing": 0.2
+      },
+      "swing": 0.3,
+      "rest_probability": 0.6
+    },
+    "A_c": {
+      "bars": 8,
+      "progression": [
+        "I",
+        "vi",
+        "ii",
+        "V7",
+        "I",
+        "IVmin",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 86,
+        "motif": "sigh",
+        "leap_probability": 0.15
+      },
+      "melodic_arc": {
+        "apex_degree": 6,
+        "apex_position": 0.65,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "swell",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 1.0,
+        "max": 3.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.3
+      },
+      "swing": 0.5,
+      "rest_probability": 0.15,
+      "key": "C"
+    },
+    "B_c": {
+      "bars": 8,
+      "progression": [
+        "IV",
+        "V7/vi",
+        "vi",
+        "V7/V",
+        "V7",
+        "I",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 90,
+        "motif": "sigh",
+        "leap_probability": 0.2
+      },
+      "melodic_arc": {
+        "apex_degree": 3,
+        "apex_position": 0.55,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "root_fifth",
+      "arc": "build",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 0.75,
+        "max": 2.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.45
+      },
+      "swing": 0.55,
+      "rest_probability": 0.1,
+      "key": "C"
+    },
+    "A_hi": {
+      "bars": 8,
+      "progression": [
+        "I",
+        "vi",
+        "ii",
+        "V7",
+        "I",
+        "IVmin",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 104,
+        "motif": "sigh",
+        "leap_probability": 0.28
+      },
+      "melodic_arc": {
+        "apex_degree": 6,
+        "apex_position": 0.65,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "build",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.5
+      },
+      "swing": 0.5,
+      "rest_probability": 0.15
+    },
+    "B_hi": {
+      "bars": 8,
+      "progression": [
+        "IV",
+        "V7/vi",
+        "vi",
+        "V7/V",
+        "V7",
+        "I",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "density": "full",
+      "melody": {
+        "behavior": "develop",
+        "register": "soprano",
+        "velocity": 108,
+        "motif": "sigh",
+        "leap_probability": 0.3
+      },
+      "melodic_arc": {
+        "apex_degree": 3,
+        "apex_position": 0.55,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "root_fifth",
+      "arc": "build",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 0.5,
+        "max": 1.25
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "full",
+        "swing": 0.55
+      },
+      "swing": 0.55,
+      "rest_probability": 0.1
+    },
+    "Coda": {
+      "bars": 8,
+      "progression": [
+        "I"
+      ],
+      "chord_bars": [
+        8
+      ],
+      "density": "medium",
+      "melody": {
+        "behavior": "sparse",
+        "register": "soprano",
+        "velocity": 86,
+        "leap_probability": 0.05
+      },
+      "melodic_arc": {
+        "apex_degree": 1,
+        "apex_position": 0.85,
+        "resolve_every_cycle": true
+      },
+      "bass_style": "pedal",
+      "arc": "fade_out",
+      "rhythm": "free",
+      "note_length_range": {
+        "min": 2.0,
+        "max": 4.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "sustain",
+        "density": "medium",
+        "swing": 0.2
+      },
+      "swing": 0.3,
+      "rest_probability": 0.65
+    }
+  }
+}
