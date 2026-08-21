@@ -36,6 +36,7 @@ from intervals.music.bass     import generate_bass, BassNote
 from intervals.music.melody   import (
     generate_melody_for_progression, MelodyNote,
     MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
+    _opening_anchor_from_previous,
 )
 from intervals.music.counterpoint import generate_counterpoint, CounterpointNote, chord_tones_as_voices
 from intervals.music.rhythm   import (
@@ -60,6 +61,7 @@ from intervals.core.context import (
 from intervals.core.schemas import (
     SectionModel,
     PieceModel,
+    RegisterWindowModel,
     # Exported Literal sets — replaces VALID_DENSITY etc. defined below
     VALID_DENSITY,
     VALID_MELODY_BEH,
@@ -88,6 +90,80 @@ CHANNEL_HARMONY      = 1
 CHANNEL_COUNTERPOINT = 2
 CHANNEL_BASS         = 3
 CHANNEL_COUNTERPOINT_2 = 4
+
+# Sentinel for generate_section's forced_opening_anchor param -- distinguishes
+# "not passed, compute normally" from "explicitly passed as None" (replay a
+# first occurrence that itself had no opening-bias anchor). See
+# is_exact_repeat's docstring on generate_section.
+_ANCHOR_UNSET = object()
+
+# ---------------------------------------------------------------------------
+# Seed-derived register/voicing defaults
+# ---------------------------------------------------------------------------
+# Give bass and harmony a per-piece register/voicing identity when the
+# piece's JSON doesn't declare one explicitly (via bass_register /
+# harmony_register / voicing on a section). Before this existed, bass sat
+# at a hardcoded 36-48 and harmony at 48-72 in EVERY piece in the catalog
+# regardless of key, mode, or anything else authored — measured as the
+# single biggest driver of the catalog's "everything sounds alike" problem
+# (bass median pitch was 41 in a dozen different pieces; see project
+# notes). Deriving the default from base_seed rather than a fixed constant
+# means every EXISTING, unedited piece in the catalog picks up a different
+# register/voicing identity the next time it's rendered, with no JSON
+# changes required — that is the point of doing it this way, not an
+# incidental side effect.
+#
+# Plain modulo arithmetic on base_seed, NOT a hash function. A prior
+# attempt at hash-based (blake2b) seed derivation elsewhere in this engine
+# was reverted because it audibly degraded piece character (see
+# tests/test_generator.py's docstring on the seed scheme) — staying with
+# the arithmetic approach that's already proven not to do that, same
+# spirit as the existing base_seed + seed_offset fan-out.
+#
+# Derived once per PIECE (keyed on base_seed alone, not seed_offset), not
+# per section — a piece's bass and harmony pad should hold one register
+# identity across its own sections; jittering it section-to-section inside
+# a single piece would read as a mixing inconsistency, not a
+# compositional choice. Cross-piece variation is what serves "pieces sound
+# distinct from EACH OTHER," which is the actual goal.
+_BASS_WINDOW_CHOICES = [
+    (24, 36), (28, 40), (33, 45), (36, 48), (40, 52),
+]
+_HARMONY_WINDOW_CHOICES = [
+    (43, 67), (48, 72), (48, 84), (53, 77), (55, 79),
+]
+_VOICING_CHOICES = ["closed", "open", "drop2"]
+
+
+def derive_register_defaults(base_seed: int, piece_key: str = "C", piece_mode: str = "ionian") -> dict:
+    """
+    Deterministic per-piece bass register, harmony register, and voicing
+    choice. Derived from base_seed AND the piece's own key/mode, by plain
+    arithmetic — no hash function (see module comment above for why).
+
+    key/mode are folded in because base_seed alone isn't a strong enough
+    per-piece identity for this catalog specifically: 17 of the 57
+    existing pieces share the schema default base_seed=42, which would
+    otherwise collapse all 17 onto the same register/voicing defaults —
+    the opposite of the goal. Character-code summation over the key/mode
+    strings is plain arithmetic (like base_seed + seed_offset elsewhere in
+    this file), not a hash; it's used only to pick among a handful of
+    discrete register-window choices, never to shape pitch or rhythm
+    content directly, so it doesn't carry the same regression risk as the
+    reverted blake2b note-generation seed scheme.
+
+    The same (base_seed, key, mode) always derives the same defaults —
+    reproducible, independent of section count/order, and overridable per
+    section via bass_register/harmony_register/voicing in the JSON.
+    """
+    identity = base_seed + sum(ord(c) for c in f"{piece_key}{piece_mode}") * 31
+    return {
+        "bass_register":    _BASS_WINDOW_CHOICES[identity % len(_BASS_WINDOW_CHOICES)],
+        # Different multipliers so bass/harmony/voicing don't all key off
+        # the same residue and move in lockstep with each other.
+        "harmony_register": _HARMONY_WINDOW_CHOICES[(identity * 7) % len(_HARMONY_WINDOW_CHOICES)],
+        "voicing":          _VOICING_CHOICES[(identity * 13) % len(_VOICING_CHOICES)],
+    }
 CHANNEL_COUNTERPOINT_3 = 5
 CHANNEL_DRUMS        = 9
 
@@ -156,6 +232,12 @@ class SectionResult:
     density:                str
     section_model:          "SectionModel"
     harmony_section_events: "list[RhythmEvent] | str | None"
+    # The melody opening-bias anchor actually used for this section's FIRST
+    # chord (see melody.py's _opening_anchor_from_previous), or None if no
+    # bias applied. Exposed so generate_piece() can cache a repeat's
+    # opening anchor from its section's first occurrence and replay the
+    # exact same value -- see is_exact_repeat's docstring on generate_section.
+    opening_anchor_used:    Optional[int] = None
 
 
 # ---------------------------------------------------------------------------
@@ -429,6 +511,8 @@ def generate_section(
     sec_ctx: Optional[SectionContext] = None,
     piece_ctx: Optional[PieceContext] = None,
     transform_sequence: Optional[list[str]] = None,
+    is_exact_repeat: bool = False,
+    forced_opening_anchor: object = _ANCHOR_UNSET,
 ) -> SectionResult:
     """
     Generate all voices for a single section.
@@ -441,6 +525,24 @@ def generate_section(
         sec_ctx:             SectionContext for cross-voice awareness (optional)
         piece_ctx:           PieceContext for cross-section memory (optional)
         transform_sequence:  Explicit motif transform plan from piece JSON (optional)
+        is_exact_repeat:     True when this call is a REPEAT occurrence of an
+                              exact_repeat song-form section (2nd+ time the
+                              name appears) — not merely a section with
+                              exact_repeat=True set on its first occurrence.
+                              Informational only now (the actual replay is
+                              driven by forced_opening_anchor, below); kept
+                              for callers/logging that want to know.
+        forced_opening_anchor: Bypasses melody's piece_ctx-based opening-bias
+                              computation when passed. Unset (default):
+                              compute fresh from piece_ctx + this section's
+                              arc, unchanged behavior. Passed explicitly
+                              (including None): use that value directly
+                              instead of computing — generate_piece() passes
+                              the FIRST occurrence's actual
+                              opening_anchor_used for every later repeat
+                              occurrence, so a repeat reproduces exactly
+                              what the first occurrence did regardless of
+                              what section precedes the repeat in the form.
 
     Returns:
         SectionResult with all generated voice data and section metadata.
@@ -480,6 +582,21 @@ def generate_section(
     groove       = section_model.groove
     swing        = section_model.swing
 
+    # ── Register / voicing (explicit override, else seed-derived) ──────────
+    # See derive_register_defaults()'s docstring: this is what gives every
+    # existing, unedited piece a different bass/harmony register and
+    # voicing identity on next render, keyed on the piece's own seed.
+    _reg_defaults = derive_register_defaults(base_seed, theme.get("key", key), theme.get("mode", mode))
+    bass_octave_bottom, bass_octave_top = (
+        section_model.bass_register.as_tuple() if section_model.bass_register
+        else _reg_defaults["bass_register"]
+    )
+    harmony_register_bottom, harmony_register_top = (
+        section_model.harmony_register.as_tuple() if section_model.harmony_register
+        else _reg_defaults["harmony_register"]
+    )
+    chord_voicing = section_model.voicing or _reg_defaults["voicing"]
+
     # ── Peer-voices lead ──────────────────────────────────────────────────
     # The lead voice may come from section.voices[0] (true multi-voice
     # section) or from section.melody given in dict form ({behavior,
@@ -501,12 +618,23 @@ def generate_section(
         lb = lead_voice.bounds()
         if lb is not None:
             lead_octave_bottom, lead_octave_top = lb
+    # section.melody_register is a direct override that wins over both the
+    # lead voice's named-register bounds and the bare "generative"-string
+    # default -- not seed-derived (melody's named registers already give
+    # composers real per-piece control; unlike bass/harmony this was never
+    # a dead/unreachable knob, so it doesn't need an automatic default).
+    if section_model.melody_register is not None:
+        lead_octave_bottom, lead_octave_top = section_model.melody_register.as_tuple()
 
     # Per-chord bar durations — model helper handles chord_bars vs bars logic
     bars_list = section_model.bars_list()
 
     # Resolve chords
-    chords = resolve_progression(progression, key, mode, density=density)
+    chords = resolve_progression(
+        progression, key, mode, density=density,
+        register_bottom=harmony_register_bottom, register_top=harmony_register_top,
+        voicing=chord_voicing,
+    )
 
     # ── Compute section totals (used for snapshots) ───────────────
     total_beats_section = sum(b * beats_per_bar for b in bars_list)
@@ -714,6 +842,8 @@ def generate_section(
         rest_probability=section_model.bass_rest_probability,
         bass_subdivision=section_model.bass_subdivision,
         bass_offset=section_model.bass_offset,
+        octave_bottom=bass_octave_bottom,
+        octave_top=bass_octave_top,
     )
 
     # Record bass snapshot so melody/counterpoint can read it
@@ -785,7 +915,16 @@ def generate_section(
             velocity=lead_velocity,
             theme_pool=motif_pool,
         )
+        # Literal subject/answer entries don't go through melody.py's
+        # opening-bias mechanism at all (generate_subject_entry doesn't
+        # take piece_ctx) -- nothing to record or replay for exact_repeat.
+        _opening_anchor_value = None
     else:
+        _opening_anchor_value = (
+            _opening_anchor_from_previous(piece_ctx, section_model.arc)
+            if forced_opening_anchor is _ANCHOR_UNSET
+            else forced_opening_anchor
+        )
         melody_notes = generate_melody_for_progression(
             chords, key, mode,
             behavior=melody_beh,
@@ -804,7 +943,10 @@ def generate_section(
             rhythm_events_override=melody_rhythm_events,
             fugal_techniques=section_model.fugal_techniques,
             rest_probability=lead_rest_prob,
-            piece_ctx=piece_ctx,
+            # Always explicit now -- generator.py owns the anchor decision
+            # (computed above) rather than letting melody.py read piece_ctx
+            # itself. See forced_opening_anchor's docstring on generate_section.
+            forced_opening_anchor=_opening_anchor_value,
             arc=section_model.arc,
             note_length_range=section_nlr,
             note_length_quantum=section_nlr_quantum,
@@ -841,6 +983,7 @@ def generate_section(
         density=density,
         section_model=section_model,
         harmony_section_events=harmony_section_events,
+        opening_anchor_used=_opening_anchor_value,
     )
 
 
@@ -1117,17 +1260,49 @@ def generate_piece(
     # Build per-section seed offsets. Song form entries with exact_repeat=True
     # reuse the seed_offset of the first occurrence of that section name so
     # generation is identical — same notes, same voicings, same rhythm.
+    #
+    # is_exact_repeat_flags (parallel array) records which occurrences are
+    # a REPEAT (the 2nd+ time an exact_repeat name appears), not merely
+    # which sections have exact_repeat=True set. section_names (also
+    # parallel) lets the main per-section loop below look up the cached
+    # opening anchor by name.
+    #
+    # Why a cache is needed at all: seed_offset reuse alone guarantees
+    # identical RNG draws, but melody's cross-section opening-bias anchor
+    # (_opening_anchor_from_previous, in melody.py) is a function of
+    # piece_ctx.previous_melody — whatever section actually preceded THIS
+    # occurrence in the form (verse_2 before the 2nd chorus, verse_1 before
+    # the 1st). That's genuinely different content, so the anchor genuinely
+    # differs between occurrences even though the seed doesn't. A repeat
+    # must reproduce the first occurrence's actual notes, which means
+    # replaying the exact anchor value (including "no bias," if that's what
+    # the first occurrence got) the first occurrence used — not recomputing
+    # from whatever precedes the repeat, and not suppressing bias outright
+    # (that would just substitute one different anchor for another).
+    # _first_opening_anchor is populated from each section's
+    # opening_anchor_used after its first occurrence completes, and
+    # consulted (via forced_opening_anchor) before every repeat occurrence.
     if form_type == "song":
         _first_offset: dict[str, int] = {}
         seed_offsets: list[int] = []
+        is_exact_repeat_flags: list[bool] = []
+        section_names: list[str] = []
         for _i, _entry in enumerate(piece_model.form or []):
             _name   = _entry if isinstance(_entry, str) else _entry.section
             _exact  = False if isinstance(_entry, str) else _entry.exact_repeat
-            _offset = _first_offset[_name] if (_exact and _name in _first_offset) else _i * 10
+            _is_repeat_occurrence = bool(_exact and _name in _first_offset)
+            _offset = _first_offset[_name] if _is_repeat_occurrence else _i * 10
             _first_offset.setdefault(_name, _offset)
             seed_offsets.append(_offset)
+            is_exact_repeat_flags.append(_is_repeat_occurrence)
+            section_names.append(_name)
     else:
         seed_offsets = [i * 10 for i in range(len(sections))]
+        is_exact_repeat_flags = [False] * len(sections)
+        section_names = [s.get("name", f"section_{i}") if isinstance(s, dict) else f"section_{i}"
+                          for i, s in enumerate(sections)]
+
+    _first_opening_anchor: dict[str, object] = {}
 
     # Accumulate all voice events with beat offsets across sections
     all_chord_events  = []   # (abs_beat, 'on'/'off', note, vel, channel)
@@ -1162,11 +1337,24 @@ def generate_piece(
         # ══════════════════════════════════════════════════════════
         sec_ctx = piece_ctx.make_section_context(section, i)
 
+        _name_i = section_names[i]
+        _forced_anchor_kwargs = (
+            {"forced_opening_anchor": _first_opening_anchor[_name_i]}
+            if is_exact_repeat_flags[i] and _name_i in _first_opening_anchor
+            else {}
+        )
         res = generate_section(
             section, theme, base_seed=base_seed, seed_offset=seed_offsets[i],
             sec_ctx=sec_ctx, piece_ctx=piece_ctx,
             transform_sequence=transform_sequence,
+            is_exact_repeat=is_exact_repeat_flags[i],
+            **_forced_anchor_kwargs,
         )
+        # Cache the FIRST occurrence's actual opening anchor so any later
+        # repeat occurrence of this section name can replay it exactly
+        # (see the block above building _first_opening_anchor).
+        if _name_i not in _first_opening_anchor:
+            _first_opening_anchor[_name_i] = res.opening_anchor_used
 
         chords                 = res.chords
         bass_notes             = res.bass_notes

@@ -445,16 +445,89 @@ def apply_inversion(tones: list[int], inversion: int) -> list[int]:
     return result
 
 
+def spread_voicing(voiced: list[int], voicing: str, register_bottom: int,
+                    register_top: int) -> list[int]:
+    """
+    Reshape a closed-position chord (bass note + tight cluster within one
+    octave above it) into a more open arrangement, per `voicing`.
+
+    "closed":  no-op. Returns `voiced` unchanged -- this is the historical
+               behavior every existing piece renders with today.
+    "open":    upper voices (everything above the bass note) are spread
+               upward to fill the available headroom up to register_top,
+               ascending, evenly spaced, pitch class preserved for each
+               voice. Bass note (voiced[0]) never moves -- it's the
+               harmonic foundation and stays anchored near register_bottom
+               exactly as the closed algorithm placed it.
+    "drop2":   classic arranging technique -- the second-from-top voice
+               drops an octave. Doesn't require register_top headroom the
+               way "open" does; it opens the chord by pulling one inner
+               voice down rather than pushing voices up, so it still reads
+               as "open" even in a narrow register window.
+
+    Either transform preserves each tone's pitch class, so harmonic
+    content is identical to the closed voicing -- only octave placement
+    changes. Movement-minimizing inversion choice (which tone is in the
+    bass) still happens upstream in choose_inversion_for_voice_leading;
+    this only reshapes what sits above that bass note.
+    """
+    if voicing == "closed" or len(voiced) < 3:
+        return voiced
+
+    bass = voiced[0]
+    upper = voiced[1:]
+
+    if voicing == "drop2":
+        # Second-from-top voice, dropped an octave. For a 3-note chord
+        # that's the middle voice; for 4+ notes it's the second-highest.
+        idx = len(upper) - 2
+        dropped = upper[idx] - 12
+        new_upper = upper[:idx] + [dropped] + upper[idx + 1:]
+        return sorted([bass] + new_upper)
+
+    if voicing == "open":
+        n = len(upper)
+        headroom = register_top - bass
+        if headroom <= 0 or n == 0:
+            return voiced
+        # Evenly spaced target slots between just-above-bass and register_top,
+        # then snap each upper voice to its own pitch class nearest that slot
+        # -- preserves harmonic content, just relocates the octave.
+        spread = []
+        for i, tone in enumerate(upper):
+            pc = tone % 12
+            slot = bass + headroom * ((i + 1) / n)
+            # Nearest MIDI note with this pitch class to the target slot
+            candidate = round((slot - pc) / 12) * 12 + pc
+            candidate = max(bass + 1, min(register_top, candidate))
+            spread.append(int(candidate))
+        # Guarantee strictly ascending (pitch-class snapping can tie two
+        # voices to the same octave when headroom is tight) -- nudge any
+        # collision up an octave rather than let voices cross or double.
+        for i in range(1, len(spread)):
+            while spread[i] <= spread[i - 1]:
+                spread[i] += 12
+        return sorted([bass] + spread)
+
+    return voiced
+
+
 def choose_inversion_for_voice_leading(
     tones: list[int],
     prev_chord: Optional["VoicedChord"],
     register_bottom: int = 48,   # C3
     register_top: int = 72,      # C5
+    voicing: str = "closed",
 ) -> tuple[list[int], int]:
     """
     Choose the inversion that minimises total movement from the previous chord
     and keeps notes within the target register.
     Returns (voiced_notes, inversion_number).
+
+    Inversion selection always scores against the CLOSED-position cluster
+    (unchanged algorithm/behavior) -- voicing is applied as a shaping pass
+    afterward, on whichever inversion won. This keeps the well-exercised
+    voice-leading distance logic untouched regardless of `voicing`.
     """
     max_inv = min(3, len(tones) - 1)
     candidates = []
@@ -480,6 +553,7 @@ def choose_inversion_for_voice_leading(
 
     candidates.sort(key=lambda x: x[0])
     _, best_inv, best_voiced = candidates[0]
+    best_voiced = spread_voicing(best_voiced, voicing, register_bottom, register_top)
     return best_voiced, best_inv
 
 
@@ -496,6 +570,7 @@ def _resolve_secondary_chord(
     register_bottom: int,
     register_top: int,
     octave: int,
+    voicing: str = "closed",
 ) -> VoicedChord:
     """
     Resolve a secondary/applied chord written as "APPLIED/TARGET", e.g. "V7/ii"
@@ -557,7 +632,7 @@ def _resolve_secondary_chord(
 
     raw_tones = build_chord_tones(applied_root_midi, quality, density)
     voiced, inversion = choose_inversion_for_voice_leading(
-        raw_tones, prev_chord, register_bottom, register_top
+        raw_tones, prev_chord, register_bottom, register_top, voicing
     )
 
     return VoicedChord(
@@ -579,6 +654,7 @@ def resolve_chord(
     register_bottom: int = 48,
     register_top: int = 72,
     octave: int = 4,
+    voicing: str = "closed",
 ) -> VoicedChord:
     """
     Resolve a Roman numeral to a fully voiced VoicedChord.
@@ -599,7 +675,7 @@ def resolve_chord(
     """
     if "/" in roman:
         return _resolve_secondary_chord(
-            roman, key, mode, density, prev_chord, register_bottom, register_top, octave
+            roman, key, mode, density, prev_chord, register_bottom, register_top, octave, voicing
         )
 
     degree, quality_override, alteration = parse_roman(roman)
@@ -622,7 +698,7 @@ def resolve_chord(
 
     raw_tones = build_chord_tones(root_midi, quality, density)
     voiced, inversion = choose_inversion_for_voice_leading(
-        raw_tones, prev_chord, register_bottom, register_top
+        raw_tones, prev_chord, register_bottom, register_top, voicing
     )
 
     return VoicedChord(
@@ -643,6 +719,7 @@ def resolve_progression(
     register_bottom: int = 48,
     register_top: int = 72,
     octave: int = 4,
+    voicing: str = "closed",
 ) -> list[VoicedChord]:
     """
     Resolve a full progression to a list of VoicedChords with smooth voice leading.
@@ -654,6 +731,8 @@ def resolve_progression(
         density:        "sparse" | "medium" | "full"
         register_bottom/top: MIDI note range for voicing
         octave:         Base octave
+        voicing:        "closed" (default, unchanged) | "open" | "drop2" --
+                         see spread_voicing()'s docstring.
 
     Returns:
         List of VoicedChord objects
@@ -662,7 +741,7 @@ def resolve_progression(
     prev = None
     for roman in progression:
         chord = resolve_chord(
-            roman, key, mode, density, prev, register_bottom, register_top, octave
+            roman, key, mode, density, prev, register_bottom, register_top, octave, voicing
         )
         chords.append(chord)
         prev = chord

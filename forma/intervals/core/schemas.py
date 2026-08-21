@@ -116,6 +116,13 @@ GrooveLiteral = Literal[
     "straight", "push", "backbeat", "syncopated", "halftime",
     "shuffle", "broken", "clave", "waltz", "offbeat", "driving",
 ]
+# Harmony chord voicing shape — how the pad's tones are arranged in pitch
+# space, independent of which inversion carries the bass note. "closed"
+# is every piece's behavior before this field existed (tight cluster
+# within one octave above the bass note); "open"/"drop2" are real
+# arranging techniques, not decorative aliases — see harmony.py's
+# spread_voicing() docstring for what each actually does to the chord.
+VoicingLiteral = Literal["closed", "open", "drop2"]
 # Same story for drums.pattern — plain str, schema-legal for a typo,
 # caught only as "Unknown drum pattern: '...'" at render time in
 # percussion.py. Keep in sync with percussion.py's DRUM_PATTERNS keys.
@@ -151,10 +158,16 @@ REGISTER_BOUNDS: dict[str, tuple[int, int]] = {
     "tenor":    (51, 69),   # D#3–A4, centered C4
     "baritone": (46, 64),   # A#2–E4, centered G3
     "bass":     (39, 57),   # D#2–A3, centered C3
-    # Legacy aliases (same treatment, same centers as their SATB equivalents)
+    # Legacy aliases. "high" and "low" were always distinct boxes; "mid"
+    # and "low_mid" used to be exact duplicates of soprano/tenor (dead
+    # names, not real choices) -- now genuinely between their SATB
+    # neighbors, so all nine names are distinct usable positions instead
+    # of six. This changes the rendered pitch of any existing piece using
+    # melody/voice register: "mid" or "low_mid" -- deliberately, per the
+    # goal of making the existing catalog sound less uniform.
     "high":     (67, 85),   # G4–C#6, centered E5
-    "mid":      (63, 81),   # D#4–A5, centered C5  (== soprano)
-    "low_mid":  (51, 69),   # D#3–A4, centered C4  (== tenor)
+    "mid":      (60, 78),   # C4–F#5, centered A4  (between alto and soprano)
+    "low_mid":  (48, 66),   # C3–F#4, centered A3  (between baritone and tenor)
     "low":      (36, 54),   # C2–F#3, centered A2
 }
 
@@ -294,6 +307,38 @@ class NoteLengthRangeModel(BaseModel):
         return self
 
     def as_tuple(self) -> tuple[float, float]:
+        return (self.min, self.max)
+
+
+class RegisterWindowModel(BaseModel):
+    """
+    Explicit MIDI pitch window [min, max] for a voice layer (bass or
+    harmony). Overrides the per-piece/per-section seed-derived default
+    (see generator.py's derive_register_defaults()) with an authored
+    choice. Raw MIDI note numbers rather than a named preset, so a
+    composer can place a layer anywhere on the keyboard, not just pick
+    from a fixed box the way melody's named registers work.
+
+    Melody keeps using VoiceRegisterLiteral / REGISTER_BOUNDS (named
+    boxes) rather than this model — melody's register vocabulary already
+    existed and stayed backward-navigable; bass and harmony had no
+    per-piece register control at all before this field existed, so
+    there's no legacy naming convention to preserve for them.
+    """
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    min: Annotated[int, Field(ge=0, le=127)]
+    max: Annotated[int, Field(ge=0, le=127)]
+
+    @model_validator(mode="after")
+    def _check_bounds(self) -> "RegisterWindowModel":
+        if self.max <= self.min:
+            raise ValueError(
+                f"register window max ({self.max}) must be > min ({self.min})"
+            )
+        return self
+
+    def as_tuple(self) -> tuple[int, int]:
         return (self.min, self.max)
 
 
@@ -935,6 +980,27 @@ class SectionModel(BaseModel):
     #     never coinciding with a four-on-floor kick on the downbeat.
     bass_subdivision: Optional[Annotated[float, Field(gt=0.0, le=4.0)]] = None
     bass_offset:      Optional[Annotated[float, Field(ge=0.0, lt=4.0)]] = None
+
+    # ── Register / voicing overrides ────────────────────────────────────────
+    # All four are optional and default to None. None does NOT mean "use
+    # the old fixed constant" the way every other Optional field in this
+    # model works -- it means "let generate_section() derive this
+    # section's value from the piece's seed" (see generator.py's
+    # derive_register_defaults()). That's a deliberate departure from this
+    # file's usual convention, and it's why every existing piece renders
+    # differently after this feature shipped even though not one of them
+    # was edited: the seed already existed per piece/section, so an
+    # unedited JSON's sections now land on different (but still
+    # deterministic, reproducible) register windows and voicing shapes
+    # than they did before this field existed.
+    #
+    # Setting any of these explicitly opts a section OUT of seed-derived
+    # variation and pins it to exactly what's written, same as every
+    # other field in this file.
+    bass_register:    Optional[RegisterWindowModel] = None
+    harmony_register: Optional[RegisterWindowModel] = None
+    melody_register:  Optional[RegisterWindowModel] = None
+    voicing:          Optional[VoicingLiteral]       = None
 
     # ── Optional voices ───────────────────────────────────────────────────────
     counterpoint: Optional[list[CounterpointModel]] = None

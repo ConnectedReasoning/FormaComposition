@@ -39,6 +39,14 @@ from intervals.music.melodic_shape import (
     directed_anchor_shift,
 )
 
+# Sentinel distinguishing "forced_opening_anchor not passed" (compute the
+# bias normally via _opening_anchor_from_previous, unchanged default
+# behavior) from "explicitly passed as None" (replay a first occurrence
+# that itself had no bias -- exact_repeat's contract, see generator.py's
+# is_exact_repeat). A bare None default couldn't distinguish those two
+# cases from each other.
+_UNSET = object()
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -1462,6 +1470,7 @@ def generate_melody_for_progression(
     fugal_techniques: Optional[dict] = None,
     rest_probability: float = 0.0,
     piece_ctx: Optional[object] = None,
+    forced_opening_anchor: object = _UNSET,
     arc: Optional[str] = None,
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
@@ -1496,7 +1505,20 @@ def generate_melody_for_progression(
         piece_ctx: Optional PieceContext for cross-section memory. When provided
             (with arc), the opening note of the FIRST chord is biased relative to
             the previous section's ending contour. Only the section opening is
-            affected; normal generation takes over afterward.
+            affected; normal generation takes over afterward. Ignored (not
+            consulted at all) when forced_opening_anchor is passed explicitly.
+        forced_opening_anchor: Bypasses piece_ctx-based bias computation
+            entirely when passed. Unset (default): compute normally from
+            piece_ctx, as above -- unchanged behavior for every caller that
+            doesn't pass this. Passed as an int: use that value directly as
+            the opening anchor. Passed as None: no opening bias at all, even
+            if piece_ctx would otherwise supply one. This exists for
+            exact_repeat song-form sections (see generator.py's
+            is_exact_repeat) -- a repeat occurrence replays whatever anchor
+            (a value, or explicitly no bias) the section's first occurrence
+            actually used, rather than recomputing from piece_ctx.
+            previous_melody, which reflects a DIFFERENT preceding section
+            for the repeat than it did for the first occurrence.
         arc: The section's declared arc (used only for the opening bias).
         melodic_arc: Optional apex/goal-tone config (Phase 2 of the
             apex/goal-tone build — see melodic_shape.py), e.g.
@@ -1642,7 +1664,11 @@ def generate_melody_for_progression(
     # No-op when piece_ctx is None, when this is the first section,
     # or when contour/arc combination implies no strong bias.
     # ════════════════════════════════════════════════════════════
-    opening_anchor = _opening_anchor_from_previous(piece_ctx, arc)
+    opening_anchor = (
+        _opening_anchor_from_previous(piece_ctx, arc)
+        if forced_opening_anchor is _UNSET
+        else forced_opening_anchor
+    )
     if opening_anchor is not None:
         prev_note = opening_anchor
 

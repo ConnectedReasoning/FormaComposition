@@ -117,7 +117,7 @@ def resolve_apex_pitch(
     """
     Convert a diatonic apex_degree into an actual target MIDI pitch.
 
-    Placed in the octave nearest `anchor` (so the target sits near
+    Placed in the SAME octave as `anchor` (so the target sits near
     wherever the melody currently is, not always in some fixed reference
     octave), then folded into [octave_bottom, octave_top] by whole
     octaves if it still falls outside — the identical fold discipline
@@ -126,11 +126,19 @@ def resolve_apex_pitch(
     still genuinely degree `apex_degree` of this scale, just relocated —
     never a different degree substituted in its place.
 
-    This always returns a pitch (never raises) — Phase 0 decided
-    unreachable targets are a lint-time warning, not a render-time
-    failure. Use apex_degree_reachable() below to check reachability
-    for that warning; this function's job is only to always produce
-    something playable.
+    "Same octave as anchor" (anchor_degree // n), not "nearest absolute
+    pitch to anchor" -- see test_melodic_shape.py's TestResolveApexPitch
+    for the tested contract. A true-nearest-occurrence search was tried
+    and reverted: it passed the statistical apex-bias tests but broke
+    the documented, directly-tested "stays in the anchor's own octave"
+    contract (e.g. anchor=C4 must resolve degree 4 to G4, not G3, even
+    though G3 is numerically closer to C4). The apparent "far from
+    anchor" cases this same-octave rule can produce (e.g. up to ~11
+    semitones for an anchor sitting right below a target degree) are the
+    intended behavior, not a bug -- a genuinely-nearest search would make
+    the apex's octave placement flip unpredictably for small anchor
+    perturbations, which is worse for a "build to a stable peak" feature
+    than a wider but consistent same-octave distance.
     """
     pcs = pitch_classes(scale_tones)
     n = len(pcs)
