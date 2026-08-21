@@ -57,16 +57,45 @@ class BassNote:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def bass_root(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
-              octave_top: int = BASS_OCTAVE_TOP) -> int:
-    """Return the root note of a chord dropped into bass register."""
-    root_pc = CHROMATIC.index(chord.root_name)
-    note = octave_bottom + root_pc
+def _pitch_class_to_bass_note(pc: int, octave_bottom: int, octave_top: int) -> int:
+    """
+    Place a pitch class into [octave_bottom, octave_top] register bounds,
+    correctly, regardless of whether octave_bottom itself happens to be a C.
+
+    Bug fix (2026-08): the previous formula in bass_root/bass_fifth/
+    bass_third was `octave_bottom + pc`, which only produces the right
+    absolute pitch when octave_bottom IS a C (pitch class 0) -- true for
+    this module's own BASS_OCTAVE_BOTTOM=36 (C2) default, so the bug never
+    surfaced until a caller passed a non-C-aligned box through
+    section.bass_register (e.g. schemas.py's REGISTER_BOUNDS["bass"] =
+    (39, 57), deliberately centered on C3 with an asymmetric 18-semitone
+    span -- its floor, D#2, is NOT a C). With that box, every chord root
+    landed up to 11 semitones off the intended pitch class -- silently:
+    no error, no warning, no schema violation, just the wrong note. Caught
+    only by a composer looking at the piano roll and asking why a C-chord
+    bass note was D#.
+
+    Fix: find the C at or below octave_bottom, add the pitch class to
+    THAT, then fold into range with the same wrap-loop as before. For a
+    C-aligned octave_bottom (base_c == octave_bottom) this is byte-
+    identical to the old formula -- verified against test_bass.py's
+    existing bass_root/bass_fifth/bass_third assertions, all of which use
+    the C-aligned default and are unaffected.
+    """
+    base_c = (octave_bottom // 12) * 12
+    note = base_c + pc
     while note < octave_bottom:
         note += 12
     while note > octave_top:
         note -= 12
     return note
+
+
+def bass_root(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
+              octave_top: int = BASS_OCTAVE_TOP) -> int:
+    """Return the root note of a chord dropped into bass register."""
+    root_pc = CHROMATIC.index(chord.root_name)
+    return _pitch_class_to_bass_note(root_pc, octave_bottom, octave_top)
 
 
 def bass_fifth(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
@@ -75,12 +104,7 @@ def bass_fifth(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
     if len(chord.midi_notes) < 3:
         return None
     fifth_pc = chord.midi_notes[2] % 12
-    note = octave_bottom + fifth_pc
-    while note < octave_bottom:
-        note += 12
-    while note > octave_top:
-        note -= 12
-    return note
+    return _pitch_class_to_bass_note(fifth_pc, octave_bottom, octave_top)
 
 
 def bass_third(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
@@ -89,12 +113,7 @@ def bass_third(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
     if len(chord.midi_notes) < 2:
         return None
     third_pc = chord.midi_notes[1] % 12
-    note = octave_bottom + third_pc
-    while note < octave_bottom:
-        note += 12
-    while note > octave_top:
-        note -= 12
-    return note
+    return _pitch_class_to_bass_note(third_pc, octave_bottom, octave_top)
 
 
 def bass_chord_tones(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
@@ -111,14 +130,7 @@ def bass_chord_tones(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM
     the whole harmonic point of the chord (e.g. a dominant 7th's flat-7).
     """
     pcs = sorted(set(n % 12 for n in chord.midi_notes))
-    tones = []
-    for pc in pcs:
-        note = octave_bottom + pc
-        while note < octave_bottom:
-            note += 12
-        while note > octave_top:
-            note -= 12
-        tones.append(note)
+    tones = [_pitch_class_to_bass_note(pc, octave_bottom, octave_top) for pc in pcs]
     return sorted(set(tones))
 
 
