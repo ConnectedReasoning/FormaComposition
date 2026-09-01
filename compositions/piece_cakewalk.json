@@ -1,0 +1,201 @@
+{
+  "piece": {
+    "name": "Cakewalk Strut",
+    "title": "Cakewalk Strut",
+    "key": "F",
+    "mode": "ionian",
+    "tempo": 108,
+    "notes": "Test piece for cakewalk syncopation. First draft used rhythm:'pattern' with a hand-authored 3+3+2 onset grid -- but generator.py confirmed rhythm:'pattern' always couples bass to the identical onset grid (bypassing bass_style dispatch entirely, per bass.py's rhythm_events_override path), which would have made bass syncopate in unison with the melody instead of staying steady underneath it -- the opposite of the intended effect. Fixed by using rhythm:'free' + groove:'broken', the engine's own built-in 3+3+2 tresillo template (its docstring literally says 'Afro-Cuban tresillo' -- same rhythmic lineage as cakewalk). groove only threads into melody's own generation path; bass_style keeps running its own independent dispatch untouched, so root_fifth/pulse/root_only actually stay steady and on the beat as designed. swing stays 0.0 throughout -- cakewalk/ragtime syncopation is straight eighths with shifted accents, not a triplet shuffle. ABA form (intro, strain A, strain B, strain A reprise, outro) mirrors real published cakewalk sheet music structure. One counterpoint voice in strain B only, for a light countermelody.",
+    "sections": [
+      {
+        "name": "intro",
+        "bars": 4,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.1,
+        "notes": "Vamp -- establishes the steady march pulse before the syncopated tune enters properly in strain A.",
+        "groove": "broken"
+      },
+      {
+        "name": "strain_a",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "IV",
+          "I",
+          "V",
+          "I",
+          "IV",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.1,
+        "notes": "Main strain. root_fifth bass stays flatly on the beat while the melody's 3+3+2 grouping cuts across it -- that tension is the actual cakewalk effect, not a trick layered on top of it.",
+        "groove": "broken"
+      },
+      {
+        "name": "strain_b",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "IV",
+          "I",
+          "ii",
+          "V",
+          "IV",
+          "I",
+          "ii",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 90
+        },
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.1,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 50
+          }
+        ],
+        "notes": "Contrasting strain -- bass moves to pulse for a touch more insistence, still steady/unsyncopated. One light countermelody above, the way a period brass-band arrangement might carry a second voice.",
+        "groove": "broken"
+      },
+      {
+        "name": "strain_a_reprise",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "IV",
+          "I",
+          "V",
+          "I",
+          "IV",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.1,
+        "notes": "Return of strain A -- classic ABA parlor-piece structure. No counterpoint here, mirrors the original strain's simplicity.",
+        "groove": "broken"
+      },
+      {
+        "name": "outro",
+        "bars": 4,
+        "beats_per_bar": 4,
+        "progression": [
+          "V",
+          "I"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 86
+        },
+        "bass_style": "root_only",
+        "arc": "decay",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.15,
+        "notes": "Short closing tag/button.",
+        "groove": "broken"
+      }
+    ]
+  }
+}

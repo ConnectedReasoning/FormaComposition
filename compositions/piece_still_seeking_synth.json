@@ -1,0 +1,320 @@
+{
+  "piece": {
+    "name": "Still Seeking (Synth)",
+    "title": "Still Seeking - Synth Version (FormaComposition) v1",
+    "key": "C",
+    "mode": "aeolian",
+    "tempo": 122,
+    "seed": 1981,
+    "notes": "Pure synth-pop side of the pair, opposite arrangement of the same idea as still_seeking_v1.json (mixolydian riff-rock). Same tonic (C) so the two can sit side by side, different mode/treatment entirely. Verse uses sustain harmony (lush pad wash, Pigments/Shimmer territory) instead of the rock version's rhythmic chord stabs; chorus tightens the harmony onto the hook's own rhythm for lift. Bridge strips the pad out entirely for a breakdown before the final chorus -- the classic pre-drop pull-back. Bass stays a straight driving eighth pulse throughout, the DM signature.",
+    "motifs": [
+      {
+        "name": "hook",
+        "intervals": [
+          0,
+          2,
+          -1,
+          1,
+          -2,
+          1,
+          -1,
+          0
+        ],
+        "rhythm": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "velocities": [
+          0.9,
+          0.6,
+          0.7,
+          0.6,
+          0.75,
+          0.85,
+          0.6,
+          0.65
+        ],
+        "transform_pool": [
+          "inversion",
+          "transpose_up",
+          "transpose_down",
+          "sequence"
+        ]
+      }
+    ],
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse_1",
+      "chorus",
+      "verse_2",
+      {
+        "section": "chorus",
+        "exact_repeat": true
+      },
+      "bridge",
+      "chorus_final",
+      "outro"
+    ],
+    "sections": {
+      "intro": {
+        "bars": 4,
+        "progression": [
+          "i",
+          "VII"
+        ],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "build",
+        "rhythm": "free",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Pulse and four-on-floor establish first, pad enters sustained under it, hook not in yet."
+      },
+      "verse_1": {
+        "bars": 8,
+        "progression": [
+          "i",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "density": "medium",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "plateau",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "motif": "hook",
+            "velocity": 90,
+            "leap_probability": 0.0
+          }
+        ],
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Hook motif carried by the lead voice, mostly stepwise -- catalog contrast to the rock riff's fifth-leaps. Pad stays sustained underneath, no rhythmic stabs yet."
+      },
+      "chorus": {
+        "bars": 8,
+        "progression": [
+          "VI",
+          "VII",
+          "i",
+          "i"
+        ],
+        "density": "medium",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "swell",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "motif": "hook",
+            "velocity": 105,
+            "leap_probability": 0.0
+          },
+          {
+            "register": "soprano",
+            "behavior": "generative",
+            "velocity": 55,
+            "leap_probability": 0.0
+          }
+        ],
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Harmony tightens onto the hook's own rhythm for lift -- pad becomes rhythmic instead of sustained. Peer voice enters above for shimmer, independently generated (generative behavior) -- NOT motif-tied: the schema only wires develop-behavior motif reading to voices[0], the lead. Confirmed by the engine's own lint warning during --info. A literal arp-motif peer would need the counterpoint block instead, which is mutually exclusive with voices. This single definition is reused for both choruses via exact_repeat."
+      },
+      "verse_2": {
+        "bars": 8,
+        "progression": [
+          "i",
+          "VI",
+          "III",
+          "VII"
+        ],
+        "density": "medium",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "plateau",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "motif": "hook",
+            "velocity": 90,
+            "leap_probability": 0.0
+          }
+        ],
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Same feel as verse_1, independent section name so it carries its own seed-derived variation."
+      },
+      "bridge": {
+        "bars": 8,
+        "progression": [
+          "III",
+          "VII",
+          "VI",
+          "i"
+        ],
+        "density": "sparse",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "build",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rest_probability": 0.6,
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "motif": "hook",
+            "velocity": 80,
+            "leap_probability": 0.0
+          }
+        ],
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Breakdown -- pad pulled way back (harmony_rest_probability thins it, no harmony_rhythm block means it inherits section.rhythm rather than sustaining continuously), leaving pulse, drums, and hook exposed before the final chorus lands."
+      },
+      "chorus_final": {
+        "bars": 8,
+        "progression": [
+          "VI",
+          "VII",
+          "i",
+          "i"
+        ],
+        "density": "full",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "swell",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "motif": "hook",
+            "velocity": 110,
+            "leap_probability": 0.0
+          },
+          {
+            "register": "soprano",
+            "behavior": "generative",
+            "velocity": 65,
+            "leap_probability": 0.0
+          }
+        ],
+        "drums": {
+          "pattern": "four_on_floor",
+          "groove": "driving"
+        },
+        "notes": "Peak lift. Peer voice generative (not motif-tied, same reason as chorus). Harmony density kept at medium here deliberately (not full) after the rock version's chorus_final flagged a harmony-mass FAIL at full density -- learned from that, not repeating it blind."
+      },
+      "outro": {
+        "bars": 4,
+        "progression": [
+          "i",
+          "VII",
+          "i"
+        ],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "bass_register": {
+          "min": 39,
+          "max": 57
+        },
+        "arc": "fade_out",
+        "rhythm": "free",
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "drums": {
+          "pattern": "minimal",
+          "groove": "driving"
+        },
+        "notes": "Hook drops out, pulse settles to a pedal, pad returns sustained and fades."
+      }
+    }
+  }
+}

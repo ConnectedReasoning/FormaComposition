@@ -1,0 +1,150 @@
+{
+  "piece": {
+    "name": "Still Seeking",
+    "title": "Still Seeking (FormaComposition) v1",
+    "key": "C",
+    "mode": "mixolydian",
+    "tempo": 120,
+    "seed": 1983,
+    "notes": "Eliminator-model rock: bass_style pulse gives the sequenced-synth 'platform' (deliberately low, out of the riff's register); voices[0]='riff' motif (develop) rides on top. Harmony strikes on the riff's own rhythm (harmony_rhythm.rhythm=motif) for Ob-La-Di-style chord stabs rather than sustained pads. Mixolydian's native VII is already flat -- written bare as 'VII', NOT 'bVII' (bVII would double-flatten it against the major-scale reference -- see harmony.py's _roman_degree_to_root_midi docstring). Progression I-VII-IV throughout is the AC/DC/mixolydian skeleton. No power-chord (root+fifth, no third) voicing exists in this engine's chord-quality system -- density:'sparse' (triad only) is the closest available, flagged as a known gap, not silently worked around.",
+    "motifs": [
+      {
+        "name": "riff",
+        "intervals": [0, 4, -1, -1, -2, 0],
+        "rhythm": [0.5, 0.5, 0.5, 0.25, 0.25, 2.0],
+        "velocities": [0.95, 0.75, 0.9, 0.65, 0.8, 0.7],
+        "transform_pool": ["transpose_up", "transpose_down", "augmentation"]
+      }
+    ],
+    "form_type": "song",
+    "form": [
+      "intro",
+      "verse_1",
+      "chorus",
+      "verse_2",
+      { "section": "chorus", "exact_repeat": true },
+      "break",
+      "chorus_final",
+      "outro"
+    ],
+    "sections": {
+      "intro": {
+        "bars": 4,
+        "progression": ["I", "VII"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "build",
+        "rhythm": "free",
+        "beats_per_bar": 4,
+        "drums": { "pattern": "minimal", "groove": "driving" },
+        "notes": "Pulse and drums establish the platform first, riff not in yet -- mirrors Eliminator's build order: rhythm section programmed before the guitar layers in."
+      },
+      "verse_1": {
+        "bars": 8,
+        "progression": ["I", "VII", "I", "VII"],
+        "density": "sparse",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "plateau",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif", "motif": "riff", "density": "sparse" },
+        "voices": [
+          { "register": "tenor", "behavior": "develop", "motif": "riff", "velocity": 100, "leap_probability": 0.0 }
+        ],
+        "drums": { "pattern": "backbeat", "groove": "driving" },
+        "notes": "Riff locked in via voices[0], develop behavior (the only one that reads motif pitch). Chord stabs ride the riff's own rhythm cell. Bass stays low and out of the riff's register, per Gibbons' platform principle."
+      },
+      "chorus": {
+        "bars": 8,
+        "progression": ["IV", "VII", "I", "I"],
+        "density": "medium",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "swell",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif", "motif": "riff", "density": "medium" },
+        "voices": [
+          { "register": "tenor", "behavior": "develop", "motif": "riff", "velocity": 110, "leap_probability": 0.0 }
+        ],
+        "drums": { "pattern": "backbeat", "groove": "driving" },
+        "notes": "Lift to IV, fuller chord density for the hook. This single definition is reused for both choruses via exact_repeat -- the hook stays identical each time it lands."
+      },
+      "verse_2": {
+        "bars": 8,
+        "progression": ["I", "VII", "I", "VII"],
+        "density": "sparse",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "plateau",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif", "motif": "riff", "density": "sparse" },
+        "voices": [
+          { "register": "tenor", "behavior": "develop", "motif": "riff", "velocity": 100, "leap_probability": 0.0 }
+        ],
+        "drums": { "pattern": "backbeat", "groove": "driving" },
+        "notes": "Same feel as verse_1; independent section name (not exact_repeat) so it can carry its own seed-derived variation."
+      },
+      "break": {
+        "bars": 8,
+        "progression": ["I"],
+        "density": "sparse",
+        "bass_style": "pedal",
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "build",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "voices": [
+          { "register": "tenor", "behavior": "develop", "motif": "riff", "velocity": 95, "leap_probability": 0.0 }
+        ],
+        "drums": { "pattern": "backbeat", "groove": "driving" },
+        "notes": "Static pedal on I -- this is the solo pocket. Chord chart holds one chord the whole section so guitar has open space; riff voice uses 'develop' here (not exact_repeat) to genuinely vary rather than lock."
+      },
+      "chorus_final": {
+        "bars": 8,
+        "progression": ["IV", "VII", "I", "I"],
+        "density": "full",
+        "bass_style": "pulse",
+        "bass_subdivision": 0.5,
+        "bass_offset": 0.0,
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "swell",
+        "rhythm": "motif",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "motif", "motif": "riff", "density": "full" },
+        "voices": [
+          { "register": "tenor", "behavior": "develop", "motif": "riff", "velocity": 115, "leap_probability": 0.0 }
+        ],
+        "drums": { "pattern": "backbeat", "groove": "driving" },
+        "notes": "Peak intensity -- full chord density, hottest velocity. Intentionally NOT a repeat of chorus, same pattern as shake_v5's chorus_final."
+      },
+      "outro": {
+        "bars": 4,
+        "progression": ["I", "VII", "I"],
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "bass_register": { "min": 39, "max": 57 },
+        "arc": "fade_out",
+        "rhythm": "free",
+        "beats_per_bar": 4,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": { "pattern": "minimal", "groove": "driving" },
+        "notes": "Riff drops out, pulse settles to a pedal, drums thin -- mirrors the intro build in reverse."
+      }
+    }
+  }
+}

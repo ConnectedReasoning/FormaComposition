@@ -1,0 +1,77 @@
+{
+  "piece": {
+    "name": "Second Melody Test",
+    "title": "Second Melody Test",
+    "key": "F",
+    "mode": "ionian",
+    "tempo": 100,
+    "notes": "Isolated test of the new SectionModel.second_melody field. Lead melody runs plain free rhythm (no groove) at the normal 4/4 bar grid. second_melody carries its own rhythm_pattern with length_beats=3.0, tiled continuously across the full 16-bar (64-beat) section via rhythm_pattern_to_events -- since 3 doesn't divide the 4-beat bar evenly, its onsets should drift out of phase with the bar grid over the section instead of resyncing every bar: genuine polymeter, not just a different subdivision. One counterpoint voice also present to prove second_melody coexists with the existing counterpoint list mechanism without conflict.",
+    "sections": [
+      {
+        "name": "main",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "IV",
+          "I",
+          "V",
+          "I",
+          "IV",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 85
+        },
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "rhythm": "free",
+        "swing": 0.0,
+        "rest_probability": 0.1,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 55
+          }
+        ],
+        "second_melody": {
+          "behavior": "lyrical",
+          "register": "high",
+          "velocity": 80,
+          "rhythm_pattern": {
+            "onsets": [
+              0.0
+            ],
+            "durations": [
+              2.5
+            ],
+            "velocities": [
+              1.0
+            ],
+            "length_beats": 3.0
+          }
+        },
+        "notes": "Lead in plain 4-beat free rhythm, second_melody cycling every 3 beats -- classic 3-over-4 polymeter, should audibly drift through the bar over 16 bars.",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        }
+      }
+    ]
+  }
+}

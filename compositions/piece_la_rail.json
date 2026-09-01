@@ -1,0 +1,390 @@
+{
+  "piece": {
+    "name": "The LA Rail",
+    "title": "The LA Rail",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": 100,
+    "notes": "Classic 4-minute pop song, a little prog / a little yacht rock -- Supertramp lane (Logical Song / Take the Long Way Home territory: quartal-adjacent extended chords at density='full', laid-back light-swing pocket, sax-like countermelody). Structure: intro, verse, chorus, verse, chorus, transition (real breakdown -- learned from Cakewalk Strut not to stay 'too alive' the whole way through), bridge (borrowed bVII for a modal-mixture lift + second_melody carrying a genuine polymeter drift as the 'prog' touch), final chorus modulated up a whole step G->A (uses the sec_key/sec_mode fix made today -- confirmed counterpoint and second_melody now actually follow a section-level key override instead of silently staying in the piece's original key), outro. swing=0.15 throughout on purpose (unlike the cakewalk/ragtime rule of swing=0.0 -- yacht rock's pocket, e.g. Steely Dan/Doobie Brothers, genuinely does want a light shuffle, a different genre calling for a different informed choice, not the same rule applied blindly). Counterpoint (one voice, below, sax/horn-like) present only in choruses/bridge/final chorus, absent in verses -- enters with the hook the way Xanadu's counterpoint did.",
+    "sections": [
+      {
+        "name": "intro",
+        "bars": 4,
+        "beats_per_bar": 4,
+        "progression": [
+          "vi",
+          "IV",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.15,
+        "notes": "Short vamp, establishes the vi-IV-I-V loop before the verse states it properly."
+      },
+      {
+        "name": "verse_1",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "vi",
+          "IV",
+          "I",
+          "V",
+          "vi",
+          "IV",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.15,
+        "notes": "Verse 1 -- laid back, no counterpoint yet, leaves room for the vocal/lyric. 'I'm gonna ride my daily destination, the LA Rail' territory."
+      },
+      {
+        "name": "chorus_1",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "V",
+          "vi",
+          "IV",
+          "I",
+          "V",
+          "vi",
+          "IV"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 92
+        },
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "groove": "syncopated",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.1,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 56
+          }
+        ],
+        "notes": "Chorus -- tonic-anchored (I, not vi), higher energy, counterpoint enters as a sax/horn-like line under the hook. syncopated groove for pop lift, still 0.15 swing underneath."
+      },
+      {
+        "name": "verse_2",
+        "bars": 12,
+        "beats_per_bar": 4,
+        "progression": [
+          "vi",
+          "IV",
+          "I",
+          "V",
+          "vi",
+          "IV"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "medium",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "root_fifth",
+        "arc": "plateau",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.15,
+        "notes": "Verse 2, compressed to 12 bars for pacing -- ends on IV rather than resolving to V, leaning into chorus 2. 'This might be droll... tomorrow's dreams' territory."
+      },
+      {
+        "name": "chorus_2",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "I",
+          "V",
+          "vi",
+          "IV",
+          "I",
+          "V",
+          "vi",
+          "IV"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 92
+        },
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "groove": "syncopated",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.1,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 56
+          }
+        ],
+        "notes": "Chorus 2, same hook restated."
+      },
+      {
+        "name": "transition",
+        "bars": 4,
+        "beats_per_bar": 4,
+        "progression": [
+          "vi"
+        ],
+        "chord_bars": [
+          4
+        ],
+        "density": "sparse",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 86
+        },
+        "bass_style": "pedal",
+        "arc": "fade_out",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.0,
+        "rest_probability": 0.45,
+        "notes": "The actual breakdown -- single held vi chord, sparse, high rest_probability, no counterpoint, no groove. Learned this lesson directly from Cakewalk Strut: a real gap here earns the bridge instead of just continuing at chorus density. This is the quiet before the bridge steps outside the song's narrative."
+      },
+      {
+        "name": "bridge",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "progression": [
+          "vi",
+          "IV",
+          "bVII",
+          "IV",
+          "vi",
+          "IV",
+          "V",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 88
+        },
+        "bass_style": "walking",
+        "arc": "breath",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.15,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ],
+        "second_melody": {
+          "behavior": "lyrical",
+          "register": "high",
+          "velocity": 72,
+          "rhythm_pattern": {
+            "onsets": [
+              0.0
+            ],
+            "durations": [
+              2.5
+            ],
+            "velocities": [
+              1.0
+            ],
+            "length_beats": 3.0
+          }
+        },
+        "notes": "Bridge -- steps outside the verse/chorus narrative (Star Wars / rock-and-roll-reborn-every-ten-years territory). Borrowed bVII (F major, mixolydian lift) for the 'prog' color. second_melody carries the actual polymeter payoff from today's engine work: a bell-like hit every 3 beats against the 4-beat bar, genuinely drifting through all 16 bars rather than a fixed accent -- the one place in the song the polymeter bones actually get used, not just tested. Walking bass, same 'genuinely developmental' role it played in Riff Cycle's bridge."
+      },
+      {
+        "name": "final_chorus",
+        "bars": 16,
+        "beats_per_bar": 4,
+        "key": "A",
+        "progression": [
+          "I",
+          "V",
+          "vi",
+          "IV",
+          "I",
+          "V",
+          "vi",
+          "IV"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "full",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 94
+        },
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "free",
+        "groove": "syncopated",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.15,
+        "rest_probability": 0.1,
+        "counterpoint": [
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ],
+        "notes": "Final chorus, modulated up a whole step (G->A) via section-level key override -- the 'one modulation move that reliably works' per the songwriting craft notes. This is the actual reason today's sec_key/sec_mode fix mattered: without it, counterpoint here would have silently stayed in G while melody/harmony/bass correctly moved to A."
+      },
+      {
+        "name": "outro",
+        "bars": 4,
+        "beats_per_bar": 4,
+        "key": "A",
+        "progression": [
+          "I",
+          "IV",
+          "I"
+        ],
+        "chord_bars": [
+          2,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": {
+          "behavior": "lyrical",
+          "register": "mid",
+          "velocity": 86
+        },
+        "bass_style": "root_only",
+        "arc": "decay",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "swing": 0.1,
+        "rest_probability": 0.25,
+        "notes": "Resolves in the modulated key -- ends up, doesn't come back down. Fade/decay to close."
+      }
+    ]
+  }
+}

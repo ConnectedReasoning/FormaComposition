@@ -37,19 +37,19 @@
     "notes": "An upbeat, driving pop anthem designed according to pop_music_guidelines.md. Features the classic 4-chord I-V-vi-IV loop in the chorus with a recognizable motif, high energy density, and strong 4-on-the-floor drum/pulse bass foundation. The verse pulls back to a sparser texture (I-vi-IV-V) with lyrical melody, while the bridge introduces a build arc and a minor-leaning progression.",
     "sections": {
       "intro": {
-        "bars": 8,
+        "bars": 12,
         "progression": [ "I", "IV"],
-        "chord_bars": [ 4, 4   ],
-        "density": "sparse",
+        "chord_bars": [ 6, 6   ],
+        "density": "medium",
         "melody": {
-          "behavior": "sparse",
+          "behavior": "lyrical",
           "register": "tenor",
-          "velocity": 75
+          "velocity": 90
         },
         "bass_style": "root_only",
-        "arc": "swell",
+        "arc": "plateau",
         "rhythm": "free",
-        "rest_probability": 0.4,
+        "rest_probability": 0.01,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "sparse"
@@ -72,7 +72,7 @@
         "bass_style": "steady",
         "arc": "breath",
         "rhythm": "free",
-        "rest_probability": 0.3,
+        "rest_probability": 0.1,
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "medium",
@@ -96,7 +96,7 @@
         "bass_style": "walking",
         "arc": "breath",
         "rhythm": "free",
-        "rest_probability": 0.2,
+        "rest_probability": 0.1,
         "harmony_rhythm": {
           "rhythm": "pattern",
           "density": "medium",
@@ -131,7 +131,7 @@
         "bass_style": "pulse",
         "arc": "plateau",
         "rhythm": "motif",
-        "rest_probability": 0.25,
+        "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "pattern",
           "density": "full",
@@ -159,7 +159,7 @@
         "bass_style": "steady",
         "arc": "build",
         "rhythm": "free",
-        "rest_probability": 0.2,
+        "rest_probability": 0.1,
         "harmony_rhythm": {
           "rhythm": "pattern",
           "density": "medium",
@@ -187,7 +187,7 @@
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "motif",
-        "rest_probability": 0.3,
+        "rest_probability": 0.15,
         "harmony_rhythm": {
           "rhythm": "sustain",
           "density": "sparse"
