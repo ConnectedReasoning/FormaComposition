@@ -536,6 +536,21 @@ class VoiceModel(BaseModel):
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
 
+    # Independent per-voice rhythm override (2026-08). Only consumed by
+    # SectionModel.second_melody (see that field's docstring) — a peer
+    # voice inside voices[] does NOT read this yet, same "schema-legal but
+    # not everywhere wired" situation `motif` was in before its lead-voice
+    # fix; extending it to voices[] peers is a follow-up, not scope creep
+    # here. When set, this voice's rhythm is computed once via
+    # rhythm_pattern_to_events() tiled across the FULL section length (not
+    # reset per chord/bar), exactly like harmony_pattern already works —
+    # so a length_beats that doesn't evenly divide the section's bar length
+    # produces genuine phase drift against the rest of the ensemble instead
+    # of resyncing every bar. When None (default), the voice falls back to
+    # whatever rhythm source it would already use (groove/swing inherited
+    # from the section, for a melody-path voice).
+    rhythm_pattern: Optional[RhythmPatternModel] = None
+
     # ── Literal subject/answer entry (fugue-style) ──────────────────────
     # When set, this voice renders `motif` literally via
     # generate_subject_entry() instead of going through generate_counterpoint
@@ -1005,6 +1020,51 @@ class SectionModel(BaseModel):
     # ── Optional voices ───────────────────────────────────────────────────────
     counterpoint: Optional[list[CounterpointModel]] = None
     voices:       Optional[list[VoiceModel]]  = None   # peer voices (replaces melody+counterpoint)
+
+    # A second, fully independent melodic line (2026-08) — NOT counterpoint
+    # (no species/voice-leading rules against the lead) and NOT one of the
+    # voices[] peers (those inherit the section's groove/swing verbatim,
+    # same as the lead; see generator.py's peer-voice melody-path branch).
+    # This field exists specifically so a second voice can carry its own
+    # rhythm_pattern (see VoiceModel.rhythm_pattern) independently of the
+    # lead melody's rhythm and of bass — genuine polyrhythm/polymeter
+    # between two melodic lines, not just melody-vs-harmony. Coexists
+    # freely with `counterpoint` above; deliberately additive rather than
+    # requiring migration to voices[] for pieces that already use the
+    # separate counterpoint list. behavior/register/velocity/motif on the
+    # VoiceModel work the same as any other melody-path voice; species/
+    # entry_role are schema-legal here but meaningless (this is always the
+    # melody.py generative path, never counterpoint.py) — species/entry_role
+    # are rejected outright by _validate_second_melody_is_melody_path below
+    # rather than silently ignored (same lesson as every other no-op found
+    # and fixed in this engine: a validation error beats a config that
+    # looks like it does something and doesn't).
+    second_melody: Optional[VoiceModel] = None
+
+    @field_validator("second_melody", mode="after")
+    @classmethod
+    def _validate_second_melody_is_melody_path(cls, v):
+        """second_melody always renders via generate_melody_for_progression
+        (see generator.py) — it never reaches counterpoint.py's species
+        path or motif.py's generate_subject_entry. species/entry_role on
+        this voice would validate cleanly and then do nothing at render
+        time, so reject them here instead."""
+        if v is None:
+            return v
+        if v.species is not None:
+            raise ValueError(
+                "second_melody.species is set, but second_melody always "
+                "renders through the melody.py generative path, never "
+                "counterpoint.py — species would be silently ignored. "
+                "Use `counterpoint` or `voices` for a species-based voice."
+            )
+        if v.entry_role is not None:
+            raise ValueError(
+                "second_melody.entry_role is set, but second_melody never "
+                "reaches generate_subject_entry() — entry_role would be "
+                "silently ignored. Use `voices` for a subject/answer entry."
+            )
+        return v
     drums:        Optional[DrumModel]         = None
     percussion:   Optional[dict]              = None   # future-proofed, untyped
 

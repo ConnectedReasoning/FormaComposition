@@ -165,6 +165,7 @@ def derive_register_defaults(base_seed: int, piece_key: str = "C", piece_mode: s
         "voicing":          _VOICING_CHOICES[(identity * 13) % len(_VOICING_CHOICES)],
     }
 CHANNEL_COUNTERPOINT_3 = 5
+CHANNEL_SECOND_MELODY  = 6
 CHANNEL_DRUMS        = 9
 
 # Program numbers — one unique value per voice so Logic Pro creates
@@ -194,6 +195,7 @@ TRACK_NAME_HARMONY      = "Harmony"
 TRACK_NAME_COUNTERPOINT = "Counterpoint"
 TRACK_NAME_COUNTERPOINT_2 = "Counterpoint 2"
 TRACK_NAME_COUNTERPOINT_3 = "Counterpoint 3"
+TRACK_NAME_SECOND_MELODY  = "Second Melody"
 TRACK_NAME_BASS         = "Bass"
 TRACK_NAME_DRUMS        = "Drums"
 
@@ -1312,6 +1314,7 @@ def generate_piece(
     # voice accumulates its own notes across every section, and ends up
     # on its own MIDI track instead of being merged into one.
     all_cp_notes: dict[int, list] = {}
+    all_second_melody_notes = []
     all_drum_hits     = []
     # Chord chart markers -- (abs_beat, chord_symbol_text), one per resolved
     # chord across the whole piece, for accompanists reading along on keys
@@ -1504,6 +1507,51 @@ def generate_piece(
                 for n in peer_notes:
                     n.start_beat += global_beat
                 all_cp_notes.setdefault(voice_idx, []).extend(peer_notes)
+
+        # Second melody (optional, additive — see SectionModel.second_melody
+        # docstring). Independent of `voices` above and of the legacy
+        # `counterpoint` list below: always renders via
+        # generate_melody_for_progression, never counterpoint.py. v1 scope
+        # note: this voice does NOT feed into the counterpoint block's
+        # against_notes/against_voices below, so an existing counterpoint
+        # voice is not yet collision-aware of it — deliberate, not an
+        # oversight, to avoid mixing section-local and global-offset time
+        # bases across two independently-generated voices in one pass.
+        # When second_melody.rhythm_pattern is set, its onsets are
+        # pre-computed once via rhythm_pattern_to_events tiled across the
+        # FULL section (total_beats, this section's length pulled from
+        # SectionResult) — same mechanism harmony_pattern already uses
+        # (there it's called total_beats_section, but that name is local
+        # to generate_section; generate_piece's copy of the same value is
+        # just total_beats) — so a length_beats that doesn't
+        # evenly divide the bar drifts genuinely against the rest of the
+        # ensemble instead of resyncing every bar/chord.
+        if section_model.second_melody is not None:
+            sm = section_model.second_melody
+            sm_lo, sm_hi = sm.bounds() or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
+            sm_rhythm_override = None
+            if sm.rhythm_pattern is not None:
+                sm_rhythm_override = rhythm_pattern_to_events(
+                    sm.rhythm_pattern.model_dump(exclude_none=True),
+                    total_beats,
+                )
+            sm_rest = (sm.rest_probability if sm.rest_probability is not None
+                       else section_model.rest_probability)
+            second_melody_notes = generate_melody_for_progression(
+                chords, theme["key"], theme["mode"],
+                behavior=sm.behavior, density=density,
+                bars_per_chord=bars_list, beats_per_bar=beats_per_bar,
+                seed=base_seed + seed_offsets[i] + 200,
+                octave_bottom=sm_lo, octave_top=sm_hi,
+                base_velocity=sm.velocity,
+                rest_probability=sm_rest,
+                groove=groove, swing=swing,
+                rhythm_events_override=sm_rhythm_override,
+                leap_probability=sm.leap_probability,
+            )
+            for n in second_melody_notes:
+                n.start_beat += global_beat
+            all_second_melody_notes.extend(second_melody_notes)
 
         # Counterpoint (optional — only if section defines it).
         # section_model.counterpoint is a list of 1-3 CounterpointModel
@@ -1819,6 +1867,15 @@ def generate_piece(
         channel, track_name, program = _cp_track_specs[voice_idx]
         mid.tracks.append(build_counterpoint_track(
             notes, channel=channel, track_name=track_name, program=program,
+        ))
+
+    # Second melody track (only if any section used it)
+    if all_second_melody_notes:
+        mid.tracks.append(build_counterpoint_track(
+            all_second_melody_notes,
+            channel=CHANNEL_SECOND_MELODY,
+            track_name=TRACK_NAME_SECOND_MELODY,
+            program=PROGRAM_MELODY,
         ))
 
     # Harmony track
