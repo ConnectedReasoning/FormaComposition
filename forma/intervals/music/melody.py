@@ -865,6 +865,36 @@ def generate_sparse(
     return notes_out
 
 
+# Register-wall restoring pull (generate_develop's two wall-check call
+# sites, below): jitters the pull's TARGET rather than reducing its step
+# size. A fixed target (bare register_center) means every anchor within
+# reach lands on the exact same pitch, one hop, every time it fires --
+# which is what turned "corrective pull" into "new gravity well" in the
+# first place (a motif whose statement-to-statement net drift is small
+# under its own transform pool can get trapped oscillating tightly around
+# that one repeatable landing point, since it's now equally far from
+# BOTH walls and never re-triggers the check again). Jittering the target
+# by a few DIATONIC SCALE DEGREES (not semitones -- directed_anchor_shift
+# resolves its target via pitch_to_degree/degree_to_pitch internally, so
+# a semitone offset that doesn't itself land on a scale tone gets snapped
+# straight back to the SAME degree as the un-jittered target, silently
+# defeating the whole point) keeps the correction just as decisive --
+# still a solid move away from the wall, same max_step_degrees reach --
+# but different firings land on genuinely different nearby scale tones
+# instead of converging on one, so no single note becomes a magnet. Uses
+# the function's own seeded `rng`, so this stays fully deterministic and
+# reproducible per-seed like everything else in this module -- not
+# actual randomness, just per-seed variation.
+REGISTER_WALL_JITTER_DEGREES = 2  # diatonic scale degrees either side of register_center
+
+
+def _jittered_register_center(rng: random.Random, register_center: int, scale_tones: list[int]) -> int:
+    pcs = pitch_classes(scale_tones)
+    center_degree = pitch_to_degree(register_center, pcs)
+    jitter = rng.randint(-REGISTER_WALL_JITTER_DEGREES, REGISTER_WALL_JITTER_DEGREES)
+    return degree_to_pitch(center_degree + jitter, pcs)
+
+
 def generate_develop(
     rhythm_events: list[RhythmEvent],
     chord: VoicedChord,
@@ -1058,10 +1088,11 @@ def generate_develop(
         if (start <= resolved_octave_bottom + wall_margin
                 or start >= resolved_octave_top - wall_margin):
             start = directed_anchor_shift(
-                start, register_center, scale_tones,
+                start, _jittered_register_center(rng, register_center, scale_tones), scale_tones,
                 position_t=0.0, apex_position=1.0,
                 max_step_degrees=REGISTER_WALL_MAX_STEP,
             )
+
 
     motif_notes: list[tuple[int, float]] = []
     statement_idx = 0
@@ -1144,7 +1175,7 @@ def generate_develop(
                 if (anchor <= resolved_octave_bottom + wall_margin
                         or anchor >= resolved_octave_top - wall_margin):
                     anchor = directed_anchor_shift(
-                        anchor, register_center, scale_tones,
+                        anchor, _jittered_register_center(rng, register_center, scale_tones), scale_tones,
                         position_t=0.0, apex_position=1.0,
                         max_step_degrees=REGISTER_WALL_MAX_STEP,
                     )
