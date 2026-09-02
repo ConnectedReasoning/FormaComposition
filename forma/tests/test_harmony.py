@@ -16,6 +16,7 @@ from intervals.music.harmony import (
     apply_inversion,
     build_chord_tones,
     choose_inversion_for_voice_leading,
+    chord_symbol,
     get_scale,
     key_to_midi_root,
     mode_chord_quality,
@@ -57,11 +58,11 @@ class TestKeyAndScale:
 
 class TestParseRoman:
     @pytest.mark.parametrize("roman,expected", [
-        ("i", (0, None, 0)),
-        ("IV", (3, None, 0)),
-        ("iim7", (1, "minor7", 0)),
-        ("Vmaj9", (4, "major9", 0)),
-        ("viidim", (6, "diminished", 0)),
+        ("i", (0, None, [], 0)),
+        ("IV", (3, None, [], 0)),
+        ("iim7", (1, "minor7", [], 0)),
+        ("Vmaj9", (4, "major9", [], 0)),
+        ("viidim", (6, "diminished", [], 0)),
     ])
     def test_basic_and_quality_suffix(self, roman, expected):
         assert parse_roman(roman) == expected
@@ -71,17 +72,79 @@ class TestParseRoman:
         a pitch shift applied later, not a different diatonic degree.
         (Previously this wrapped to degree 4, silently colliding with
         whatever numeral actually lives at degree 4 in a given mode.)"""
-        assert parse_roman("bVI") == (5, None, -1)
+        assert parse_roman("bVI") == (5, None, [], -1)
 
     def test_sharp_alteration_does_not_change_the_degree(self):
-        assert parse_roman("#iv") == (3, None, 1)
+        assert parse_roman("#iv") == (3, None, [], 1)
 
     def test_alteration_combined_with_quality(self):
-        assert parse_roman("bVImaj7") == (5, "major7", -1)
+        assert parse_roman("bVImaj7") == (5, "major7", [], -1)
 
     def test_invalid_roman_raises(self):
         with pytest.raises(ValueError, match="Cannot parse Roman numeral"):
             parse_roman("Z")
+
+
+# ===========================================================================
+# parse_roman — independent tension clause
+# ===========================================================================
+
+class TestParseRomanTensions:
+    @pytest.mark.parametrize("roman,expected_tensions", [
+        ("V7(9)",        [(9, 0)]),
+        ("V7(9,13)",     [(9, 0), (13, 0)]),
+        ("im7(add13)",   [(13, 0)]),
+        ("V7(#9)",       [(9, 1)]),
+        ("V7(b13)",      [(13, -1)]),
+        ("V7(#9,b13)",   [(9, 1), (13, -1)]),
+    ])
+    def test_tension_clause_parses_independently_of_quality(self, roman, expected_tensions):
+        """Tensions are additive on top of whatever quality/base the rest
+        of the string names -- '(9,13)' must NOT force the 11th the old
+        fixed dominant9->dominant11 ladder would have implied."""
+        _, _, tensions, _ = parse_roman(roman)
+        assert tensions == expected_tensions
+
+    def test_tension_clause_quality_still_resolves(self):
+        """The quality suffix before the parenthesis is unaffected by the
+        tension clause trailing it."""
+        degree, quality, tensions, alteration = parse_roman("V7(9,13)")
+        assert (degree, quality, alteration) == (4, "dominant7", 0)
+        assert tensions == [(9, 0), (13, 0)]
+
+    def test_bare_quality_form_still_produces_empty_tensions(self):
+        """'Vmaj9' is the pre-existing fixed-quality form, not tension
+        syntax -- it must keep parsing exactly as before, with an empty
+        tensions list (the fixed quality itself already encodes the 9th)."""
+        assert parse_roman("Vmaj9") == (4, "major9", [], 0)
+
+    def test_unclosed_tension_clause_raises(self):
+        with pytest.raises(ValueError, match="unclosed tension clause"):
+            parse_roman("V7(9,13")
+
+    def test_empty_tension_clause_raises(self):
+        with pytest.raises(ValueError, match="empty tension clause"):
+            parse_roman("V7()")
+
+    def test_unrecognized_tension_token_raises(self):
+        with pytest.raises(ValueError, match="unrecognized tension"):
+            parse_roman("V7(15)")
+
+    def test_bare_seventh_in_parens_raises(self):
+        """'(7)' is not a valid tension -- the 7th is part of the base
+        quality, not something addable via the tension clause."""
+        with pytest.raises(ValueError, match="unrecognized tension"):
+            parse_roman("V7(7)")
+
+    def test_conflicting_accidentals_on_same_degree_raises(self):
+        with pytest.raises(ValueError, match="conflicting accidentals"):
+            parse_roman("V7(9,b9)")
+
+    def test_repeated_identical_tension_does_not_raise(self):
+        """Same degree, same accidental, listed twice -- redundant but
+        unambiguous, so this is allowed rather than an error."""
+        _, _, tensions, _ = parse_roman("V7(9,9)")
+        assert tensions == [(9, 0), (9, 0)]
 
 
 # ===========================================================================
@@ -155,6 +218,32 @@ class TestBuildChordTones:
         assert build_chord_tones(60, "minor7b9", "full") == [60, 63, 67, 70, 73]
         # major7b9: root, M3, P5, M7, b9
         assert build_chord_tones(60, "major7b9", "full") == [60, 64, 67, 71, 73]
+
+    def test_extra_tensions_appended_after_base_tones(self):
+        assert build_chord_tones(60, "dominant7", "medium", extra_tensions=[14, 21]) == \
+            [60, 64, 67, 70, 74, 81]
+
+    def test_extra_tensions_survive_density_that_truncates_base_quality(self):
+        """sparse caps at 3 tones -- an explicit 'dominant7' quality itself
+        loses its 7th here (pre-existing behavior). The explicit tension
+        must NOT suffer the same fate: it's appended AFTER the cap, not
+        subject to it."""
+        result = build_chord_tones(60, "dominant7", "sparse", extra_tensions=[14])
+        assert result == [60, 64, 67, 74]  # triad only, 7th dropped, 9th present
+
+    def test_extra_tension_deduped_against_existing_base_tone(self):
+        """A tension offset that's already present in the base tones (e.g.
+        density='full' auto-extended the quality to include a 9th, and the
+        roman numeral also explicitly wrote '(9)') is not doubled."""
+        # dominant9 base already has offset 14 (the 9th) among its tones.
+        result = build_chord_tones(60, "dominant9", "full", extra_tensions=[14])
+        assert result == [60, 64, 67, 70, 74]  # unchanged, no duplicate 74
+
+    def test_no_extra_tensions_behaves_identically_to_before(self):
+        assert build_chord_tones(60, "minor7", "medium", extra_tensions=None) == \
+            build_chord_tones(60, "minor7", "medium")
+        assert build_chord_tones(60, "minor7", "medium", extra_tensions=[]) == \
+            build_chord_tones(60, "minor7", "medium")
 
 
 # ===========================================================================
@@ -234,6 +323,60 @@ class TestResolveChord:
     def test_secondary_chord_invalid_target_raises(self):
         with pytest.raises(ValueError, match="not a valid Roman numeral"):
             resolve_chord("V7/Z", "C", "ionian")
+
+    def test_tension_clause_wired_into_chord_construction(self):
+        """V7(9,13) in C ionian: dominant7 base (G,B,D,F) plus explicit 9
+        (A) and 13 (E) tensions -- deliberately skipping the 11th, which
+        the old fixed-quality dominant9/dominant11 ladder could never
+        express (it forces every rung in between)."""
+        chord = resolve_chord("V7(9,13)", "C", "ionian", density="medium")
+        assert chord.quality == "dominant7"
+        assert chord.tensions == [(9, 0), (13, 0)]
+        pitch_classes = {n % 12 for n in chord.midi_notes}
+        assert pitch_classes == {7, 11, 2, 5, 9, 4}  # G B D F A E
+
+    def test_explicit_tension_survives_low_density_that_truncates_base_quality(self):
+        """Sparse density caps chord tones at 3, which (pre-existing
+        behavior, unrelated to this feature) truncates even an explicit
+        '7' suffix down to a bare triad. The explicitly requested tension
+        must NOT be subject to that same silent truncation."""
+        chord = resolve_chord("V7(9)", "C", "ionian", density="sparse")
+        pitch_classes = {n % 12 for n in chord.midi_notes}
+        assert 9 in pitch_classes  # A, the requested 9th -- survives
+        assert len(chord.midi_notes) == 4  # triad (3) + the one explicit tension
+
+    def test_tension_default_matches_mode_diatonic_context(self):
+        """A bare '(9)' on phrygian's i chord lands as a b9 automatically --
+        the same diatonic value mode_chord_quality's existing auto-b9
+        detection already picks for phrygian, confirming the independent
+        tension clause and the fixed-quality ladder agree on what
+        'diatonic' means for this mode."""
+        triad = resolve_chord("i", "C", "phrygian", density="sparse")
+        with_tension = resolve_chord("i(9)", "C", "phrygian", density="sparse")
+        triad_pcs = {n % 12 for n in triad.midi_notes}
+        added_pcs = {n % 12 for n in with_tension.midi_notes} - triad_pcs
+        # phrygian's own 2nd degree sits a half-step above root -> b9, not
+        # the natural 9 that any other mode would give here.
+        auto_b9_quality = resolve_chord("i", "C", "phrygian", density="full")
+        assert auto_b9_quality.quality == "minor7b9"
+        assert added_pcs == {(60 + 13) % 12}  # b9 = 13 semitones above root
+
+    def test_sharp_nine_altered_tension(self):
+        """V7(#9) -- the 'Hendrix chord' -- sharpens the diatonic natural
+        9th (A, pc 9) by a semitone to Bb (pc 10), not the natural 9."""
+        chord = resolve_chord("V7(#9)", "C", "ionian", density="medium")
+        pitch_classes = {n % 12 for n in chord.midi_notes}
+        assert 10 in pitch_classes
+        assert 9 not in pitch_classes
+
+    def test_secondary_chord_with_tension_clause_resolves(self):
+        """V7(9)/ii in C ionian: applied dominant7 built on ii's root (A)
+        with an explicit 9 tension riding along -- same additive mechanism
+        as ordinary chords, computed relative to the APPLIED degree/mode."""
+        chord = resolve_chord("V7(9)/ii", "C", "ionian", density="medium")
+        assert chord.root_name == "A"
+        assert chord.quality == "dominant7"
+        assert chord.tensions == [(9, 0)]
 
     def test_unknown_key_raises(self):
         with pytest.raises(ValueError):
@@ -318,6 +461,38 @@ class TestResolveChord:
         # bVI in C ionian = Ab; V7 of Ab = Eb dominant7
         assert chord.root_name == "D#"  # enharmonic Eb
         assert chord.quality == "dominant7"
+
+
+# ===========================================================================
+# chord_symbol — tension suffix (chart truthfulness)
+# ===========================================================================
+
+class TestChordSymbolTensions:
+    def test_renders_plain_tensions(self):
+        chord = resolve_chord("V7(9,13)", "C", "ionian", density="medium")
+        # show_inversion=False: which inversion voice-leading picks (and
+        # thus whether a "/bass" suffix appears) is a separate, already-
+        # tested concern -- this test isolates the tension suffix itself.
+        assert chord_symbol(chord, show_inversion=False) == "G7(9,13)"
+
+    def test_renders_altered_tension(self):
+        chord = resolve_chord("V7(#9)", "C", "ionian", density="medium")
+        assert chord_symbol(chord, show_inversion=False) == "G7(#9)"
+
+    def test_no_tensions_unaffected(self):
+        """A chord with no tension clause renders exactly as before this
+        feature existed -- no stray empty parens."""
+        chord = resolve_chord("V7", "C", "ionian", density="medium")
+        assert chord_symbol(chord, show_inversion=False) == "G7"
+
+    def test_symbol_reads_the_same_field_that_placed_the_pitches(self):
+        """chord.tensions is the single source chord_symbol renders from --
+        it can't show a tension build_chord_tones didn't actually voice,
+        because both are derived from the same parsed list, not two
+        independently-maintained values."""
+        chord = resolve_chord("im7(add13)", "C", "dorian", density="sparse")
+        assert "13" in chord_symbol(chord, show_inversion=False)
+        assert any((deg, acc) == (13, 0) for deg, acc in chord.tensions)
 
 
 # ===========================================================================

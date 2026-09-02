@@ -1,13 +1,21 @@
 """
 harmony.py — Intervals Engine
 Resolves Roman numeral progressions to voiced MIDI chords.
-Handles modes, inversions, and extensions (triads, 7ths, 9ths, 11ths).
+Handles modes, inversions, and extensions (triads, 7ths, 9ths, 11ths), plus
+an independent tension clause ("V7(9,13)") parsed by parse_roman and wired
+through build_chord_tones/resolve_chord -- tensions default to their
+diatonic value for the piece's mode, an explicit accidental in the clause
+("#9", "b13") shifts that by a semitone, and chord.tensions is the single
+field chord_symbol() reads to keep the chart truthful to what's actually
+voiced. No 13th-chord support beyond the tension clause -- there is no
+fixed "dominant13"/"major13" quality string; write "(13)" instead.
 """
 
 from dataclasses import dataclass, field
 from typing import Optional
 
 import random
+import re
 from abc import ABC, abstractmethod
 
 from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
@@ -165,14 +173,20 @@ CHORD_QUALITY_SYMBOLS = {
 def chord_symbol(chord: "VoicedChord", show_inversion: bool = True) -> str:
     """
     Human-readable chord symbol for a resolved VoicedChord (e.g. "Dm9",
-    "Cmaj7", "G7b9") -- letter-name, not Roman numeral, since a musician
-    reading a chart while playing along needs the directly-playable name,
-    not a numeral requiring mental transposition against the key.
+    "Cmaj7", "G7b9", "G7(9,13)") -- letter-name, not Roman numeral, since a
+    musician reading a chart while playing along needs the directly-playable
+    name, not a numeral requiring mental transposition against the key.
 
     Falls back to the raw quality string (rather than raising) for any
     quality not in CHORD_QUALITY_SYMBOLS, so an unrecognized future
     quality degrades to a readable-if-inelegant label instead of crashing
     chart generation entirely.
+
+    Independent tensions (chord.tensions, from parse_roman's tension
+    clause) are appended as a parenthesized suffix -- "(9,13)", "(#9,b13)"
+    -- reading directly off the same field build_chord_tones used to place
+    those tones in midi_notes, so the chart can never show a tension that
+    isn't actually sounding, or omit one that is.
 
     show_inversion: when True (the default) and the chord is voiced in a
     non-root inversion, appends "/<bass note>" -- standard lead-sheet
@@ -185,6 +199,12 @@ def chord_symbol(chord: "VoicedChord", show_inversion: bool = True) -> str:
     """
     symbol = CHORD_QUALITY_SYMBOLS.get(chord.quality, chord.quality)
     label = f"{chord.root_name}{symbol}"
+    if chord.tensions:
+        accidental_str = {-1: "b", 0: "", 1: "#"}
+        tension_str = ",".join(
+            f"{accidental_str[acc]}{deg}" for deg, acc in chord.tensions
+        )
+        label += f"({tension_str})"
     if show_inversion and chord.inversion != 0 and chord.midi_notes:
         bass_pc = chord.midi_notes[0] % 12
         root_pc = CHROMATIC.index(chord.root_name) if chord.root_name in CHROMATIC else None
@@ -214,6 +234,15 @@ class VoicedChord:
     roman: str = ""         # original Roman numeral string
     degree: int = 0         # scale degree 0-6
 
+    # Independent tensions requested via parse_roman's tension clause, e.g.
+    # "V7(9,13)" -> [(9, 0), (13, 0)]. Kept as the SAME (degree, accidental)
+    # tuples parse_roman returns -- this is the single source of truth
+    # chord_symbol() reads to render the chart; midi_notes already has the
+    # actual pitches (via build_chord_tones' extra_tensions), so this field
+    # exists purely so the chart can describe what's already sounding,
+    # never as a second place that could drift from it.
+    tensions: list[tuple[int, int]] = field(default_factory=list)
+
     # Per-chord rhythm DNA.  When present, the harmony strategy uses these
     # events instead of the section-level stencil.  Events are expressed in
     # chord-local beat coordinates (first onset at 0.0).
@@ -224,7 +253,8 @@ class VoicedChord:
     def __repr__(self):
         notes_str = ", ".join(str(n) for n in self.midi_notes)
         dna = f" dna={len(self.rhythm_events)}ev" if self.rhythm_events else ""
-        return f"VoicedChord({self.root_name}{self.quality} inv={self.inversion} [{notes_str}]{dna})"
+        tens = f" tensions={self.tensions}" if self.tensions else ""
+        return f"VoicedChord({self.root_name}{self.quality} inv={self.inversion} [{notes_str}]{tens}{dna})"
 
 
 # ---------------------------------------------------------------------------
@@ -251,11 +281,25 @@ def get_scale(key: str, mode: str, octave: int = 4) -> list[int]:
     return [root_midi + interval for interval in MODES[mode]]
 
 
-def parse_roman(roman: str) -> tuple[int, Optional[str], int]:
+# ─────────────────────────────────────────────────────────────────────────
+# Independent tension clause: "(9)", "(9,13)", "(add13)", "(#9,b13)"
+# ─────────────────────────────────────────────────────────────────────────
+# A single token is an optional 'add' (pure readability alias, no semantic
+# effect -- "add13" and "13" parse identically), an optional accidental
+# (b/#), and a tension degree number restricted to 9/11/13 -- the only
+# tension degrees jazz practice actually uses. Anything else (a bare "7",
+# a made-up "15", a stray letter) is a hard parse error, not a silently
+# ignored token -- see the no-op discussion this grammar exists to avoid.
+_TENSION_TOKEN_RE = re.compile(r'^(?:add)?([b#]?)(9|11|13)$', re.IGNORECASE)
+_ACCIDENTAL_TO_INT = {'b': -1, '#': 1, '': 0}
+
+
+def parse_roman(roman: str) -> tuple[int, Optional[str], list[tuple[int, int]], int]:
     """
     Parse a Roman numeral string into (degree_index, quality_override_or_None,
-    alteration). Supports chromatic alterations with 'b' (flat) and '#'
-    (sharp) prefixes.
+    tensions, alteration). Supports chromatic alterations with 'b' (flat)
+    and '#' (sharp) prefixes, and an independent tension clause in
+    parentheses.
 
     degree_index is the UNALTERED position (0-6) the bare numeral names --
     "bVII" is still degree 6 (the seventh-position chord), same as "VII".
@@ -267,15 +311,33 @@ def parse_roman(roman: str) -> tuple[int, Optional[str], int]:
     literal same chord. See resolve_chord()'s docstring for how the
     returned alteration is now actually applied.)
 
+    tensions is a list of (degree_number, accidental) pairs, e.g.
+    "(9,13)" → [(9, 0), (13, 0)], "(#9,b13)" → [(9, 1), (13, -1)]. This is
+    INDEPENDENT of quality_override -- "V7(9,13)" builds a dominant7 base
+    with a 9th and 13th added, without implying the 11th the old fixed
+    "dominant9"/"dominant11" quality ladder would have forced in between.
+    Empty list when no tension clause is present -- this is the single
+    source of truth for a chord's tensions; nothing else in the schema
+    duplicates it, specifically so a tension can never diverge from what
+    the roman numeral string itself says.
+
     Examples:
-        "i"      → (0, None, 0)
-        "IV"     → (3, None, 0)
-        "iim7"   → (1, "minor7", 0)
-        "Vmaj9"  → (4, "major9", 0)
-        "viidim" → (6, "diminished", 0)
-        "bVI"    → (5, None, -1)  [VI, flattened by a semitone]
-        "#iv"    → (3, None, +1)  [iv, sharpened by a semitone]
-        "bVImaj7" → (5, "major7", -1)  [alteration + quality]
+        "i"          → (0, None, [], 0)
+        "IV"         → (3, None, [], 0)
+        "iim7"       → (1, "minor7", [], 0)
+        "Vmaj9"      → (4, "major9", [], 0)  [legacy fixed-quality form, unchanged]
+        "viidim"     → (6, "diminished", [], 0)
+        "bVI"        → (5, None, [], -1)  [VI, flattened by a semitone]
+        "#iv"        → (3, None, [], +1)  [iv, sharpened by a semitone]
+        "bVImaj7"    → (5, "major7", [], -1)  [alteration + quality]
+        "V7(9,13)"   → (4, "dominant7", [(9, 0), (13, 0)], 0)
+        "im7(add13)" → (0, "minor7", [(13, 0)], 0)
+        "V7(#9)"     → (4, "dominant7", [(9, 1)], 0)
+
+    Raises ValueError on an unclosed tension clause, an empty "()", an
+    unrecognized tension token, or a tension degree repeated with
+    conflicting accidentals (e.g. "(9,b9)") -- all treated as malformed
+    input rather than silently dropped or silently resolved one way.
     """
     # Strip leading/trailing whitespace
     roman = roman.strip()
@@ -303,6 +365,21 @@ def parse_roman(roman: str) -> tuple[int, Optional[str], int]:
 
     remainder = roman[len(base):]  # anything after the numeral
 
+    # Split off a trailing parenthesized tension clause, if present, before
+    # quality-symbol matching runs -- otherwise "(9,13)" would just be dead
+    # weight on the end of the quality-symbol prefix scan below.
+    tension_clause = None
+    paren_start = remainder.find('(')
+    if paren_start != -1:
+        if not remainder.endswith(')'):
+            raise ValueError(
+                f"Cannot parse Roman numeral: '{roman}' -- unclosed tension "
+                f"clause. Tensions must be wrapped in matching parentheses, "
+                f"e.g. 'V7(9,13)'."
+            )
+        tension_clause = remainder[paren_start + 1:-1]
+        remainder = remainder[:paren_start]
+
     # Check for explicit quality symbol
     quality_override = None
     for symbol in sorted(QUALITY_SYMBOLS.keys(), key=len, reverse=True):
@@ -310,7 +387,38 @@ def parse_roman(roman: str) -> tuple[int, Optional[str], int]:
             quality_override = QUALITY_SYMBOLS[symbol.lower()]
             break
 
-    return degree, quality_override, alteration
+    tensions: list[tuple[int, int]] = []
+    if tension_clause is not None:
+        if tension_clause.strip() == "":
+            raise ValueError(
+                f"Cannot parse Roman numeral: '{roman}' -- empty tension "
+                f"clause '()'. Remove the parentheses entirely, or add a "
+                f"tension inside them."
+            )
+        seen_degrees: dict[int, int] = {}
+        for raw_token in tension_clause.split(','):
+            token = raw_token.strip()
+            m = _TENSION_TOKEN_RE.match(token)
+            if not m:
+                raise ValueError(
+                    f"Cannot parse Roman numeral: '{roman}' -- unrecognized "
+                    f"tension '{token}'. Tensions must be 9, 11, or 13, "
+                    f"optionally prefixed with 'add', 'b', or '#' (e.g. "
+                    f"'9', 'add13', 'b13', '#9')."
+                )
+            accidental_symbol, degree_str = m.groups()
+            tension_degree = int(degree_str)
+            tension_accidental = _ACCIDENTAL_TO_INT[accidental_symbol.lower()]
+            if tension_degree in seen_degrees and seen_degrees[tension_degree] != tension_accidental:
+                raise ValueError(
+                    f"Cannot parse Roman numeral: '{roman}' -- tension "
+                    f"{tension_degree} given conflicting accidentals in the "
+                    f"same clause. Ambiguous which one applies."
+                )
+            seen_degrees[tension_degree] = tension_accidental
+            tensions.append((tension_degree, tension_accidental))
+
+    return degree, quality_override, tensions, alteration
 
 
 def mode_chord_quality(degree: int, mode: str, density: str) -> str:
@@ -410,14 +518,88 @@ def _roman_degree_to_root_midi(degree: int, alteration: int, key: str, mode: str
     return major_scale[degree] + alteration
 
 
+# Scale-step offset (in diatonic degrees, not semitones) from a chord's own
+# root to the scale tone that gives each compound tension its DIATONIC
+# default: 9th = compound 2nd (root + 1 step), 11th = compound 4th (root +
+# 3 steps), 13th = compound 6th (root + 5 steps). Same pattern the existing
+# third/fifth/seventh/ninth math in mode_chord_quality() already uses --
+# this just extends it to the 13th, and reuses it here for the independent
+# tension clause instead of duplicating the formula a third time.
+_TENSION_STEP_OFFSET = {9: 1, 11: 3, 13: 5}
+
+
+def _diatonic_tension_semitones(
+    degree: int, alteration: int, mode: str, tension_degree: int, tension_accidental: int,
+) -> int:
+    """
+    Resolve one (tension_degree, tension_accidental) pair from parse_roman's
+    tension clause into an absolute semitone offset from the chord's root.
+
+    The DIATONIC default (accidental == 0) is read off the mode's own scale
+    at the appropriate compound step -- e.g. a "9" on a phrygian i chord
+    lands as a b9 automatically, because phrygian's own 2nd degree sits a
+    half-step above its root, same as mode_chord_quality's existing
+    auto-detected b9 logic. An explicit accidental in the clause ("#9",
+    "b13") then shifts that diatonic default by one further semitone --
+    it does NOT replace mode-derived context with a hardcoded generic
+    interval, so "(9)" in phrygian and "(9)" in ionian correctly produce
+    different actual pitches even though both are written identically.
+
+    Mirrors _roman_degree_to_root_midi's alteration handling: an altered/
+    borrowed chord root (bVII, etc.) has no diatonic footing in the
+    current mode, so its tensions are read off the major scale instead --
+    the same reference scale that root itself was computed against.
+    """
+    step_offset = _TENSION_STEP_OFFSET[tension_degree]
+    intervals = MODES["ionian"] if alteration != 0 else MODES[mode.lower()]
+    n = len(intervals)
+    diatonic = (intervals[(degree + step_offset) % n] - intervals[degree]) % 12 + 12
+    return diatonic + tension_accidental
+
+
+def _resolve_tension_offsets(
+    tensions: list[tuple[int, int]], degree: int, alteration: int, mode: str,
+) -> list[int]:
+    """Resolve a full parsed tension list to semitone-from-root offsets."""
+    return [
+        _diatonic_tension_semitones(degree, alteration, mode, td, acc)
+        for td, acc in tensions
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Voicing
 # ---------------------------------------------------------------------------
 
-def build_chord_tones(root_midi: int, quality: str, density: str) -> list[int]:
+def build_chord_tones(
+    root_midi: int, quality: str, density: str,
+    extra_tensions: Optional[list[int]] = None,
+) -> list[int]:
     """
     Build the MIDI note list for a chord given its root and quality,
     capped by density.
+
+    extra_tensions: semitone-from-root offsets for EXPLICITLY requested
+    tensions (parse_roman's independent tension clause, already resolved
+    to concrete semitones by _resolve_tension_offsets). These are added
+    AFTER density capping and are never truncated by it.
+
+    This is a deliberate asymmetry from how the base quality's own tones
+    are handled (existing behavior: `tones[:max_tones]` silently drops
+    whatever density doesn't have room for -- e.g. an explicit "V7" chord
+    quality still loses its 7th under density="sparse"). Explicit tensions
+    are a different contract: the person wrote "(9,13)" precisely because
+    they want those specific tones present, not "present if density
+    allows." Subjecting them to the same silent cap would recreate, for
+    the tension feature specifically, the exact silent-no-op failure mode
+    this feature's guard rails exist to prevent. (The base-quality density
+    cap is a separate, pre-existing behavior -- not touched here.)
+
+    Duplicate pitch classes are NOT re-added: if the base quality already
+    includes a tone at the same semitone-from-root offset (e.g. density
+    "full" auto-extended the quality to include a 9th, and the roman
+    numeral ALSO explicitly wrote "(9)"), the explicit tension is a no-op
+    addition rather than a doubled note -- the tone is already there.
     """
     if quality not in CHORD_INTERVALS:
         # Fallback: treat as major triad
@@ -425,7 +607,17 @@ def build_chord_tones(root_midi: int, quality: str, density: str) -> list[int]:
     intervals = CHORD_INTERVALS[quality]
     max_tones = DENSITY_TONES.get(density, 3)
     tones = [root_midi] + [root_midi + i for i in intervals]
-    return tones[:max_tones]
+    tones = tones[:max_tones]
+
+    if extra_tensions:
+        existing_offsets = {t - root_midi for t in tones}
+        for offset in extra_tensions:
+            if offset not in existing_offsets:
+                tones.append(root_midi + offset)
+                existing_offsets.add(offset)
+        tones.sort()
+
+    return tones
 
 
 def apply_inversion(tones: list[int], inversion: int) -> list[int]:
@@ -607,7 +799,7 @@ def _resolve_secondary_chord(
     target_str = target_str.strip()
 
     try:
-        target_degree, _, target_alteration = parse_roman(target_str)
+        target_degree, _, _target_tensions, target_alteration = parse_roman(target_str)
     except ValueError:
         raise ValueError(
             f"Cannot resolve '{roman}': '{target_str}' is not a valid Roman "
@@ -617,7 +809,7 @@ def _resolve_secondary_chord(
             f"this piece needs a different approach for now."
         )
 
-    applied_degree, applied_quality_override, applied_alteration = parse_roman(applied_str)
+    applied_degree, applied_quality_override, applied_tensions, applied_alteration = parse_roman(applied_str)
 
     scale = get_scale(key, mode, octave)
     tonic_midi = scale[0]
@@ -630,7 +822,8 @@ def _resolve_secondary_chord(
     root_name = CHROMATIC[applied_root_midi % 12]
     quality = applied_quality_override if applied_quality_override else "major"
 
-    raw_tones = build_chord_tones(applied_root_midi, quality, density)
+    tension_offsets = _resolve_tension_offsets(applied_tensions, applied_degree, applied_alteration, mode)
+    raw_tones = build_chord_tones(applied_root_midi, quality, density, extra_tensions=tension_offsets)
     voiced, inversion = choose_inversion_for_voice_leading(
         raw_tones, prev_chord, register_bottom, register_top, voicing
     )
@@ -640,6 +833,7 @@ def _resolve_secondary_chord(
         quality=quality,
         midi_notes=voiced,
         inversion=inversion,
+        tensions=applied_tensions,
         roman=roman,
         degree=applied_degree,
     )
@@ -678,7 +872,7 @@ def resolve_chord(
             roman, key, mode, density, prev_chord, register_bottom, register_top, octave, voicing
         )
 
-    degree, quality_override, alteration = parse_roman(roman)
+    degree, quality_override, tensions, alteration = parse_roman(roman)
     root_midi = _roman_degree_to_root_midi(degree, alteration, key, mode, octave)
     root_name = CHROMATIC[root_midi % 12]
 
@@ -696,7 +890,8 @@ def resolve_chord(
         # An explicit quality suffix ("bVII7", "bVImaj7", ...) always wins.
         quality = "major"
 
-    raw_tones = build_chord_tones(root_midi, quality, density)
+    tension_offsets = _resolve_tension_offsets(tensions, degree, alteration, mode)
+    raw_tones = build_chord_tones(root_midi, quality, density, extra_tensions=tension_offsets)
     voiced, inversion = choose_inversion_for_voice_leading(
         raw_tones, prev_chord, register_bottom, register_top, voicing
     )
@@ -706,6 +901,7 @@ def resolve_chord(
         quality=quality,
         midi_notes=voiced,
         inversion=inversion,
+        tensions=tensions,
         roman=roman,
         degree=degree,
     )
