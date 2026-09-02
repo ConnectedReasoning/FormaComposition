@@ -45,7 +45,6 @@ Import these instead of maintaining local constant sets in generator.py:
 from __future__ import annotations
 
 import math
-import re
 import warnings
 from typing import Annotated, Literal, Optional, Union, get_args
 
@@ -1082,31 +1081,19 @@ class SectionModel(BaseModel):
         if v is None:
             return v
         for entry in v:
-            if isinstance(entry, str):
-                # A comma INSIDE a tension clause's parens is legitimate --
-                # "V7(9,13)" is one chord with two tensions, not several
-                # chords crammed into one string (harmony.py's parse_roman
-                # tension-clause grammar). Strip parenthesized spans before
-                # checking, so only a comma OUTSIDE any clause still trips
-                # this guard -- that's the actual old-bug signature this
-                # check exists to catch.
-                outside_tension_clause = re.sub(r"\([^)]*\)", "", entry)
-                if "," in outside_tension_clause:
-                    raise ValueError(
-                        f"progression entry {entry!r} contains a comma "
-                        f"outside a tension clause. A chord symbol never "
-                        f"legitimately contains one there — this almost "
-                        f"always means several chords were written as a "
-                        f"single comma-separated string inside one array "
-                        f"element (e.g. [\"ii, v, i\"]) instead of separate "
-                        f"elements ([\"ii\", \"v\", \"i\"]). The single-string "
-                        f"form parses silently as just the first chord, "
-                        f"with every chord after the comma discarded — no "
-                        f"error, no chord changes, and no clue why. Split "
-                        f"it into separate array elements. (A comma INSIDE "
-                        f"parentheses, e.g. \"V7(9,13)\", is fine — that's "
-                        f"a tension clause, not multiple chords.)"
-                    )
+            if isinstance(entry, str) and "," in entry:
+                raise ValueError(
+                    f"progression entry {entry!r} contains a comma. A chord "
+                    f"symbol never legitimately contains one — this almost "
+                    f"always means several chords were written as a single "
+                    f"comma-separated string inside one array element "
+                    f"(e.g. [\"ii, v, i\"]) instead of separate elements "
+                    f"([\"ii\", \"v\", \"i\"]). The single-string form parses "
+                    f"silently as just the first chord, with every chord "
+                    f"after the comma discarded — no error, no chord "
+                    f"changes, and no clue why. Split it into separate "
+                    f"array elements."
+                )
         return v
 
     @field_validator("key", mode="before")

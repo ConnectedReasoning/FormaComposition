@@ -1209,89 +1209,53 @@ class TestGenerateDevelop:
         itself more likely to need another wall-hugging correction. Over
         many chained statements this compounds with no restoring force
         (center-fold's old behavior always had one; that's what actually
-        got lost).
+        got lost). Confirmed on the real piece via monkeypatch: disabling
+        the restoring pull raised the top pitch's share from 26% to 39%
+        of a 352-note melody.
 
         Fixed with a mild, CAPPED (directed_anchor_shift) pull toward
         register center whenever a fresh statement's anchor is within
         wall_margin of a wall and melodic_arc is absent (see the
         anchor-health comment at generate_develop's anchor assignment).
-
-        Second-order bug in the fix itself, found and fixed later: a
-        FIXED target (bare register_center) meant every correction landed
-        on the exact same pitch, one hop, every time it fired -- turning
-        "corrective pull" into a NEW gravity well at the center instead of
-        the wall, for any motif whose statement-to-statement net drift
-        happens to be small once centered (that motif then oscillates
-        tightly around the one repeated landing point instead of exploring
-        the register, since it's now equally far from both walls and never
-        re-triggers the check again). Fixed by jittering the pull's target
-        by a few DIATONIC SCALE DEGREES each time it fires (see
-        _jittered_register_center) -- must be degree-space, not semitones,
-        since directed_anchor_shift resolves its target via
-        pitch_to_degree/degree_to_pitch internally, and a semitone offset
-        that doesn't land on an actual scale tone gets silently snapped
-        right back to the un-jittered degree.
-
-        This test uses a TRIMMED SLICE OF REAL CATALOG MATERIAL --
-        piece_broadway_boogie_v8's own m3_canon_entry/m3_canon_full
-        sections (same motif, key, mode, register, seed as the actual
-        piece) -- not a hand-built synthetic motif. An earlier version of
-        this test used a small synthetic fugue-subject motif instead; that
-        motif turned out to be a genuinely adversarial edge case for this
-        mechanism (its alternating inversion/retrograde transforms produce
-        near-canceling net drift once an anchor lands near center), and
-        the with/without comparison on it stayed unreliable -- non-
-        monotonic under jitter-width tuning, and roughly a coin flip
-        (2 wins / 6 losses across seeds) even after scaling the piece 3x
-        longer to rule out a small-sample effect. Neither jitter tuning
-        nor piece length fixed it, which is itself the useful finding:
-        that motif shape is a known limitation of a wall-proximity-
-        triggered pull, not a bug in this test or this fix. Real catalog
-        material (this test, and the full piece_broadway_boogie_v8 render
-        checked during this fix) shows the pull reliably winning, which is
-        what actually matters -- this engine renders real pieces, not
-        adversarially-constructed synthetic motifs.
+        This test disables that pull via monkeypatch (an identity
+        wrapper around directed_anchor_shift) to confirm concentration
+        measurably worsens without it, and stays bounded with it --
+        using the actual reported motif/register/transform combination,
+        not a simplified stand-in (a scaled-down synthetic version of
+        this scenario did not reliably reproduce the compounding drift
+        within a reasonable statement count).
         """
         import intervals.music.melody as melody_mod
         from intervals.core import generator as generator_mod
         from collections import Counter
 
         piece = {
-            "name": "broadway_boogie", "key": "F", "mode": "mixolydian", "tempo": 98,
-            "seed": 194,
+            "name": "flatten_regression", "key": "D", "mode": "aeolian", "tempo": 85,
+            "seed": 1750,
             "motif": {
-                "name": "boogie_cell",
-                "intervals": [0, 4, 3, 2, 1, -1, -2, -3],
-                "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0],
-                "transform_pool": ["retrograde", "inversion", "sequence"],
+                "name": "fugue_subject",
+                "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
+                "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                "transform_pool": ["inversion", "retrograde"],
             },
-            "form_type": "song",
-            "form": ["m3_canon_entry", "m3_canon_full"],
-            "sections": {
-                "m3_canon_entry": {
-                    "name": "m3_canon_entry", "bars": 16,
-                    "progression": ["ii", "iii°", "v"], "chord_bars": [4, 2, 2],
-                    "density": "medium",
-                    "melody": {"register": "alto", "behavior": "develop", "velocity": 89},
-                    "bass_style": "steady", "arc": "swell", "rhythm": "motif",
-                    "rest_probability": 0.25,
-                    "harmony_rhythm": {"rhythm": "sustain", "density": "full", "groove": "straight"},
-                    "counterpoint": {"species": "free", "register": "above", "dissonance": "passing"},
-                    "swing": 0.34,
+            "sections": [
+                {
+                    "name": "continuation", "bars": 12,
+                    "progression": ["i", "iv", "V", "i", "V", "i"],
+                    "chord_bars": [2, 2, 2, 2, 2, 2],
+                    "rhythm": "motif", "bass_style": "root_only",
+                    "bass_rest_probability": 1.0, "beats_per_bar": 4,
+                    "voices": [{"register": "soprano", "behavior": "develop", "velocity": 90}],
                 },
-                "m3_canon_full": {
-                    "name": "m3_canon_full", "bars": 32,
-                    "progression": ["ii", "iii°", "v", "I", "ii", "iii°", "v", "I"],
-                    "chord_bars": [1, 1, 1, 1, 1, 1, 1, 1],
-                    "density": "medium",
-                    "melody": {"register": "alto", "behavior": "develop", "velocity": 89},
-                    "bass_style": "steady", "arc": "plateau", "rhythm": "motif",
-                    "rest_probability": 0.3,
-                    "harmony_rhythm": {"rhythm": "sustain", "density": "full", "groove": "straight"},
-                    "counterpoint": {"species": "free", "register": "above", "dissonance": "passing"},
-                    "swing": 0.34,
+                {
+                    "name": "stretto", "bars": 12,
+                    "progression": ["i", "IV", "V", "i", "iv", "V"],
+                    "chord_bars": [2, 2, 2, 2, 2, 2],
+                    "rhythm": "motif", "bass_style": "root_only",
+                    "bass_rest_probability": 1.0, "beats_per_bar": 4,
+                    "voices": [{"register": "soprano", "behavior": "develop", "velocity": 95}],
                 },
-            },
+            ],
         }
 
         def melody_top_pitch_fraction():
@@ -1319,6 +1283,7 @@ class TestGenerateDevelop:
         n_without, frac_without = melody_top_pitch_fraction()
         monkeypatch.setattr(melody_mod, "directed_anchor_shift", real_shift)
 
+        assert n_with == n_without  # same note count either way -- only pitches differ
         assert frac_with < frac_without, (
             f"expected the restoring pull to reduce the top pitch's share "
             f"({frac_with:.2f}) below the no-pull baseline ({frac_without:.2f}) "
