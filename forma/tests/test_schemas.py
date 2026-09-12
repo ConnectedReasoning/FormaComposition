@@ -446,6 +446,20 @@ class TestSectionModel:
         with pytest.raises(ValidationError, match="comma"):
             SectionModel.model_validate(_minimal_section(progression=["ii, v, i"]))
 
+    def test_progression_entry_with_tension_clause_comma_is_valid(self):
+        """A comma INSIDE a tension clause's parens ('V7(9,13)') is a real
+        chord with two tensions, not several chords crammed into one
+        string -- the guard above must not fire on this."""
+        model = SectionModel.model_validate(_minimal_section(progression=["V7(9,13)", "Imaj7(9)"]))
+        assert model.progression == ["V7(9,13)", "Imaj7(9)"]
+
+    def test_progression_entry_with_comma_outside_tension_clause_still_invalid(self):
+        """A tension clause doesn't blanket-exempt a string from the
+        guard -- a comma OUTSIDE the parens is still the old-bug
+        signature even if the string also happens to contain parens."""
+        with pytest.raises(ValidationError, match="comma"):
+            SectionModel.model_validate(_minimal_section(progression=["V7(9), ii"]))
+
     def test_invalid_rhythm_pattern_requires_block(self):
         with pytest.raises(ValidationError, match="requires a rhythm_pattern"):
             SectionModel.model_validate(_minimal_section(rhythm="pattern"))

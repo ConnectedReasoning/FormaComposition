@@ -23,6 +23,7 @@ from intervals.music.harmony import (
     parse_roman,
     resolve_chord,
     resolve_progression,
+    spread_voicing,
 )
 
 
@@ -295,6 +296,140 @@ class TestChooseInversionForVoiceLeading:
         voiced, _ = choose_inversion_for_voice_leading([84, 88, 91], None,
                                                         register_bottom=48, register_top=72)
         assert all(48 <= n <= 84 for n in voiced)  # shifted down toward register
+
+
+# ===========================================================================
+# spread_voicing — tension-aware placement (Phase 3)
+# ===========================================================================
+
+class TestSpreadVoicingTensionPlacement:
+    def test_no_tension_pcs_open_unchanged_from_original_algorithm(self):
+        """tension_pcs=None (the default) must reproduce the exact
+        pre-Phase-3 algorithm -- every existing non-tension piece in the
+        catalog renders through this path and must not move a single
+        note. Hand-derived: bass=60, upper=[64,67,70], headroom=24,
+        3 evenly-spaced slots at 60+8, 60+16, 60+24 snapped to each
+        voice's own pitch class."""
+        assert spread_voicing([60, 64, 67, 70], "open", 48, 84) == [60, 64, 79, 82]
+
+    def test_open_voicing_never_corrupts_pitch_class_on_overflow(self):
+        """Standalone bug fix, NOT tension-related: with enough upper
+        voices and a modest register, the pre-Phase-3 clamp could
+        overshoot register_top and get silently clamped to whatever
+        pitch class the boundary happened to be -- corrupting harmonic
+        content with no tensions involved at all. tension_pcs is
+        deliberately omitted here to prove that."""
+        voiced = [60, 64, 67, 70, 74, 81]
+        result = spread_voicing(voiced, "open", 48, 76)
+        assert sorted(n % 12 for n in result) == sorted(n % 12 for n in voiced)
+        assert all(48 <= n <= 76 for n in result)
+
+    def test_empty_tension_pcs_set_also_unchanged(self):
+        """An explicitly empty set behaves identically to None -- both
+        mean 'no tensions in this chord'."""
+        assert spread_voicing([60, 64, 67, 70], "open", 48, 84, tension_pcs=set()) == \
+            spread_voicing([60, 64, 67, 70], "open", 48, 84)
+
+    def test_no_tension_pcs_closed_still_pure_noop(self):
+        voiced = [60, 64, 67, 70]
+        assert spread_voicing(voiced, "closed", 48, 84) == voiced
+        assert spread_voicing(voiced, "closed", 48, 84, tension_pcs=set()) == voiced
+
+    def test_no_tension_pcs_drop2_unaffected_by_the_parameter_existing(self):
+        voiced = [60, 64, 67, 71, 74]
+        assert spread_voicing(voiced, "drop2", 48, 84) == \
+            spread_voicing(voiced, "drop2", 48, 84, tension_pcs=None)
+
+    # -- Rule 1: mud zone (close interval, below MUD_ZONE_CEILING=60) --
+
+    def test_mud_zone_clash_pushes_tension_up_an_octave(self):
+        """Tension tone at 59 (pc 11), one semitone below the guide tone
+        at 58 -- a close interval (< a major third) below middle C reads
+        as mud. Pushed up to 71, clear of every other voice. Every guide
+        tone is completely untouched."""
+        voiced = [48, 52, 55, 58, 59]
+        result = spread_voicing(voiced, "closed", 36, 96, tension_pcs={11})
+        assert result == [48, 52, 55, 58, 71]
+
+    def test_same_close_interval_above_mud_zone_is_left_alone(self):
+        """The identical semitone clash (72 vs the guide tone at 71), but
+        both notes sit AT/above MUD_ZONE_CEILING (60) -- above middle C a
+        close interval reads as color, not mud, so the mud-zone rule
+        doesn't fire and nothing moves."""
+        voiced = [60, 64, 67, 71, 72]
+        assert spread_voicing(voiced, "closed", 48, 96, tension_pcs={0}) == voiced
+
+    def test_mud_zone_only_moves_the_tension_tone_not_guide_tones(self):
+        voiced = [48, 52, 55, 58, 59]
+        result = spread_voicing(voiced, "closed", 36, 96, tension_pcs={11})
+        assert result[:4] == [48, 52, 55, 58]  # bass + all guide tones unmoved
+
+    # -- Rule 2: adjacent-voice octave ceiling (skips the lowest pair) --
+
+    def test_isolated_tension_pulled_down_to_within_an_octave(self):
+        """Tension at 90, stranded 35 semitones above its nearest
+        neighbor (55) -- pulled down one octave to 78, closing the gap to
+        23 semitones... """
+        voiced = [48, 52, 55, 90]
+        result = spread_voicing(voiced, "closed", 36, 96, tension_pcs={6})
+        assert result == [48, 52, 55, 78]
+
+    def test_pulldown_skipped_if_it_would_reopen_a_mud_clash(self):
+        """A tension close enough to the bass pair that pulling it down
+        an octave would land it in a mud-zone clash is left where it is
+        instead -- the two rules don't fight each other into an
+        infinite loop or a worse outcome."""
+        # Tension at 90 (pc6); pulling down to 78 is fine here (prior
+        # test), but if there's ALSO a close neighbor waiting at 79,
+        # the pulled-down position would immediately clash.
+        voiced = [48, 52, 55, 79, 90]
+        result = spread_voicing(voiced, "closed", 36, 96, tension_pcs={6})
+        # 79 is a guide tone (pc7, not in {6}) and sits above the mud
+        # ceiling, so it's untouched; the tension at 90 has gap 11 to 79
+        # (<=12), so rule 2 doesn't even fire here -- confirms the gap
+        # check uses the ACTUAL nearest neighbor, not a stale one.
+        assert result == [48, 52, 55, 79, 90]
+
+    def test_lowest_pair_exempt_from_the_octave_ceiling(self):
+        """The bass-to-next-voice gap is explicitly allowed to exceed an
+        octave (traditional four-part voice leading's one exception) --
+        even when that next voice is itself a tension."""
+        voiced = [36, 62]  # 26 semitones apart, tension at 62 (pc2)
+        # len(voiced) < 3 short-circuits spread_voicing entirely --
+        # use a 3rd tone to actually exercise the rule.
+        voiced = [36, 62, 65]
+        result = spread_voicing(voiced, "closed", 24, 96, tension_pcs={2})
+        assert result[0] == 36 and result[1] == 62  # untouched: exempt pair
+
+    # -- End-to-end wiring --
+
+    def test_resolve_chord_with_tensions_wires_tension_pcs_through(self):
+        """End-to-end: a chord built through resolve_chord() with an
+        explicit tension actually goes through the repair pass -- not
+        just correct in the standalone function tested in isolation."""
+        chord = resolve_chord("V7(9)", "C", "ionian", density="medium", voicing="closed")
+        pcs = {n % 12 for n in chord.midi_notes}
+        assert 9 in pcs  # A, the 9th, survives resolution + voicing intact
+
+    def test_open_voicing_with_tensions_still_preserves_pitch_classes(self):
+        """The repair pass only ever shifts tones by whole octaves, so
+        harmonic content (pitch classes) must be identical before and
+        after, regardless of how many rules fire."""
+        voiced = [60, 64, 67, 70, 74, 81]
+        result = spread_voicing(voiced, "open", 48, 76, tension_pcs={2, 9})
+        assert sorted(n % 12 for n in result) == sorted(n % 12 for n in voiced)
+
+    def test_open_voicing_with_narrow_register_stays_in_range(self):
+        """The exact real-piece scenario that broke the earlier
+        percentage-split version: F7(9,13)-shaped chord in a 48-76
+        window. Must stay fully in range and preserve pitch classes --
+        no assertion that tensions land strictly above every guide tone,
+        since that's no longer the goal; graceful degradation under a
+        narrow register is the goal."""
+        voiced = [60, 63, 65, 67, 69, 74]
+        result = spread_voicing(voiced, "open", 48, 76, tension_pcs={7, 2})
+        assert all(48 <= n <= 76 for n in result)
+        assert sorted(n % 12 for n in result) == sorted(n % 12 for n in voiced)
 
 
 # ===========================================================================

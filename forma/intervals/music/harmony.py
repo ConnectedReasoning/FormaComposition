@@ -637,8 +637,145 @@ def apply_inversion(tones: list[int], inversion: int) -> list[int]:
     return result
 
 
-def spread_voicing(voiced: list[int], voicing: str, register_bottom: int,
-                    register_top: int) -> list[int]:
+def _clamp_preserving_pitch_class(candidate: int, pc: int, floor: int, ceiling: int) -> int:
+    """
+    Clamp `candidate` into [floor, ceiling] WITHOUT changing its pitch
+    class -- steps by whole octaves rather than snapping to the boundary
+    value directly.
+
+    STANDALONE BUG FIX, unrelated to tensions or Phase 3: the "open"
+    voicing algorithm below has always clamped an overflowing candidate
+    with plain `max(floor, min(ceiling, candidate))`. When a computed
+    slot genuinely overshoots (enough upper voices + a modest register --
+    no tensions required to trigger it), that naive clamp silently
+    substitutes WHATEVER pitch class the boundary happens to be, which
+    can duplicate an existing tone's pitch class while dropping the
+    tone that was supposed to be there entirely -- corrupted harmonic
+    content with no error, no warning. Reproduced on a plain 6-tone
+    chord with zero tensions involved, so this predates today's tension
+    work; only found because Phase 3's testing pushed harder on "open"
+    voicing's headroom limits than any prior test had. Now used
+    unconditionally in the "open" base algorithm (not just the tension
+    repair pass) since a wrong pitch class is a correctness bug
+    regardless of whether the chord happens to carry a tension.
+
+    If no in-range octave of this pitch class exists (a genuinely narrow
+    register), returns the closest in-range value even if that means
+    slightly violating pc preservation -- better than an infinite loop,
+    and this case shouldn't occur with normal register windows.
+    """
+    while candidate > ceiling:
+        candidate -= 12
+    while candidate < floor:
+        candidate += 12
+    if candidate > ceiling:
+        return ceiling
+    return candidate
+
+
+MUD_ZONE_CEILING = 60       # ~middle C; below this, tight intervals read as mud
+CLOSE_INTERVAL_SEMITONES = 4  # tighter than a major third counts as "close"
+ADJACENT_VOICE_MAX_GAP = 12   # adjacent voices shouldn't exceed an octave...
+# ...except the LOWEST pair (bass to the next voice up), which traditional
+# four-part voice leading explicitly permits to open wider than the rest
+# of the texture -- so that pair is exempt below.
+
+
+def _repair_tension_placement(
+    voiced: list[int], tension_pcs: set[int], register_top: int,
+) -> list[int]:
+    """
+    Post-placement repair pass for EXPLICIT tensions, grounded in two
+    real voice-leading rules rather than an arbitrary percentage-of-
+    headroom split. Only tension tones ever move -- guide tones (and the
+    bass) define the chord's identity and stay exactly where the calling
+    voicing style put them.
+
+    1. Mud-zone rule (jazz voicing pedagogy, e.g. Levine's Jazz Piano
+       Book): a close interval (< a major third) below roughly middle C
+       reads as muddy/indistinct rather than colorful. If a tension tone
+       sits below MUD_ZONE_CEILING and within CLOSE_INTERVAL_SEMITONES of
+       ANY other voice, push it up an octave -- repeat until clear or
+       register_top is reached.
+
+    2. Adjacent-voice octave rule (four-part harmony, e.g. Piston): no
+       two ADJACENT voices should exceed an octave apart, except the
+       lowest pair (bass to the next voice up), which is traditionally
+       allowed to open wider than the rest of the texture. After the
+       mud-zone pass, if a tension tone is left stranded more than an
+       octave above its nearest neighbor, pull it back down an octave --
+       unless that would drop it below the bass or reopen a mud-zone
+       clash, in which case it's left where rule 1 put it.
+
+    This replaces an earlier approach (guide tones confined to ~60% of
+    headroom, tensions required to clear a full octave above the highest
+    guide tone) that looked reasonable on paper but collapsed under a
+    real, only moderately narrow register window: pitch-class snapping
+    let a guide tone drift higher than its nominal slot, eating the
+    headroom the fixed +12 floor assumed would be there, with no
+    fallback -- verified by hand-tracing an actual real-piece chord
+    (F7(9,13) in a 48-76 window) where that version placed a tension
+    BELOW a guide tone despite existing to do the opposite. This version
+    never reserves headroom up front and never demands a fixed gap that
+    can fail to fit -- it only repairs an actual clash or an actual
+    isolated leap, where either one is found, so a narrow register
+    degrades gracefully (less separation, never a wrong-direction
+    outcome) instead of catastrophically.
+    """
+    if not tension_pcs:
+        return voiced
+
+    result = sorted(voiced)
+    bass = result[0]
+
+    def is_tension(tone: int) -> bool:
+        return tone != bass and (tone % 12) in tension_pcs
+
+    # Rule 1: mud zone. Iterate to a fixed point -- pushing one tension
+    # up an octave can newly clash with a different voice at the new
+    # position, so re-check after each move rather than a single pass.
+    for _ in range(20):  # generous bound; real chords resolve in 1-3 passes
+        result = sorted(result)
+        moved = False
+        for i, tone in enumerate(result):
+            if not is_tension(tone) or tone >= MUD_ZONE_CEILING:
+                continue
+            clashing = any(
+                j != i and abs(tone - other) < CLOSE_INTERVAL_SEMITONES
+                for j, other in enumerate(result)
+            )
+            if clashing and tone + 12 <= register_top:
+                result[i] = tone + 12
+                moved = True
+        if not moved:
+            break
+
+    # Rule 2: adjacent-voice octave ceiling, skipping the lowest pair
+    # (index 0 to 1 -- bass to the next voice up is exempt).
+    result = sorted(result)
+    for i in range(2, len(result)):
+        if not is_tension(result[i]):
+            continue
+        gap = result[i] - result[i - 1]
+        if gap <= ADJACENT_VOICE_MAX_GAP:
+            continue
+        candidate = result[i] - 12
+        if candidate <= bass:
+            continue  # would collide with or pass the bass -- leave it
+        reopens_mud_clash = candidate < MUD_ZONE_CEILING and any(
+            j != i and abs(candidate - other) < CLOSE_INTERVAL_SEMITONES
+            for j, other in enumerate(result) if j != i
+        )
+        if not reopens_mud_clash:
+            result[i] = candidate
+
+    return sorted(result)
+
+
+def spread_voicing(
+    voiced: list[int], voicing: str, register_bottom: int, register_top: int,
+    tension_pcs: Optional[set[int]] = None,
+) -> list[int]:
     """
     Reshape a closed-position chord (bass note + tight cluster within one
     octave above it) into a more open arrangement, per `voicing`.
@@ -662,46 +799,84 @@ def spread_voicing(voiced: list[int], voicing: str, register_bottom: int,
     changes. Movement-minimizing inversion choice (which tone is in the
     bass) still happens upstream in choose_inversion_for_voice_leading;
     this only reshapes what sits above that bass note.
+
+    tension_pcs: pitch classes (0-11) of any EXPLICIT tensions in this
+    chord (parse_roman's tension clause -- see resolve_chord). Each
+    voicing style computes its placement completely normally, exactly as
+    if tension_pcs were absent -- "closed" stays a pure no-op, "open" and
+    "drop2" run their unmodified algorithms. THEN, if tension_pcs is
+    non-empty, _repair_tension_placement runs as a final pass, fixing
+    only genuine problems (a tension in a muddy close-interval clash low
+    in the register, or a tension isolated by more than an octave from
+    its nearest neighbor) -- see that function's docstring for the two
+    voice-leading rules behind it. Guide tones and the bass never move
+    during repair. A chord with no tensions (tension_pcs is None or
+    empty) is completely untouched by any of this -- identical to
+    behavior before this parameter existed, in every voicing.
     """
-    if voicing == "closed" or len(voiced) < 3:
+    if len(voiced) < 3:
         return voiced
 
     bass = voiced[0]
     upper = voiced[1:]
 
-    if voicing == "drop2":
+    if voicing == "closed":
+        base = voiced
+
+    elif voicing == "drop2":
         # Second-from-top voice, dropped an octave. For a 3-note chord
         # that's the middle voice; for 4+ notes it's the second-highest.
         idx = len(upper) - 2
         dropped = upper[idx] - 12
         new_upper = upper[:idx] + [dropped] + upper[idx + 1:]
-        return sorted([bass] + new_upper)
+        base = sorted([bass] + new_upper)
 
-    if voicing == "open":
+    elif voicing == "open":
         n = len(upper)
         headroom = register_top - bass
         if headroom <= 0 or n == 0:
-            return voiced
-        # Evenly spaced target slots between just-above-bass and register_top,
-        # then snap each upper voice to its own pitch class nearest that slot
-        # -- preserves harmonic content, just relocates the octave.
-        spread = []
-        for i, tone in enumerate(upper):
-            pc = tone % 12
-            slot = bass + headroom * ((i + 1) / n)
-            # Nearest MIDI note with this pitch class to the target slot
-            candidate = round((slot - pc) / 12) * 12 + pc
-            candidate = max(bass + 1, min(register_top, candidate))
-            spread.append(int(candidate))
-        # Guarantee strictly ascending (pitch-class snapping can tie two
-        # voices to the same octave when headroom is tight) -- nudge any
-        # collision up an octave rather than let voices cross or double.
-        for i in range(1, len(spread)):
-            while spread[i] <= spread[i - 1]:
-                spread[i] += 12
-        return sorted([bass] + spread)
+            base = voiced
+        else:
+            # Otherwise identical to the original algorithm -- only the
+            # clamp changed, from a plain numeric clamp (which could
+            # silently corrupt a pitch class on overflow) to
+            # _clamp_preserving_pitch_class (see its docstring: a
+            # standalone bug fix, unrelated to tensions). This is the
+            # ONLY difference from the pre-Phase-3 algorithm; the locked
+            # -in no-tension regression test's register window never
+            # triggers the overflow condition, so its values are
+            # identical either way.
+            spread = []
+            for i, tone in enumerate(upper):
+                pc = tone % 12
+                slot = bass + headroom * ((i + 1) / n)
+                candidate = round((slot - pc) / 12) * 12 + pc
+                candidate = _clamp_preserving_pitch_class(candidate, pc, bass + 1, register_top)
+                spread.append(int(candidate))
+            for i in range(1, len(spread)):
+                while spread[i] <= spread[i - 1]:
+                    spread[i] += 12
+            # The collision-avoidance nudge above (+12 to break an exact
+            # tie) can push a tone that was already correctly bounded
+            # back OUT of register -- reachable in practice with enough
+            # upper voices in a moderate register window (verified via
+            # the actual choose_inversion_for_voice_leading pipeline on
+            # a 6-tone chord, not just a hand-built edge case). In-range
+            # is a harder requirement than avoiding an exact duplicate
+            # pitch, so this final pass re-clamps anything still over
+            # register_top, accepting a rare exact-unison duplicate in
+            # genuinely cramped windows as the lesser problem versus a
+            # note escaping the intended register entirely.
+            spread = [
+                _clamp_preserving_pitch_class(s, s % 12, bass + 1, register_top)
+                for s in spread
+            ]
+            base = sorted([bass] + spread)
 
-    return voiced
+    else:
+        base = voiced
+
+    return _repair_tension_placement(base, tension_pcs or set(), register_top)
 
 
 def choose_inversion_for_voice_leading(
@@ -710,6 +885,7 @@ def choose_inversion_for_voice_leading(
     register_bottom: int = 48,   # C3
     register_top: int = 72,      # C5
     voicing: str = "closed",
+    tension_pcs: Optional[set[int]] = None,
 ) -> tuple[list[int], int]:
     """
     Choose the inversion that minimises total movement from the previous chord
@@ -720,6 +896,10 @@ def choose_inversion_for_voice_leading(
     (unchanged algorithm/behavior) -- voicing is applied as a shaping pass
     afterward, on whichever inversion won. This keeps the well-exercised
     voice-leading distance logic untouched regardless of `voicing`.
+
+    tension_pcs: passed straight through to spread_voicing -- see its
+    docstring. Inversion SELECTION itself doesn't distinguish tensions
+    from guide tones; only the shaping pass afterward does.
     """
     max_inv = min(3, len(tones) - 1)
     candidates = []
@@ -745,7 +925,7 @@ def choose_inversion_for_voice_leading(
 
     candidates.sort(key=lambda x: x[0])
     _, best_inv, best_voiced = candidates[0]
-    best_voiced = spread_voicing(best_voiced, voicing, register_bottom, register_top)
+    best_voiced = spread_voicing(best_voiced, voicing, register_bottom, register_top, tension_pcs)
     return best_voiced, best_inv
 
 
@@ -824,8 +1004,9 @@ def _resolve_secondary_chord(
 
     tension_offsets = _resolve_tension_offsets(applied_tensions, applied_degree, applied_alteration, mode)
     raw_tones = build_chord_tones(applied_root_midi, quality, density, extra_tensions=tension_offsets)
+    tension_pcs = {(applied_root_midi + off) % 12 for off in tension_offsets} if tension_offsets else None
     voiced, inversion = choose_inversion_for_voice_leading(
-        raw_tones, prev_chord, register_bottom, register_top, voicing
+        raw_tones, prev_chord, register_bottom, register_top, voicing, tension_pcs
     )
 
     return VoicedChord(
@@ -892,8 +1073,9 @@ def resolve_chord(
 
     tension_offsets = _resolve_tension_offsets(tensions, degree, alteration, mode)
     raw_tones = build_chord_tones(root_midi, quality, density, extra_tensions=tension_offsets)
+    tension_pcs = {(root_midi + off) % 12 for off in tension_offsets} if tension_offsets else None
     voiced, inversion = choose_inversion_for_voice_leading(
-        raw_tones, prev_chord, register_bottom, register_top, voicing
+        raw_tones, prev_chord, register_bottom, register_top, voicing, tension_pcs
     )
 
     return VoicedChord(
