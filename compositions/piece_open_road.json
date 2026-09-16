@@ -1,0 +1,101 @@
+{
+  "piece": {
+    "title": "Open Road (Radio Edit)",
+    "key": "G",
+    "mode": "ionian",
+    "tempo": 96,
+    "seed": 2201,
+    "form_type": "song",
+    "motif": {
+      "name": "highway_lift",
+      "intervals": [2, 2, -1, 2, -3],
+      "rhythm": [1.0, 0.5, 0.5, 1.0, 1.0],
+      "velocities": [0.55, 0.6, 0.65, 0.7, 0.5],
+      "transform_pool": ["inversion", "retrograde", "transpose_up"]
+    },
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 8,
+        "progression": ["I", "V", "vi", "IV"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "low",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in"
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 8,
+        "progression": ["I", "V", "vi", "IV"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "root_fifth",
+        "arc": "build"
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 8,
+        "progression": ["vi", "IV", "I", "V"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5],
+          "durations": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+          "velocities": [0.75, 0.55, 0.7, 0.55, 0.75, 0.55, 0.7, 0.6],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "swell"
+      },
+      "bridge": {
+        "name": "bridge",
+        "bars": 8,
+        "progression": ["ii", "IV", "V", "I"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "breath"
+      },
+      "solo": {
+        "name": "solo",
+        "bars":24,
+        "progression": ["vi", "IV", "I", "V"],
+        "chord_bars": [6, 6, 6, 6],
+        "rhythm": "motif",
+        "density": "low",
+        "melody": "sparse",
+        "bass_style": "root_fifth",
+        "arc": "plateau"
+      },
+      "outro": {
+        "name": "outro",
+        "bars": 8,
+        "progression": ["vi", "IV", "I", "V"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "low",
+        "melody": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_out"
+      }
+    },
+    "form": [
+      "intro",
+      "verse", "chorus",
+      "verse", "chorus",
+      "bridge",
+      "solo",
+      "chorus", "chorus",
+      "outro"
+    ]
+  }
+}

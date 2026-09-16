@@ -76,11 +76,18 @@
           "pattern": "four_on_floor"
         },
         "rest_probability": 0.0,
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "none"
-        }
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       }
     }
   }

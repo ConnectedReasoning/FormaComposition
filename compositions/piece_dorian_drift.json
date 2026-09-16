@@ -1,0 +1,125 @@
+{
+  "piece": {
+    "title": "Dorian Drift",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": 68,
+    "seed": 2117,
+    "motif": {
+      "name": "long_arc",
+      "intervals": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        -1,
+        1,
+        3,
+        2,
+        0,
+        -1,
+        -2
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        0.5,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "augmentation",
+        "sequence"
+      ],
+      "notes": "Twice the length of the last two motifs on purpose -- 12 notes over a full 2-bar (8-beat) cycle instead of 1-bar/4-beat, so the line has room to breathe and arc rather than repeat every bar. Mostly stepwise with one small leap (the 3), gentle rise-and-fall shape closer to a sung phrase than a riff. 'augmentation' in the transform pool lets it stretch out even further on repetition."
+    },
+    "notes": "Chill modal jazz: Tyner-style dorian vamping (i-IV-VII movement, the same harmonic neighborhood as 'My Favorite Things') with Evans-style lush open voicings and a pedal bass instead of a walking line. Every major chord (III/IV/VII, all diatonic to dorian -- no borrowed accidentals needed, so plain roman numerals without a 'b' prefix) carries a 9 or add13 for color; i stays minor9 throughout as the harmonic anchor. voicing='open' spreads everything for that airy Evans spacing; harmony_rhythm='sustain' holds pads instead of comping stabs -- opposite mood from the funk piece. No drums -- this is a piano-trio-chill vibe, not a groove track. Honest limitation: this engine doesn't have a literal quartal-voicing mode (stacked fourths as a distinct chord-building method) -- Tyner's exact sound is approximated here through mode + tensions + open spacing + a slow pedal-point bass, not a true quartal harmony feature.",
+    "form_type": "song",
+    "form": [
+      "main_vamp",
+      "bridge",
+      "main_vamp"
+    ],
+    "sections": {
+      "main_vamp": {
+        "bars": 8,
+        "progression": [
+          "im7(9)",
+          "im7(9)",
+          "IVmaj7(9)",
+          "im7(9)",
+          "VIImaj7(add13)",
+          "IVmaj7(9)",
+          "im7(9)",
+          "im7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "breath",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 48,
+          "max": 79
+        },
+        "rest_probability": 0.3,
+        "swing": 0.05,
+        "notes": "The vamp -- i minor9 as home base, IV and VII (both diatonic major chords in dorian, no accidentals) drifting through and back. Long pedal bass underneath, no walking motion.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 85
+          }
+        ]
+      },
+      "bridge": {
+        "bars": 4,
+        "progression": [
+          "IIImaj7(9)",
+          "IVmaj7(9)",
+          "VIImaj7(add13)",
+          "im7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pedal",
+        "arc": "swell",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 48,
+          "max": 79
+        },
+        "rest_probability": 0.35,
+        "swing": 0.05,
+        "notes": "Brief lift into dorian's relative-major color (III) before settling back through IV-VII into home.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 82
+          }
+        ]
+      }
+    }
+  }
+}

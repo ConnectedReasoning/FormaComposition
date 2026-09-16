@@ -60,11 +60,7 @@
           4
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "develop",
-          "register": "alto",
-          "velocity": 90
-        },
+        "melody": "develop",
         "rest_probability": 0.35,
         "bass_style": "pulse",
         "bass_subdivision": 1.0,
@@ -86,7 +82,14 @@
             "burst_subdivision": 0.125,
             "burst_span_beats": 0.5
           }
-        }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "alto",
+            "velocity": 90
+          }
+        ]
       },
       "hook": {
         "name": "hook",
@@ -105,11 +108,7 @@
           4
         ],
         "density": "full",
-        "melody": {
-          "behavior": "develop",
-          "register": "alto",
-          "velocity": 96
-        },
+        "melody": "develop",
         "rest_probability": 0.2,
         "bass_style": "pulse",
         "bass_subdivision": 1.0,
@@ -142,7 +141,14 @@
             "burst_subdivision": 0.0833,
             "burst_span_beats": 0.75
           }
-        }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "alto",
+            "velocity": 96
+          }
+        ]
       }
     }
   }

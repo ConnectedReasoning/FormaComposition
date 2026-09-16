@@ -1,0 +1,140 @@
+{
+  "title": "The Empty Set",
+  "name": "The EmptySet",
+  "seed": 42,
+  "form_type": "narrative",
+  "tempo": {
+    "min": 96,
+    "max": 96
+  },
+  "key": "C",
+  "mode": "ionian",
+  "motifs": [
+    {
+      "name": "mo",
+      "intervals": [
+        1,
+        1,
+        1,
+        3,
+        5,
+        4,
+        2
+      ],
+      "rhythm": [
+        0.25,
+        0.25,
+        0.25,
+        0.5,
+        1,
+        1
+      ],
+      "rests": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "velocities": [
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9
+      ],
+      "transform_pool": [
+        "original",
+        "inversion"
+      ],
+      "melodic_scale": "ionian"
+    }
+  ],
+  "transform_sequence": [
+    "original"
+  ],
+  "sections": [
+    {
+      "name": "only",
+      "key": "C",
+      "mode": "ionian",
+      "progression": [
+        "i",
+        "iv",
+        "v",
+        "iv"
+      ],
+      "chord_bars": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "bars": 16,
+      "beats_per_bar": 1,
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "root_fifth",
+      "arc": "plateau",
+      "rhythm": "free",
+      "harmony_rhythm": {
+        "rhythm": "motif",
+        "density": "medium",
+        "groove": "straight",
+        "motif": "mo",
+        "swing": 0
+      },
+      "rhythm_pattern": {
+        "onsets": [
+          0
+        ],
+        "durations": [
+          0
+        ],
+        "velocities": [
+          0
+        ],
+        "length_beats": 2
+      },
+      "harmony_pattern": {
+        "onsets": [
+          0
+        ],
+        "durations": [
+          0
+        ],
+        "velocities": [
+          0
+        ],
+        "length_beats": 1
+      },
+      "melodic_variation": "isorhythmic",
+      "groove": "straight",
+      "swing": 0,
+      "rest_probability": 0,
+      "fugal_techniques": {
+        "motif_transform": "",
+        "stretto_compression": 0,
+        "subject_fragmentation": 0,
+        "canonic_imitation": false,
+        "canon_interval": 0
+      },
+      "note_length_range": {
+        "min": 0.25,
+        "max": 2,
+        "quantum": 0.125
+      },
+      "melodic_arc": {
+        "apex_degree": 0,
+        "apex_position": 0,
+        "resolve_every_cycle": false
+      },
+      "harmony_rest_probability": 0,
+      "bass_offset": 0,
+      "voicing": "open",
+      "notes": ""
+    }
+  ]
+}

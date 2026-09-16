@@ -40,27 +40,7 @@
           2
         ],
         "density": "sparse",
-        "melody": {
-          "behavior": "develop",
-          "register": "mid",
-          "velocity": 86,
-          "motif": {
-            "name": "intro_call",
-            "intervals": [
-              2,
-              2,
-              -1
-            ],
-            "rhythm": [
-              1.0,
-              1.0,
-              2.0
-            ],
-            "transform_pool": [
-              "augmentation"
-            ]
-          }
-        },
+        "melody": "develop",
         "bass_style": "pedal",
         "arc": "fade_in",
         "rhythm": "motif",
@@ -68,7 +48,30 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.2,
-        "notes": "Motif 1 of 6. Simple rising call, mostly untransformed, over a pedal D. Establishes the mixolydian color (VII = C major, not C#dim) right away."
+        "notes": "Motif 1 of 6. Simple rising call, mostly untransformed, over a pedal D. Establishes the mixolydian color (VII = C major, not C#dim) right away.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "mid",
+            "velocity": 86,
+            "motif": {
+              "name": "intro_call",
+              "intervals": [
+                2,
+                2,
+                -1
+              ],
+              "rhythm": [
+                1.0,
+                1.0,
+                2.0
+              ],
+              "transform_pool": [
+                "augmentation"
+              ]
+            }
+          }
+        ]
       },
       {
         "name": "verse",
@@ -95,30 +98,7 @@
           2
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "develop",
-          "register": "mid",
-          "velocity": 88,
-          "motif": {
-            "name": "verse_lope",
-            "intervals": [
-              1,
-              -1,
-              2,
-              -2
-            ],
-            "rhythm": [
-              0.5,
-              0.5,
-              1.0,
-              2.0
-            ],
-            "transform_pool": [
-              "transpose_up",
-              "sequence"
-            ]
-          }
-        },
+        "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "build",
         "rhythm": "motif",
@@ -126,15 +106,39 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.15,
-        "counterpoint": [
+        "notes": "Motif 2 of 6. First counterpoint voice enters quietly below the melody. Bass moves to root_fifth for gentle forward motion.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "mid",
+            "velocity": 88,
+            "motif": {
+              "name": "verse_lope",
+              "intervals": [
+                1,
+                -1,
+                2,
+                -2
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                1.0,
+                2.0
+              ],
+              "transform_pool": [
+                "transpose_up",
+                "sequence"
+              ]
+            }
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 45
           }
-        ],
-        "notes": "Motif 2 of 6. First counterpoint voice enters quietly below the melody. Bass moves to root_fifth for gentle forward motion."
+        ]
       },
       {
         "name": "chorus_a",
@@ -161,27 +165,7 @@
           1
         ],
         "density": "full",
-        "melody": {
-          "behavior": "develop",
-          "register": "high",
-          "velocity": 95,
-          "motif": {
-            "name": "chorus_riff_a",
-            "intervals": [
-              0,
-              2,
-              -1,
-              0
-            ],
-            "rhythm": [
-              0.5,
-              0.5,
-              0.5,
-              2.5
-            ],
-            "transform_pool": []
-          }
-        },
+        "melody": "develop",
         "bass_style": "motif",
         "arc": "swell",
         "rhythm": "motif",
@@ -189,7 +173,29 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Motif 3 of 6 -- riff A. Empty transform_pool: this motif restates verbatim every bar instead of developing. Bass plays the same motif in unison (bass_style:'motif') for a real guitar+bass riff feel. Second counterpoint voice joins here -- both above and below the melody now.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "high",
+            "velocity": 95,
+            "motif": {
+              "name": "chorus_riff_a",
+              "intervals": [
+                0,
+                2,
+                -1,
+                0
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                2.5
+              ],
+              "transform_pool": []
+            }
+          },
           {
             "species": "free",
             "register": "above",
@@ -202,8 +208,7 @@
             "dissonance": "passing",
             "velocity": 54
           }
-        ],
-        "notes": "Motif 3 of 6 -- riff A. Empty transform_pool: this motif restates verbatim every bar instead of developing. Bass plays the same motif in unison (bass_style:'motif') for a real guitar+bass riff feel. Second counterpoint voice joins here -- both above and below the melody now."
+        ]
       },
       {
         "name": "chorus_b",
@@ -230,27 +235,7 @@
           1
         ],
         "density": "full",
-        "melody": {
-          "behavior": "develop",
-          "register": "high",
-          "velocity": 95,
-          "motif": {
-            "name": "chorus_riff_b",
-            "intervals": [
-              3,
-              -2,
-              -1,
-              0
-            ],
-            "rhythm": [
-              0.5,
-              0.5,
-              0.5,
-              2.5
-            ],
-            "transform_pool": []
-          }
-        },
+        "melody": "develop",
         "bass_style": "motif",
         "arc": "swell",
         "rhythm": "motif",
@@ -258,7 +243,29 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Motif 4 of 6 -- riff B, the 'answer' riff. Different shape from riff A, same verbatim-repetition treatment, harmonic center lifts to IV. This is the micro-section-breaks-the-chorus idea in practice: chorus_a and chorus_b are two 8-bar halves of one chorus, each with its own riff.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "high",
+            "velocity": 95,
+            "motif": {
+              "name": "chorus_riff_b",
+              "intervals": [
+                3,
+                -2,
+                -1,
+                0
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                2.5
+              ],
+              "transform_pool": []
+            }
+          },
           {
             "species": "free",
             "register": "above",
@@ -271,8 +278,7 @@
             "dissonance": "passing",
             "velocity": 54
           }
-        ],
-        "notes": "Motif 4 of 6 -- riff B, the 'answer' riff. Different shape from riff A, same verbatim-repetition treatment, harmonic center lifts to IV. This is the micro-section-breaks-the-chorus idea in practice: chorus_a and chorus_b are two 8-bar halves of one chorus, each with its own riff."
+        ]
       },
       {
         "name": "bridge",
@@ -299,34 +305,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "develop",
-          "register": "mid",
-          "velocity": 90,
-          "motif": {
-            "name": "bridge_dev",
-            "intervals": [
-              4,
-              -1,
-              -2,
-              3,
-              -3
-            ],
-            "rhythm": [
-              0.5,
-              0.5,
-              1.0,
-              0.5,
-              1.5
-            ],
-            "transform_pool": [
-              "inversion",
-              "retrograde",
-              "augmentation",
-              "sequence"
-            ]
-          }
-        },
+        "melody": "develop",
         "bass_style": "walking",
         "arc": "breath",
         "rhythm": "motif",
@@ -334,7 +313,36 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.15,
-        "counterpoint": [
+        "notes": "Motif 5 of 6. The one genuinely developmental section -- wider leaps, full transform pool active, walking bass. Both counterpoint voices continue. This is the closest thing to Xanadu's 'development' section, just shorter.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "mid",
+            "velocity": 90,
+            "motif": {
+              "name": "bridge_dev",
+              "intervals": [
+                4,
+                -1,
+                -2,
+                3,
+                -3
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                1.0,
+                0.5,
+                1.5
+              ],
+              "transform_pool": [
+                "inversion",
+                "retrograde",
+                "augmentation",
+                "sequence"
+              ]
+            }
+          },
           {
             "species": "free",
             "register": "above",
@@ -347,8 +355,7 @@
             "dissonance": "passing",
             "velocity": 60
           }
-        ],
-        "notes": "Motif 5 of 6. The one genuinely developmental section -- wider leaps, full transform pool active, walking bass. Both counterpoint voices continue. This is the closest thing to Xanadu's 'development' section, just shorter."
+        ]
       },
       {
         "name": "outro",
@@ -367,25 +374,7 @@
           2
         ],
         "density": "sparse",
-        "melody": {
-          "behavior": "develop",
-          "register": "mid",
-          "velocity": 86,
-          "motif": {
-            "name": "outro_fall",
-            "intervals": [
-              -1,
-              -1,
-              -2
-            ],
-            "rhythm": [
-              1.0,
-              1.0,
-              2.0
-            ],
-            "transform_pool": []
-          }
-        },
+        "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
         "rhythm": "motif",
@@ -393,7 +382,28 @@
           "rhythm": "sustain"
         },
         "rest_probability": 0.3,
-        "notes": "Motif 6 of 6. Simple descending close, no transforms, no counterpoint -- mirrors the intro's simplicity to bookend the piece."
+        "notes": "Motif 6 of 6. Simple descending close, no transforms, no counterpoint -- mirrors the intro's simplicity to bookend the piece.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "mid",
+            "velocity": 86,
+            "motif": {
+              "name": "outro_fall",
+              "intervals": [
+                -1,
+                -1,
+                -2
+              ],
+              "rhythm": [
+                1.0,
+                1.0,
+                2.0
+              ],
+              "transform_pool": []
+            }
+          }
+        ]
       }
     ]
   }

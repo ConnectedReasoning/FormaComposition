@@ -11,105 +11,234 @@
         "name": "intro",
         "bars": 4,
         "beats_per_bar": 4,
-        "progression": ["I", "V"],
-        "chord_bars": [2, 2],
+        "progression": [
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "build",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Plain I-V vamp before lydian's raised-4th color shows up via II in strain A."
+        "notes": "Plain I-V vamp before lydian's raised-4th color shows up via II in strain A.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_a",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["I", "II", "I", "V", "I", "II", "I", "V"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "I",
+          "II",
+          "I",
+          "V",
+          "I",
+          "II",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Main strain -- I-II is lydian's signature move, the major II (from the raised 4th, F# not F) giving that floating, gravity-free brightness. Steady root_fifth bass under the tresillo, same tension principle as the original."
+        "notes": "Main strain -- I-II is lydian's signature move, the major II (from the raised 4th, F# not F) giving that floating, gravity-free brightness. Steady root_fifth bass under the tresillo, same tension principle as the original.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_b",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["vi", "II", "iii", "V", "vi", "II", "iii", "V"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "vi",
+          "II",
+          "iii",
+          "V",
+          "vi",
+          "II",
+          "iii",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 90 },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 50 }
-        ],
-        "notes": "Contrasting strain -- vi-II-iii-V keeps II's brightness prominent while touching the mode's two minor colors (vi, iii) for contrast. One light countermelody above."
+        "notes": "Contrasting strain -- vi-II-iii-V keeps II's brightness prominent while touching the mode's two minor colors (vi, iii) for contrast. One light countermelody above.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 90
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 50
+          }
+        ]
       },
       {
         "name": "breakdown",
         "bars": 8,
         "beats_per_bar": 4,
-        "progression": ["I", "II"],
-        "chord_bars": [4, 4],
+        "progression": [
+          "I",
+          "II"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
         "density": "sparse",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 62 },
+        "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.4,
-        "notes": "The eye of the storm, same move as the original -- no groove, no counterpoint, pedal bass, high rest_probability."
+        "notes": "The eye of the storm, same move as the original -- no groove, no counterpoint, pedal bass, high rest_probability.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 62
+          }
+        ]
       },
       {
         "name": "strain_a_reprise",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["I", "II", "I", "V", "I", "II", "I", "V"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "I",
+          "II",
+          "I",
+          "V",
+          "I",
+          "II",
+          "I",
+          "V"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Return of strain A, rebuilding out of the breakdown."
+        "notes": "Return of strain A, rebuilding out of the breakdown.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "outro",
         "bars": 4,
         "beats_per_bar": 4,
-        "progression": ["V", "I"],
-        "chord_bars": [2, 2],
+        "progression": [
+          "V",
+          "I"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 86 },
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "decay",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.15,
         "groove": "broken",
-        "notes": "Short closing tag, resolves brightly to the tonic."
+        "notes": "Short closing tag, resolves brightly to the tonic.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 86
+          }
+        ]
       }
     ]
   }

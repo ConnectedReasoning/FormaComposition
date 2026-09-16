@@ -63,13 +63,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "porch_open",
@@ -84,13 +91,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "fade_in",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "porch_step",
@@ -105,13 +119,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "fade_in",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "breath_1",
@@ -139,13 +160,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.1
+        "rest_probability": 0.1,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "evening_breeze",
@@ -160,13 +188,20 @@
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.08
+        "rest_probability": 0.08,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "porch_recede",
@@ -180,13 +215,20 @@
         "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.18
+        "rest_probability": 0.18,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "breath_2",
@@ -218,13 +260,20 @@
         "melody": "develop",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.06
+        "rest_probability": 0.06,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "porch_echo",
@@ -239,13 +288,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.12
+        "rest_probability": 0.12,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "receding",
@@ -259,13 +315,20 @@
         "melody": "develop",
         "bass_style": "root_only",
         "arc": "fade_out",
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.16
+        "rest_probability": 0.16,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "porch_reprise",

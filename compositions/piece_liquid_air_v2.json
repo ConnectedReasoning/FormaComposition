@@ -2,37 +2,77 @@
   "title": "Liquid Air",
   "key": "Bb",
   "mode": "ionian",
-  "tempo": {"min": 63, "max": 66},
+  "tempo": {
+    "min": 63,
+    "max": 66
+  },
   "seed": 217,
   "form_type": "song",
   "form": [
     "A",
-    {"section": "A", "exact_repeat": true},
+    {
+      "section": "A",
+      "exact_repeat": true
+    },
     "B",
     "A"
   ],
   "motifs": [
     {
       "name": "sigh",
-      "intervals": [0, 2, 1, -1, 2],
-      "rhythm": [1.0, 0.5, 0.5, 1.0, 1.0],
-      "velocities": [0.55, 0.5, 0.6, 0.52, 0.65],
-      "transform_pool": ["inversion", "sequence", "augmentation"]
+      "intervals": [
+        0,
+        2,
+        1,
+        -1,
+        2
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "velocities": [
+        0.55,
+        0.5,
+        0.6,
+        0.52,
+        0.65
+      ],
+      "transform_pool": [
+        "inversion",
+        "sequence",
+        "augmentation"
+      ]
     }
   ],
   "sections": {
     "A": {
       "bars": 8,
-      "progression": ["I", "vi", "ii", "V7", "I", "IVmin", "ii", "V7"],
-      "chord_bars": [1, 1, 1, 1, 1, 1, 1, 1],
+      "progression": [
+        "I",
+        "vi",
+        "ii",
+        "V7",
+        "I",
+        "IVmin",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 86,
-        "motif": "sigh",
-        "leap_probability": 0.15
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 6,
         "apex_position": 0.65,
@@ -41,23 +81,51 @@
       "bass_style": "walking",
       "arc": "swell",
       "rhythm": "free",
-      "note_length_range": {"min": 0.5, "max": 2.0},
-      "harmony_rhythm": {"rhythm": "motif", "density": "full", "swing": 0.3},
+      "note_length_range": {
+        "min": 0.5,
+        "max": 2.0
+      },
+      "harmony_rhythm": {
+        "rhythm": "motif",
+        "density": "full",
+        "swing": 0.3
+      },
       "swing": 0.5,
-      "rest_probability": 0.15
+      "rest_probability": 0.15,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 86,
+          "motif": "sigh",
+          "leap_probability": 0.15
+        }
+      ]
     },
     "B": {
       "bars": 8,
-      "progression": ["IV", "V7/vi", "vi", "V7/V", "V7", "I", "ii", "V7"],
-      "chord_bars": [1, 1, 1, 1, 1, 1, 1, 1],
+      "progression": [
+        "IV",
+        "V7/vi",
+        "vi",
+        "V7/V",
+        "V7",
+        "I",
+        "ii",
+        "V7"
+      ],
+      "chord_bars": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 90,
-        "motif": "sigh",
-        "leap_probability": 0.2
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 3,
         "apex_position": 0.55,
@@ -66,10 +134,26 @@
       "bass_style": "walking",
       "arc": "build",
       "rhythm": "free",
-      "note_length_range": {"min": 0.5, "max": 1.5},
-      "harmony_rhythm": {"rhythm": "motif", "density": "full", "swing": 0.45},
+      "note_length_range": {
+        "min": 0.5,
+        "max": 1.5
+      },
+      "harmony_rhythm": {
+        "rhythm": "motif",
+        "density": "full",
+        "swing": 0.45
+      },
       "swing": 0.55,
-      "rest_probability": 0.1
+      "rest_probability": 0.1,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 90,
+          "motif": "sigh",
+          "leap_probability": 0.2
+        }
+      ]
     }
   }
 }

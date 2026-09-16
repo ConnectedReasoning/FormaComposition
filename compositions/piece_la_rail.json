@@ -24,11 +24,7 @@
           1
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "build",
         "rhythm": "free",
@@ -37,7 +33,14 @@
         },
         "swing": 0.15,
         "rest_probability": 0.15,
-        "notes": "Short vamp, establishes the vi-IV-I-V loop before the verse states it properly."
+        "notes": "Short vamp, establishes the vi-IV-I-V loop before the verse states it properly.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "verse_1",
@@ -64,11 +67,7 @@
           2
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
@@ -77,7 +76,14 @@
         },
         "swing": 0.15,
         "rest_probability": 0.15,
-        "notes": "Verse 1 -- laid back, no counterpoint yet, leaves room for the vocal/lyric. 'I'm gonna ride my daily destination, the LA Rail' territory."
+        "notes": "Verse 1 -- laid back, no counterpoint yet, leaves room for the vocal/lyric. 'I'm gonna ride my daily destination, the LA Rail' territory.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "chorus_1",
@@ -104,11 +110,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 92
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
@@ -118,15 +120,20 @@
         },
         "swing": 0.15,
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Chorus -- tonic-anchored (I, not vi), higher energy, counterpoint enters as a sax/horn-like line under the hook. syncopated groove for pop lift, still 0.15 swing underneath.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 92
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 56
           }
-        ],
-        "notes": "Chorus -- tonic-anchored (I, not vi), higher energy, counterpoint enters as a sax/horn-like line under the hook. syncopated groove for pop lift, still 0.15 swing underneath."
+        ]
       },
       {
         "name": "verse_2",
@@ -149,11 +156,7 @@
           2
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
@@ -162,7 +165,14 @@
         },
         "swing": 0.15,
         "rest_probability": 0.15,
-        "notes": "Verse 2, compressed to 12 bars for pacing -- ends on IV rather than resolving to V, leaning into chorus 2. 'This might be droll... tomorrow's dreams' territory."
+        "notes": "Verse 2, compressed to 12 bars for pacing -- ends on IV rather than resolving to V, leaning into chorus 2. 'This might be droll... tomorrow's dreams' territory.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "chorus_2",
@@ -189,11 +199,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 92
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
@@ -203,15 +209,20 @@
         },
         "swing": 0.15,
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Chorus 2, same hook restated.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 92
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 56
           }
-        ],
-        "notes": "Chorus 2, same hook restated."
+        ]
       },
       {
         "name": "transition",
@@ -224,11 +235,7 @@
           4
         ],
         "density": "sparse",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 86
-        },
+        "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
@@ -237,7 +244,14 @@
         },
         "swing": 0.0,
         "rest_probability": 0.45,
-        "notes": "The actual breakdown -- single held vi chord, sparse, high rest_probability, no counterpoint, no groove. Learned this lesson directly from Cakewalk Strut: a real gap here earns the bridge instead of just continuing at chorus density. This is the quiet before the bridge steps outside the song's narrative."
+        "notes": "The actual breakdown -- single held vi chord, sparse, high rest_probability, no counterpoint, no groove. Learned this lesson directly from Cakewalk Strut: a real gap here earns the bridge instead of just continuing at chorus density. This is the quiet before the bridge steps outside the song's narrative.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 86
+          }
+        ]
       },
       {
         "name": "bridge",
@@ -264,11 +278,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "walking",
         "arc": "breath",
         "rhythm": "free",
@@ -277,32 +287,37 @@
         },
         "swing": 0.15,
         "rest_probability": 0.15,
-        "counterpoint": [
+        "notes": "Bridge -- steps outside the verse/chorus narrative (Star Wars / rock-and-roll-reborn-every-ten-years territory). Borrowed bVII (F major, mixolydian lift) for the 'prog' color. second_melody carries the actual polymeter payoff from today's engine work: a bell-like hit every 3 beats against the 4-beat bar, genuinely drifting through all 16 bars rather than a fixed accent -- the one place in the song the polymeter bones actually get used, not just tested. Walking bass, same 'genuinely developmental' role it played in Riff Cycle's bridge.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 58
+          },
+          {
+            "behavior": "lyrical",
+            "register": "high",
+            "velocity": 72,
+            "rhythm_pattern": {
+              "onsets": [
+                0.0
+              ],
+              "durations": [
+                2.5
+              ],
+              "velocities": [
+                1.0
+              ],
+              "length_beats": 3.0
+            }
           }
-        ],
-        "second_melody": {
-          "behavior": "lyrical",
-          "register": "high",
-          "velocity": 72,
-          "rhythm_pattern": {
-            "onsets": [
-              0.0
-            ],
-            "durations": [
-              2.5
-            ],
-            "velocities": [
-              1.0
-            ],
-            "length_beats": 3.0
-          }
-        },
-        "notes": "Bridge -- steps outside the verse/chorus narrative (Star Wars / rock-and-roll-reborn-every-ten-years territory). Borrowed bVII (F major, mixolydian lift) for the 'prog' color. second_melody carries the actual polymeter payoff from today's engine work: a bell-like hit every 3 beats against the 4-beat bar, genuinely drifting through all 16 bars rather than a fixed accent -- the one place in the song the polymeter bones actually get used, not just tested. Walking bass, same 'genuinely developmental' role it played in Riff Cycle's bridge."
+        ]
       },
       {
         "name": "final_chorus",
@@ -330,11 +345,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 94
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
@@ -344,15 +355,20 @@
         },
         "swing": 0.15,
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Final chorus, modulated up a whole step (G->A) via section-level key override -- the 'one modulation move that reliably works' per the songwriting craft notes. This is the actual reason today's sec_key/sec_mode fix mattered: without it, counterpoint here would have silently stayed in G while melody/harmony/bass correctly moved to A.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 94
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 58
           }
-        ],
-        "notes": "Final chorus, modulated up a whole step (G->A) via section-level key override -- the 'one modulation move that reliably works' per the songwriting craft notes. This is the actual reason today's sec_key/sec_mode fix mattered: without it, counterpoint here would have silently stayed in G while melody/harmony/bass correctly moved to A."
+        ]
       },
       {
         "name": "outro",
@@ -370,11 +386,7 @@
           1
         ],
         "density": "sparse",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 86
-        },
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "decay",
         "rhythm": "free",
@@ -383,7 +395,14 @@
         },
         "swing": 0.1,
         "rest_probability": 0.25,
-        "notes": "Resolves in the modulated key -- ends up, doesn't come back down. Fade/decay to close."
+        "notes": "Resolves in the modulated key -- ends up, doesn't come back down. Fade/decay to close.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 86
+          }
+        ]
       }
     ]
   }

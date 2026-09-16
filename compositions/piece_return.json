@@ -68,13 +68,19 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "free",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 54
-        },
-        "notes": "Walking through the threshold. The crucial moment: V\u2192bVI is the deceptive cadence \u2014 'I expected home (I) but got something else (bVI).' This is the motif's arrival gesture meeting the composition's harmonic surprise. Lyrical melody walks through the space; counterpoint adds texture under the swell. Root-fifth bass gives forward motion. By bar 12, the listener realizes: this isn't the expected return, it's something else."
+        "notes": "Walking through the threshold. The crucial moment: V\u2192bVI is the deceptive cadence \u2014 'I expected home (I) but got something else (bVI).' This is the motif's arrival gesture meeting the composition's harmonic surprise. Lyrical melody walks through the space; counterpoint adds texture under the swell. Root-fifth bass gives forward motion. By bar 12, the listener realizes: this isn't the expected return, it's something else.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 54
+          }
+        ]
       },
       {
         "name": "recognition",

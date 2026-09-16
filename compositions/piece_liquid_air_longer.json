@@ -104,13 +104,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 86,
-        "motif": "sigh",
-        "leap_probability": 0.15
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 6,
         "apex_position": 0.65,
@@ -129,7 +123,16 @@
         "swing": 0.3
       },
       "swing": 0.5,
-      "rest_probability": 0.15
+      "rest_probability": 0.15,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 86,
+          "motif": "sigh",
+          "leap_probability": 0.15
+        }
+      ]
     },
     "B": {
       "bars": 8,
@@ -154,13 +157,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 90,
-        "motif": "sigh",
-        "leap_probability": 0.2
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 3,
         "apex_position": 0.55,
@@ -179,7 +176,16 @@
         "swing": 0.45
       },
       "swing": 0.55,
-      "rest_probability": 0.1
+      "rest_probability": 0.1,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 90,
+          "motif": "sigh",
+          "leap_probability": 0.2
+        }
+      ]
     },
     "A2": {
       "bars": 8,
@@ -204,13 +210,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 86,
-        "motif": "sigh",
-        "leap_probability": 0.15
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 6,
         "apex_position": 0.65,
@@ -229,7 +229,16 @@
         "swing": 0.3
       },
       "swing": 0.5,
-      "rest_probability": 0.15
+      "rest_probability": 0.15,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 86,
+          "motif": "sigh",
+          "leap_probability": 0.15
+        }
+      ]
     },
     "Intro": {
       "bars": 4,
@@ -240,12 +249,7 @@
         4
       ],
       "density": "medium",
-      "melody": {
-        "behavior": "sparse",
-        "register": "alto",
-        "velocity": 86,
-        "leap_probability": 0.05
-      },
+      "melody": "sparse",
       "melodic_arc": {
         "apex_degree": 1,
         "apex_position": 0.9,
@@ -264,7 +268,15 @@
         "swing": 0.2
       },
       "swing": 0.3,
-      "rest_probability": 0.6
+      "rest_probability": 0.6,
+      "voices": [
+        {
+          "behavior": "sparse",
+          "register": "alto",
+          "velocity": 86,
+          "leap_probability": 0.05
+        }
+      ]
     },
     "A_c": {
       "bars": 8,
@@ -289,13 +301,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 86,
-        "motif": "sigh",
-        "leap_probability": 0.15
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 6,
         "apex_position": 0.65,
@@ -315,7 +321,16 @@
       },
       "swing": 0.5,
       "rest_probability": 0.15,
-      "key": "C"
+      "key": "C",
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 86,
+          "motif": "sigh",
+          "leap_probability": 0.15
+        }
+      ]
     },
     "B_c": {
       "bars": 8,
@@ -340,13 +355,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 90,
-        "motif": "sigh",
-        "leap_probability": 0.2
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 3,
         "apex_position": 0.55,
@@ -366,7 +375,16 @@
       },
       "swing": 0.55,
       "rest_probability": 0.1,
-      "key": "C"
+      "key": "C",
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 90,
+          "motif": "sigh",
+          "leap_probability": 0.2
+        }
+      ]
     },
     "A_hi": {
       "bars": 8,
@@ -391,13 +409,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 104,
-        "motif": "sigh",
-        "leap_probability": 0.28
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 6,
         "apex_position": 0.65,
@@ -416,7 +428,16 @@
         "swing": 0.5
       },
       "swing": 0.5,
-      "rest_probability": 0.15
+      "rest_probability": 0.15,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 104,
+          "motif": "sigh",
+          "leap_probability": 0.28
+        }
+      ]
     },
     "B_hi": {
       "bars": 8,
@@ -441,13 +462,7 @@
         1
       ],
       "density": "full",
-      "melody": {
-        "behavior": "develop",
-        "register": "soprano",
-        "velocity": 108,
-        "motif": "sigh",
-        "leap_probability": 0.3
-      },
+      "melody": "develop",
       "melodic_arc": {
         "apex_degree": 3,
         "apex_position": 0.55,
@@ -466,7 +481,16 @@
         "swing": 0.55
       },
       "swing": 0.55,
-      "rest_probability": 0.1
+      "rest_probability": 0.1,
+      "voices": [
+        {
+          "behavior": "develop",
+          "register": "soprano",
+          "velocity": 108,
+          "motif": "sigh",
+          "leap_probability": 0.3
+        }
+      ]
     },
     "Coda": {
       "bars": 8,
@@ -477,12 +501,7 @@
         8
       ],
       "density": "medium",
-      "melody": {
-        "behavior": "sparse",
-        "register": "soprano",
-        "velocity": 86,
-        "leap_probability": 0.05
-      },
+      "melody": "sparse",
       "melodic_arc": {
         "apex_degree": 1,
         "apex_position": 0.85,
@@ -501,7 +520,15 @@
         "swing": 0.2
       },
       "swing": 0.3,
-      "rest_probability": 0.65
+      "rest_probability": 0.65,
+      "voices": [
+        {
+          "behavior": "sparse",
+          "register": "soprano",
+          "velocity": 86,
+          "leap_probability": 0.05
+        }
+      ]
     }
   }
 }

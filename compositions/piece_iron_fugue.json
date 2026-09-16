@@ -85,18 +85,24 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "build",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        },
         "rhythm": "free",
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "medium",
           "groove": "straight"
-        }
+        },
+        "voices": [
+          {
+            "behavior": "generative",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "exposition_third",
@@ -118,18 +124,24 @@
         "melody": "develop",
         "bass_style": "melodic",
         "arc": "swell",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        },
         "rhythm": "free",
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "medium",
           "groove": "straight"
-        }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "episode_1",
@@ -155,18 +167,24 @@
         "melody": "generative",
         "bass_style": "walking",
         "arc": "plateau",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        },
         "rhythm": "free",
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "medium",
           "groove": "straight"
-        }
+        },
+        "voices": [
+          {
+            "behavior": "generative",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "middle_entry_relative",
@@ -219,18 +237,24 @@
         "melody": "develop",
         "bass_style": "walking",
         "arc": "plateau",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        },
         "rhythm": "free",
         "harmony_rhythm": {
           "rhythm": "free",
           "density": "full",
           "groove": "straight"
-        }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "augmentation",

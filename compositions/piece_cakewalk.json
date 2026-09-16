@@ -20,11 +20,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "build",
         "rhythm": "free",
@@ -34,7 +30,14 @@
         "swing": 0.0,
         "rest_probability": 0.1,
         "notes": "Vamp -- establishes the steady march pulse before the syncopated tune enters properly in strain A.",
-        "groove": "broken"
+        "groove": "broken",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_a",
@@ -61,11 +64,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
@@ -75,7 +74,14 @@
         "swing": 0.0,
         "rest_probability": 0.1,
         "notes": "Main strain. root_fifth bass stays flatly on the beat while the melody's 3+3+2 grouping cuts across it -- that tension is the actual cakewalk effect, not a trick layered on top of it.",
-        "groove": "broken"
+        "groove": "broken",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_b",
@@ -102,11 +108,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 90
-        },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
@@ -115,16 +117,21 @@
         },
         "swing": 0.0,
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Contrasting strain -- bass moves to pulse for a touch more insistence, still steady/unsyncopated. One light countermelody above, the way a period brass-band arrangement might carry a second voice.",
+        "groove": "broken",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 90
+          },
           {
             "species": "free",
             "register": "above",
             "dissonance": "passing",
             "velocity": 50
           }
-        ],
-        "notes": "Contrasting strain -- bass moves to pulse for a touch more insistence, still steady/unsyncopated. One light countermelody above, the way a period brass-band arrangement might carry a second voice.",
-        "groove": "broken"
+        ]
       },
       {
         "name": "strain_a_reprise",
@@ -151,11 +158,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 88
-        },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
@@ -165,7 +168,14 @@
         "swing": 0.0,
         "rest_probability": 0.1,
         "notes": "Return of strain A -- classic ABA parlor-piece structure. No counterpoint here, mirrors the original strain's simplicity.",
-        "groove": "broken"
+        "groove": "broken",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "outro",
@@ -180,11 +190,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 86
-        },
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "decay",
         "rhythm": "free",
@@ -194,7 +200,14 @@
         "swing": 0.0,
         "rest_probability": 0.15,
         "notes": "Short closing tag/button.",
-        "groove": "broken"
+        "groove": "broken",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 86
+          }
+        ]
       }
     ]
   }

@@ -1,0 +1,161 @@
+{
+  "piece": {
+    "title": "Quiet Goodbye",
+    "key": "Eb",
+    "mode": "ionian",
+    "tempo": 72,
+    "seed": 4409,
+    "motif": {
+      "name": "vocal_line",
+      "intervals": [
+        0,
+        2,
+        1,
+        -1,
+        1,
+        2,
+        -1,
+        -3
+      ],
+      "rhythm": [
+        0.5,
+        0.5,
+        0.75,
+        0.25,
+        0.5,
+        0.5,
+        0.75,
+        0.25
+      ],
+      "transform_pool": [
+        "inversion",
+        "sequence",
+        "augmentation"
+      ],
+      "notes": "Gentle rise-and-fall, singable range and shape -- meant to read as a lead vocal line, not a horn riff or a jazz-development exercise. Between the fanfare's punch and the ballad's long arc in length -- 8 notes, 1 bar, but legato rather than syncopated."
+    },
+    "notes": "Chill 70s soft-rock ballad -- the 'If You Leave Me Now' side of this band's sound, not the horn-stab 'Wall of Brass' side. Functional ionian harmony (not modal), warm maj9/m9 chords throughout, a borrowed minor iv (ivm7, from the parallel minor -- classic soft-rock/soul-ballad bittersweet lift right before resolving home) in the chorus, and one secondary dominant (V7(9)/vi) for a gentle lift into the relative minor. bass_style='melodic' for a singing, moving bassline rather than the previous pieces' pedal drone or driving pulse. voicing='open' for lush pad spacing. No drums in the verse (intimate, rubato-adjacent feel); a soft halftime pattern only enters for the chorus.",
+    "form_type": "song",
+    "form": [
+      "verse",
+      "chorus",
+      "verse",
+      "chorus",
+      "outro"
+    ],
+    "sections": {
+      "verse": {
+        "bars": 8,
+        "progression": [
+          "Imaj7(9)",
+          "vim7(9)",
+          "iim7(9)",
+          "V7(9)",
+          "Imaj7(9)",
+          "IV(9)",
+          "iim7(9)",
+          "V7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "breath",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 50,
+          "max": 76
+        },
+        "rest_probability": 0.22,
+        "swing": 0.0,
+        "notes": "Warm, unhurried functional movement -- I-vi-ii-V in maj9/m9 color. No drums yet.",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 84
+          }
+        ]
+      },
+      "chorus": {
+        "bars": 8,
+        "progression": [
+          "Imaj7(9)",
+          "V7(9)/vi",
+          "vim7(9)",
+          "IV(9)",
+          "ivm7(9)",
+          "Imaj7(9)",
+          "iim7(9)",
+          "V7(9,13)"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "swell",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 50,
+          "max": 76
+        },
+        "rest_probability": 0.18,
+        "swing": 0.0,
+        "drums": {
+          "pattern": "halftime",
+          "groove": "straight",
+          "density": "sparse"
+        },
+        "notes": "The lift: a secondary dominant into vi, then the borrowed ivm7 right before the final cadence -- the bittersweet turn this style is built on. Drums enter here, soft and sparse, not driving.",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 88
+          }
+        ]
+      },
+      "outro": {
+        "bars": 4,
+        "progression": [
+          "ivm7(9)",
+          "Imaj7(9)",
+          "iim7(9)",
+          "Imaj7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "melodic",
+        "arc": "fade_out",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "harmony_register": {
+          "min": 50,
+          "max": 76
+        },
+        "rest_probability": 0.3,
+        "swing": 0.0,
+        "notes": "Drums drop back out -- fading home the same intimate way it started.",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 78
+          }
+        ]
+      }
+    }
+  }
+}

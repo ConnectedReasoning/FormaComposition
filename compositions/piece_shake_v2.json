@@ -148,7 +148,11 @@
           "density": "sparse"
         },
         "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; Counterpoint 2 (counterline character) sits below.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -190,7 +194,11 @@
           "density": "medium"
         },
         "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Primary melody develops the plea motif. Counterpoint 1 (arpeggio) at full energy above. Counterpoint 2 (counterline) below, freer dissonance for contrary-motion tension.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -226,7 +234,11 @@
           "density": "sparse"
         },
         "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -267,7 +279,11 @@
           "rhythm": "free",
           "density": "medium"
         },
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -303,7 +319,11 @@
           "density": "sparse"
         },
         "notes": "Bb-C-Bb-Dm. Tension and release. Primary melody sparse here; counterpoint 1 and 2 move in contrary motion, building toward the final chorus.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -345,7 +365,11 @@
           "density": "full"
         },
         "notes": "Extended final chorus \u2014 16 bars. Primary melody and both counterpoint voices at full intensity, peak interweave.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -380,7 +404,11 @@
           "rhythm": "sustain"
         },
         "notes": "Voices dissolve in reverse order. Bass pedal on D. Primary melody (plea motif) fragments only; counterpoint 2 drops out first, then counterpoint 1.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "sparse",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",

@@ -119,13 +119,19 @@
         "arc": "breath",
         "rhythm": "free",
         "rest_probability": 0.05,
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "free",
-          "canon_offset": 1.5,
-          "velocity": 58
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "free",
+            "canon_offset": 1.5,
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "suspension",
@@ -172,12 +178,18 @@
         "arc": "swell",
         "rhythm": "motif",
         "rest_probability": 0.2,
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "free",
-          "velocity": 52
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "free",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "dissolution",

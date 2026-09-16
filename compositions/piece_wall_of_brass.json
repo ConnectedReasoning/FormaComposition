@@ -1,0 +1,201 @@
+{
+  "piece": {
+    "title": "Wall of Brass",
+    "key": "F",
+    "mode": "ionian",
+    "tempo": 124,
+    "seed": 7625,
+    "motif": {
+      "name": "horn_fanfare",
+      "intervals": [
+        0,
+        4,
+        3,
+        0,
+        -2,
+        2
+      ],
+      "rhythm": [
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        2.0,
+        3.0
+      ],
+      "transform_pool": [
+        "sequence",
+        "retrograde"
+      ],
+      "notes": "Bold fanfare shape -- a wide leap up, settle, breathe -- built for horns, not voice. Short and punchy (1 bar) on purpose, contrast to the last piece's long legato line."
+    },
+    "notes": "Horn-driven jazz-rock in the vein of 70s brass-rock bands: driving rock rhythm section underneath, sophisticated horn-chart harmony on top. voicing='drop2' throughout -- unlike the funk piece's tight 'closed' stabs or the ballad's spread 'open' pads, drop2 (second-from-top voice dropped an octave) is the actual technique horn arrangers use for a big-but-still-punchy brass sound. Structure escalates harmonically on purpose: intro_riff and verse stay mostly plain triads/7ths (rock-song simplicity), horn_hook loads in 9ths/13ths/an altered dominant for the big brass chorus, outro_vamp closes on repeated dominant-tonic stabs. groove='push' on the hook section specifically, for that leaning-into-the-beat horn-band urgency; 'driving' elsewhere.",
+    "form_type": "song",
+    "form": [
+      "intro_riff",
+      "verse",
+      "horn_hook",
+      "verse",
+      "horn_hook",
+      "outro_vamp"
+    ],
+    "sections": {
+      "intro_riff": {
+        "bars": 8,
+        "progression": [
+          "I",
+          "IV",
+          "I",
+          "V7"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "voicing": "drop2",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 79
+        },
+        "rest_probability": 0.1,
+        "swing": 0.0,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "driving"
+        },
+        "notes": "Plain triads -- establishing the riff and the drive before any jazz color shows up.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 92
+          }
+        ]
+      },
+      "verse": {
+        "bars": 16,
+        "progression": [
+          "I",
+          "vim7",
+          "iim7",
+          "V7",
+          "I",
+          "IV",
+          "iim7",
+          "V7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "voicing": "drop2",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 79
+        },
+        "rest_probability": 0.12,
+        "swing": 0.0,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "driving"
+        },
+        "notes": "Rock-song harmonic movement -- a pop-turnaround feel (I-vi-ii-V), still mostly plain 7ths, one 9th at the very end leaning toward the hook.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 88
+          }
+        ]
+      },
+      "horn_hook": {
+        "bars": 16,
+        "progression": [
+          "I7(9)",
+          "IV7(9)",
+          "iim7(13)",
+          "V7(9,13)",
+          "vim7(9)",
+          "IV7(9)",
+          "V7(#9)",
+          "I7(9,13)"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "voicing": "drop2",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 79
+        },
+        "rest_probability": 0.08,
+        "swing": 0.0,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "push"
+        },
+        "notes": "The big brass chorus -- every chord loaded with a tension, V7(#9) as the dramatic altered hit right before the final tonic stab.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 100
+          }
+        ]
+      },
+      "outro_vamp": {
+        "bars": 8,
+        "progression": [
+          "I7(9,13)",
+          "IV7(9)",
+          "V7(#9)",
+          "I7(9,13)"
+        ],
+        "density": "full",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "voicing": "drop2",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 79
+        },
+        "rest_probability": 0.05,
+        "swing": 0.0,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "driving"
+        },
+        "notes": "Repeated dominant-tonic brass stabs to close -- ending on I7(9,13) rather than a plain major tonic, soul/rock-horn convention.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 100
+          }
+        ]
+      }
+    }
+  }
+}

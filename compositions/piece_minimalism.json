@@ -78,11 +78,18 @@
         "arc": "plateau",
         "rhythm": "motif",
         "rest_probability": 0.0,
-        "counterpoint": {
-          "species": "first",
-          "register": "above",
-          "dissonance": "none"
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "accumulation",
@@ -105,11 +112,18 @@
         "arc": "plateau",
         "rhythm": "motif",
         "rest_probability": 0.0,
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "passing"
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       }
     ]
   }

@@ -107,11 +107,18 @@
         "drums": {
           "pattern": "four_on_floor"
         },
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "none"
-        }
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       "filter_break": {
         "name": "filter_break",

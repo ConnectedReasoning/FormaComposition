@@ -122,12 +122,18 @@
         "rhythm": "motif",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "m3_dissolve",
@@ -224,12 +230,18 @@
         "rhythm": "motif",
         "rest_probability": 0.15,
         "beats_per_bar": 4,
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 50
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 50
+          }
+        ]
       },
       {
         "name": "m4_fade",

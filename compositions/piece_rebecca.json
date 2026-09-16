@@ -58,13 +58,19 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "motif",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 52
-        },
-        "notes": "The piece finds its voice. Lyrical melody enters \u2014 this is where Manuel's guitar or voice belongs. Counterpoint strings enter underneath, very soft. Root-fifth bass gives gentle movement. The progression is the most natural, loving thing in music \u2014 nothing surprising, everything true."
+        "notes": "The piece finds its voice. Lyrical melody enters \u2014 this is where Manuel's guitar or voice belongs. Counterpoint strings enter underneath, very soft. Root-fifth bass gives gentle movement. The progression is the most natural, loving thing in music \u2014 nothing surprising, everything true.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 52
+          }
+        ]
       },
       {
         "name": "warmth",
@@ -81,13 +87,19 @@
         "bass_style": "walking",
         "arc": "breath",
         "rhythm": "motif",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "velocity": 55
-        },
-        "notes": "Longest lyrical section \u2014 24 bars of sustained warmth. The ii chord adds a gentle ache (borrowed longing). Walking bass gives the section forward motion without urgency. Breath arc means it swells and recedes naturally \u2014 like a long exhale. This is the section to play guitar over."
+        "notes": "Longest lyrical section \u2014 24 bars of sustained warmth. The ii chord adds a gentle ache (borrowed longing). Walking bass gives the section forward motion without urgency. Breath arc means it swells and recedes naturally \u2014 like a long exhale. This is the section to play guitar over.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 55
+          }
+        ]
       },
       {
         "name": "bloom",
@@ -138,13 +150,19 @@
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "motif",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "none",
-          "velocity": 50
-        },
-        "notes": "The melody returns \u2014 now it feels like memory. Same lyrical behavior but the motif has been through augmentation; it moves slower, fuller. Counterpoint is dissonance-free here \u2014 pure consonance, nothing unresolved. The added IV at the end begins the farewell."
+        "notes": "The melody returns \u2014 now it feels like memory. Same lyrical behavior but the motif has been through augmentation; it moves slower, fuller. Counterpoint is dissonance-free here \u2014 pure consonance, nothing unresolved. The added IV at the end begins the farewell.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 50
+          }
+        ]
       },
       {
         "name": "evening",

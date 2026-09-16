@@ -1,0 +1,117 @@
+{
+  "piece": {
+    "title": "Tension Clause Demo",
+    "key": "Bb",
+    "mode": "ionian",
+    "tempo": 92,
+    "seed": 913,
+    "motif": {
+      "name": "walkup_cell",
+      "intervals": [
+        0,
+        2,
+        2,
+        1,
+        -1,
+        -2,
+        -2,
+        0
+      ],
+      "rhythm": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "transform_pool": [
+        "inversion",
+        "sequence",
+        "retrograde"
+      ],
+      "notes": "Simple stepwise walk outlining the chord scale, so the melody stays out of the harmony's way and the tensions in the pad are what's doing the talking."
+    },
+    "notes": "Phase-2 demo piece for the independent tension clause (parse_roman's '(9,13)' grammar). head_a plays a ii-V-I turnaround with a diatonic 9/13 on the V (skipping the 11 entirely -- the exact combination the old fixed-quality ladder couldn't express), a natural 9 on ii and I, an add13 on vi, and a sharp-9 'Hendrix chord' V on the second pass. head_b is a 4-bar bridge: a secondary dominant (V7/ii) carrying its own 9th tension, then a flat-13 altered V resolving home. voicing='open' throughout since Phase 3 (tension-aware voicing placement) hasn't landed yet -- open spacing is the manual mitigation for now.",
+    "form_type": "song",
+    "form": [
+      "head_a",
+      "head_b",
+      "head_a"
+    ],
+    "sections": {
+      "head_a": {
+        "bars": 8,
+        "progression": [
+          "iim7(9)",
+          "V7(9,13)",
+          "Imaj7(9)",
+          "vim7(add13)",
+          "iim7(9)",
+          "V7(#9)",
+          "Imaj7(9)",
+          "Imaj7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "harmony_register": {
+          "min": 48,
+          "max": 76
+        },
+        "rest_probability": 0.1,
+        "swing": 0.25,
+        "notes": "ii-V-I turnaround x2. Bar 2 (V7(9,13)) deliberately skips the 11th -- additive tensions, not a fixed ladder. Bar 6 (V7(#9)) is the altered-dominant 'Hendrix chord', sharpening the diatonic natural 9 by a semitone rather than using it.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 90
+          }
+        ]
+      },
+      "head_b": {
+        "bars": 4,
+        "progression": [
+          "V7(9)/ii",
+          "iim7(9)",
+          "V7(b13)",
+          "Imaj7(9)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "walking",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "voicing": "open",
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "medium"
+        },
+        "harmony_register": {
+          "min": 48,
+          "max": 76
+        },
+        "rest_probability": 0.1,
+        "swing": 0.25,
+        "notes": "Bridge. Bar 1 is a secondary dominant (G7, applied against ii's root) carrying its own explicit 9th tension -- same additive mechanism as an ordinary chord, resolved relative to the applied degree. Bar 3 is a flat-13 altered V resolving home.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 90
+          }
+        ]
+      }
+    }
+  }
+}

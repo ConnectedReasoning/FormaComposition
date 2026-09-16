@@ -32,45 +32,46 @@
           2
         ],
         "density": "medium",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "mid",
-          "velocity": 85
-        },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
         "swing": 0.0,
         "rest_probability": 0.1,
-        "counterpoint": [
+        "notes": "Lead in plain 4-beat free rhythm, second_melody cycling every 3 beats -- classic 3-over-4 polymeter, should audibly drift through the bar over 16 bars.",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 85
+          },
           {
             "species": "free",
             "register": "below",
             "dissonance": "passing",
             "velocity": 55
+          },
+          {
+            "behavior": "lyrical",
+            "register": "high",
+            "velocity": 80,
+            "rhythm_pattern": {
+              "onsets": [
+                0.0
+              ],
+              "durations": [
+                2.5
+              ],
+              "velocities": [
+                1.0
+              ],
+              "length_beats": 3.0
+            }
           }
-        ],
-        "second_melody": {
-          "behavior": "lyrical",
-          "register": "high",
-          "velocity": 80,
-          "rhythm_pattern": {
-            "onsets": [
-              0.0
-            ],
-            "durations": [
-              2.5
-            ],
-            "velocities": [
-              1.0
-            ],
-            "length_beats": 3.0
-          }
-        },
-        "notes": "Lead in plain 4-beat free rhythm, second_melody cycling every 3 beats -- classic 3-over-4 polymeter, should audibly drift through the bar over 16 bars.",
-        "harmony_rhythm": {
-          "rhythm": "sustain"
-        }
+        ]
       }
     ]
   }

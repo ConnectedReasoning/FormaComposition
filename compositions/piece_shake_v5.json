@@ -160,7 +160,11 @@
           "density": "sparse"
         },
         "notes": "Dm-C-F-Bb feel. Primary melody carries plea motif, lyrical. Counterpoint 1 (arpeggio character) interweaves above; counterpoint 2 (counterline character) below.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -201,7 +205,11 @@
           "rhythm": "motif"
         },
         "notes": "The darkness hits. bVI is the Db major borrowed chord (one semitone below tonic). Harmony strikes on the plea motif's syncopated rhythm \u2014 Ob-La-Di-style chord hits. This single definition is reused for both choruses via exact_repeat so the hook is identical each time.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
           {
             "species": "first",
             "register": "above",
@@ -237,7 +245,11 @@
           "density": "sparse"
         },
         "notes": "Same feel as verse 1, motif transform applied to the primary melody. Counterpoint 1 slightly pulled back for variation.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -272,7 +284,11 @@
           "rhythm": "motif"
         },
         "notes": "Bb-C-Bb-Dm. Tension and release. Counterpoint 1 and 2 move in contrary motion, building toward the final chorus.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",
@@ -314,7 +330,11 @@
           "rhythm": "motif"
         },
         "notes": "Extended final chorus \u2014 16 bars, intentionally NOT a repeat of chorus. Primary melody and both counterpoint voices at full intensity, peak interweave.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
           {
             "species": "first",
             "register": "above",
@@ -349,7 +369,11 @@
           "rhythm": "sustain"
         },
         "notes": "Voices dissolve in reverse order. Bass pedal on D. Counterpoint 2 drops out first, then counterpoint 1. Harmony returns to sustain, mirroring the intro.",
-        "counterpoint": [
+        "voices": [
+          {
+            "behavior": "sparse",
+            "velocity": 72
+          },
           {
             "species": "free",
             "register": "above",

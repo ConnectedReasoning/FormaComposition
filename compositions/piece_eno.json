@@ -53,11 +53,7 @@
         ],
         "rhythm": "free",
         "density": "sparse",
-        "melody": {
-          "behavior": "sparse",
-          "register": "soprano",
-          "velocity": 62
-        },
+        "melody": "sparse",
         "bass_style": "pedal",
         "arc": "breath",
         "rest_probability": 0.45,
@@ -67,15 +63,20 @@
           "density": "full",
           "groove": "straight"
         },
-        "counterpoint": [
+        "notes": "Opening movement (~4.8 minutes). D Lydian I-II-IV-I cycle with 18 bars per chord. Tonic pedal bass anchors sustained chord pads while high-register counterpoint acts as a delicate tape-loop shimmer.",
+        "voices": [
+          {
+            "behavior": "sparse",
+            "register": "soprano",
+            "velocity": 62
+          },
           {
             "species": "free",
             "register": "above",
             "dissonance": "free",
             "velocity": 48
           }
-        ],
-        "notes": "Opening movement (~4.8 minutes). D Lydian I-II-IV-I cycle with 18 bars per chord. Tonic pedal bass anchors sustained chord pads while high-register counterpoint acts as a delicate tape-loop shimmer."
+        ]
       },
       {
         "name": "ii_unfolding_expanse",
@@ -98,11 +99,7 @@
         ],
         "rhythm": "free",
         "density": "sparse",
-        "melody": {
-          "behavior": "lyrical",
-          "register": "alto",
-          "velocity": 68
-        },
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "swell",
         "rest_probability": 0.4,
@@ -112,7 +109,13 @@
           "density": "full",
           "groove": "straight"
         },
-        "counterpoint": [
+        "notes": "Second movement (~6.4 minutes). Expands the texture with two independent counterpoint voices providing Frippertronics-style overlapping reflections below and above.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "alto",
+            "velocity": 68
+          },
           {
             "species": "free",
             "register": "above",
@@ -125,9 +128,7 @@
             "dissonance": "free",
             "velocity": 45
           }
-        ],
-
-        "notes": "Second movement (~6.4 minutes). Expands the texture with two independent counterpoint voices providing Frippertronics-style overlapping reflections below and above."
+        ]
       },
       {
         "name": "iii_plateau_of_stillness",
@@ -146,11 +147,7 @@
         ],
         "rhythm": "free",
         "density": "sparse",
-        "melody": {
-          "behavior": "generative",
-          "register": "tenor",
-          "velocity": 60
-        },
+        "melody": "generative",
         "bass_style": "pedal",
         "arc": "plateau",
         "rest_probability": 0.5,
@@ -160,15 +157,20 @@
           "density": "full",
           "groove": "straight"
         },
-        "counterpoint": [
+        "notes": "Central movement (~7.2 minutes). Ultra-long 27-bar chord holds create an immobile, timeless glass-like surface. Minimal generative melody in tenor register.",
+        "voices": [
+          {
+            "behavior": "generative",
+            "register": "tenor",
+            "velocity": 60
+          },
           {
             "species": "free",
             "register": "above",
             "dissonance": "free",
             "velocity": 50
           }
-        ],
-        "notes": "Central movement (~7.2 minutes). Ultra-long 27-bar chord holds create an immobile, timeless glass-like surface. Minimal generative melody in tenor register."
+        ]
       },
       {
         "name": "iv_reflected_horizon",
@@ -191,11 +193,7 @@
         ],
         "rhythm": "free",
         "density": "sparse",
-        "melody": {
-          "behavior": "sparse",
-          "register": "soprano",
-          "velocity": 64
-        },
+        "melody": "sparse",
         "bass_style": "steady",
         "arc": "swell",
         "rest_probability": 0.42,
@@ -205,15 +203,20 @@
           "density": "full",
           "groove": "straight"
         },
-        "counterpoint": [
+        "notes": "Fourth movement (~6.4 minutes). Lydian II chord (E major) brings floating, optimistic brightness into the high register before returning home to I.",
+        "voices": [
+          {
+            "behavior": "sparse",
+            "register": "soprano",
+            "velocity": 64
+          },
           {
             "species": "free",
             "register": "above",
             "dissonance": "free",
             "velocity": 54
           }
-        ],
-        "notes": "Fourth movement (~6.4 minutes). Lydian II chord (E major) brings floating, optimistic brightness into the high register before returning home to I."
+        ]
       },
       {
         "name": "v_dissolving_into_air",
@@ -232,11 +235,7 @@
         ],
         "rhythm": "free",
         "density": "sparse",
-        "melody": {
-          "behavior": "sparse",
-          "register": "soprano",
-          "velocity": 55
-        },
+        "melody": "sparse",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rest_probability": 0.55,
@@ -246,15 +245,20 @@
           "density": "full",
           "groove": "straight"
         },
-        "counterpoint": [
+        "notes": "Final movement (~5.2 minutes). Plagal IV-I oscillation with a long fade_out arc. Total duration across all 5 sections = 450 bars = exactly 30 minutes at 60 BPM.",
+        "voices": [
+          {
+            "behavior": "sparse",
+            "register": "soprano",
+            "velocity": 55
+          },
           {
             "species": "free",
             "register": "above",
             "dissonance": "free",
             "velocity": 42
           }
-        ],
-        "notes": "Final movement (~5.2 minutes). Plagal IV-I oscillation with a long fade_out arc. Total duration across all 5 sections = 450 bars = exactly 30 minutes at 60 BPM."
+        ]
       }
     ]
   }

@@ -53,12 +53,19 @@
         "bass_style": "walking",
         "arc": "plateau",
         "rhythm": "motif",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "canon_offset": 1.0
-        }
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "canon_offset": 1.0,
+            "velocity": 58
+          }
+        ]
       },
       "episode_one": {
         "name": "episode_one",
@@ -95,12 +102,19 @@
         "bass_style": "melodic",
         "arc": "breath",
         "rhythm": "motif",
-        "counterpoint": {
-          "species": "free",
-          "register": "above",
-          "dissonance": "passing",
-          "canon_offset": 2.0
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "canon_offset": 2.0,
+            "velocity": 58
+          }
+        ]
       }
     }
   }

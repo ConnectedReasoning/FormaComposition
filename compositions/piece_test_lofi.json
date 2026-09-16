@@ -55,11 +55,7 @@
           2
         ],
         "density": "full",
-        "melody": {
-          "behavior": "sparse",
-          "register": "alto",
-          "velocity": 88
-        },
+        "melody": "sparse",
         "rest_probability": 0.7,
         "bass_style": "pedal",
         "arc": "fade_in",
@@ -68,7 +64,14 @@
           "rhythm": "sustain",
           "density": "sparse"
         },
-        "swing": 0.55
+        "swing": 0.55,
+        "voices": [
+          {
+            "behavior": "sparse",
+            "register": "alto",
+            "velocity": 88
+          }
+        ]
       },
       "verse": {
         "name": "verse",
@@ -87,11 +90,7 @@
           4
         ],
         "density": "full",
-        "melody": {
-          "behavior": "develop",
-          "register": "alto",
-          "velocity": 95
-        },
+        "melody": "develop",
         "rest_probability": 0.5,
         "bass_style": "walking",
         "arc": "plateau",
@@ -105,7 +104,14 @@
           "pattern": "backbeat",
           "density": "medium",
           "swing": 0.6
-        }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "alto",
+            "velocity": 95
+          }
+        ]
       },
       "outro": {
         "name": "outro",
@@ -120,11 +126,7 @@
           4
         ],
         "density": "full",
-        "melody": {
-          "behavior": "sparse",
-          "register": "alto",
-          "velocity": 85
-        },
+        "melody": "sparse",
         "rest_probability": 0.75,
         "bass_style": "pedal",
         "arc": "fade_out",
@@ -133,7 +135,14 @@
           "rhythm": "sustain",
           "density": "sparse"
         },
-        "swing": 0.5
+        "swing": 0.5,
+        "voices": [
+          {
+            "behavior": "sparse",
+            "register": "alto",
+            "velocity": 85
+          }
+        ]
       }
     }
   }

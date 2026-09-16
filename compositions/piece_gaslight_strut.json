@@ -11,105 +11,234 @@
         "name": "intro",
         "bars": 4,
         "beats_per_bar": 4,
-        "progression": ["i", "v"],
-        "chord_bars": [2, 2],
+        "progression": [
+          "i",
+          "v"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "build",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Vamp on i-v, establishes the dorian minor color before IV's brightness shows up in strain A."
+        "notes": "Vamp on i-v, establishes the dorian minor color before IV's brightness shows up in strain A.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_a",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["i", "IV", "i", "v", "i", "IV", "i", "v"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Main strain -- i-IV is dorian's signature move, the major IV lifting out of the minor tonic. root_fifth bass stays steady while the tresillo cuts across it, same tension as the original."
+        "notes": "Main strain -- i-IV is dorian's signature move, the major IV lifting out of the minor tonic. root_fifth bass stays steady while the tresillo cuts across it, same tension as the original.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "strain_b",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["bVII", "IV", "i", "v", "bVII", "IV", "i", "v"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "bVII",
+          "IV",
+          "i",
+          "v",
+          "bVII",
+          "IV",
+          "i",
+          "v"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 90 },
+        "melody": "lyrical",
         "bass_style": "pulse",
         "arc": "swell",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "counterpoint": [
-          { "species": "free", "register": "above", "dissonance": "passing", "velocity": 50 }
-        ],
-        "notes": "Contrasting strain -- bVII-IV adds the other dorian-defining color (both chords major, floating free of the minor tonic's gravity). One light countermelody above."
+        "notes": "Contrasting strain -- bVII-IV adds the other dorian-defining color (both chords major, floating free of the minor tonic's gravity). One light countermelody above.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 90
+          },
+          {
+            "species": "free",
+            "register": "above",
+            "dissonance": "passing",
+            "velocity": 50
+          }
+        ]
       },
       {
         "name": "breakdown",
         "bars": 8,
         "beats_per_bar": 4,
-        "progression": ["i", "IV"],
-        "chord_bars": [4, 4],
+        "progression": [
+          "i",
+          "IV"
+        ],
+        "chord_bars": [
+          4,
+          4
+        ],
         "density": "sparse",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 62 },
+        "melody": "lyrical",
         "bass_style": "pedal",
         "arc": "fade_out",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.4,
-        "notes": "The eye of the storm, same move as the original -- no groove, no counterpoint, pedal bass, high rest_probability."
+        "notes": "The eye of the storm, same move as the original -- no groove, no counterpoint, pedal bass, high rest_probability.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 62
+          }
+        ]
       },
       {
         "name": "strain_a_reprise",
         "bars": 16,
         "beats_per_bar": 4,
-        "progression": ["i", "IV", "i", "v", "i", "IV", "i", "v"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "progression": [
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 88 },
+        "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "build",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.1,
         "groove": "broken",
-        "notes": "Return of strain A, rebuilding out of the breakdown."
+        "notes": "Return of strain A, rebuilding out of the breakdown.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 88
+          }
+        ]
       },
       {
         "name": "outro",
         "bars": 4,
         "beats_per_bar": 4,
-        "progression": ["v", "i"],
-        "chord_bars": [2, 2],
+        "progression": [
+          "v",
+          "i"
+        ],
+        "chord_bars": [
+          2,
+          2
+        ],
         "density": "full",
-        "melody": { "behavior": "lyrical", "register": "mid", "velocity": 86 },
+        "melody": "lyrical",
         "bass_style": "root_only",
         "arc": "decay",
         "rhythm": "free",
-        "harmony_rhythm": { "rhythm": "sustain" },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
         "swing": 0.0,
         "rest_probability": 0.15,
         "groove": "broken",
-        "notes": "Short closing tag, resolves to the minor tonic."
+        "notes": "Short closing tag, resolves to the minor tonic.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "mid",
+            "velocity": 86
+          }
+        ]
       }
     ]
   }

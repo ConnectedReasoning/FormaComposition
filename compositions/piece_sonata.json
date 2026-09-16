@@ -89,12 +89,19 @@
         "arc": "build",
         "rhythm": "motif",
         "rest_probability": 0.15,
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing",
-          "canon_offset": 2.0
-        }
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "canon_offset": 2.0,
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "recapitulation",
@@ -112,11 +119,18 @@
         "arc": "swell",
         "rhythm": "motif",
         "rest_probability": 0.45,
-        "counterpoint": {
-          "species": "first",
-          "register": "below",
-          "dissonance": "none"
-        }
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "coda",

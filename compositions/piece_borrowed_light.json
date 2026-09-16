@@ -1,0 +1,42 @@
+{
+  "piece": {
+    "title": "Borrowed Light",
+    "key": "E",
+    "mode": "ionian",
+    "tempo": 88,
+    "seed": 3117,
+    "form_type": "song",
+    "motif": {
+      "name": "drift_cell",
+      "intervals": [1, 2, -1, -2, 1],
+      "rhythm": [1.0, 0.5, 0.5, 1.0, 1.0],
+      "velocities": [0.6, 0.55, 0.65, 0.6, 0.5],
+      "transform_pool": ["inversion", "retrograde", "transpose_up"]
+    },
+    "sections": {
+      "verse": {
+        "name": "verse",
+        "bars": 8,
+        "progression": ["I", "bIII", "bVI", "bVII"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "generative",
+        "bass_style": "root_fifth",
+        "arc": "swell"
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 8,
+        "progression": ["I", "bVI", "IV", "V"],
+        "chord_bars": [2, 2, 2, 2],
+        "rhythm": "motif",
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "root_fifth",
+        "arc": "build"
+      }
+    },
+    "form": ["verse", "chorus", "verse", "chorus",  "verse", "chorus"]
+  }
+}

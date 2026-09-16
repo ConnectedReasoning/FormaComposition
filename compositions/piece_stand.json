@@ -41,11 +41,7 @@
           2
         ],
         "density": "medium",
-        "melody": {
-          "register": "alto",
-          "behavior": "lyrical",
-          "velocity": 89
-        },
+        "melody": "lyrical",
         "bass_style": "steady",
         "arc": "fade_in",
         "rhythm": "free",
@@ -54,7 +50,14 @@
           "rhythm": "free",
           "density": "sparse",
           "groove": "straight"
-        }
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 89
+          }
+        ]
       }
     }
   }

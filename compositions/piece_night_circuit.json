@@ -1,0 +1,175 @@
+{
+  "piece": {
+    "title": "Night Circuit",
+    "key": "Eb",
+    "mode": "mixolydian",
+    "tempo": 104,
+    "seed": 5150,
+    "motif": {
+      "name": "horn_stab",
+      "intervals": [
+        0,
+        3,
+        2,
+        0,
+        -2,
+        0,
+        3,
+        0
+      ],
+      "rhythm": [
+        0.25,
+        0.25,
+        0.5,
+        0.25,
+        0.25,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "transform_pool": [
+        "sequence",
+        "retrograde"
+      ],
+      "notes": "Tight syncopated horn-stab riff, pentatonic-ish shape over Eb mixolydian's flat-7 color. Kept close to a literal repeat by leaning on 'sequence' -- funk hooks live on repetition and pocket, not development."
+    },
+    "notes": "Dominant-vamp funk in the 'Chameleon' mold: I7 vamping against bVII7 (mixolydian's own diatonic flat-7 chord, no borrowed accidental needed), extended with explicit 9/13/#9 tensions throughout. Voicing is 'closed' everywhere on purpose -- tight, punchy horn-and-clav stabs, not spread pads -- specifically to put Phase 3's mud-zone/adjacent-octave repair pass to work instead of the open-voicing spread. bass_style='pulse' and groove='syncopated' carry the pocket; harmony_rhythm='pattern' gives staccato stabs instead of a sustained chord pad.",
+    "form_type": "song",
+    "form": [
+      "verse_vamp",
+      "chorus",
+      "verse_vamp",
+      "chorus",
+      "verse_vamp",
+      "chorus",
+      "verse_vamp",
+      "bridge",
+      "chorus",
+      "verse_vamp"
+    ],
+    "sections": {
+      "verse_vamp": {
+        "bars": 8,
+        "progression": [
+          "I7(9,13)",
+          "I7(9,13)",
+          "bVII7(9)",
+          "I7(9,13)",
+          "I7(#9)",
+          "bVII7(9)",
+          "I7(9,13)",
+          "I7(9,13)"
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "plateau",
+        "rhythm": "motif",
+        "voicing": "closed",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "syncopated"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 74
+        },
+        "rest_probability": 0.35,
+        "swing": 0.12,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "syncopated"
+        },
+        "notes": "The vamp. bVII7(9) is diatonic to mixolydian, not borrowed -- no accidental needed for that bVII motion, unlike doing this in ionian.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 92
+          }
+        ]
+      },
+      "chorus": {
+        "bars": 8,
+        "progression": [
+          "ii7(9)",
+          "V7(9,13)",
+          "I7(9)",
+          "IV7(9)",
+          "ii7(9)",
+          "V7(b13)",
+          "I7(#9)",
+          "I7(9,13)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "build",
+        "rhythm": "motif",
+        "voicing": "closed",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "medium",
+          "groove": "syncopated"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 74
+        },
+        "rest_probability": 0.1,
+        "swing": 0.12,
+        "drums": {
+          "pattern": "backbeat",
+          "groove": "syncopated"
+        },
+        "notes": "The hook opens up into real ii-V-I motion (all explicit quality overrides, so mode-natural mixolydian qualities don't matter here) -- more harmonic movement than the vamp, still every chord carrying its own tension.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 96
+          }
+        ]
+      },
+      "bridge": {
+        "bars": 4,
+        "progression": [
+          "IV7(13)",
+          "IV7(13)",
+          "bVII7(9)",
+          "I7(9,13)"
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "pulse",
+        "arc": "swell",
+        "rhythm": "motif",
+        "voicing": "closed",
+        "harmony_rhythm": {
+          "rhythm": "free",
+          "density": "sparse",
+          "groove": "syncopated"
+        },
+        "harmony_register": {
+          "min": 55,
+          "max": 74
+        },
+        "rest_probability": 0.3,
+        "swing": 0.12,
+        "drums": {
+          "pattern": "halftime",
+          "groove": "syncopated"
+        },
+        "notes": "Short breakdown -- sparser density, halftime drums, drops the volume before the vamp comes back in.",
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 80
+          }
+        ]
+      }
+    }
+  }
+}
