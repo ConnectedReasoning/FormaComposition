@@ -21,7 +21,6 @@ import pytest
 from pydantic import ValidationError
 
 from intervals.core.schemas import (
-    CounterpointModel,
     DrumModel,
     HarmonyRhythmModel,
     MotifModel,
@@ -186,34 +185,78 @@ class TestMelodicArcModel:
 
 
 # ===========================================================================
-# CounterpointModel
+# Retired-field rejection (CounterpointModel / counterpoint[] / second_melody)
 # ===========================================================================
 
-class TestCounterpointModel:
-    def test_valid(self):
-        m = CounterpointModel(species="first", register="above", velocity=70)
-        assert m.species == "first"
-        assert m.cp_register == "above"  # populated via alias
+class TestRetiredSectionFields:
+    """The retired names must fail LOUDLY. SectionModel is extra="allow", so
+    without _reject_retired_fields an old piece would validate clean and then
+    render as though the field were never written — the exact silent-no-op
+    failure this refactor set out to kill."""
 
-    def test_valid_free_species_default(self):
-        m = CounterpointModel()
-        assert m.species == "free"
-        assert m.cp_register == "below"
+    @pytest.mark.parametrize("field,value", [
+        ("counterpoint",  [{"species": "free"}]),
+        ("second_melody", {"behavior": "lyrical"}),
+        ("motif",         "riff"),
+        ("motifs",        ["riff"]),
+        ("percussion",    {"pattern": "whatever"}),
+    ])
+    def test_retired_field_is_rejected(self, field, value):
+        with pytest.raises(ValidationError, match="retired in 2026-09"):
+            SectionModel.model_validate(
+                {"progression": ["i"], "rhythm": "free", field: value})
 
-    def test_invalid_unimplemented_species(self):
-        """'second'/'third'/'fourth'/'fifth' are schema-valid *names* in the
-        Literal but not implemented in counterpoint.py — must be blocked at
-        validation time, not left to crash at render time."""
+    def test_error_names_the_replacement(self):
+        with pytest.raises(ValidationError, match=r"voices\[\]"):
+            SectionModel.model_validate(
+                {"progression": ["i"], "rhythm": "free",
+                 "counterpoint": [{"species": "free"}]})
+
+    def test_error_points_at_the_migrator(self):
+        with pytest.raises(ValidationError, match="migrate_voices"):
+            SectionModel.model_validate(
+                {"progression": ["i"], "rhythm": "free", "percussion": {}})
+
+    def test_melody_dict_form_is_rejected(self):
+        """The VoiceModel arm of `melody` is gone — a lead that needs its own
+        register/velocity is voices[0] like every other voice."""
+        with pytest.raises(ValidationError):
+            SectionModel.model_validate(
+                {"progression": ["i"], "rhythm": "free",
+                 "melody": {"behavior": "lyrical", "register": "alto"}})
+
+    def test_bare_melody_string_still_works(self):
+        m = SectionModel.model_validate(
+            {"progression": ["i"], "rhythm": "free", "melody": "lyrical"})
+        assert m.melody_behavior() == "lyrical"
+        assert m.lead_voice() is None
+
+
+# ===========================================================================
+# VoiceModel absorbed CounterpointModel's fields
+# ===========================================================================
+
+class TestVoiceModelAbsorbedCounterpointFields:
+    def test_absorbed_defaults_match_the_retired_model(self):
+        v = VoiceModel(species="free")
+        assert v.rhythm_density == "medium"
+        assert v.groove is None
+        assert v.note_length_range is None
+
+    def test_absorbed_fields_accept_values(self):
+        v = VoiceModel(species="free", rhythm_density="sparse", groove="push",
+                       note_length_range={"min": 0.5, "max": 2.0})
+        assert v.rhythm_density == "sparse"
+        assert v.groove == "push"
+        assert v.note_length_range.as_tuple() == (0.5, 2.0)
+
+    def test_counterpoint_relative_register_aliases_still_accepted(self):
+        assert VoiceModel(species="free", register="above").v_register == "above"
+        assert VoiceModel(species="free", register="below").v_register == "below"
+
+    def test_unimplemented_species_still_blocked_at_validation(self):
         with pytest.raises(ValidationError, match="not implemented"):
-            CounterpointModel(species="third")
-
-    def test_invalid_velocity_out_of_range(self):
-        with pytest.raises(ValidationError):
-            CounterpointModel(velocity=200)
-
-    def test_invalid_bad_dissonance_enum(self):
-        with pytest.raises(ValidationError):
-            CounterpointModel(dissonance="bogus")
+            VoiceModel(species="third")
 
 
 # ===========================================================================
@@ -413,13 +456,15 @@ class TestSectionModel:
         assert s.bars == 8.0
         assert s.resolved_progression() == ["i", "iv", "v"]
 
-    def test_valid_with_voices_and_counterpoint(self):
+    def test_valid_with_lead_and_species_peer(self):
+        """One list holds both kinds of voice: a melody-path lead and a
+        species peer. This is what the retired melody+counterpoint pair
+        used to take two fields to say."""
         s = SectionModel.model_validate(_minimal_section(
             voices=[
                 {"register": "soprano", "behavior": "lyrical"},
                 {"register": "alto", "species": "first"},
             ],
-            counterpoint=None,
         ))
         assert len(s.voices) == 2
         assert s.lead_voice().v_register == "soprano"
@@ -476,15 +521,18 @@ class TestSectionModel:
                 progression=["i", "iv"], chord_bars=[1.0, 1.0], bars=5,
             ))
 
-    def test_invalid_too_many_counterpoint_voices(self):
-        cp = [{"species": "free"}] * 4
-        with pytest.raises(ValidationError, match="at most 3 voices"):
-            SectionModel.model_validate(_minimal_section(counterpoint=cp))
-
     def test_invalid_too_many_total_voices(self):
-        voices = [{"register": "soprano"}] * 5
-        with pytest.raises(ValidationError, match="at most 4 total"):
+        """Cap is 5 (1 lead + 4 peers), up from 4. Retiring second_melody
+        freed its dedicated MIDI channel, which became the 4th peer slot —
+        the consolidation bought a voice rather than costing one."""
+        voices = [{"register": "soprano"}] * 6
+        with pytest.raises(ValidationError, match="at most 5 total"):
             SectionModel.model_validate(_minimal_section(voices=voices))
+
+    def test_five_voices_is_allowed(self):
+        s = SectionModel.model_validate(_minimal_section(
+            voices=[{"register": "soprano"}] + [{"species": "free"}] * 4))
+        assert len(s.voices) == 5
 
     def test_invalid_harmony_rhythm_pattern_requires_block(self):
         with pytest.raises(ValidationError, match="harmony_pattern block"):
@@ -534,8 +582,11 @@ class TestSectionModel:
             harmony_rhythm={"rhythm": "sustain"},
         ))
 
-    def test_invalid_transform_imitation_strict_with_motif_rhythm(self):
-        with pytest.raises(ValidationError, match="not implemented"):
+    def test_retired_transform_imitation_is_rejected(self):
+        """transform_imitation had exactly one legal value whose only
+        implementation was a ValueError. Retired 2026-09; HarmonyRhythmModel
+        is extra="forbid", so it now fails as an unknown key."""
+        with pytest.raises(ValidationError, match="not permitted"):
             SectionModel.model_validate(_minimal_section(
                 harmony_rhythm={"rhythm": "motif", "transform_imitation": "strict"},
             ))
@@ -560,14 +611,14 @@ class TestSectionModel:
         assert any("canon_offset" in str(w.message) and "never reads" in str(w.message)
                     for w in caught)
 
-    def test_lead_canon_offset_warns_when_set_on_melody_dict_form(self):
-        """Same dead field, reached via section.melody given as a VoiceModel
-        dict instead of voices[] — lead_voice() resolves either, and
-        generator.py never touches section.melody's VoiceModel at all."""
+    def test_lead_canon_offset_warns_when_set_on_lead_voice(self):
+        """Same dead field on voices[0]. The melody-as-dict route this used
+        to also cover is gone (2026-09) — there is one way to write a lead
+        with its own fields now, and this is it."""
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
             SectionModel.model_validate(_minimal_section(
-                melody={"behavior": "lyrical", "canon_offset": 1.5},
+                voices=[{"behavior": "lyrical", "canon_offset": 1.5}],
             ))
         assert any("canon_offset" in str(w.message) and "never reads" in str(w.message)
                     for w in caught)
@@ -644,7 +695,7 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
             beats_per_bar=4, rhythm="free",
-            melody={"behavior": "develop"},
+            voices=[{"behavior": "develop"}],
         ))
         with pytest.warns(UserWarning, match="behavior='develop'.*boogie_cell.*8.*4"):
             section.validate_against_theme(piece)
@@ -657,7 +708,7 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
             beats_per_bar=4, rhythm="free",
-            melody={"behavior": "develop"},
+            voices=[{"behavior": "develop"}],
         ))
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -673,7 +724,7 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v"], chord_bars=[1.0, 1.0], bars=2.0,  # exactly 4 beats/chord
             beats_per_bar=4, rhythm="free",
-            melody={"behavior": "develop"},
+            voices=[{"behavior": "develop"}],
         ))
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -691,7 +742,7 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
             beats_per_bar=4, rhythm="free",
-            melody={"behavior": "lyrical"},
+            voices=[{"behavior": "lyrical"}],
         ))
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -726,12 +777,12 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,  # 4 beats/chord
             beats_per_bar=4, rhythm="free",
-            melody={
+            voices=[{
                 "behavior": "develop",
                 "motif": {"name": "voice_override_cell",
                           "intervals": [0, 2, 2, 1, 1, -1, -1, -2],
                           "rhythm": [1.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 2.0]},  # 8 beats
-            },
+            }],
         ))
         with pytest.warns(UserWarning, match="voice_override_cell"):
             section.validate_against_theme(piece)
@@ -743,7 +794,7 @@ class TestDevelopMotifCycleVsChordLength:
         section = SectionModel.model_validate(_minimal_section(
             progression=["ii", "v", "I"], chord_bars=[1.0, 1.0, 1.0], bars=3.0,
             beats_per_bar=4, rhythm="free",
-            melody={"behavior": "develop"},
+            voices=[{"behavior": "develop"}],
         ))
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")

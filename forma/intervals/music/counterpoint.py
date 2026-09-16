@@ -30,7 +30,7 @@ from intervals.music.melody import MelodyNote
 from intervals.music.rhythm import get_pattern
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from intervals.core.schemas import CounterpointModel
+    pass  # (CounterpointModel import retired 2026-09)
 
 # ---------------------------------------------------------------------------
 # Interval classification
@@ -940,7 +940,6 @@ def generate_counterpoint(
     dissonance: str = "passing",
     seed: Optional[int] = None,
     *,
-    cp_model: "Optional[CounterpointModel]" = None,
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
     chord_voices: Optional[list[list]] = None,
@@ -954,8 +953,9 @@ def generate_counterpoint(
     """
     Generate a counterpoint voice against a melody.
 
-    note_length_range is the section-level default (free species only). A
-    CounterpointModel with its own note_length_range overrides it per-voice.
+    note_length_range is the caller's resolved value (free species only) —
+    generator.py applies the per-voice VoiceModel.note_length_range override
+    before calling, falling back to the section-level default.
 
     Args:
         melody_notes:   List of MelodyNote from melody.py
@@ -967,9 +967,6 @@ def generate_counterpoint(
         velocity:       Base MIDI velocity
         dissonance:     For free species: "none" | "passing" | "free"
         seed:           Random seed
-        cp_model:       Optional CounterpointModel instance.  When provided,
-                        its fields override the individual keyword arguments so
-                        the caller does not need to unpack the model manually.
         against_notes:  Sounding pitches from all prior voices in the section.
                         Used to avoid parallel fifths/octaves across all peers,
                         not just the primary melody. Time-agnostic; kept for
@@ -989,19 +986,9 @@ def generate_counterpoint(
     Returns:
         List of CounterpointNote
     """
-    # If a typed model is supplied, let it win over individual kwargs.
-    if cp_model is not None:
-        species        = cp_model.species
-        register       = cp_model.cp_register
-        beats_per_bar  = beats_per_bar  # not on CounterpointModel — caller supplies
-        velocity       = cp_model.velocity
-        dissonance     = cp_model.dissonance
-        rhythm_density = cp_model.rhythm_density
-        groove         = cp_model.groove
-        # Per-voice range override wins over the section-level default.
-        if cp_model.note_length_range is not None:
-            note_length_range   = cp_model.note_length_range.as_tuple()
-            note_length_quantum = cp_model.note_length_range.quantum
+    # cp_model was removed 2026-09 along with CounterpointModel — callers
+    # pass every field explicitly now, which is what generator.py's
+    # voices[] path already did.
 
     if species == "first":
         return generate_first_species(

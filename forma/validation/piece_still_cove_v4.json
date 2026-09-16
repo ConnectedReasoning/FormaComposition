@@ -78,13 +78,20 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "swell",
-        "counterpoint": {
-          "species": "first",
-          "register": "below",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "opening_arrival",
@@ -100,13 +107,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
-        "counterpoint": {
-          "species": "first",
-          "register": "below",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.1
+        "rest_probability": 0.1,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "opening_motion",
@@ -122,13 +136,20 @@
         "melody": "develop",
         "bass_style": "pedal",
         "arc": "swell",
-        "counterpoint": {
-          "species": "first",
-          "register": "below",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.15
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "opening_arrival",
@@ -144,13 +165,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
-        "counterpoint": {
-          "species": "first",
-          "register": "below",
-          "dissonance": "none"
-        },
         "rhythm": "free",
-        "rest_probability": 0.1
+        "rest_probability": 0.1,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "first",
+            "register": "below",
+            "dissonance": "none",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "center_hinge",
@@ -166,13 +194,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "breath",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.05
+        "rest_probability": 0.05,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "center_swell",
@@ -188,13 +223,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.05
+        "rest_probability": 0.05,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "center_peak",
@@ -210,13 +252,20 @@
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "plateau",
-        "counterpoint": {
-          "species": "free",
-          "register": "below",
-          "dissonance": "passing"
-        },
         "rhythm": "free",
-        "rest_probability": 0.05
+        "rest_probability": 0.05,
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "below",
+            "dissonance": "passing",
+            "velocity": 58
+          }
+        ]
       },
       {
         "name": "release_turn",

@@ -1668,14 +1668,13 @@ def resolve_harmony_section_events(
     hr_density: Optional[str],
     harmony_motif_def: Optional[dict],
     harmony_motif_desc: str,
-    transform_imitation: Optional[str] = None,
     seed: Optional[int] = None,
 ) -> tuple:
     """
     Resolve harmony's rhythm source for one section into a section-wide event
     stream (or sentinel), plus a description of what was chosen.
 
-    transform_imitation, seed (item 17 / ST-5): only consulted on the
+    seed (item 17 / ST-5): only consulted on the
     "motif" branch. None (default) -> harmony picks its own transform each
     repetition, independently, from harmony_motif_def's transform_pool,
     seeded from `seed` for determinism. "strict" -> NOT YET IMPLEMENTED;
@@ -1766,17 +1765,6 @@ def resolve_harmony_section_events(
         # regardless of behavior or chord boundaries -- the two voices'
         # "repetition" isn't the same shape, so "the same choice" isn't
         # well-defined yet even once ordering is solved.
-        if transform_imitation == "strict":
-            raise ValueError(
-                f"Section '{section_name}': harmony_rhythm.transform_imitation="
-                f"'strict' is not yet implemented. Harmony's motif rhythm "
-                f"resolves before melody's notes (and its transform choices) "
-                f"exist, and the two voices' repetition cadence don't "
-                f"currently share a common shape to inherit across. Leave "
-                f"transform_imitation unset for harmony's independent "
-                f"per-repetition transform selection (item 17's shipped fix)."
-            )
-
         # density selects onset articulation — full/stressed/anchor, the same
         # subsetting _motif_rhythm_to_events already offers melody and bass —
         # so density has a real, audible effect here instead of being

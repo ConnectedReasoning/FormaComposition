@@ -9,7 +9,7 @@ Validation hierarchy:
     PieceModel
     ├── SectionModel          (narrative: list of these)
     │   ├── HarmonyRhythmModel
-    │   ├── CounterpointModel
+    │   ├── (CounterpointModel retired 2026-09 — voices[] covers it)
     │   ├── RhythmPatternModel
     │   └── DrumModel
     └── SongFormEntryModel    (song form: form array entries)
@@ -268,12 +268,11 @@ class HarmonyRhythmModel(BaseModel):
     # harmony inherits melody's transform choice each repetition and
     # reapplies it to its own comping shape, staying in lockstep.
     #
-    # transform_ prefix is deliberate: this is scoped to which TRANSFORM got
-    # picked, not a general "imitation" concept -- melody.py's unrelated
-    # canonic_imitation (fugal_techniques, offset voice entries in time) is
-    # a different mechanism in a different config surface entirely; the two
-    # terms shouldn't be confused for each other.
-    transform_imitation: Optional[Literal["strict"]] = None
+    # RETIRED 2026-09: `transform_imitation` was schema-legal with exactly
+    # one accepted value ("strict") whose only implementation was a
+    # ValueError. Absence already meant free imitation, so the field could
+    # never do anything but crash. Removed; reintroduce it the day strict
+    # imitation actually renders.
 
 class NoteLengthRangeModel(BaseModel):
     """
@@ -393,69 +392,26 @@ class MelodicArcModel(BaseModel):
     resolve_every_cycle: bool = False
 
 
-class CounterpointModel(BaseModel):
-    """Corresponds to section["counterpoint"] block."""
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+# CounterpointModel RETIRED 2026-09.
+#
+# It was the third of four parallel ways to declare a voice (alongside
+# section.melody-as-dict, voices[], and second_melody), and generator.py
+# already treated it as superseded:
+#     cp_voice_models = None if section_model.voices else section_model.counterpoint
+# i.e. declaring voices[] silently switched the whole counterpoint[] block
+# off. Every field it carried now lives on VoiceModel:
+#     species        -> VoiceModel.species
+#     register       -> VoiceModel.register (VoiceRegisterLiteral accepts
+#                       "above"/"below" as counterpoint-relative aliases)
+#     dissonance     -> VoiceModel.dissonance
+#     velocity       -> VoiceModel.velocity
+#     canon_offset   -> VoiceModel.canon_offset
+#     motif          -> VoiceModel.motif
+#     rhythm_density -> VoiceModel.rhythm_density      (absorbed above)
+#     groove         -> VoiceModel.groove              (absorbed above)
+#     note_length_range -> VoiceModel.note_length_range (absorbed above)
+# Run forma/migrate_voices.py to convert existing pieces.
 
-    species:      CounterpointSpeciesLiteral  = "free"
-    cp_register:  CounterpointRegisterLiteral = Field(default="below", alias="register")
-    dissonance:   DissonanceLiteral           = "passing"
-    velocity:     Annotated[int, Field(ge=1, le=127)] = 58
-    canon_offset: Annotated[float, Field(ge=0.0)]     = 0.0
-
-    @field_validator("species", mode="after")
-    @classmethod
-    def _validate_species_implemented(cls, v):
-        """
-        Only 'first' and 'free' species are implemented in counterpoint.py.
-        'second'/'third'/'fourth'/'fifth' are schema-valid *names*
-        (CounterpointSpeciesLiteral accepts all six) but raise ValueError
-        ("Unknown species: ... Choose 'first' or 'free'.") the moment
-        generate_counterpoint() runs — previously only surfaced as a
-        non-blocking lint warning (_check_counterpoint_species_unimplemented),
-        not caught at validation time. lint.py's check still runs — it just
-        can no longer actually fire, since this now blocks first.
-        """
-        if v not in ("first", "free"):
-            raise ValueError(
-                f"species='{v}' is not implemented in counterpoint.py — "
-                f"only 'first' and 'free' are. 'second'/'third'/'fourth'/"
-                f"'fifth' are schema-valid names but raise ValueError at "
-                f"render time."
-            )
-        return v
-
-    # Rhythmic independence (free species only — see counterpoint.py).
-    # "first" species stays note-against-note with the cantus firmus by
-    # classical convention regardless of these fields.
-    rhythm_density: Literal["sparse", "medium", "full"] = "medium"
-    groove:         Optional[GrooveLiteral]              = None
-    # Per-voice note-length range override (free species only). When set, this
-    # voice samples its durations in-range independently of the section-level
-    # setting; when None it inherits the section's note_length_range (if any).
-    note_length_range: Optional[NoteLengthRangeModel]   = None
-
-    # Independent per-voice motif override (string ref or embedded dict),
-    # mirroring VoiceModel.motif's shape exactly (item MT-1, option A).
-    # Resolved via resolve_motif_value with the theme's motif pool, same as
-    # the lead voice's and harmony's own motif overrides — a string checks
-    # theme.motifs by name first, then falls through to the external
-    # library; an embedded dict is used directly.
-    #
-    # RHYTHM ONLY, never pitch (see generate_free_species's
-    # rhythm_events_override in counterpoint.py): consonance/voice-leading
-    # stays fully rule-driven regardless of this field. Only "free" species
-    # can honor it — "first" species is rhythmically locked to the melody by
-    # definition (see generate_first_species's docstring) and silently
-    # ignores it if set; not an error, since the classical species
-    # definition already determines rhythm for that voice.
-    #
-    # Opt-in per voice by construction: unset (the default) means this
-    # voice's rhythm is exactly what it was before this field existed —
-    # its own density/groove grid. No section-level trigger; setting the
-    # section's rhythm to "motif" has no effect on a counterpoint voice
-    # that doesn't independently set this field.
-    motif: Optional[Union[str, dict]] = None
 
 class VoiceModel(BaseModel):
     """
@@ -537,12 +493,23 @@ class VoiceModel(BaseModel):
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
 
-    # Independent per-voice rhythm override (2026-08). Only consumed by
-    # SectionModel.second_melody (see that field's docstring) — a peer
-    # voice inside voices[] does NOT read this yet, same "schema-legal but
-    # not everywhere wired" situation `motif` was in before its lead-voice
-    # fix; extending it to voices[] peers is a follow-up, not scope creep
-    # here. When set, this voice's rhythm is computed once via
+    # ── Absorbed from the retired CounterpointModel (2026-09) ───────────
+    # These three were the only fields CounterpointModel carried that
+    # VoiceModel didn't, so they move here verbatim to make the
+    # counterpoint[] -> voices[] migration lossless. All three are free
+    # species only: "first" species is note-against-note with the cantus
+    # firmus by classical convention and ignores them, and a melody-path
+    # voice (species absent) takes its grid from the section.
+    rhythm_density: Literal["sparse", "medium", "full"] = "medium"
+    groove:         Optional[GrooveLiteral]             = None
+    # Per-voice note-length override. When set this voice samples durations
+    # in-range independently; when None it inherits section.note_length_range.
+    note_length_range: Optional[NoteLengthRangeModel]   = None
+
+    # Independent per-voice rhythm override (2026-08). Consumed by every
+    # melody-path voice in voices[] (wired 2026-09, when second_melody was
+    # folded into voices[] — before that it was read only there). When set,
+    # this voice's rhythm is computed once via
     # rhythm_pattern_to_events() tiled across the FULL section length (not
     # reset per chord/bar), exactly like harmony_pattern already works —
     # so a length_beats that doesn't evenly divide the section's bar length
@@ -880,6 +847,21 @@ def _resolve_motif_value_safe(value: Optional[Union[str, dict]], theme_pool: Opt
     except (FileNotFoundError, ValueError, TypeError) as exc:
         raise ValueError(f"could not resolve motif override: {exc}") from exc
 
+_RETIRED_SECTION_FIELDS: dict[str, str] = {
+    "counterpoint":  "moved to voices[] — each entry becomes a voice with "
+                     "its species/register/dissonance intact. voices[0] is "
+                     "the lead; counterpoint voices follow it.",
+    "second_melody": "moved to voices[] — add it as a peer voice "
+                     "(species omitted). Its rhythm_pattern now works on "
+                     "any melody-path peer.",
+    "motif":         "section-level motif was never read at render time. "
+                     "Use voices[N].motif, or the piece-level motif pool.",
+    "motifs":        "section-level motifs was never read at render time. "
+                     "Use the piece-level motifs pool.",
+    "percussion":    "never read by anything. Use drums.",
+}
+
+
 class SectionModel(BaseModel):
     """
     Validated representation of a single section dict.
@@ -901,12 +883,13 @@ class SectionModel(BaseModel):
     key:  Optional[str] = None
     mode: Optional[str] = None
 
-    # ── Section-level motif override (falls back to theme pool if absent) ─────
-    # Accepts a motif name (str), embedded dict, or a list of either.
-    # A single value is treated as the sole motif for this section.
-    # A list restricts the pool to exactly those motifs.
-    motif:  Optional[Union[str, dict]] = None
-    motifs: Optional[list[Union[str, dict]]] = None
+    # RETIRED 2026-09: section-level `motif`/`motifs` were never read at
+    # render time — only the theme's motif pool was ever consulted, so a
+    # section override did nothing at all (lint.py's
+    # _check_section_motif_override existed solely to say so). Removed
+    # rather than wired up: per-voice `voices[].motif` already covers the
+    # real use case with clearer scope. Rejected loudly by
+    # _reject_retired_fields below.
 
     # ── Harmony / progression ─────────────────────────────────────────────────
     progression:   list[str]          = Field(min_length=1)
@@ -920,7 +903,10 @@ class SectionModel(BaseModel):
     # default 'mid' register (60-81). Dict form: same shape as a voices[]
     # entry ({behavior, register, velocity, ...}) — lets the lead line get
     # an explicit register without needing the full voices array wrapper.
-    melody:     Union[MelodyLiteral, "VoiceModel"]    = "generative"
+    # Plain behavior-string shorthand for the lead voice. The dict/VoiceModel
+    # arm was RETIRED 2026-09 — a lead that needs its own register, velocity,
+    # motif or rhythm is voices[0], the same as every other voice.
+    melody:     MelodyLiteral    = "generative"
     bass_style: BassStyleLiteral = "root_fifth"
     arc:        ArcLiteral       = "swell"
 
@@ -1018,56 +1004,37 @@ class SectionModel(BaseModel):
     melody_register:  Optional[RegisterWindowModel] = None
     voicing:          Optional[VoicingLiteral]       = None
 
-    # ── Optional voices ───────────────────────────────────────────────────────
-    counterpoint: Optional[list[CounterpointModel]] = None
-    voices:       Optional[list[VoiceModel]]  = None   # peer voices (replaces melody+counterpoint)
+    # ── Voices ────────────────────────────────────────────────────────────────
+    # The single way to declare every voice in the section. voices[0] is the
+    # lead (what `melody` names the behavior of when voices[] is absent);
+    # voices[1:] are peers, each either a counterpoint voice (species set) or
+    # an independent melody-path line (species absent).
+    #
+    # RETIRED 2026-09 in favor of this one list:
+    #   section.counterpoint[]  — was already superseded by voices[] in
+    #                             generator.py; see the CounterpointModel note.
+    #   section.second_melody   — was a melody-path peer voice in all but
+    #                             name: the generator branch for it and the
+    #                             one for a melody-path peer made the same
+    #                             generate_melody_for_progression() call.
+    #                             Its one real capability, a per-voice
+    #                             rhythm_pattern for genuine polymeter, is
+    #                             now wired into every melody-path peer, so
+    #                             voices[] does everything it did.
+    #   section.melody as a dict — the lead's register/velocity/motif belong
+    #                             on voices[0]. `melody` stays as the plain
+    #                             behavior-string shorthand it always was.
+    #
+    # Four ways to say "add a voice" was the single biggest source of both
+    # parameter count and silent no-ops in this schema (voices[N].behavior=
+    # 'develop' never receiving a motif, species on a voice that can't use
+    # one, counterpoint[] evaporating when voices[] appeared). One list, one
+    # code path, one set of rules.
+    voices: Optional[list[VoiceModel]] = None
 
-    # A second, fully independent melodic line (2026-08) — NOT counterpoint
-    # (no species/voice-leading rules against the lead) and NOT one of the
-    # voices[] peers (those inherit the section's groove/swing verbatim,
-    # same as the lead; see generator.py's peer-voice melody-path branch).
-    # This field exists specifically so a second voice can carry its own
-    # rhythm_pattern (see VoiceModel.rhythm_pattern) independently of the
-    # lead melody's rhythm and of bass — genuine polyrhythm/polymeter
-    # between two melodic lines, not just melody-vs-harmony. Coexists
-    # freely with `counterpoint` above; deliberately additive rather than
-    # requiring migration to voices[] for pieces that already use the
-    # separate counterpoint list. behavior/register/velocity/motif on the
-    # VoiceModel work the same as any other melody-path voice; species/
-    # entry_role are schema-legal here but meaningless (this is always the
-    # melody.py generative path, never counterpoint.py) — species/entry_role
-    # are rejected outright by _validate_second_melody_is_melody_path below
-    # rather than silently ignored (same lesson as every other no-op found
-    # and fixed in this engine: a validation error beats a config that
-    # looks like it does something and doesn't).
-    second_melody: Optional[VoiceModel] = None
-
-    @field_validator("second_melody", mode="after")
-    @classmethod
-    def _validate_second_melody_is_melody_path(cls, v):
-        """second_melody always renders via generate_melody_for_progression
-        (see generator.py) — it never reaches counterpoint.py's species
-        path or motif.py's generate_subject_entry. species/entry_role on
-        this voice would validate cleanly and then do nothing at render
-        time, so reject them here instead."""
-        if v is None:
-            return v
-        if v.species is not None:
-            raise ValueError(
-                "second_melody.species is set, but second_melody always "
-                "renders through the melody.py generative path, never "
-                "counterpoint.py — species would be silently ignored. "
-                "Use `counterpoint` or `voices` for a species-based voice."
-            )
-        if v.entry_role is not None:
-            raise ValueError(
-                "second_melody.entry_role is set, but second_melody never "
-                "reaches generate_subject_entry() — entry_role would be "
-                "silently ignored. Use `voices` for a subject/answer entry."
-            )
-        return v
     drums:        Optional[DrumModel]         = None
-    percussion:   Optional[dict]              = None   # future-proofed, untyped
+    # RETIRED 2026-09: `percussion` was an untyped future-proofing stub,
+    # read by absolutely nothing in the engine. Drums live in `drums`.
 
     # ── Free-form documentation ───────────────────────────────────────────────
     notes: Optional[str] = None
@@ -1132,47 +1099,42 @@ class SectionModel(BaseModel):
             raise ValueError(f"Section mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}.")
         return v.lower()
 
-    @field_validator("counterpoint", mode="before")
+    # ── Retired-field rejection ───────────────────────────────────────────
+    # SectionModel is extra="allow", so a retired field name would otherwise
+    # validate cleanly and then render as if it were never written — exactly
+    # the silent no-op failure mode this refactor exists to kill. Fail loud
+    # instead, and say what to do about it.
+    @model_validator(mode="before")
     @classmethod
-    def _coerce_counterpoint(cls, v):
-        """
-        Accept the legacy bare-object form ("counterpoint": {...}) and
-        normalise it to a one-item list, so every existing composition
-        file keeps validating unchanged. New compositions may instead
-        supply a list directly for 2-3 independent counterpoint voices.
-        """
-        if v is None:
-            return v
-        if isinstance(v, dict):
-            return [v]
-        return v
-
-    @field_validator("counterpoint", mode="after")
-    @classmethod
-    def _validate_counterpoint_count(cls, v):
-        """Cap at three independent counterpoint voices (practical/audible limit)."""
-        if v is not None and len(v) > 3:
+    def _reject_retired_fields(cls, data):
+        if not isinstance(data, dict):
+            return data
+        found = [k for k in _RETIRED_SECTION_FIELDS if k in data]
+        if found:
+            lines = [f"  {k}: {_RETIRED_SECTION_FIELDS[k]}" for k in found]
             raise ValueError(
-                f"counterpoint supports at most 3 voices, got {len(v)}"
+                "section uses field(s) retired in 2026-09:\n"
+                + "\n".join(lines)
+                + "\nRun forma/migrate_voices.py on this piece to convert it."
             )
-        return v
+        return data
 
     @field_validator("voices", mode="after")
     @classmethod
     def _validate_voices_count(cls, v):
         """
-        Cap at 4 total voices (1 lead + 3 peers). generator.py writes peer
-        voices (section.voices[1:]) to MIDI tracks via a hardcoded 3-entry
-        _cp_track_specs list, indexed by peer position — a 4th peer voice
-        (voices[4], the 5th entry overall) would index past the end of that
-        list and crash with an IndexError deep in MIDI writing, well after
-        generation has already run. Catching it here instead gives a clean
-        error at validation time, before any generation starts, mirroring
-        the existing counterpoint cap above.
+        Cap at 5 total voices (1 lead + 4 peers). generator.py writes peer
+        voices (section.voices[1:]) to MIDI tracks via a fixed _cp_track_specs
+        list, indexed by peer position — one peer past the end of that list
+        would raise IndexError deep in MIDI writing, long after generation has
+        run. Catching it here gives a clean error before generation starts.
+
+        Was 4 total until 2026-09; retiring second_melody freed its dedicated
+        channel, which became the 4th peer slot.
         """
-        if v is not None and len(v) > 4:
+        if v is not None and len(v) > 5:
             raise ValueError(
-                f"voices supports at most 4 total (1 lead + 3 peers), got {len(v)}"
+                f"voices supports at most 5 total (1 lead + 4 peers), got {len(v)}"
             )
         return v
 
@@ -1386,30 +1348,6 @@ class SectionModel(BaseModel):
             )
         if self.harmony_rhythm is not None:
             hr = self.harmony_rhythm
-            # harmony_rhythm.transform_imitation='strict' is schema-legal
-            # (Literal["strict"]) but NOT implemented — resolve_harmony_
-            # section_events() in harmony.py raises ValueError whenever it's
-            # combined with an EXPLICIT harmony_rhythm.rhythm='motif' (the
-            # only branch that reads transform_imitation at all; motif
-            # inherited from section.rhythm without an explicit
-            # harmony_rhythm.rhythm is coerced to 'free' before this field
-            # is ever consulted, so that combination is harmless and not
-            # checked here). Catching the live combination at validation
-            # time turns a mid-render crash into an immediate, clear error —
-            # same reasoning as the harmony_pattern check just above.
-            if hr.transform_imitation == "strict" and hr.rhythm == "motif":
-                raise ValueError(
-                    f"Section '{self.name}': harmony_rhythm.transform_imitation="
-                    f"'strict' combined with harmony_rhythm.rhythm='motif' is "
-                    f"not implemented — this will raise ValueError at render "
-                    f"time in harmony.py (melody's transform choices don't "
-                    f"exist yet at the point harmony resolves, and the two "
-                    f"voices' repetition cadence isn't the same shape to "
-                    f"inherit across). Remove transform_imitation (leave it "
-                    f"unset) for harmony's independent per-repetition "
-                    f"transform selection — the only mode currently "
-                    f"implemented."
-                )
         return self
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -1518,27 +1456,24 @@ class SectionModel(BaseModel):
         if harmony_motif is not None:
             self._check_bar_alignment(harmony_motif.name, harmony_motif.rhythm, label, where="harmony_rhythm.motif")
 
-        # counterpoint[].motif and peer voices[1:].motif — a *different*
-        # crash gap from the two checks just above. The lead voice
-        # (voices[0] / melody-as-dict) and harmony_rhythm.motif are both
-        # resolved here via _resolve_motif_value_safe, which converts a
-        # bad name into this method's clean ValueError. But at render time,
-        # counterpoint[] entries and peer voices route through a different
-        # resolver entirely — generator.py's _resolve_voice_motif_rhythm —
-        # which calls resolve_motif_value() directly with no error handling
-        # at all, and does so unconditionally whenever .motif is set,
-        # regardless of species (even a "first"-species voice, where the
-        # motif is otherwise inert per lint.py, still hits this call). A
-        # typo'd name there previously reached generation as a raw,
-        # uncaught FileNotFoundError instead of this method's ValueError.
-        # voices[0] is skipped here — already covered above via voice_motif
-        # / lead_voice().
-        for cp in (self.counterpoint or []):
-            if cp.motif is not None:
-                cp_motif = _resolve_motif_value_safe(cp.motif, theme_pool)
-                self._check_bar_alignment(
-                    cp_motif.name, cp_motif.rhythm, label, where="counterpoint[].motif"
-                )
+        # Peer voices[1:].motif — a *different* crash gap from the two
+        # checks just above. The lead voice (voices[0]) and
+        # harmony_rhythm.motif are both resolved here via
+        # _resolve_motif_value_safe, which converts a bad name into this
+        # method's clean ValueError. But at render time, peer voices route
+        # through a different resolver entirely — generator.py's
+        # _resolve_voice_motif_rhythm — which calls resolve_motif_value()
+        # directly with no error handling at all, and does so
+        # unconditionally whenever .motif is set, regardless of species
+        # (even a "first"-species voice, where the motif is otherwise inert
+        # per lint.py, still hits this call). A typo'd name there previously
+        # reached generation as a raw, uncaught FileNotFoundError instead of
+        # this method's ValueError. voices[0] is skipped here — already
+        # covered above via voice_motif / lead_voice().
+        #
+        # The parallel counterpoint[] loop that used to sit here went away
+        # with CounterpointModel (2026-09); those voices are voices[] now
+        # and are covered by this same loop.
         for peer in (self.voices or [])[1:]:
             if peer.motif is not None:
                 peer_motif = _resolve_motif_value_safe(peer.motif, theme_pool)
@@ -1668,30 +1603,22 @@ class SectionModel(BaseModel):
 
     def lead_voice(self) -> "Optional[VoiceModel]":
         """
-        The lead voice as a VoiceModel, from whichever of the two places it
-        was actually specified: section.voices[0] takes precedence (true
-        multi-voice section); otherwise section.melody, but only if it was
-        given in dict form (a bare behavior string carries no register, so
-        there's no VoiceModel to return — None means "use the old default
-        wide range", not "no melody").
+        The lead voice as a VoiceModel: section.voices[0] when voices[] is in
+        use, else None. None means "bare `melody` string — use the default
+        wide range", not "no melody".
         """
         if self.voices:
             return self.voices[0]
-        if isinstance(self.melody, VoiceModel):
-            return self.melody
         return None
 
     def melody_behavior(self) -> str:
         """
-        The lead voice's behavior as a plain string, regardless of whether
-        section.melody was given as a bare string or a dict, and regardless
-        of whether section.voices is in use instead. Use this instead of
+        The lead voice's behavior as a plain string, whether it came from
+        voices[0] or from the bare `melody` shorthand. Use this instead of
         reading .melody directly wherever a plain MelodyLiteral is needed.
         """
         if self.voices:
             return self.voices[0].behavior
-        if isinstance(self.melody, VoiceModel):
-            return self.melody.behavior
         return self.melody
 
     def resolved_progression(self) -> list[str]:

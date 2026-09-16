@@ -1,24 +1,25 @@
 """
-Tests for intervals.core.lint — the 17 consume-gate guardrails.
+Tests for intervals.core.lint — the consume-gate guardrails.
 
 Each test constructs the exact minimal SectionModel shape a given
 `_check_*` function is documented to catch, calls that function directly
 (not lint_section/lint_piece), and asserts a Contradiction fires with the
 expected field/message content.
 
-Two of these checks (`_check_counterpoint_species_unimplemented`'s two
-branches) guard against a state that schemas.py's own field validators
-now block at construction time -- CounterpointModel and VoiceModel both
-raise ValidationError for any species outside {'first', 'free'} before a
-SectionModel can ever hold one. That means the normal path to a
-SectionModel can no longer produce the input these checks were written
-for. To test the checks' own logic in isolation (which is what this task
-asks for -- lint.py and schemas.py are separate lines of defense, tested
-separately), those two tests build the malformed value with
-`model_construct()` / `model_copy(update=...)`, which bypass field
-validation on purpose. This is flagged again in the final summary as a
-real dead-code finding, not fixed here (out of scope for a test-writing
-task).
+2026-09: three checks were retired along with the fields they guarded.
+`_check_section_motif_override` and `_check_transform_imitation_unimplemented`
+lost their fields outright. `_check_counterpoint_species_unimplemented` lost
+its reason to exist: both CounterpointModel and VoiceModel had already grown
+field validators that reject any species outside {'first', 'free'} at
+construction time, so the check could no longer fire through any real path —
+its tests only reached it via model_construct() to bypass validation, which
+is the signature of a check testing nothing. It was the dead-code finding
+the old docstring flagged and declined to act on; acting on it now.
+
+`_check_counterpoint_motif_species_noop` survived but was retargeted from
+the retired counterpoint[] block to voices[], and renamed
+`_check_first_species_motif_noop` to match. Same gate, same effect, one
+list instead of two.
 """
 import pytest
 
@@ -27,8 +28,7 @@ from intervals.core.lint import (
     _check_bass_rest_on_continuous,
     _check_bass_swing_noop,
     _check_canon_interval_without_canonic_imitation,
-    _check_counterpoint_motif_species_noop,
-    _check_counterpoint_species_unimplemented,
+    _check_first_species_motif_noop,
     _check_develop_peer_voice_noop,
     _check_even_chord_split,
     _check_harmony_melody_ratio,
@@ -44,12 +44,10 @@ from intervals.core.lint import (
     _check_motif_never_developed,
     _check_note_length_range_vs_groove,
     _check_note_length_range_vs_rhythm,
-    _check_section_motif_override,
-    _check_transform_imitation_unimplemented,
     _check_voice_dissonance_without_species,
     _check_voice_motif,
 )
-from intervals.core.schemas import CounterpointModel, PieceModel, SectionModel, VoiceModel
+from intervals.core.schemas import PieceModel, SectionModel, VoiceModel
 
 
 def _section(**overrides) -> SectionModel:
@@ -150,20 +148,29 @@ def test_check_harmony_groove_noop_silent_under_free():
 
 
 # ===========================================================================
-# 4. _check_counterpoint_motif_species_noop
+# 4. _check_first_species_motif_noop
 # ===========================================================================
 
-def test_check_counterpoint_motif_species_noop_fires_on_first_species_motif():
-    section = _section(counterpoint=[{"species": "first", "motif": "riff"}])
-    found = list(_check_counterpoint_motif_species_noop(section))
+def test_check_first_species_motif_noop_fires_on_first_species_motif():
+    section = _section(voices=[{"behavior": "lyrical"},
+                               {"species": "first", "motif": "riff"}])
+    found = list(_check_first_species_motif_noop(section))
     assert len(found) == 1
     assert "motif='riff'" in found[0].setting
     assert "species='first'" in found[0].cause
 
 
-def test_check_counterpoint_motif_species_noop_silent_for_free_species():
-    section = _section(counterpoint=[{"species": "free", "motif": "riff"}])
-    assert list(_check_counterpoint_motif_species_noop(section)) == []
+def test_check_first_species_motif_noop_silent_for_free_species():
+    section = _section(voices=[{"behavior": "lyrical"},
+                               {"species": "free", "motif": "riff"}])
+    assert list(_check_first_species_motif_noop(section)) == []
+
+
+def test_check_first_species_motif_noop_silent_for_melody_path_peer():
+    """No species at all means melody.py, where motif is read normally."""
+    section = _section(voices=[{"behavior": "lyrical"},
+                               {"behavior": "develop", "motif": "riff"}])
+    assert list(_check_first_species_motif_noop(section)) == []
 
 
 # ===========================================================================
@@ -188,29 +195,6 @@ def test_check_melodic_variation_noop_fires_on_small_pool_even_with_rhythm_motif
 def test_check_melodic_variation_noop_silent_when_all_conditions_met():
     section = _section(rhythm="motif", melodic_variation="isorhythmic")
     assert list(_check_melodic_variation_noop(section, motif_pool_size=3)) == []
-
-
-# ===========================================================================
-# 6. _check_section_motif_override
-# ===========================================================================
-
-def test_check_section_motif_override_fires_on_section_motif():
-    section = _section(motif="theme_a")
-    found = list(_check_section_motif_override(section))
-    assert len(found) == 1
-    assert "section-level motif is set" in found[0].setting
-
-
-def test_check_section_motif_override_fires_on_section_motifs_list():
-    section = _section(motifs=["theme_a", "theme_b"])
-    found = list(_check_section_motif_override(section))
-    assert len(found) == 1
-    assert "motifs" in found[0].setting
-
-
-def test_check_section_motif_override_silent_when_unset():
-    section = _section()
-    assert list(_check_section_motif_override(section)) == []
 
 
 # ===========================================================================
@@ -335,14 +319,14 @@ def test_check_melodic_arc_silent_when_key_or_mode_not_declared_on_section():
     assert list(_check_melodic_arc_apex_unreachable(section)) == []
 
 
-def test_check_melodic_arc_uses_voice_register_when_melody_is_a_voice_model():
+def test_check_melodic_arc_uses_lead_voice_register():
     # degree 5 (dominant) is reachable in the default 'mid' register, but
     # a narrow explicit voice register can make it genuinely unreachable
-    # -- confirms register resolution actually reads section.melody's
-    # VoiceModel form, not just falling back to the default every time.
+    # -- confirms register resolution actually reads voices[0]'s register,
+    # not just falling back to the default every time.
     section = _section(
         key="C", mode="ionian",
-        melody={"register": "low", "behavior": "lyrical"},
+        voices=[{"register": "low", "behavior": "lyrical"}],
         melodic_arc={"apex_degree": 51, "apex_position": 0.7},
     )
     found = list(_check_melodic_arc_apex_unreachable(section))
@@ -426,72 +410,6 @@ def test_check_bass_swing_noop_fires():
 def test_check_bass_swing_noop_silent_for_consuming_style():
     section = _section(swing=0.5, bass_style="melodic")
     assert list(_check_bass_swing_noop(section)) == []
-
-
-# ===========================================================================
-# 14. _check_counterpoint_species_unimplemented
-# ===========================================================================
-#
-# schemas.py's CounterpointModel/VoiceModel now block any species outside
-# {'first', 'free'} at field-validation time -- see module docstring above.
-# model_construct() / model_copy(update=...) bypass that validation so this
-# check's own logic (which predates or duplicates that schema guard) can
-# still be exercised directly, as the task asks.
-
-def test_check_counterpoint_species_unimplemented_fires_for_counterpoint_list():
-    section = _section()
-    bad_cp = CounterpointModel.model_construct(
-        species="third", cp_register="below", dissonance="passing",
-        velocity=58, canon_offset=0.0, rhythm_density="medium",
-        groove=None, note_length_range=None, motif=None,
-    )
-    section = section.model_copy(update={"counterpoint": [bad_cp]})
-    found = list(_check_counterpoint_species_unimplemented(section))
-    assert len(found) == 1
-    assert "species='third'" in found[0].setting
-    assert "WILL raise ValueError" in found[0].effect
-
-
-def test_check_counterpoint_species_unimplemented_fires_for_voices_list():
-    section = _section()
-    bad_voice = VoiceModel.model_construct(
-        v_register="mid", behavior="lyrical", velocity=64, motif=None,
-        species="fifth", dissonance="passing", canon_offset=0.0,
-        rest_probability=None,
-    )
-    section = section.model_copy(update={"voices": [bad_voice]})
-    found = list(_check_counterpoint_species_unimplemented(section))
-    assert len(found) == 1
-    assert "species='fifth'" in found[0].setting
-
-
-def test_check_counterpoint_species_unimplemented_silent_for_implemented_species():
-    section = _section(counterpoint=[{"species": "first"}, {"species": "free"}])
-    assert list(_check_counterpoint_species_unimplemented(section)) == []
-
-
-# ===========================================================================
-# 15. _check_transform_imitation_unimplemented
-# ===========================================================================
-
-def test_check_transform_imitation_unimplemented_fires():
-    # rhythm='free' (not 'motif') so this stays schema-legal at
-    # SectionModel construction -- schemas.py only blocks the combination
-    # with rhythm='motif' specifically (see test_schemas.py). The lint
-    # check itself fires on transform_imitation='strict' alone, so this
-    # is still a genuine, reachable case for it.
-    section = _section(harmony_rhythm={
-        "rhythm": "free", "transform_imitation": "strict",
-    })
-    found = list(_check_transform_imitation_unimplemented(section))
-    assert len(found) == 1
-    assert "transform_imitation='strict'" in found[0].setting
-    assert "WILL raise ValueError" in found[0].effect
-
-
-def test_check_transform_imitation_unimplemented_silent_when_unset():
-    section = _section(harmony_rhythm={"rhythm": "free"})
-    assert list(_check_transform_imitation_unimplemented(section)) == []
 
 
 # ===========================================================================
@@ -596,7 +514,7 @@ def test_check_inherited_motif_coerced_to_free_silent_when_explicit_other_source
 
 def test_check_fugal_techniques_fires_on_motif_transform_with_wrong_behavior():
     section = _section(
-        melody={"behavior": "lyrical"},
+        voices=[{"behavior": "lyrical"}],
         fugal_techniques={"motif_transform": "inversion"},
     )
     found = list(_check_fugal_techniques_require_develop(section))
@@ -645,7 +563,7 @@ def test_check_fugal_techniques_fires_once_for_multiple_fields():
 
 def test_check_fugal_techniques_silent_when_behavior_is_develop():
     section = _section(
-        melody={"behavior": "develop"},
+        voices=[{"behavior": "develop"}],
         fugal_techniques={"motif_transform": "inversion"},
     )
     assert list(_check_fugal_techniques_require_develop(section)) == []
@@ -750,13 +668,13 @@ def test_check_voice_dissonance_silent_on_default_value():
     assert list(_check_voice_dissonance_without_species(section)) == []
 
 
-def test_check_voice_dissonance_fires_on_melody_dict_form_lead():
-    """No voices[] array at all — section.melody given as a VoiceModel
-    dict is still the lead, still dead."""
-    section = _section(melody={"behavior": "lyrical", "dissonance": "none"})
+def test_check_voice_dissonance_fires_on_lone_lead_voice():
+    """voices[] with only a lead in it — dissonance there is still dead.
+    (This used to be the melody-as-dict case; that form retired 2026-09
+    and its one real job, a lead with its own fields, is voices[0].)"""
+    section = _section(voices=[{"behavior": "lyrical", "dissonance": "none"}])
     found = list(_check_voice_dissonance_without_species(section))
     assert len(found) == 1
-    assert "melody (dict form)" in found[0].where
 
 
 def test_check_voice_dissonance_silent_on_bare_string_melody():
@@ -906,10 +824,15 @@ def test_check_lead_velocity_margin_silent_when_explicit_lead_velocity_clears_it
 #                                         for the "motif" rhythm-source case
 # ===========================================================================
 
-def test_checks_registry_has_twentyone_entries_plus_melodic_variation_separately():
-    # 20 (through #4's addition) + 1 for
-    # _check_voice_dissonance_without_species (known-issues #5) = 21.
-    assert len(CHECKS) == 21
+def test_checks_registry_size_and_membership():
+    # Was 21. Retired 2026-09 along with the fields/paths they guarded:
+    #   _check_section_motif_override            (section.motif/motifs gone)
+    #   _check_transform_imitation_unimplemented (field gone)
+    #   _check_counterpoint_species_unimplemented (schema validators already
+    #                                             blocked it at construction,
+    #                                             so it could never fire)
+    assert len(CHECKS) == 18
+    assert _check_first_species_motif_noop in CHECKS
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
     assert _check_harmony_melody_ratio not in CHECKS

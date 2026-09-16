@@ -122,6 +122,8 @@ SEED_COLLISION_RISK_HARMONY_SOURCES: frozenset[str] = frozenset({"free", "motif"
 # itself the answer to "which settings depend on which other settings?" — read
 # it top to bottom to see every hidden coupling in one place.
 COUPLINGS: list[str] = [
+    "voices[N].motif  is heard only when behavior == 'develop' (pitch) or "
+    "species == 'free' (rhythm); a first-species voice ignores it entirely.",
     "voice.motif       is heard only when voice.behavior == 'develop' "
     "(other behaviors ignore the motif's pitch shape).",
     "harmony_rhythm.motif  is heard only when harmony_rhythm.rhythm == "
@@ -129,8 +131,6 @@ COUPLINGS: list[str] = [
     "harmony_rhythm.groove  is a no-op when harmony_rhythm.rhythm == "
     "'motif' — the motif cell supplies its own fixed onset grid, same as "
     "melody's 'motif' rhythm source.",
-    "section.motif / section.motifs  are not read at render time; only the "
-    "theme's motif pool is consulted. Section-level overrides do nothing.",
     "section.harmony_rest_probability  is a no-op on harmony source 'sustain' "
     "(single-onset spans can't be thinned, only deleted).",
     "section.bass_rest_probability  is ignored for bass_style 'walking' and "
@@ -149,12 +149,6 @@ COUPLINGS: list[str] = [
     "motif field or transform_pool.",
     "section.swing only reaches the bass line under bass_style 'melodic' or "
     "'motif' — the other 6 styles accept the field and never consult it.",
-    "counterpoint species other than 'first'/'free' (on counterpoint[] or "
-    "voices[].species) is schema-valid but raises ValueError and aborts the "
-    "render — a hard crash, not a silent no-op.",
-    "harmony_rhythm.transform_imitation='strict' is schema-valid but not yet "
-    "implemented — raises ValueError at render time whenever paired with "
-    "rhythm='motif'. Leave transform_imitation unset.",
     "progression longer than "
     f"{LONG_PROGRESSION_SEED_COLLISION_THRESHOLD} chords risks a harmony "
     "seed collision with a different chord in another section, audible "
@@ -348,25 +342,25 @@ def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradi
     )
 
 
-def _check_counterpoint_motif_species_noop(section: SectionModel) -> Iterator[Contradiction]:
+def _check_first_species_motif_noop(section: SectionModel) -> Iterator[Contradiction]:
     """
-    CounterpointModel.motif only has an effect on free-species voices --
+    voices[N].motif only has an effect on free-species voices --
     rhythm_events_override never reaches first-species counterpoint, which
-    is locked to the melody's own onsets by definition (MT-1's verified
-    design; see generate_first_species's docstring in counterpoint.py). A
-    motif assigned to a first-species voice is schema-legal and silently
-    ignored -- confirmed live in a real piece, where species per voice
-    position deliberately varies section to section, so the same motif
-    field was active in some sections and inert in others with no warning.
+    is locked to the melody's own onsets by definition (see
+    generate_first_species's docstring in counterpoint.py). A motif assigned
+    to a first-species voice is schema-legal and silently ignored --
+    confirmed live in a real piece, where species per voice position
+    deliberately varies section to section, so the same motif field was
+    active in some sections and inert in others with no warning.
+
+    Retargeted 2026-09 from the retired counterpoint[] block to voices[];
+    same gate, same effect, one list instead of two.
     """
-    cp = section.counterpoint
-    if not cp:
-        return
-    for i, c in enumerate(cp):
-        if c.species == "first" and c.motif is not None:
+    for i, v in enumerate(section.voices or []):
+        if v.species == "first" and v.motif is not None:
             yield Contradiction(
-                where=f"section '{section.name or '?'}', counterpoint[{i}]",
-                setting=f"motif={c.motif!r}",
+                where=f"section '{section.name or '?'}' \u2192 {_voice_label(i, v)}",
+                setting=f"motif={v.motif!r}",
                 cause="species='first' -- rhythmically locked to the melody, "
                       "no rhythm override path exists for this species",
                 effect="motif is never consulted; this voice's rhythm is "
@@ -419,26 +413,6 @@ def _check_melodic_variation_noop(
                "as if it were unset",
         fix="drop melodic_variation, or address the condition(s) above so it "
             "actually applies.",
-    )
-
-
-def _check_section_motif_override(section: SectionModel) -> Iterator[Contradiction]:
-    """
-    section.motif / section.motifs are documented as restricting the motif pool
-    for the section, but render-time motif resolution never reads them — only
-    the theme's pool is consulted (see schemas.SectionModel.validate_against_theme).
-    So they're a pure no-op today.
-    """
-    if section.motif is None and section.motifs is None:
-        return
-    which = "motif" if section.motif is not None else "motifs"
-    yield Contradiction(
-        where=f"section '{section.name or '?'}'",
-        setting=f"section-level {which} is set",
-        cause="the engine only reads the theme's motif pool at render time",
-        effect="this section-level override does nothing",
-        fix="define the motif in the theme, or attach it to a specific voice "
-            "with behavior='develop'.",
     )
 
 
@@ -518,9 +492,11 @@ def _check_melodic_arc_apex_unreachable(section: SectionModel) -> Iterator[Contr
     guess at inherited values, this only fires when the section
     explicitly declares its own key AND mode — the one case where every
     fact this check needs is genuinely present on the section itself.
-    Register is resolved from section.melody's voice register if it's
-    given in dict/VoiceModel form, else the 'mid' default every melody
-    behavior falls back to.
+    Register is resolved from the lead voice (voices[0]), else the 'mid'
+    default every melody behavior falls back to. Before the 2026-09 voice
+    consolidation this read section.melody's dict form only and ignored
+    voices[0] outright — a section that set its lead register the newer way
+    was silently checked against the wrong box.
     """
     arc = section.melodic_arc
     if arc is None or arc.apex_degree is None:
@@ -532,8 +508,9 @@ def _check_melodic_arc_apex_unreachable(section: SectionModel) -> Iterator[Contr
     from intervals.music.melodic_shape import apex_degree_reachable
 
     octave_bottom, octave_top = MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP
-    if isinstance(section.melody, VoiceModel):
-        bounds = section.melody.bounds()
+    lead = section.lead_voice()
+    if lead is not None:
+        bounds = lead.bounds()
         if bounds is not None:
             octave_bottom, octave_top = bounds
 
@@ -646,59 +623,6 @@ def _check_bass_swing_noop(section: SectionModel) -> Iterator[Contradiction]:
         fix="use bass_style 'melodic' or 'motif' if the bass should audibly "
             "swing, or ignore this if swing is only meant for the other "
             "voices in this section.",
-    )
-
-
-def _check_counterpoint_species_unimplemented(section: SectionModel) -> Iterator[Contradiction]:
-    """
-    species outside {'first','free'} — on counterpoint[] or voices[] — is
-    schema-valid but raises ValueError at render time. Surfaced here so it
-    shows up in the lint report before a render attempt, not as a raw
-    traceback during one.
-    """
-    for i, c in enumerate(section.counterpoint or []):
-        if c.species not in IMPLEMENTED_COUNTERPOINT_SPECIES:
-            yield Contradiction(
-                where=f"section '{section.name or '?'}', counterpoint[{i}]",
-                setting=f"species={c.species!r}",
-                cause="only 'first' and 'free' species are implemented in "
-                      "generate_counterpoint",
-                effect="this WILL raise ValueError and abort the render — "
-                       "not a soft no-op",
-                fix="change species to 'first' or 'free'.",
-            )
-    for i, v in enumerate(section.voices or []):
-        if v.species is not None and v.species not in IMPLEMENTED_COUNTERPOINT_SPECIES:
-            yield Contradiction(
-                where=f"section '{section.name or '?'}' → {_voice_label(i, v)}",
-                setting=f"species={v.species!r}",
-                cause="only 'first' and 'free' species are implemented in "
-                      "generate_counterpoint",
-                effect="this WILL raise ValueError and abort the render — "
-                       "not a soft no-op",
-                fix="change species to 'first' or 'free'.",
-            )
-
-
-def _check_transform_imitation_unimplemented(section: SectionModel) -> Iterator[Contradiction]:
-    """
-    harmony_rhythm.transform_imitation='strict' is schema-valid but not yet
-    implemented — raises ValueError whenever harmony_rhythm.rhythm='motif'
-    too (the only branch that reads it). Surfaced pre-render, same reasoning
-    as the counterpoint species check above.
-    """
-    hr = section.harmony_rhythm
-    if hr is None or hr.transform_imitation != "strict":
-        return
-    yield Contradiction(
-        where=f"section '{section.name or '?'}'",
-        setting="harmony_rhythm.transform_imitation='strict'",
-        cause="not yet implemented in resolve_harmony_section_events",
-        effect="this WILL raise ValueError at render time whenever "
-               "harmony_rhythm.rhythm='motif' — not a soft no-op",
-        fix="drop transform_imitation (leave it unset) for harmony's "
-            "independent per-repetition transform selection — the only "
-            "mode currently implemented.",
     )
 
 
@@ -831,23 +755,6 @@ def _check_voice_dissonance_without_species(section: SectionModel) -> Iterator[C
                     "the dissonance field if a free melodic line is "
                     "intended.",
             )
-
-    # section.melody given as a VoiceModel dict form is the lead voice too,
-    # even with no voices[] array present at all -- same dead field.
-    if (not section.voices and isinstance(section.melody, VoiceModel)
-            and section.melody.dissonance != "passing"):
-        yield Contradiction(
-            where=f"section '{section.name or '?'}' → melody (dict form)",
-            setting=f"dissonance={section.melody.dissonance!r}",
-            cause="this is the lead voice, given via section.melody's dict "
-                  "form -- generate_melody_for_progression / "
-                  "generate_subject_entry never read species or dissonance",
-            effect="dissonance has no effect on the lead line",
-            fix="dissonance only applies to a PEER voice (voices[1:]) with "
-                "species also set -- use a voices[] array with a peer "
-                "voice instead, or drop dissonance.",
-        )
-
 
 def _check_fugal_techniques_require_develop(section: SectionModel) -> Iterator[Contradiction]:
     """
@@ -1154,8 +1061,7 @@ CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
     _check_harmony_motif_groove_noop,
-    _check_counterpoint_motif_species_noop,
-    _check_section_motif_override,
+    _check_first_species_motif_noop,
     _check_harmony_rest_on_sustain,
     _check_bass_rest_on_continuous,
     _check_note_length_range_vs_groove,
@@ -1164,8 +1070,6 @@ CHECKS = [
     _check_even_chord_split,
     _check_develop_peer_voice_noop,
     _check_bass_swing_noop,
-    _check_counterpoint_species_unimplemented,
-    _check_transform_imitation_unimplemented,
     _check_long_progression_seed_collision,
     _check_canon_interval_without_canonic_imitation,
     _check_lead_velocity_margin,
@@ -1191,17 +1095,15 @@ def _lead_behavior(section: SectionModel) -> Optional[str]:
     """
     The lead voice's effective melody behavior for this section, whichever
     form it was written in: `voices[0].behavior` if `voices` is set (it
-    supersedes `melody`+`counterpoint` outright), else `melody` directly if
-    it's a bare string, else `melody.behavior` if it's the dict/VoiceModel
-    form. Returns None only if nothing resolvable is set, which shouldn't
-    happen given schema defaults but is handled rather than assumed away.
+    supersedes the bare `melody` shorthand), else `melody` directly if
+    it's a bare string. The dict/VoiceModel arm of `melody` retired 2026-09.
+    Returns None only if nothing resolvable is set, which shouldn't happen
+    given schema defaults but is handled rather than assumed away.
     """
     if section.voices:
         return section.voices[0].behavior
     if isinstance(section.melody, str):
         return section.melody
-    if isinstance(section.melody, VoiceModel):
-        return section.melody.behavior
     return None
 
 
