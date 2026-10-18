@@ -505,6 +505,18 @@ def _write_events_to_track(track: MidiTrack, events: list[tuple]) -> None:
 # Section assembler
 # ---------------------------------------------------------------------------
 
+def _phrase_kwargs(voice, theme: dict) -> dict:
+    """phrase_form / phrase_chords / phrase_restate for
+    generate_melody_for_progression: the voice's own value if set, else the
+    piece-level default (None / 2 / "exact" -> feature off)."""
+    def pick(name, default):
+        v = getattr(voice, name, None) if voice is not None else None
+        return v if v is not None else theme.get(name, default)
+    return dict(phrase_form=pick("phrase_form", None),
+                phrase_chords=pick("phrase_chords", 2),
+                phrase_restate=pick("phrase_restate", "exact"))
+
+
 def generate_section(
     section: dict,
     theme: dict,
@@ -954,6 +966,9 @@ def generate_section(
             melodic_arc=melody_melodic_arc,
             progression_cycle_length=melody_progression_cycle_length,
             leap_probability=(lead_voice.leap_probability if lead_voice is not None else 0.0),
+            melody_engine=((lead_voice.melody_engine if lead_voice is not None else None)
+                            or theme.get("melody_engine", "v1")),
+            **_phrase_kwargs(lead_voice, theme),
         )
 
     # Record melody snapshot for counterpoint and next-section memory
@@ -1499,6 +1514,8 @@ def generate_piece(
                         groove=v.groove or groove, swing=swing,
                         rhythm_events_override=v_rhythm_override,
                         leap_probability=v.leap_probability,
+                        melody_engine=(v.melody_engine or theme.get("melody_engine", "v1")),
+                        **_phrase_kwargs(v, theme),
                     )
 
                 # Canon offset (shift forward, trim past section end).

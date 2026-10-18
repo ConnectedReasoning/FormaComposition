@@ -476,6 +476,27 @@ class VoiceModel(BaseModel):
     # develop reads motif intervals literally and ignores this field).
     leap_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
+    # 2026-10: opt-in melody note chooser. "v1" (default) is the original
+    # memoryless pick -- output byte-identical to before this field existed.
+    # "v2" scores each candidate on scale-degree proximity, direction
+    # persistence, leap recovery, anti-wobble, and chord-tone placement on
+    # strong beats (see melody.py _v2_choose). Consumed by "generative" and
+    # "lyrical"; a no-op on "sparse" and "develop".
+    # None (default) inherits the piece-level melody_engine (itself default "v1").
+    melody_engine: Optional[Literal["v1", "v2"]] = None
+
+    # 2026-10: phrase restatement for melody_engine "v2" (see melody.py's
+    # _derive_phrase_chord). phrase_form is a letter pattern, e.g. "aaba":
+    # chords are grouped phrase_chords at a time, the first phrase of each
+    # letter is generated fresh and later ones are re-derived from it
+    # (same rhythm, same or sequenced/inverted shape, strong beats refit to
+    # the new chord). None (default) inherits the piece-level value, which
+    # itself defaults to off. Ignored with a melodic_arc, on engine v1, and
+    # on behaviors other than generative/lyrical.
+    phrase_form:    Optional[Annotated[str, Field(pattern=r"^[a-z]{1,8}$")]] = None
+    phrase_chords:  Optional[Annotated[int, Field(ge=1, le=8)]] = None
+    phrase_restate: Optional[Literal["exact", "sequence", "invert"]] = None
+
     @field_validator("species", mode="after")
     @classmethod
     def _validate_species_implemented(cls, v):
@@ -1703,6 +1724,15 @@ class PieceModel(BaseModel):
     title:     Optional[str] = None
     tempo:     Optional[TempoRangeModel] = None
     seed:      int = 42
+
+    # 2026-10: piece-wide default for the melody note chooser; a voice may
+    # override it with its own melody_engine. "v1" = original behavior.
+    melody_engine: Literal["v1", "v2"] = "v1"
+
+    # Piece-wide defaults for phrase restatement (voices may override).
+    phrase_form:    Optional[Annotated[str, Field(pattern=r"^[a-z]{1,8}$")]] = None
+    phrase_chords:  Annotated[int, Field(ge=1, le=8)] = 2
+    phrase_restate: Literal["exact", "sequence", "invert"] = "exact"
 
     form_type: Literal["narrative", "song"] = "narrative"
 

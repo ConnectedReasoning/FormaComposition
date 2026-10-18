@@ -23,6 +23,8 @@ Motif is defined in theme.json as:
   }
 """
 
+import bisect
+import collections
 import random
 import math
 from dataclasses import dataclass
@@ -606,6 +608,293 @@ def _pick_start_note(chord_tones: list[int], scale_tones: list[int], prev_note: 
     return min(chord_tones, key=lambda n: abs(n - prev_note))
 
 
+# ---------------------------------------------------------------------------
+# melody_engine "v2": scored note chooser (2026-10)
+#
+# v1's generative/lyrical behaviors pick each note by rng.choice over a
+# candidate pool -- a memoryless random walk. Measured on rendered MIDI
+# (Broadway Boogie v8, Shake v5, Still Cove v4): only 37-47% of moves are
+# steps, 61-65% of moves reverse direction, and just 14-24% of leaps are
+# answered by a step the other way (good tonal melody: ~60-75% / ~35-45% /
+# ~70%+). v2 keeps each behavior's candidate generation (apex, cadence,
+# leap_probability, next-chord pull all still run) and replaces only the
+# final pick with a weighted choice that knows what came before:
+#
+#   * proximity measured in SCALE DEGREES, not semitones, so pentatonic /
+#     pelog / hirajoshi "steps" are steps
+#   * direction persistence, with a forced turn after a long run
+#   * leaps (a fourth or more) are rare and answered by a step back
+#   * A-B-A-B wobble and triple repeats are penalized
+#   * chord tones favored on strong beats / long notes; passing tones
+#     tolerated on weak beats
+#   * last onset of a chord leans toward the next chord's tones
+#   * mild pull back toward register center when hugging a wall
+#
+# Opt-in via VoiceModel.melody_engine = "v2" (default "v1": byte-identical
+# to before this existed). Not applied to sparse (rest-dominated, wide by
+# design) or develop (motif-derived; its quality is set by the motif).
+# ---------------------------------------------------------------------------
+
+# Weight by scale-degree distance from the current note.
+_V2_PROXIMITY = {0: 0.35, 1: 3.0, 2: 1.5, 3: 0.7, 4: 0.45, 5: 0.15, 6: 0.08}
+_V2_PROXIMITY_FAR = 0.03
+# Chord-tone / non-chord-tone weight by beat strength level
+# (0 = off-beat, 1 = other beat, 2 = mid-bar beat or long note, 3 = downbeat).
+_V2_CHORD_TONE_W = (1.0, 1.6, 2.5, 4.0)
+_V2_NON_CHORD_TONE_W = (1.0, 0.8, 0.5, 0.25)
+_V2_LEAP_DEGREES = 3          # a fourth or wider counts as a leap
+_V2_MAX_RUN = 4               # same-direction moves before a turn is encouraged
+
+
+class _V2State:
+    """Short melodic memory carried across onsets within one chord."""
+    __slots__ = ("prev", "prev2", "prev3", "run_dir", "run_len", "leap_dir")
+
+    def __init__(self):
+        self.prev = self.prev2 = self.prev3 = None
+        self.run_dir = 0
+        self.run_len = 0
+        self.leap_dir = 0     # direction of the previous move if it was a leap
+
+    def seed_from(self, prev_prev: Optional[int], prev: Optional[int],
+                  scale_tones: list[int]) -> None:
+        """Carry melodic memory across a chord boundary: the generators run
+        per chord, so without this a leap landing on a chord's last onset
+        would never be answered at the next chord's first."""
+        if prev is None:
+            return
+        if prev_prev is not None:
+            self.update(prev_prev, scale_tones)
+        self.update(prev, scale_tones)
+
+    def update(self, new_note: int, scale_tones: list[int]) -> None:
+        if self.prev is not None:
+            delta = new_note - self.prev
+            sgn = (delta > 0) - (delta < 0)
+            if sgn:
+                self.run_len = self.run_len + 1 if sgn == self.run_dir else 1
+                self.run_dir = sgn
+            dd = _degree_distance(new_note, self.prev, scale_tones)
+            self.leap_dir = sgn if dd >= _V2_LEAP_DEGREES else 0
+        self.prev3, self.prev2, self.prev = self.prev2, self.prev, new_note
+
+
+def _degree_distance(a: int, b: int, scale_tones: list[int]) -> int:
+    """Distance between two pitches in scale-degree steps (mode-aware)."""
+    return abs(bisect.bisect_left(scale_tones, a) - bisect.bisect_left(scale_tones, b))
+
+
+def _v2_beat_level(ev: RhythmEvent, context: Optional[dict]) -> int:
+    """0 off-beat .. 3 downbeat, using absolute (section) beat position."""
+    bpb = (context.get("beats_per_bar") if context else None) or 4
+    offset = (context.get("section_beat_offset") if context else None) or 0.0
+    pos = (offset + ev.start_beat) % bpb
+    if pos < 0.12 or bpb - pos < 0.12:
+        level = 3
+    elif abs(pos - bpb / 2) < 0.12:
+        level = 2
+    elif abs(pos - round(pos)) < 0.12:
+        level = 1
+    else:
+        level = 0
+    if ev.duration_beats >= 1.5:
+        level = max(level, 2)
+    return level
+
+
+def _v2_choose(
+    rng: random.Random,
+    candidates: list[int],
+    state: _V2State,
+    current: int,
+    scale_tones: list[int],
+    chord_pcs: set,
+    level: int,
+    is_last: bool,
+    next_pcs: Optional[set],
+    center: float,
+) -> int:
+    """Weighted pick. Duplicate entries in `candidates` (apex/cadence
+    weighting) are kept as a base weight, then scored on melodic context."""
+    counts = collections.Counter(candidates)
+    pitches = sorted(counts)
+    weights = []
+    for c in pitches:
+        w = float(counts[c])
+        dd = _degree_distance(c, current, scale_tones)
+        w *= _V2_PROXIMITY.get(dd, _V2_PROXIMITY_FAR)
+        delta = c - current
+        sgn = (delta > 0) - (delta < 0)
+
+        # Direction persistence / forced turn after a long run.
+        if sgn and state.run_dir:
+            if sgn == state.run_dir:
+                w *= 1.6 if state.run_len < _V2_MAX_RUN else 0.3
+            else:
+                w *= 0.8
+
+        # A leap is answered by a step the other way.
+        if state.leap_dir:
+            if sgn == -state.leap_dir and dd <= 1:
+                w *= 4.0
+            elif sgn == state.leap_dir:
+                w *= 0.15
+            elif sgn == 0:
+                w *= 0.5
+
+        # Anti-wobble: A-B-A, A-B-A-B, and triple repeats.
+        if c == state.prev2 and c != current:
+            w *= 0.15 if (state.prev3 is not None and current == state.prev3) else 0.5
+        if c == current and state.prev == current:
+            w *= 0.1
+
+        # Harmonic placement.
+        if c % 12 in chord_pcs:
+            w *= _V2_CHORD_TONE_W[level]
+        else:
+            w *= _V2_NON_CHORD_TONE_W[level]
+
+        # Hand off to the next chord on this chord's final onset.
+        if is_last and next_pcs and c % 12 in next_pcs:
+            w *= 2.0
+
+        # Don't hug the register wall.
+        dist = abs(current - center)
+        if dist > 8 and abs(c - center) < dist:
+            w *= 1.6
+
+        weights.append(w)
+    return rng.choices(pitches, weights=weights, k=1)[0]
+
+
+# ---------------------------------------------------------------------------
+# Phrase restatement (2026-10) -- opt-in, melody_engine "v2" only
+#
+# v2 fixes how single notes are chosen but gives a listener nothing to
+# recognize: every chord is generated independently, so no pitch shape ever
+# recurs. Perricone (Melody in Songwriting, ch. 11): "Repetition is possibly
+# the most important factor in making anything memorable. Yet repetition
+# without variation causes monotony." His first developmental technique is
+# "retain the rhythmic structure, change the pitch".
+#
+# phrase_form ("aaba", "abab", ...) groups chords into phrases of
+# phrase_chords chords and assigns each phrase a letter. The first phrase
+# with a given letter is generated fresh by the normal v2 chooser; every
+# later phrase with that letter is DERIVED from it, chord by chord:
+#   * rhythm (incl. rests) and velocities are copied from the source chord
+#     -- unless the piece supplies its own rhythm layer, in which case the
+#     phrase is derived only when that layer already matches the source
+#   * pitches are copied ("exact"), shifted by the root-degree difference
+#     between source and target chord ("sequence"), or mirrored around the
+#     source chord's first note ("invert") -- all in scale-degree space
+#   * strong-beat notes (and the phrase's final note) that are not tones of
+#     the NEW chord are moved to the nearest chord tone, so the shape
+#     survives but the harmony still fits; the stable final note also gives
+#     the restatement a closed ending against the first statement's
+#     hand-off to the next chord
+# Ignored when a melodic_arc is set (an arc wants a different shape at each
+# position, which is the opposite of restating one).
+# ---------------------------------------------------------------------------
+
+PHRASE_RESTATE_MODES = ("exact", "sequence", "invert")
+
+
+def _scale_index(pitch: int, scale_tones: list[int]) -> int:
+    """Index of the scale tone nearest `pitch`."""
+    i = bisect.bisect_left(scale_tones, pitch)
+    if i >= len(scale_tones):
+        return len(scale_tones) - 1
+    if i > 0 and abs(scale_tones[i - 1] - pitch) <= abs(scale_tones[i] - pitch):
+        return i - 1
+    return i
+
+
+def _same_rhythm(a: list, b: list, tol: float = 0.05) -> bool:
+    """True when two note/event lists share onsets, durations and rests.
+    Tolerant: generated notes carry a ~0.01-beat articulation nudge
+    (e.g. onset 0.51 / duration 0.49 for an event at 0.5 / 0.5)."""
+    if len(a) != len(b):
+        return False
+    return all(
+        abs(x.start_beat - y.start_beat) <= tol
+        and abs(x.duration_beats - y.duration_beats) <= tol
+        and bool(x.is_rest) == bool(y.is_rest)
+        for x, y in zip(a, b))
+
+
+def _derive_phrase_chord(
+    src_notes: list,
+    restate: str,
+    shift: int,
+    pivot: Optional[int],
+    align_prev: bool,
+    scale_tones: list[int],
+    per_octave: int,
+    tgt_chord_tones: list[int],
+    context: dict,
+    is_phrase_end: bool,
+    prev_note: Optional[int],
+    octave_bottom: int,
+    octave_top: int,
+) -> list:
+    """Re-express one chord's worth of a source phrase over a new chord.
+
+    `shift` (sequence: scale degrees), `pivot` (invert: min+max of the
+    source phrase's scale indices, i.e. mirror about the phrase's centre so
+    the span and register are preserved) are decided ONCE per phrase by
+    the caller, so every chord of a restated phrase moves together and the
+    seams between its chords stay as smooth as the source's."""
+    sounding = [k for k, n in enumerate(src_notes) if not n.is_rest]
+    if not sounding or not scale_tones:
+        return [MelodyNote(n.midi_note, n.start_beat, n.duration_beats, n.velocity, n.is_rest)
+                for n in src_notes]
+
+    top = len(scale_tones) - 1
+    idx = {k: _scale_index(src_notes[k].midi_note, scale_tones) for k in sounding}
+    if pivot is None:
+        pivot = min(idx.values()) + max(idx.values())
+
+    pitches: dict[int, int] = {}
+    for k in sounding:
+        if restate == "exact":
+            pitches[k] = src_notes[k].midi_note
+            continue
+        i = (idx[k] + shift if restate == "sequence" else pivot - idx[k])
+        while i < 0:
+            i += per_octave
+        while i > top:
+            i -= per_octave
+        pitches[k] = scale_tones[max(0, min(top, i))]
+
+    # Octave placement: at the START of a restated phrase, continue from the
+    # previous sounding note when a whole-octave shift keeps every pitch in
+    # register. Later chords of the phrase keep the source's own seams.
+    if align_prev and prev_note is not None:
+        first = pitches[sounding[0]]
+        best = 0
+        for s in (-12, 12):
+            moved = [p + s for p in pitches.values()]
+            if min(moved) >= octave_bottom and max(moved) <= octave_top \
+                    and abs(first + s - prev_note) < abs(first + best - prev_note):
+                best = s
+        if best:
+            pitches = {k: p + best for k, p in pitches.items()}
+
+    chord_pcs = {t % 12 for t in tgt_chord_tones}
+    last = sounding[-1]
+    out = []
+    for k, n in enumerate(src_notes):
+        if n.is_rest:
+            out.append(MelodyNote(None, n.start_beat, n.duration_beats, n.velocity, True))
+            continue
+        p = pitches[k]
+        strong = _v2_beat_level(n, context) >= 2 or (is_phrase_end and k == last)
+        if strong and tgt_chord_tones and p % 12 not in chord_pcs:
+            p = min(tgt_chord_tones, key=lambda t: (abs(t - p), t))
+        out.append(MelodyNote(p, n.start_beat, n.duration_beats, n.velocity, False))
+    return out
+
+
 def generate_generative(
     rhythm_events: list[RhythmEvent],
     chord: VoicedChord,
@@ -648,6 +937,20 @@ def generate_generative(
     apex_pitch = context.get("apex_pitch") if context else None
     apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
 
+    v2 = bool(context and context.get("melody_engine") == "v2")
+    if v2:
+        v2_state = _V2State()
+        v2_state.seed_from(context.get("prev_prev_note"), prev_note, scale_tones)
+        v2_chord_pcs = {n % 12 for n in chord_tones}
+        v2_center = (context.get("octave_bottom", MELODY_OCTAVE_BOTTOM)
+                     + context.get("octave_top", MELODY_OCTAVE_TOP)) / 2
+        v2_next_pcs = None
+        if context.get("next_chord"):
+            v2_next_pcs = {n % 12 for n in get_chord_tones_in_register(
+                context["next_chord"],
+                context.get("octave_bottom", MELODY_OCTAVE_BOTTOM),
+                context.get("octave_top", MELODY_OCTAVE_TOP))}
+
     for i, ev in enumerate(rhythm_events):
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
@@ -655,6 +958,8 @@ def generate_generative(
         # Prefer notes within a 5th of current for smooth motion
         close = [n for n, _ in pool if abs(n - current) <= 7]
         candidates = close if close else [n for n, _ in pool]
+        if v2:
+            candidates = sorted(set(candidates))
 
         if apex_pitch is not None:
             position_t = _position_t_from_context(context, ev.start_beat)
@@ -667,7 +972,13 @@ def generate_generative(
             resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, current)
             candidates = cadence_weighted_candidates(candidates, resolution_pitch)
 
-        note = rng.choice(candidates)
+        if v2:
+            note = _v2_choose(rng, candidates, v2_state, current, scale_tones,
+                              v2_chord_pcs, _v2_beat_level(ev, context),
+                              is_last_note, v2_next_pcs, v2_center)
+            v2_state.update(note, scale_tones)
+        else:
+            note = rng.choice(candidates)
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
@@ -735,6 +1046,17 @@ def generate_lyrical(
     apex_pitch = context.get("apex_pitch") if context else None
     apex_position = (melodic_arc.get("apex_position", 0.7) if melodic_arc else 0.7)
 
+    v2 = bool(context and context.get("melody_engine") == "v2")
+    if v2:
+        v2_state = _V2State()
+        v2_state.seed_from(context.get("prev_prev_note"), prev_note, scale_tones)
+        v2_chord_pcs = {n % 12 for n in chord_tones}
+        v2_center = (context.get("octave_bottom", MELODY_OCTAVE_BOTTOM)
+                     + context.get("octave_top", MELODY_OCTAVE_TOP)) / 2
+        v2_next_pcs = {n % 12 for n in next_chord_tones}
+        if prev_note:
+            current = prev_note  # continue from the sounding note, not a chord-tone proxy
+
     for i, ev in enumerate(rhythm_events):
         if ev.is_rest or (rest_probability > 0 and rng.random() < rest_probability):
             notes_out.append(MelodyNote(None, ev.start_beat, ev.duration_beats, is_rest=True))
@@ -753,12 +1075,17 @@ def generate_lyrical(
         if is_last_note and context and next_chord_tones != chord_tones:
             candidates.extend(next_chord_tones)
 
+        if v2:
+            candidates = sorted(set(candidates))
+
         if apex_pitch is not None:
             position_t = _position_t_from_context(context, ev.start_beat)
             candidates = apex_weighted_candidates(
                 candidates, current, apex_pitch, position_t, apex_position,
             )
-        else:
+        elif not v2:
+            # v1 only: per-note coin-flip direction. v2 tracks direction
+            # persistence in _v2_choose instead.
             direction = rng.choice([-1, 1])
             directed = [n for n in candidates if (n - current) * direction > 0]
             if directed:
@@ -768,7 +1095,13 @@ def generate_lyrical(
             resolution_pitch = _cadence_resolution_pitch(chord, chord_tones, current)
             candidates = cadence_weighted_candidates(candidates, resolution_pitch)
 
-        note = rng.choice(candidates) if candidates else current
+        if v2 and candidates:
+            note = _v2_choose(rng, candidates, v2_state, current, scale_tones,
+                              v2_chord_pcs, _v2_beat_level(ev, context),
+                              is_last_note, v2_next_pcs, v2_center)
+            v2_state.update(note, scale_tones)
+        else:
+            note = rng.choice(candidates) if candidates else current
         vel = int(base_velocity * ev.velocity_scale)
         notes_out.append(MelodyNote(note, ev.start_beat, ev.duration_beats, vel))
         current = note
@@ -1477,6 +1810,10 @@ def generate_melody_for_progression(
     melodic_arc: Optional[dict] = None,
     progression_cycle_length: Optional[int] = None,
     leap_probability: float = 0.0,
+    melody_engine: str = "v1",
+    phrase_form: Optional[str] = None,
+    phrase_chords: int = 2,
+    phrase_restate: str = "exact",
 ) -> list[MelodyNote]:
     """
     Generate a continuous melodic line across a full chord progression.
@@ -1655,7 +1992,24 @@ def generate_melody_for_progression(
 
     all_notes = []
     prev_note = None
+    prev_prev_note = None
     beat_offset = 0.0
+
+    # Phrase restatement (see _derive_phrase_chord). Off unless a form is
+    # given AND the v2 chooser is in use on a behavior that has one AND no
+    # melodic_arc is shaping the line.
+    phrase_active = bool(
+        phrase_form and melody_engine == "v2"
+        and behavior in ("lyrical", "generative")
+        and not melodic_arc and phrase_restate in PHRASE_RESTATE_MODES
+    )
+    phrase_chords = max(1, int(phrase_chords))
+    phrase_first: dict[str, int] = {}
+    chord_local_notes: list[list[MelodyNote]] = []
+    if phrase_active:
+        _ph_scale_name = (motif.get("melodic_scale") if isinstance(motif, dict) else None) or mode
+        _ph_scale_tones = get_scale_tones(key, _ph_scale_name, octave_bottom, octave_top)
+        _ph_per_octave = len(MODES[_ph_scale_name.lower()])
 
     # ════════════════════════════════════════════════════════════
     # CROSS-SECTION OPENING BIAS (composer behavior)
@@ -1739,6 +2093,10 @@ def generate_melody_for_progression(
             # leap_probability field. Default 0.0 -- no-op unless a caller
             # explicitly passes a nonzero value through this function.
             "leap_probability": leap_probability,
+            # "v1" (default, unchanged) or "v2" (scored chooser; see
+            # _v2_choose). Only read by generative and lyrical.
+            "melody_engine": melody_engine,
+            "prev_prev_note": prev_prev_note,
         }
 
         # Slice rhythm events for this chord's time window
@@ -1760,26 +2118,71 @@ def generate_melody_for_progression(
             if not chord_rhythm:
                 chord_rhythm = None
 
-        notes = generate_melody(
-            chord, key, mode,
-            behavior=behavior,
-            density=density,
-            total_beats=total_beats,
-            base_velocity=base_velocity,
-            prev_note=prev_note,
-            motif=chord_motif,
-            octave_bottom=octave_bottom,
-            octave_top=octave_top,
-            groove=groove,
-            beats_per_bar=beats_per_bar,
-            swing=swing,
-            seed=chord_seed,
-            context=chord_context,
-            rhythm_events_override=chord_rhythm,
-            rest_probability=rest_probability,
-            note_length_range=note_length_range,
-            note_length_quantum=note_length_quantum,
-        )
+        notes = None
+        if phrase_active:
+            p_idx, k_pos = divmod(i, phrase_chords)
+            letter = phrase_form[p_idx % len(phrase_form)]
+            first_p = phrase_first.setdefault(letter, p_idx)
+            src_i = first_p * phrase_chords + k_pos
+            if first_p != p_idx and src_i < i and abs(bpc_list[src_i] - bpc_list[i]) < 1e-9:
+                src = chord_local_notes[src_i]
+                if chord_rhythm is None or _same_rhythm(src, chord_rhythm):
+                    ph_shift, ph_pivot = 0, None
+                    if phrase_restate != "exact":
+                        src_idx = [
+                            _scale_index(n.midi_note, _ph_scale_tones)
+                            for ci in range(first_p * phrase_chords, first_p * phrase_chords + phrase_chords)
+                            for n in chord_local_notes[ci] if not n.is_rest]
+                        top_ix = len(_ph_scale_tones) - 1
+                        if src_idx and phrase_restate == "invert":
+                            ph_pivot = min(src_idx) + max(src_idx)
+                        elif src_idx:
+                            want = (chords[p_idx * phrase_chords].degree
+                                    - chords[first_p * phrase_chords].degree) % _ph_per_octave
+                            if want > _ph_per_octave // 2:
+                                want -= _ph_per_octave
+                            # Harmonically true shift first (and its octave
+                            # equivalent), then progressively smaller ones,
+                            # taking the first that keeps the whole phrase
+                            # inside the register.
+                            alts = [want, want - _ph_per_octave if want > 0 else want + _ph_per_octave]
+                            alts += [v for w in range(abs(want) - 1, -1, -1) for v in ((w, -w) if want >= 0 else (-w, w))]
+                            ph_shift = next((c for c in alts
+                                             if min(src_idx) + c >= 0 and max(src_idx) + c <= top_ix), 0)
+                    notes = _derive_phrase_chord(
+                        src, phrase_restate, ph_shift, ph_pivot, k_pos == 0,
+                        _ph_scale_tones, _ph_per_octave,
+                        get_chord_tones_in_register(chord, octave_bottom, octave_top),
+                        chord_context, k_pos == phrase_chords - 1,
+                        prev_note, octave_bottom, octave_top,
+                    )
+        if notes is None:
+            notes = generate_melody(
+                chord, key, mode,
+                behavior=behavior,
+                density=density,
+                total_beats=total_beats,
+                base_velocity=base_velocity,
+                prev_note=prev_note,
+                motif=chord_motif,
+                octave_bottom=octave_bottom,
+                octave_top=octave_top,
+                groove=groove,
+                beats_per_bar=beats_per_bar,
+                swing=swing,
+                seed=chord_seed,
+                context=chord_context,
+                rhythm_events_override=chord_rhythm,
+                rest_probability=rest_probability,
+                note_length_range=note_length_range,
+                note_length_quantum=note_length_quantum,
+            )
+        if phrase_active:
+            # Chord-local copy (before the section-offset shift below) for
+            # later restatements to derive from.
+            chord_local_notes.append([
+                MelodyNote(n.midi_note, n.start_beat, n.duration_beats, n.velocity, n.is_rest)
+                for n in notes])
         # Offset beat positions
         for n in notes:
             n.start_beat += beat_offset
@@ -1788,6 +2191,7 @@ def generate_melody_for_progression(
         # Track last sounding note for continuity
         sounding = [n for n in notes if not n.is_rest]
         if sounding:
+            prev_prev_note = sounding[-2].midi_note if len(sounding) > 1 else prev_note
             prev_note = sounding[-1].midi_note
 
         beat_offset += total_beats
