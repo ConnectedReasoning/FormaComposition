@@ -484,3 +484,104 @@ class TestGenerateCounterpointDispatch:
         via_dispatch = generate_counterpoint(melody, "C", "ionian", species="free",
                                               register="below", seed=1)
         assert [n.midi_note for n in direct] == [n.midi_note for n in via_dispatch]
+
+
+# ===========================================================================
+# Leap limiting — no teleporting between registers
+#
+# Measured on a rendered ambient piece (piece_eno, 8 seeds): 388 of 9839
+# counterpoint steps (3.9%) exceeded an octave, up to 29 semitones. Two
+# causes, both in note selection:
+#   1. The candidate funnel (consonant with the melody AND a chord tone)
+#      could leave a single survivor in a ~3-octave band; with one option the
+#      scorer had nothing to weigh and the voice jumped to it.
+#   2. The soft leap penalty topped out near +30 and routinely lost to the
+#      contrary-motion / imperfect-consonance bonuses.
+# Section openings had a third: each section restarted with no memory of the
+# previous section's last pitch.
+# ===========================================================================
+
+from intervals.music.counterpoint import (
+    MAX_COUNTERPOINT_LEAP,
+    within_leap_reach,
+)
+from intervals.music.rhythm import RhythmEvent
+
+
+class TestWithinLeapReach:
+    def test_no_previous_pitch_returns_candidates_unchanged(self):
+        assert within_leap_reach([50, 90], None, [[60]]) == [50, 90]
+
+    def test_keeps_only_candidates_within_an_octave(self):
+        assert within_leap_reach([50, 58, 62, 90], 56) == [50, 58, 62]
+
+    def test_boundary_is_inclusive(self):
+        assert within_leap_reach([44, 68, 69], 56) == [44, 68]
+
+    def test_falls_through_to_first_fallback_tier_with_something_in_reach(self):
+        assert within_leap_reach([90], 56, [[100], [57, 61], [58]]) == [57, 61]
+
+    def test_returns_original_candidates_when_nothing_is_in_reach(self):
+        assert within_leap_reach([90, 95], 56, [[100]]) == [90, 95]
+
+
+class TestScoreCandidateLeapPenalty:
+    def _score(self, candidate, cp_prev):
+        # Same melody pitch/prev, no randomness, no other voices, candidate
+        # always a consonant scale tone, so only the leap term differs.
+        scale = list(range(40, 100))
+        return score_candidate(
+            candidate, 72, 72, cp_prev, scale, 1.0, 4, "below",
+            rng=__import__("random").Random(0),
+        )
+
+    def test_two_octave_leap_costs_more_than_one_octave_leap(self):
+        assert self._score(60 + 24, 60) > self._score(60 + 12, 60) + 30
+
+    def test_leap_past_an_octave_outweighs_contrary_motion_bonus(self):
+        # Contrary motion is worth -10; a 17-semitone leap must still lose
+        # to a 5-semitone one even when the small leap is similar motion.
+        assert self._score(60 + 17, 60) > self._score(60 + 5, 60) + 10
+
+
+class TestGenerateFreeSpeciesNeverTeleports:
+    """Regression for the 29-semitone G#3 -> C#6 jump seen in piece_eno."""
+
+    def _chord_voices(self):
+        # C# major, as the II chord of B pentatonic: pcs {1, 5, 8}
+        chord = VoicedChord("C#", "major", [61, 65, 68], 0, "II", 1)
+        return chord_tones_as_voices([chord], [4.0], beats_per_bar=4, max_voices=3)
+
+    def _run(self, prev_pitch):
+        melody = [MelodyNote(78, 0.0, 4.0)]           # F#5 held
+        return generate_free_species(
+            melody, "B", "pentatonic_major", register="below",
+            dissonance="none", seed=3,
+            chord_voices=self._chord_voices(),
+            register_bounds=(56, 86),
+            rhythm_events_override=[RhythmEvent(0.0, 1.0)],
+            prev_pitch=prev_pitch,
+        )
+
+    def test_opening_note_stays_within_an_octave_of_prev_pitch(self):
+        # The only consonant chord tone against F#5 anywhere in the band is
+        # C#6 (85), 29 semitones above G#3 (56). It must not be chosen.
+        out = self._run(prev_pitch=56)
+        assert abs(out[0].midi_note - 56) <= MAX_COUNTERPOINT_LEAP
+
+    def test_without_prev_pitch_behaviour_is_unchanged(self):
+        # No history -> nothing to limit against; the funnel's lone
+        # survivor is still returned. Guards the default (None) path.
+        out = self._run(prev_pitch=None)
+        assert out[0].midi_note == 85
+
+
+class TestGenerateFirstSpeciesLeaps:
+    def test_no_leap_exceeds_an_octave_across_a_long_line(self):
+        melody = _melody([(p, float(i)) for i, p in enumerate(
+            [72, 76, 79, 76, 72, 67, 64, 67, 72, 79, 84, 79, 72, 64, 60, 64])])
+        for seed in range(20):
+            out = generate_first_species(
+                melody, "C", "ionian", register="below", seed=seed)
+            steps = [abs(b.midi_note - a.midi_note) for a, b in zip(out, out[1:])]
+            assert max(steps) <= MAX_COUNTERPOINT_LEAP, (seed, steps)

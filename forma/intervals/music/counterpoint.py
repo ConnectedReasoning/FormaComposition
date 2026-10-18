@@ -431,6 +431,47 @@ def leading_tone(key: str, mode: str) -> int:
 # Candidate scorer
 # ---------------------------------------------------------------------------
 
+# Largest leap (semitones) a counterpoint voice may take when any candidate
+# within that reach exists. An octave is the ceiling of what reads as a leap
+# within one line; anything wider reads as the voice teleporting between
+# registers.
+MAX_COUNTERPOINT_LEAP = 12
+
+
+def within_leap_reach(
+    candidates: list[int],
+    cp_prev: Optional[int],
+    fallback_pools: "Optional[list[list[int]]]" = None,
+    max_leap: int = MAX_COUNTERPOINT_LEAP,
+) -> list[int]:
+    """
+    Narrow `candidates` to pitches within `max_leap` semitones of `cp_prev`.
+
+    The candidate funnels in the species generators (consonant with the
+    melody AND a member of the sounding chord, cadence-only, ...) can
+    leave a single survivor anywhere in a register band that spans several
+    octaves. With the survivor as the only option the scorer has nothing to
+    weigh, so the voice jumps to it however far away it is -- measured on
+    a rendered piece: a "below" voice at G#3 against a melody at F#5, where
+    the only consonant chord tone was C#6, a 29-semitone leap that also
+    crossed above the melody.
+
+    Tries `candidates` first, then each pool in `fallback_pools` in order
+    (looser rule tiers, e.g. consonant-only, then any scale tone) and returns
+    the first tier that has something within reach. A near note that bends
+    a soft rule is a better line than a far note that satisfies it; the
+    scorer still penalises whatever violation remains. If nothing at all is
+    within reach, returns `candidates` unchanged.
+    """
+    if cp_prev is None:
+        return candidates
+    for pool in (candidates, *(fallback_pools or [])):
+        near = [c for c in pool if abs(c - cp_prev) <= max_leap]
+        if near:
+            return near
+    return candidates
+
+
 def score_candidate(
     candidate: int,
     melody_note: int,
@@ -500,6 +541,16 @@ def score_candidate(
             # semitones, letting the voice teleport to a distant octave
             # of a consonant pitch class instead of the nearest one.
             score += 15.0 + (leap - 7) * 2.0
+            # Past an octave the voice is changing register, not leaping.
+            # The curve above tops out near +30 at two octaves, which a
+            # -10 contrary-motion or -5 imperfect-consonance bonus
+            # routinely cancelled (87 of 1236 decisions on a rendered
+            # ambient piece took a 12+ semitone leap while an in-octave
+            # candidate was available). Steep enough to outweigh those
+            # bonuses and the +50 side-of-melody check, still well under
+            # a hard rule violation (500+).
+            if leap > MAX_COUNTERPOINT_LEAP:
+                score += 30.0 + (leap - MAX_COUNTERPOINT_LEAP) * 6.0
 
     # Prefer contrary motion
     if cp_prev is not None and melody_prev is not None:
@@ -545,6 +596,7 @@ def generate_first_species(
     against_notes: Optional[list[int]] = None,
     against_voices: Optional[list[list]] = None,
     register_bounds: Optional[tuple[int, int]] = None,
+    prev_pitch: Optional[int] = None,
 ) -> list[CounterpointNote]:
     """
     Generate strict 1st species counterpoint (note against note).
@@ -603,7 +655,10 @@ def generate_first_species(
         return []
 
     result = []
-    cp_prev = None
+    # prev_pitch: where this voice last sounded (end of the previous
+    # section), so the opening note is judged by the same leap rules as
+    # every other note instead of starting from nothing.
+    cp_prev = prev_pitch
     melody_prev = None
     total = len(sounding)
 
@@ -621,6 +676,7 @@ def generate_first_species(
                 cadence_candidates = scale_tones
 
         candidates = cadence_candidates if is_final else scale_tones
+        candidates = within_leap_reach(candidates, cp_prev, [scale_tones])
 
         # Score all candidates
         scored = []
@@ -678,6 +734,7 @@ def generate_free_species(
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
     rhythm_events_override: Optional[list] = None,
+    prev_pitch: Optional[int] = None,
 ) -> list[CounterpointNote]:
     """
     Generate free species counterpoint — mixed note values, passing tones,
@@ -792,7 +849,8 @@ def generate_free_species(
         return []
 
     result = []
-    cp_prev = None
+    # See generate_first_species: carries the previous section's last pitch.
+    cp_prev = prev_pitch
     melody_prev = None
     total = len(onsets)
     prev_was_dissonant = False
@@ -886,6 +944,18 @@ def generate_free_species(
                 if cadence:
                     candidates = cadence
 
+            # Keep the voice within an octave of where it just was. The
+            # funnels above (consonant AND chord tone, cadence) can leave
+            # one survivor several octaves away; fall back to looser rule
+            # tiers rather than teleport -- consonant-only (the same
+            # melody-only fallback the chord intersection already uses),
+            # then any scale tone.
+            candidates = within_leap_reach(
+                candidates, cp_prev,
+                [[n for n in scale_tones if is_consonant(melody_now, n)],
+                 scale_tones],
+            )
+
         # Score candidates
         scored = []
         for c in candidates:
@@ -949,6 +1019,7 @@ def generate_counterpoint(
     note_length_range: Optional[tuple[float, float]] = None,
     note_length_quantum: float = 0.25,
     rhythm_events_override: Optional[list] = None,
+    prev_pitch: Optional[int] = None,
 ) -> list[CounterpointNote]:
     """
     Generate a counterpoint voice against a melody.
@@ -982,6 +1053,9 @@ def generate_counterpoint(
                         controls how active this voice's own rhythm grid is.
         groove:         Optional named groove (rhythm.GROOVES) for free
                         species' onset pattern. None → ungrooved density grid.
+        prev_pitch:     Last pitch this voice sounded before this call (e.g.
+                        the end of the previous section). Seeds the leap
+                        limit for the opening note; None = no history.
 
     Returns:
         List of CounterpointNote
@@ -996,6 +1070,7 @@ def generate_counterpoint(
             against_notes=against_notes,
             against_voices=against_voices,
             register_bounds=register_bounds,
+            prev_pitch=prev_pitch,
         )
     elif species == "free":
         return generate_free_species(
@@ -1010,6 +1085,7 @@ def generate_counterpoint(
             note_length_range=note_length_range,
             note_length_quantum=note_length_quantum,
             rhythm_events_override=rhythm_events_override,
+            prev_pitch=prev_pitch,
         )
     else:
         raise ValueError(f"Unknown species: '{species}'. Choose 'first' or 'free'.")
