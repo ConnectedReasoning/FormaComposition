@@ -250,9 +250,10 @@ class TestVoiceModelAbsorbedCounterpointFields:
         assert v.groove == "push"
         assert v.note_length_range.as_tuple() == (0.5, 2.0)
 
-    def test_counterpoint_relative_register_aliases_still_accepted(self):
-        assert VoiceModel(species="free", register="above").v_register == "above"
-        assert VoiceModel(species="free", register="below").v_register == "below"
+    @pytest.mark.parametrize("old", ["above", "below"])
+    def test_removed_relative_registers_rejected_with_migration_hint(self, old):
+        with pytest.raises(ValidationError, match="migrate_registers"):
+            VoiceModel(species="free", register=old)
 
     def test_unimplemented_species_still_blocked_at_validation(self):
         with pytest.raises(ValidationError, match="not implemented"):
@@ -267,12 +268,12 @@ class TestVoiceModel:
     def test_valid(self):
         m = VoiceModel(register="soprano", behavior="lyrical", velocity=90)
         assert m.bounds() == (63, 81)  # soprano, 18 semitones, centered C5
-        assert m.is_relative() is False
 
-    def test_valid_relative_register(self):
-        m = VoiceModel(register="above")
-        assert m.bounds() is None
-        assert m.is_relative() is True
+    def test_every_register_has_fixed_bounds(self):
+        for r in ("soprano", "alto", "tenor", "baritone", "bass",
+                  "high", "mid", "low_mid", "low"):
+            lo, hi = VoiceModel(register=r).bounds()
+            assert hi - lo == 18
 
     def test_invalid_unimplemented_species(self):
         with pytest.raises(ValidationError, match="not implemented"):

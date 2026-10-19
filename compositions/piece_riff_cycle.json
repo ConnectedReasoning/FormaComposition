@@ -134,7 +134,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 45
           }
@@ -198,13 +198,13 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 58
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 54
           }
@@ -268,13 +268,13 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 58
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 54
           }
@@ -345,13 +345,13 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 60
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 60
           }

@@ -1435,11 +1435,8 @@ def generate_piece(
                 # from where this voice's register sits relative to the lead:
                 # a register centered at or above the lead is a descant
                 # ("above"), one below is a lower voice ("below").
-                if vb is not None:
-                    v_center = (vb[0] + vb[1]) / 2
-                    rel = "above" if v_center >= lead_center else "below"
-                else:
-                    rel = v.v_register if v.v_register in ("above", "below") else "below"
+                v_center = (vb[0] + vb[1]) / 2
+                rel = "above" if v_center >= lead_center else "below"
 
                 v_rest = (v.rest_probability if v.rest_probability is not None
                           else section_model.rest_probability)

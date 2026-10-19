@@ -219,7 +219,7 @@ class TestVoiceModelEntryRoleValidation:
 def _fugue_piece(**voice_overrides):
     voices = [
         {"register": "mid", "entry_role": "subject", "motif": "subj", "velocity": 80},
-        {"register": "above", "entry_role": "answer", "motif": "subj",
+        {"register": "soprano", "entry_role": "answer", "motif": "subj",
          "velocity": 70, "canon_offset": 2.0},
     ]
     return {
@@ -304,7 +304,7 @@ class TestGeneratorWiring:
         confirm it doesn't crash and produces notes."""
         piece = _fugue_piece()
         piece["sections"][0]["voices"].append(
-            {"register": "below", "species": "free", "velocity": 60}
+            {"register": "tenor", "species": "free", "velocity": 60}
         )
         res = generator.generate_piece(piece, "/tmp/_test_fugue_species.mid")
         assert res is not None
@@ -341,7 +341,7 @@ class TestEntryRoleUnsetIsNoOp:
                 "progression": ["I", "V"],
                 "voices": [
                     {"register": "mid", "behavior": "lyrical"},
-                    {"register": "below", "species": "free"},
+                    {"register": "tenor", "species": "free"},
                 ],
             }],
         }
@@ -360,7 +360,7 @@ class TestEntryRoleUnsetIsNoOp:
                 "progression": ["I", "IV", "V"],
                 "voices": [
                     {"register": "mid", "motif": "m", "behavior": "develop"},
-                    {"register": "below", "species": "first"},
+                    {"register": "tenor", "species": "first"},
                 ],
             }],
         }

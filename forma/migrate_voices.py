@@ -130,14 +130,14 @@ def _migrate_section(sec: dict, rep: Report, piece_label: str) -> bool:
                       f"key(s) {sorted(unknown)} in section "
                       f"{sec.get('name', '?')!r}")
             # A counterpoint voice defaulted to species="free",
-            # register="below" and velocity=58; VoiceModel defaults to no
+            # register="below" (now: tenor) and velocity=58; VoiceModel defaults to no
             # species (melody path), register="mid" and velocity=64. Pin all
             # three so the migrated voice takes the same code path at the
             # same loudness it always did. Without the velocity pin the
             # migration is silently +6 on every counterpoint line that never
             # named one — caught by byte-diffing rendered MIDI, not by tests.
             v.setdefault("species", "free")
-            v.setdefault("register", "below")
+            v.setdefault("register", "tenor")
             v.setdefault("velocity", 58)
             voices.append(v)
         del sec["counterpoint"]

@@ -56,7 +56,7 @@
           {
             "behavior": "develop",
             "species": "free",
-            "register": "below",
+            "register": "alto",
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_cell",
@@ -84,7 +84,7 @@
           {
             "behavior": "generative",
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 90
           }
@@ -123,7 +123,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_shimmer",
@@ -136,7 +136,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_pulse",
@@ -188,7 +188,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "alto",
             "dissonance": "free",
             "velocity": 50
           }
@@ -219,7 +219,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
             "velocity": 54
           }
@@ -250,7 +250,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
             "velocity": 42
           }

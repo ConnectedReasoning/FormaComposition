@@ -26,14 +26,14 @@
           "velocity": 85
         },
         {
-          "register": "above",
+          "register": "soprano",
           "entry_role": "answer",
           "motif": "fugue_subject",
           "velocity": 78,
           "canon_offset": 5.0
         },
         {
-          "register": "below",
+          "register": "tenor",
           "species": "free",
           "dissonance": "passing",
           "velocity": 62,

@@ -96,7 +96,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "canon_offset": 2.0,
             "velocity": 58
@@ -126,7 +126,7 @@
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 58
           }

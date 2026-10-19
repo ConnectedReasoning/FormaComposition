@@ -135,9 +135,15 @@ VoiceRegisterLiteral        = Literal[
     "soprano", "alto", "tenor", "baritone", "bass",
     # Legacy register names — kept as aliases so existing pieces validate
     "high", "mid", "low_mid", "low",
-    # Counterpoint-relative aliases (resolved against the lead voice)
-    "above", "below",
 ]
+
+# "above" / "below" were accepted as voice registers until 2026-10. They had
+# no fixed band: a voice using one stretched across the melody's whole span
+# plus margins (~30 semitones, three octaves), which let counterpoint lines
+# leap between registers (measured on piece_eno: 29-semitone jumps) -- while
+# every named register is a fixed 18-semitone box. Removed in favour of the
+# named SATB registers; forma/migrate_registers.py converts existing pieces.
+REMOVED_RELATIVE_REGISTERS = ("above", "below")
 
 # Absolute (bottom, top) MIDI bounds per register name. 18-semitone span (an
 # octave + a sixth) per voice, centered on the same pitch each name has
@@ -401,8 +407,8 @@ class MelodicArcModel(BaseModel):
 # i.e. declaring voices[] silently switched the whole counterpoint[] block
 # off. Every field it carried now lives on VoiceModel:
 #     species        -> VoiceModel.species
-#     register       -> VoiceModel.register (VoiceRegisterLiteral accepts
-#                       "above"/"below" as counterpoint-relative aliases)
+#     register       -> VoiceModel.register (a named register; the old
+#                       counterpoint-relative "above"/"below" were removed)
 #     dissonance     -> VoiceModel.dissonance
 #     velocity       -> VoiceModel.velocity
 #     canon_offset   -> VoiceModel.canon_offset
@@ -442,8 +448,9 @@ class VoiceModel(BaseModel):
     voice — see lint.py's _check_voice_motif for the pitch-shaping gate
     (behavior must be "develop") that applies regardless of voice position.
 
-    ``register`` maps to MIDI pitch ranges — see REGISTER_BOUNDS above.
-    ``above`` / ``below`` are relative aliases accepted for counterpoint compat.
+    ``register`` maps to a fixed MIDI pitch range — see REGISTER_BOUNDS above.
+    Whether a counterpoint peer sits above or below the lead is derived from
+    where its register's centre falls relative to the lead's, not declared.
     """
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
@@ -599,18 +606,25 @@ class VoiceModel(BaseModel):
             )
         return self
 
-    def bounds(self) -> "Optional[tuple[int, int]]":
-        """
-        Absolute (bottom, top) MIDI range for this voice's register, or None
-        for the counterpoint-relative aliases ('above'/'below'), which have
-        no fixed band — they position relative to the lead voice and are
-        resolved by the generator, not here.
-        """
-        return REGISTER_BOUNDS.get(self.v_register)
+    @field_validator("v_register", mode="before")
+    @classmethod
+    def _reject_removed_relative_registers(cls, v):
+        """'above'/'below' no longer exist -- fail with the fix, not a
+        generic 'not a valid literal' dump."""
+        if v in REMOVED_RELATIVE_REGISTERS:
+            raise ValueError(
+                f"register {v!r} was removed: it had no fixed band, so a "
+                f"voice using it could roam three octaves. Use a named "
+                f"register -- soprano, alto, tenor, baritone or bass -- "
+                f"placed {'higher' if v == 'above' else 'lower'} than the "
+                f"lead voice. To convert existing files in place, run: "
+                f"python forma/migrate_registers.py <piece.json ...>"
+            )
+        return v
 
-    def is_relative(self) -> bool:
-        """True for 'above'/'below' — positioned relative to the lead voice."""
-        return self.v_register in ("above", "below")
+    def bounds(self) -> "tuple[int, int]":
+        """Absolute (bottom, top) MIDI range for this voice's register."""
+        return REGISTER_BOUNDS[self.v_register]
 
 class DrumFillModel(BaseModel):
     """

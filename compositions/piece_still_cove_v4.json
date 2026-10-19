@@ -87,7 +87,7 @@
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 58
           }
@@ -116,7 +116,7 @@
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 58
           }
@@ -145,7 +145,7 @@
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 58
           }
@@ -174,7 +174,7 @@
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 58
           }
@@ -203,7 +203,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 58
           }
@@ -232,7 +232,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 58
           }
@@ -261,7 +261,7 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 58
           }
