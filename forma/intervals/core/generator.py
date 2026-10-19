@@ -1319,6 +1319,11 @@ def generate_piece(
                           for i, s in enumerate(sections)]
 
     _first_opening_anchor: dict[str, object] = {}
+    # Counterpoint twin of _first_opening_anchor: the pitch each voice was
+    # carried in from when a section name FIRST occurred, replayed for its
+    # exact_repeat occurrences so a repeat reproduces the first occurrence's
+    # notes byte-for-byte instead of starting from whatever preceded it.
+    _first_cp_prev: dict[tuple[str, int], object] = {}
 
     # Accumulate all voice events with beat offsets across sections
     all_chord_events  = []   # (abs_beat, 'on'/'off', note, vel, channel)
@@ -1467,6 +1472,15 @@ def generate_piece(
                         _v_nlr_q = v.note_length_range.quantum
                     else:
                         _v_nlr, _v_nlr_q = _sec_nlr, _sec_nlr_q
+                    _cp_key = (section_names[i], voice_idx)
+                    if is_exact_repeat_flags[i] and _cp_key in _first_cp_prev:
+                        _cp_prev_pitch = _first_cp_prev[_cp_key]
+                    else:
+                        _cp_prev_pitch = next(
+                            (n.midi_note for n in reversed(all_cp_notes.get(voice_idx, []))
+                             if not getattr(n, "is_rest", False) and n.midi_note is not None),
+                            None)
+                        _first_cp_prev.setdefault(_cp_key, _cp_prev_pitch)
                     peer_notes = generate_counterpoint(
                         melody_notes,
                         key=theme["key"], mode=theme["mode"],
@@ -1484,6 +1498,7 @@ def generate_piece(
                         note_length_quantum=_v_nlr_q,
                         rhythm_events_override=_resolve_voice_motif_rhythm(
                             v.motif, total_beats),
+                        prev_pitch=_cp_prev_pitch,
                     )
                 else:
                     # Melody-path peer: an independent generative/motif line
