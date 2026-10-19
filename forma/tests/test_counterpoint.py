@@ -512,11 +512,16 @@ class TestWithinLeapReach:
     def test_no_previous_pitch_returns_candidates_unchanged(self):
         assert within_leap_reach([50, 90], None, [[60]]) == [50, 90]
 
-    def test_keeps_only_candidates_within_an_octave(self):
-        assert within_leap_reach([50, 58, 62, 90], 56) == [50, 58, 62]
+    def test_keeps_only_candidates_within_reach(self):
+        m = MAX_COUNTERPOINT_LEAP
+        assert within_leap_reach([56 - m, 58, 62, 56 + m + 1, 90], 56) == [56 - m, 58, 62]
 
     def test_boundary_is_inclusive(self):
-        assert within_leap_reach([44, 68, 69], 56) == [44, 68]
+        m = MAX_COUNTERPOINT_LEAP
+        assert within_leap_reach([56 - m, 56 + m, 56 + m + 1], 56) == [56 - m, 56 + m]
+
+    def test_explicit_max_leap_overrides_the_default(self):
+        assert within_leap_reach([44, 68, 69], 56, max_leap=12) == [44, 68]
 
     def test_falls_through_to_first_fallback_tier_with_something_in_reach(self):
         assert within_leap_reach([90], 56, [[100], [57, 61], [58]]) == [57, 61]
@@ -535,13 +540,15 @@ class TestScoreCandidateLeapPenalty:
             rng=__import__("random").Random(0),
         )
 
-    def test_two_octave_leap_costs_more_than_one_octave_leap(self):
+    def test_two_octave_leap_costs_far_more_than_one_octave_leap(self):
         assert self._score(60 + 24, 60) > self._score(60 + 12, 60) + 30
 
-    def test_leap_past_an_octave_outweighs_contrary_motion_bonus(self):
-        # Contrary motion is worth -10; a 17-semitone leap must still lose
-        # to a 5-semitone one even when the small leap is similar motion.
-        assert self._score(60 + 17, 60) > self._score(60 + 5, 60) + 10
+    def test_leap_past_the_cap_outweighs_contrary_motion_bonus(self):
+        # Contrary motion is worth -10; a leap one semitone past the cap
+        # must still lose to a 5-semitone one even when the small leap is
+        # similar motion.
+        assert (self._score(60 + MAX_COUNTERPOINT_LEAP + 1, 60)
+                > self._score(60 + 5, 60) + 10)
 
 
 class TestGenerateFreeSpeciesNeverTeleports:
@@ -563,11 +570,18 @@ class TestGenerateFreeSpeciesNeverTeleports:
             prev_pitch=prev_pitch,
         )
 
-    def test_opening_note_stays_within_an_octave_of_prev_pitch(self):
+    def test_opening_note_stays_within_reach_of_prev_pitch(self):
         # The only consonant chord tone against F#5 anywhere in the band is
         # C#6 (85), 29 semitones above G#3 (56). It must not be chosen.
         out = self._run(prev_pitch=56)
         assert abs(out[0].midi_note - 56) <= MAX_COUNTERPOINT_LEAP
+
+    def test_fallback_prefers_a_chord_tone_over_a_non_chord_tone(self):
+        # Staying in reach must not cost the harmony: C# major is the held
+        # chord, so the substitute for the unreachable C#6 is another C#-
+        # major chord tone (C# or G#), never a melody-consonant stranger.
+        out = self._run(prev_pitch=56)
+        assert out[0].midi_note % 12 in {1, 8}
 
     def test_without_prev_pitch_behaviour_is_unchanged(self):
         # No history -> nothing to limit against; the funnel's lone
@@ -577,7 +591,7 @@ class TestGenerateFreeSpeciesNeverTeleports:
 
 
 class TestGenerateFirstSpeciesLeaps:
-    def test_no_leap_exceeds_an_octave_across_a_long_line(self):
+    def test_no_leap_exceeds_the_cap_across_a_long_line(self):
         melody = _melody([(p, float(i)) for i, p in enumerate(
             [72, 76, 79, 76, 72, 67, 64, 67, 72, 79, 84, 79, 72, 64, 60, 64])])
         for seed in range(20):

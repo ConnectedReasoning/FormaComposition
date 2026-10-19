@@ -432,20 +432,23 @@ def leading_tone(key: str, mode: str) -> int:
 # ---------------------------------------------------------------------------
 
 # Largest leap (semitones) a counterpoint voice may take when any candidate
-# within that reach exists. An octave is the ceiling of what reads as a leap
-# within one line; anything wider reads as the voice teleporting between
-# registers.
-MAX_COUNTERPOINT_LEAP = 12
+# within that reach exists. 17 is a perfect 11th: wide enough that a voice
+# still travels through its register (an octave cap measurably flattened
+# section-opening voices -- range 25 -> 18 semitones on piece_eno, an
+# audibly narrower, muddier band), tight enough that the 2+ octave
+# teleports (a 19+ semitone jump, then straight back) never occur.
+MAX_COUNTERPOINT_LEAP = 17
 
 
 def within_leap_reach(
     candidates: list[int],
     cp_prev: Optional[int],
     fallback_pools: "Optional[list[list[int]]]" = None,
-    max_leap: int = MAX_COUNTERPOINT_LEAP,
+    max_leap: Optional[int] = None,
 ) -> list[int]:
     """
-    Narrow `candidates` to pitches within `max_leap` semitones of `cp_prev`.
+    Narrow `candidates` to pitches within `max_leap` semitones of `cp_prev`
+    (default MAX_COUNTERPOINT_LEAP).
 
     The candidate funnels in the species generators (consonant with the
     melody AND a member of the sounding chord, cadence-only, ...) can
@@ -465,6 +468,8 @@ def within_leap_reach(
     """
     if cp_prev is None:
         return candidates
+    if max_leap is None:
+        max_leap = MAX_COUNTERPOINT_LEAP
     for pool in (candidates, *(fallback_pools or [])):
         near = [c for c in pool if abs(c - cp_prev) <= max_leap]
         if near:
@@ -541,14 +546,12 @@ def score_candidate(
             # semitones, letting the voice teleport to a distant octave
             # of a consonant pitch class instead of the nearest one.
             score += 15.0 + (leap - 7) * 2.0
-            # Past an octave the voice is changing register, not leaping.
+            # Past the cap the voice is changing register, not leaping.
             # The curve above tops out near +30 at two octaves, which a
             # -10 contrary-motion or -5 imperfect-consonance bonus
-            # routinely cancelled (87 of 1236 decisions on a rendered
-            # ambient piece took a 12+ semitone leap while an in-octave
-            # candidate was available). Steep enough to outweigh those
-            # bonuses and the +50 side-of-melody check, still well under
-            # a hard rule violation (500+).
+            # routinely cancelled. Steep enough to outweigh those bonuses
+            # and the +50 side-of-melody check, still well under a hard
+            # rule violation (500+).
             if leap > MAX_COUNTERPOINT_LEAP:
                 score += 30.0 + (leap - MAX_COUNTERPOINT_LEAP) * 6.0
 
@@ -944,15 +947,22 @@ def generate_free_species(
                 if cadence:
                     candidates = cadence
 
-            # Keep the voice within an octave of where it just was. The
+            # Keep the voice within reach of where it just was. The
             # funnels above (consonant AND chord tone, cadence) can leave
             # one survivor several octaves away; fall back to looser rule
-            # tiers rather than teleport -- consonant-only (the same
-            # melody-only fallback the chord intersection already uses),
-            # then any scale tone.
+            # tiers rather than teleport. Order matters: chord tones first
+            # (even if not melody-consonant) because the harmony is
+            # sustained -- dropping to a non-chord tone smears it (chord-
+            # tone share fell 100% -> 88% when consonant-only came first);
+            # then melody-consonant, then any scale tone.
+            chord_only = (
+                [n for n in scale_tones if n % 12 in sounding_chord_pcs]
+                if sounding_chord_pcs else []
+            )
             candidates = within_leap_reach(
                 candidates, cp_prev,
-                [[n for n in scale_tones if is_consonant(melody_now, n)],
+                [chord_only,
+                 [n for n in scale_tones if is_consonant(melody_now, n)],
                  scale_tones],
             )
 
