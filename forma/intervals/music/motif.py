@@ -611,7 +611,11 @@ def generate_subject_entry(
 
     octave_bottom, octave_top = register_bounds or (MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP)
 
-    scale_tones = get_scale_tones(key, mode, octave_bottom, octave_top)
+    # A motif's own melodic_scale (e.g. "blues" over dorian harmony) wins
+    # over the piece mode, exactly as it does on the develop path -- a
+    # literal statement of a blues riff should keep its blue notes.
+    scale_mode = motif_dict.get("melodic_scale") or mode
+    scale_tones = get_scale_tones(key, scale_mode, octave_bottom, octave_top)
     pcs = pitch_classes(scale_tones)
     if not pcs:
         return []

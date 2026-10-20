@@ -440,3 +440,30 @@ class TestSwingIsUniformAcrossEveryStyle:
         straight = generate_bass(chords, style=style, bars_per_chord=1.0, key="D", mode="dorian",
                                   swing=0.0, seed=1, **self._kwargs_for(style))
         assert swung != straight
+
+
+class TestMotifMelodicScale:
+    """A bass motif that names a melodic_scale walks that scale, unsnapped."""
+
+    RIFF = {"intervals": [0, 0, 1, 1, 1, -1, -1, -1],
+            "rhythm": [0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5]}
+
+    def _pcs(self, motif, prog=("I5",)):
+        chords = resolve_progression(list(prog), "E", "dorian", density="sparse")
+        notes = generate_bass(chords, style="motif", bars_per_chord=1.0,
+                              key="E", mode="dorian", seed=1, motif=motif,
+                              octave_bottom=33, octave_top=52)
+        return [n.midi_note % 12 for n in notes]
+
+    def test_blues_riff_keeps_its_blue_note(self):
+        pcs = self._pcs({**self.RIFF, "melodic_scale": "blues"})
+        # E E G A Bb A G E
+        assert pcs == [4, 4, 7, 9, 10, 9, 7, 4]
+
+    def test_without_melodic_scale_chord_snap_still_applies(self):
+        # Unchanged behaviour: dorian walk snapped to the power chord's
+        # tones (E, B) wherever it lands within a whole step of one.
+        pcs = self._pcs(dict(self.RIFF))
+        assert set(pcs) <= {4, 11, 7, 9, 6, 1, 2, 0}
+        assert 10 not in pcs
+        assert pcs.count(4) > 3

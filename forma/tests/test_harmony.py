@@ -665,3 +665,29 @@ class TestResolveProgression:
     def test_all_chords_share_requested_density_tone_count_cap(self):
         chords = resolve_progression(["i", "iv", "v"], "C", "ionian", density="sparse")
         assert all(len(c.midi_notes) <= 3 for c in chords)
+
+
+class TestPowerChord:
+    """'5' suffix: root + fifth (+ octave), no third."""
+
+    def test_parse(self):
+        assert parse_roman("I5")[:2] == (0, "power")
+        assert parse_roman("bVII5")[:2] == (6, "power")
+        assert parse_roman("bVII5")[3] == -1
+
+    @pytest.mark.parametrize("voicing", ["closed", "open", "drop2"])
+    @pytest.mark.parametrize("density", ["sparse", "medium", "full"])
+    def test_never_contains_a_third(self, voicing, density):
+        for roman in ("I5", "IV5", "bVII5", "v5"):
+            c = resolve_chord(roman, "E", "mixolydian", density=density, voicing=voicing)
+            pcs = {n % 12 for n in c.midi_notes}
+            assert len(pcs) == 2, (roman, c)
+            a, b = sorted(pcs)
+            assert (b - a) in (5, 7), (roman, c)   # a fifth, or a fourth if inverted
+
+    def test_root_and_fifth_of_e5(self):
+        c = resolve_chord("I5", "E", "mixolydian")
+        assert {n % 12 for n in c.midi_notes} == {4, 11}   # E and B
+
+    def test_symbol(self):
+        assert chord_symbol(resolve_chord("bVII5", "E", "mixolydian"), show_inversion=False) == "D5"

@@ -366,3 +366,17 @@ class TestEntryRoleUnsetIsNoOp:
         }
         result = generator.generate_piece(piece, "/tmp/_test_regression_full.mid")
         assert result is not None
+
+
+def test_subject_entry_honours_motif_melodic_scale():
+    """A literal statement walks the motif's own melodic_scale, so a blues
+    riff over dorian harmony keeps its flat five."""
+    from intervals.music.motif import generate_subject_entry
+    m = {"name": "r", "intervals": [0, 0, 1, 1, 1, -1, -1, -1],
+         "rhythm": [0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5],
+         "melodic_scale": "blues"}
+    notes = generate_subject_entry(m, "subject", "E", "dorian", 4.0, (58, 76))
+    assert [n.midi_note % 12 for n in notes] == [4, 4, 7, 9, 10, 9, 7, 4]
+    plain = generate_subject_entry({k: v for k, v in m.items() if k != "melodic_scale"},
+                                   "subject", "E", "dorian", 4.0, (58, 76))
+    assert 10 not in [n.midi_note % 12 for n in plain]
