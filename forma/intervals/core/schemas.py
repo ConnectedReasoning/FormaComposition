@@ -1018,6 +1018,15 @@ class SectionModel(BaseModel):
     bass_subdivision: Optional[Annotated[float, Field(gt=0.0, le=4.0)]] = None
     bass_offset:      Optional[Annotated[float, Field(ge=0.0, lt=4.0)]] = None
 
+    # The bass's own motif for bass_style="motif" -- a motif name (theme
+    # pool / library) or an embedded dict, resolved exactly like
+    # harmony_rhythm.motif. Omitted -> the bass follows the section's active
+    # theme motif, unchanged from before this field existed. Lets a section
+    # double its own riff in the bass (a B riff in a chorus) instead of
+    # always the piece's main motif. Ignored (see lint.py) for any other
+    # bass_style -- nothing else reads a motif.
+    bass_motif:       Optional[Union[str, dict]] = None
+
     # ── Register / voicing overrides ────────────────────────────────────────
     # All four are optional and default to None. None does NOT mean "use
     # the old fixed constant" the way every other Optional field in this
@@ -1431,6 +1440,7 @@ class SectionModel(BaseModel):
 
         voice_motif    = _resolve_motif_value_safe(voice_motif_value, theme_pool)
         harmony_motif  = _resolve_motif_value_safe(harmony_motif_value, theme_pool)
+        bass_motif     = _resolve_motif_value_safe(self.bass_motif, theme_pool)
         voice_has_rhythm   = voice_motif is not None and voice_motif.rhythm is not None
         harmony_has_rhythm = harmony_motif is not None and harmony_motif.rhythm is not None
 
@@ -1457,9 +1467,8 @@ class SectionModel(BaseModel):
         # "motif" reads the theme's motif independently of the section's
         # rhythm source, and harmony_rhythm has its own separate switch.
         # (bass never reads voice.motif / harmony_rhythm.motif — those two
-        # overrides are melody- and harmony-scoped only — so bass_style
-        # "motif" is checked against the theme pool exclusively, same as
-        # before this feature existed.)
+        # overrides are melody- and harmony-scoped only. The bass's own
+        # override, bass_motif, gets its own alignment check below.)
         uses_motif_rhythm = (
             self.rhythm == "motif"
             or (self.harmony_rhythm is not None and self.harmony_rhythm.rhythm == "motif")
@@ -1490,6 +1499,20 @@ class SectionModel(BaseModel):
             self._check_bar_alignment(voice_motif.name, voice_motif.rhythm, label, where="voice.motif")
         if harmony_motif is not None:
             self._check_bar_alignment(harmony_motif.name, harmony_motif.rhythm, label, where="harmony_rhythm.motif")
+        if bass_motif is not None:
+            # Check the authored dict, not the resolved Motif: resolution
+            # pads a missing rhythm with defaults, which would hide this.
+            _raw_b = self.bass_motif if isinstance(self.bass_motif, dict) else {}
+            if self.bass_style == "motif" and (
+                not bass_motif.intervals
+                or (isinstance(self.bass_motif, dict) and not _raw_b.get("rhythm"))
+            ):
+                raise ValueError(
+                    f"Section '{label}': bass_style='motif' with bass_motif "
+                    f"'{bass_motif.name or '?'}', but that motif needs both "
+                    f"'intervals' and 'rhythm' for the bass to play it"
+                )
+            self._check_bar_alignment(bass_motif.name, bass_motif.rhythm, label, where="bass_motif")
 
         # Peer voices[1:].motif — a *different* crash gap from the two
         # checks just above. The lead voice (voices[0]) and

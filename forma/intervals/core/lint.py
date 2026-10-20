@@ -275,6 +275,23 @@ def _check_voice_motif(section: SectionModel) -> Iterator[Contradiction]:
         )
 
 
+def _check_bass_motif_without_motif_style(section: SectionModel) -> Iterator[Contradiction]:
+    """
+    section.bass_motif is only read when bass_style == 'motif'; every other
+    style builds its line from the chords and never looks at a motif.
+    """
+    if section.bass_motif is None or section.bass_style == "motif":
+        return
+    motif_desc = section.bass_motif if isinstance(section.bass_motif, str) else "inline motif"
+    yield Contradiction(
+        where=f"section '{section.name or '?'}'",
+        setting=f"bass_motif={motif_desc!r} is set",
+        cause=f"bass_style={section.bass_style!r} (not 'motif')",
+        effect="the bass never plays the named motif",
+        fix="set bass_style='motif' to hear it, or drop bass_motif.",
+    )
+
+
 def _check_harmony_motif_without_motif_rhythm(section: SectionModel) -> Iterator[Contradiction]:
     """
     harmony_rhythm.motif names a motif for harmony, but it's only resolved
@@ -1060,6 +1077,7 @@ def _check_lead_velocity_margin(section: SectionModel) -> Iterator[Contradiction
 CHECKS = [
     _check_voice_motif,
     _check_harmony_motif_without_motif_rhythm,
+    _check_bass_motif_without_motif_style,
     _check_harmony_motif_groove_noop,
     _check_first_species_motif_noop,
     _check_harmony_rest_on_sustain,

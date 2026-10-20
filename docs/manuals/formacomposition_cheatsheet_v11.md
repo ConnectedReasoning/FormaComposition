@@ -114,7 +114,7 @@ Only the **primary** motif (`motifs[0]`, or `motif`) plays by default — no cyc
 
 | Consumer | Default | Override |
 |---|---|---|
-| Bass (`bass_style: "motif"`) | always primary | none — hardwired |
+| Bass (`bass_style: "motif"`) | primary | `section.bass_motif` |
 | Melody rhythm (`rhythm: "motif"`) | primary | `voices[0].motif` |
 | Melody pitch (any voice, `behavior: "develop"`) | primary | `voices[].motif` |
 | Harmony (`harmony_rhythm.rhythm: "motif"`) | primary | `harmony_rhythm.motif` |
@@ -178,6 +178,7 @@ inferred from the loader's own fallback logic.
 |---|---|---|---|
 | `arc` | enum | `swell` | `swell, build, fade, fade_in, fade_out, plateau, decay, breath` — see Arc table |
 | `bars` | float | — (see note) | — |
+| `bass_motif` | string or object | — (piece motif) | the bass's own motif for `bass_style: "motif"` — a motif name (theme pool or library) or an embedded motif with `intervals` + `rhythm`. Lets a section double its own riff in the bass (a chorus B-riff) instead of the piece's main motif. Rhythm must be a whole number of bars. Ignored (lint warns) for any other `bass_style`. Honours the motif's `melodic_scale`. |
 | `bass_offset` | float | 0.0 | only for `bass_style: "pulse"` — see Bass tuning below |
 | `bass_register` | object | — (seed-derived if unset) | `{min, max}` raw MIDI — see Register & voicing overrides below |
 | `bass_rest_probability` | float | 0.0 | 0.0–1.0 |

@@ -831,7 +831,8 @@ def test_checks_registry_size_and_membership():
     #   _check_counterpoint_species_unimplemented (schema validators already
     #                                             blocked it at construction,
     #                                             so it could never fire)
-    assert len(CHECKS) == 18
+    # 19 with _check_bass_motif_without_motif_style (section.bass_motif).
+    assert len(CHECKS) == 19
     assert _check_first_species_motif_noop in CHECKS
     assert _check_melodic_variation_noop not in CHECKS
     assert _check_motif_never_developed not in CHECKS
@@ -840,3 +841,25 @@ def test_checks_registry_size_and_membership():
     assert _check_inherited_motif_coerced_to_free in CHECKS
     assert _check_fugal_techniques_require_develop in CHECKS
     assert _check_voice_dissonance_without_species in CHECKS
+
+# ===========================================================================
+# bass_motif without bass_style='motif'
+# ===========================================================================
+
+def test_check_bass_motif_without_motif_style_fires():
+    from intervals.core.lint import _check_bass_motif_without_motif_style
+    section = _section(bass_style="pedal", bass_motif="b_riff")
+    hits = list(_check_bass_motif_without_motif_style(section))
+    assert len(hits) == 1 and "bass_style" in hits[0].cause
+
+
+def test_check_bass_motif_without_motif_style_silent_when_used():
+    from intervals.core.lint import _check_bass_motif_without_motif_style
+    assert not list(_check_bass_motif_without_motif_style(
+        _section(bass_style="motif", bass_motif="b_riff")))
+    assert not list(_check_bass_motif_without_motif_style(_section(bass_style="pedal")))
+
+
+def test_check_bass_motif_registered():
+    from intervals.core.lint import _check_bass_motif_without_motif_style
+    assert _check_bass_motif_without_motif_style in CHECKS
