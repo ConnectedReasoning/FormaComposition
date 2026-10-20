@@ -1,0 +1,358 @@
+{
+  "piece": {
+    "name": "stairwell_v2",
+    "title": "Stairwell",
+    "key": "E",
+    "mode": "dorian",
+    "tempo": 80,
+    "seed": 1971,
+    "motif": {
+      "name": "stairwell_riff",
+      "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+      "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+      "velocities": [ 1.0,  0.85, 0.9, 0.9, 0.8,  0.75, 0.9, 0.85 ],
+      "melodic_scale": "blues",
+      "transform_pool": []
+    },
+    "form_type": "song",
+    "form": [
+      "the_hum",
+      "the_riff",
+      "verse",
+      "the_call",
+      "chorus",
+      "verse",
+      "the_call",
+      "chorus",
+      "the_climb",
+      "the_solo",
+      "the_hammer",
+      "chorus",
+      "the_hum"
+    ],
+    "sections": {
+      "the_hum": {
+        "name": "the_hum",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "sparse",
+        "bass_style": "pedal",
+        "arc": "fade_in",
+        "rest_probability": 0.3,
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 85
+          }
+        ]
+      },
+      "the_riff": {
+        "name": "the_riff",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 33, "max": 52 },
+        "arc": "plateau",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "halftime",
+          "density": "full",
+          "fills": { "placement": "phrase_end", "phrase_bars": 4, "instrument": "tom_mid", "subdivision": 0.3333, "velocity_start": 0.6, "velocity_end": 1.0 }
+        },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 100
+          }
+        ]
+      },
+      "verse": {
+        "name": "verse",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 33, "max": 52 },
+        "arc": "plateau",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "halftime",
+          "density": "medium",
+          "fills": { "placement": "phrase_end", "phrase_bars": 4, "instrument": "tom_mid", "subdivision": 0.3333, "velocity_start": 0.5, "velocity_end": 0.9 }
+        },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 90
+          },
+          {
+            "entry_role": "subject",
+            "register": "high",
+            "motif": {
+              "name": "verse_line",
+              "intervals":  [ 0,    1,     1,     2,     -2,    -1,    -1,    0    ],
+              "rhythm":     [ 2.0,  1.0,   1.0,   2.0,   1.0,   1.0,   4.0,   4.0  ],
+              "rests":      [ true, false, false, false, false, false, false, true ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 98
+          }
+        ]
+      },
+      "the_call": {
+        "name": "the_call",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 33, "max": 52 },
+        "bass_motif": {
+          "name": "riff_stop",
+          "intervals":  [ 0,     0,     1,     1,     1,     -1,    -1,    -1,    0    ],
+          "rhythm":     [ 0.75,  0.75,  0.5,   0.5,   0.25,  0.25,  0.5,   0.5,   4.0  ],
+          "rests":      [ false, false, false, false, false, false, false, false, true ],
+          "melodic_scale": "blues"
+        },
+        "arc": "plateau",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "riff_stop",
+              "intervals":  [ 0,     0,     1,     1,     1,     -1,    -1,    -1,    0    ],
+              "rhythm":     [ 0.75,  0.75,  0.5,   0.5,   0.25,  0.25,  0.5,   0.5,   4.0  ],
+              "rests":      [ false, false, false, false, false, false, false, false, true ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 105
+          },
+          {
+            "entry_role": "subject",
+            "register": "high",
+            "motif": {
+              "name": "the_answer",
+              "intervals":  [ 0,    1,     1,     -1,    -1    ],
+              "rhythm":     [ 4.0,  1.0,   0.5,   0.5,   2.0   ],
+              "rests":      [ true, false, false, false, false ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 100
+          }
+        ]
+      },
+      "chorus": {
+        "name": "chorus",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "IV5" ],
+        "chord_bars":  [ 8     ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 40, "max": 57 },
+        "bass_motif": {
+          "name": "b_riff",
+          "intervals":  [ 2,     1,     1,     -2,    -1,    -1   ],
+          "rhythm":     [ 0.75,  0.25,  1.0,   0.5,   0.5,   1.0  ],
+          "rests":      [ false, false, false, false, false, true ],
+          "melodic_scale": "blues"
+        },
+        "arc": "plateau",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "backbeat",
+          "density": "full",
+          "fills": { "placement": "phrase_end", "phrase_bars": 4, "instrument": "snare", "subdivision": 0.25, "velocity_start": 0.6, "velocity_end": 1.0 }
+        },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "b_riff",
+              "intervals":  [ 2,     1,     1,     -2,    -1,    -1   ],
+              "rhythm":     [ 0.75,  0.25,  1.0,   0.5,   0.5,   1.0  ],
+              "rests":      [ false, false, false, false, false, true ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 100
+          },
+          {
+            "entry_role": "subject",
+            "register": "high",
+            "motif": {
+              "name": "chorus_line",
+              "intervals":  [ 2,     2,     -2,    -1,    -1,    -1,    1,     0    ],
+              "rhythm":     [ 3.0,   1.0,   2.0,   1.0,   1.0,   2.0,   2.0,   4.0  ],
+              "rests":      [ false, false, false, false, false, false, false, true ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 104
+          }
+        ]
+      },
+      "the_climb": {
+        "name": "the_climb",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "IV5", "VII5", "I5", "I5" ],
+        "chord_bars":  [ 2,     2,      2,    2    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "pedal",
+        "arc": "build",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "halftime",
+          "density": "full",
+          "accelerando": { "placement": "section_end", "bars": 2, "instrument": "snare", "subdivision_start": 0.25, "subdivision_end": 0.0625, "velocity_start": 0.5, "velocity_end": 1.0 }
+        },
+        "voices": [
+          {
+            "behavior": "develop",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_climb",
+              "intervals":  [ 0,   1,   1,    1,   -1,   -2  ],
+              "rhythm":     [ 1.0, 0.5, 0.5,  1.0, 0.5,  0.5 ],
+              "transform_pool": []
+            },
+            "velocity": 96
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "passing",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ]
+            },
+            "velocity": 84
+          }
+        ]
+      },
+      "the_solo": {
+        "name": "the_solo",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 33, "max": 52 },
+        "arc": "build",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "halftime",
+          "density": "full",
+          "fills": { "placement": "phrase_end", "phrase_bars": 2, "instrument": "tom_mid", "subdivision": 0.3333, "velocity_start": 0.6, "velocity_end": 1.0 }
+        },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 92
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "passing",
+            "motif": {
+              "name": "solo_run",
+              "intervals":  [ 0,   1,    1,    1,   -1,  -1,  1,   -2  ],
+              "rhythm":     [ 0.5, 0.25, 0.25, 0.5, 0.5, 1.0, 0.5, 0.5 ]
+            },
+            "velocity": 100
+          }
+        ]
+      },
+      "the_hammer": {
+        "name": "the_hammer",
+        "bars": 8,
+        "beats_per_bar": 4,
+        "progression": [ "I5" ],
+        "chord_bars":  [ 8    ],
+        "rhythm": "motif",
+        "density": "full",
+        "bass_style": "motif",
+        "bass_register": { "min": 33, "max": 52 },
+        "arc": "plateau",
+        "harmony_rhythm": { "rhythm": "sustain" },
+        "drums": {
+          "pattern": "halftime",
+          "density": "full",
+          "fills": { "placement": "phrase_end", "phrase_bars": 2, "instrument": "tom_lo", "subdivision": 0.3333, "velocity_start": 0.7, "velocity_end": 1.0 }
+        },
+        "voices": [
+          {
+            "entry_role": "subject",
+            "register": "alto",
+            "motif": {
+              "name": "stairwell_riff",
+              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
+              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "melodic_scale": "blues"
+            },
+            "velocity": 110
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "passing",
+            "motif": {
+              "name": "stairwell_wail",
+              "intervals":  [ 0,   1,   -1  ],
+              "rhythm":     [ 3.0, 1.0, 4.0 ]
+            },
+            "velocity": 92
+          }
+        ]
+      }
+    }
+  }
+}
