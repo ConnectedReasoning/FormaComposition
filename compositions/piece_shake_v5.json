@@ -167,14 +167,14 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 55,
             "motif": "arpeggio"
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 48
           }
@@ -212,13 +212,13 @@
           },
           {
             "species": "first",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 65
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "free",
             "velocity": 55,
             "motif": "counterline"
@@ -252,14 +252,14 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 52,
             "motif": "arpeggio"
           },
           {
             "species": "first",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 45
           }
@@ -291,14 +291,14 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "none",
             "velocity": 50,
             "motif": "arpeggio"
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "passing",
             "velocity": 55,
             "motif": "counterline"
@@ -337,13 +337,13 @@
           },
           {
             "species": "first",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
             "velocity": 75
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "free",
             "velocity": 65,
             "motif": "counterline"
@@ -376,7 +376,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "none",
             "velocity": 32,
             "motif": "arpeggio"

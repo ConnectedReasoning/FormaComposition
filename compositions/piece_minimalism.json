@@ -85,7 +85,7 @@
           },
           {
             "species": "first",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "none",
             "velocity": 58
           }
@@ -119,7 +119,7 @@
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "passing",
             "velocity": 58
           }

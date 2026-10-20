@@ -9,16 +9,18 @@
     "notes": "A 30-minute continuous ambient composition generated according to background music guidelines. Uses D Lydian for floating, open harmonic color (#4). Features ultra-long chord holds (16-27 bars per chord), zero-motion sustained harmony beds, pedal and root-only bass, and high rest-probability generative melody lines. Counterpoint voices act as asynchronous Brian Eno-style tape loop reflections and high bell-like flourishes.",
     "motif": {
       "name": "ambient_loop_cell",
-      "intervals":  [ 0,    3,   2,   -2,   -3   ],
+      "intervals":  [ 2,    3,   2,    0,    1   ],
       "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
       "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
       "transform_pool": [ "augmentation", "diminution" ]
     },
     "form_type": "song",
     "form": [
-      "i_first_light_drift",   "i_first_light_drift",   "i_first_light_drift",   "i_first_light_drift",
-      "ii_unfolding_expanse", "ii_unfolding_expanse", "ii_unfolding_expanse", "ii_unfolding_expanse"
-
+      "i_first_light_drift",   "i_first_light_drift","i_first_light_drift",   "i_first_light_drift",
+      "ii_unfolding_expanse", "ii_unfolding_expanse","ii_unfolding_expanse", "ii_unfolding_expanse",
+      "iii_plateau_of_stillness", "iii_plateau_of_stillness","iii_plateau_of_stillness", "iii_plateau_of_stillness",
+      "iv_reflected_horizon", "iv_reflected_horizon", "iv_reflected_horizon",
+      "v_dissolving_into_air", "v_dissolving_into_air", "v_dissolving_into_air"
     ],
     "sections": {
       "i_first_light_drift": {
@@ -46,7 +48,7 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_cell",
-              "intervals":  [ 0,    3,   2,   -2,   -3   ],
+              "intervals":  [ 0,    3,   2,    2,   4   ],
               "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
               "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
               "transform_pool": [ "augmentation", "diminution" ]
@@ -56,14 +58,14 @@
           {
             "behavior": "develop",
             "species": "free",
-            "register": "below",
+            "register": "alto",
             "dissonance": "none",
             "motif":{
-              "name": "ambient_loop_cell",
-              "intervals":  [ 0,    3,   2,   -2,   -3   ],
-              "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
-              "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
-              "transform_pool": [ "augmentation", "diminution" ]
+              "name": "ambient_loop_shimmer",
+              "intervals":  [ 0,    2,   -1,    -2,   -3   ],
+              "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
+              "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
+              "transform_pool": [ "diminution" ]
             },
             "velocity": 90
           },
@@ -74,9 +76,9 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_cell",
-              "intervals":  [ 0,    3,   2,   -2,   -3   ],
-              "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
-              "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
+              "intervals":  [ 0,   0,    2,    1,   -1   ],
+              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
+              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
               "transform_pool": [ "augmentation", "diminution" ]
             },
             "velocity": 90
@@ -84,7 +86,7 @@
           {
             "behavior": "generative",
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "none",
             "velocity": 90
           }
@@ -113,21 +115,20 @@
             "register": "alto",
             "motif": {
               "name": "ambient_loop_anchor",
-              "intervals":  [ 0,   -3,    2,    1   ],
+              "intervals":  [ 0,   -1,    2,    1   ],
               "rhythm":     [ 2.0,  1.0,  0.5,  0.5 ],
               "velocities": [ 0.9,  0.7,  0.6,  0.7 ],
               "transform_pool": [ "augmentation" ]
             },
             "velocity": 85
-
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_shimmer",
-              "intervals":  [ 0,    2,   -2,    3,   -3   ],
+              "intervals":  [ 0,    2,   0,     3,    2   ],
               "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
               "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
               "transform_pool": [ "diminution" ]
@@ -136,11 +137,11 @@
           },
           {
             "species": "free",
-            "register": "below",
+            "register": "tenor",
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_pulse",
-              "intervals":  [ 0,   0,    2,    1,   -3   ],
+              "intervals":  [ 0,   0,    2,    1,    0  ],
               "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
               "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
               "transform_pool": [ "diminution" ]
@@ -154,7 +155,7 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_pulse",
-              "intervals":  [ 0,   0,    2,    1,   -3   ],
+              "intervals":  [ 0,   0,    2,    1,   -1   ],
               "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
               "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
               "transform_pool": [ "diminution" ]
@@ -163,7 +164,7 @@
           }
         ]
       },
-       "iii_plateau_of_stillness": {
+      "iii_plateau_of_stillness": {
         "bars": 24,
         "progression": [ "I", "IV", "II", "I"],
         "chord_bars": [ 1, 2, 1, 2 ],
@@ -184,24 +185,61 @@
           {
             "behavior": "generative",
             "register": "tenor",
-            "velocity": 60
+            "velocity": 70,
+            "motif": {
+              "name": "plateau_hold",
+              "intervals":  [ 0,    0,   1,   -1  ],
+              "rhythm":     [ 2.0,  1.0, 0.5,  0.5 ],
+              "velocities": [ 0.7,  0.5, 0.55, 0.5 ],
+              "transform_pool": [ "retrograde" ]
+            }
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "alto",
             "dissonance": "free",
-            "velocity": 50
+            "motif": {
+              "name": "plateau_glint",
+              "intervals":  [ 0,    1,   -1  ],
+              "rhythm":     [ 2.0,  0.5, 1.5 ],
+              "velocities": [ 0.5,  0.6, 0.45 ]
+            },
+            "velocity": 80
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "none",
+            "motif": {
+              "name": "plateau_bell",
+              "intervals":  [ 0,    1,    -1   ],
+              "rhythm":     [ 3.0,  2.5,  2.5  ],
+              "velocities": [ 0.4,  0.35, 0.3  ]
+            },
+            "velocity": 45
+          },
+          {
+            "species": "free",
+            "register": "baritone",
+            "dissonance": "none",
+            "motif": {
+              "name": "plateau_ground",
+              "intervals":  [ 0,    -1,   1    ],
+              "rhythm":     [ 2.0,  1.0,  1.0  ],
+              "velocities": [ 0.5,  0.4,  0.45 ]
+            },
+            "velocity": 48
           }
         ]
       },
       "iv_reflected_horizon": {
-        "bars": 24,
+        "bars": 48,
         "progression": [ "II", "IV", "I", "II", "I", "I" ],
-        "chord_bars": [    4,    4,   4,    4,   4,   4  ],
+        "chord_bars": [    2,    1,   3,    2,   1,   3  ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",
-        "bass_style": "steady",
+        "bass_style": "root_only",
         "arc": "plateau",
         "rest_probability": 0.85,
         "beats_per_bar": 4,
@@ -215,24 +253,61 @@
           {
             "behavior": "lyrical",
             "register": "soprano",
-            "velocity": 64
+            "motif": {
+              "name": "horizon_mirror",
+              "intervals":  [ 0,    1,   1,    -1,   -1  ],
+              "rhythm":     [ 2.0,  1.0, 2.0,  1.0,  2.0 ],
+              "velocities": [ 0.6,  0.7, 0.8,  0.7,  0.6 ],
+              "transform_pool": [ "retrograde", "inversion" ]
+            },
+            "velocity": 84
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
-            "velocity": 54
+            "motif": {
+              "name": "horizon_line",
+              "intervals":  [ 0,    -1,  1   ],
+              "rhythm":     [ 1.5,  1.0, 1.5 ],
+              "velocities": [ 0.5,  0.4, 0.5 ]
+            },
+            "velocity":74
+          },
+          {
+            "species": "free",
+            "register": "alto",
+            "dissonance": "none",
+            "motif": {
+              "name": "horizon_echo",
+              "intervals":  [ 0,    -1,   -1,   1,    1    ],
+              "rhythm":     [ 4.0,  2.0,  4.0,  2.0,  4.0  ],
+              "velocities": [ 0.5,  0.55, 0.6,  0.55, 0.5  ]
+            },
+            "velocity": 70
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "none",
+            "motif": {
+              "name": "horizon_depth",
+              "intervals":  [ 0,    1,    -1   ],
+              "rhythm":     [ 3.0,  2.0,  3.0  ],
+              "velocities": [ 0.45, 0.4,  0.45 ]
+            },
+            "velocity": 86
           }
         ]
       },
       "v_dissolving_into_air": {
-        "bars": 15,
+        "bars": 54,
         "progression": [ "IV", "I", "IV", "I" ],
-        "chord_bars": [    3,   3,    4,   5  ],
+        "chord_bars": [    2,   2,    3,   2  ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",
-        "bass_style": "pedal",
+        "bass_style": "root_only",
         "arc": "plateau",
         "rest_probability": 0.85,
         "beats_per_bar": 4,
@@ -246,13 +321,50 @@
           {
             "behavior": "lyrical",
             "register": "soprano",
-            "velocity": 55
+            "motif": {
+              "name": "air_dissolve",
+              "intervals":  [ 0,    -1,  -1,   1,    1   ],
+              "rhythm":     [ 1.0,  1.0, 2.0,  4.0,  4.0 ],
+              "velocities": [ 0.7,  0.6, 0.5,  0.4,  0.3 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 80
           },
           {
             "species": "free",
-            "register": "above",
+            "register": "soprano",
             "dissonance": "free",
-            "velocity": 42
+            "motif": {
+              "name": "air_trace",
+              "intervals":  [ 0,    1,   -1   ],
+              "rhythm":     [ 6.0,  2.0, 8.0  ],
+              "velocities": [ 0.45, 0.35, 0.25 ]
+            },
+            "velocity": 70
+          },
+          {
+            "species": "free",
+            "register": "alto",
+            "dissonance": "none",
+            "motif": {
+              "name": "air_wisp",
+              "intervals":  [ 0,    -1,   1,    0    ],
+              "rhythm":     [ 2.0,  2.0,  4.0,  12.0 ],
+              "velocities": [ 0.4,  0.35, 0.3,  0.2  ]
+            },
+            "velocity": 80
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "none",
+            "motif": {
+              "name": "air_settle",
+              "intervals":  [ 0,    -1,   1    ],
+              "rhythm":     [ 12.0, 4.0,  8.0  ],
+              "velocities": [ 0.35, 0.25, 0.2  ]
+            },
+            "velocity": 75
           }
         ]
       }

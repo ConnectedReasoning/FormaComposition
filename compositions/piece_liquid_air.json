@@ -78,7 +78,7 @@
         "apex_position": 0.65,
         "resolve_every_cycle": true
       },
-      "bass_style": "pedal",
+      "bass_style": "root_only",
       "arc": "swell",
       "rhythm": "free",
       "note_length_range": {
