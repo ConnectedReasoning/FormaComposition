@@ -898,13 +898,20 @@ def arc_multiplier(arc: str, t: float) -> float:
       fade_out / fade: 1.00 → 0.65, linear fall
       fade_in:  0.65 → 1.00, linear rise
       breath:   arch — 0.85 at the edges, peaking 1.15 at midpoint
-      plateau:  flat 1.0 — intentionally a strict no-op, not an unimplemented
-                branch; a section declaring `plateau` wants no dynamic shaping.
+      plateau:  flat 1.0 within the section. NOT a full opt-out: it still
+                eases in from the previous section's ending level
+                (blended_arc_multiplier) and harmony still clamps to 40-120.
+      none:     flat 1.0 AND an opt-out from everything else — no blend-in
+                from the previous section, no 40-120 clamp (see
+                blended_arc_multiplier / apply_velocity_arc). Velocities
+                render exactly as the author set them.
       decay:    0.95 → 0.70, gradual linear fall
       anything else: 1.0 (neutral — guarantees no change for unknown arcs)
     """
     t = max(0.0, min(1.0, t))
 
+    if arc == "none":
+        return 1.0   # explicit: before the 0.6-1.25 clamp below, so it can't be touched
     if arc == "swell":
         m = 0.75 + 0.35 * (t ** 2)
     elif arc == "build":
@@ -966,6 +973,13 @@ def blended_arc_multiplier(
     """
     own = arc_multiplier(arc, t)
 
+    # "none" opts out of the cross-section blend too: the author is setting
+    # velocities by hand, so the previous section's ending level must not
+    # leak into this one. (A section AFTER a "none" section is unaffected:
+    # none ends at 1.0, which is what the next section would blend from.)
+    if arc == "none":
+        return 1.0
+
     if prev_end is None or blend_t <= 0.0:
         return own
 
@@ -999,6 +1013,17 @@ def apply_velocity_arc(
     """
     if not events:
         return []
+
+    # arc "none": velocities are the author's own. No multiplier, no blend and
+    # no 40-120 clamp — only the MIDI-valid range 1..127 (0 would read as a
+    # note-off). Harmony is the only voice that clamps here; melody and drums
+    # clamp in generator.py only when an arc multiplier is actually applied,
+    # so "none" already leaves them untouched.
+    if arc == "none":
+        return [
+            (ev, max(1, min(127, int(base_velocity * ev.velocity_scale))))
+            for ev in events
+        ]
 
     arc_scale = blended_arc_multiplier(arc, arc_t, prev_arc_end, arc_blend_t)
 

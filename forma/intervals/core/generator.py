@@ -869,6 +869,10 @@ def generate_section(
         bass_offset=section_model.bass_offset,
         octave_bottom=bass_octave_bottom,
         octave_top=bass_octave_top,
+        # Only passed when the section sets it, so an unset field keeps
+        # generate_bass's own default (70) untouched.
+        **({} if section_model.bass_velocity is None
+           else {"velocity": section_model.bass_velocity}),
     )
 
     # Record bass snapshot so melody/counterpoint can read it
@@ -1620,6 +1624,10 @@ def generate_piece(
                 prev_arc_end=prev_arc_end,
                 arc_blend_t=arc_blend_t,
                 harmony_rest_probability=section_model.harmony_rest_probability,
+                # Only passed when the section sets it, so an unset field keeps
+                # build_harmony_chord_context's own default (65) untouched.
+                **({} if section_model.harmony_velocity is None
+                   else {"base_velocity": section_model.harmony_velocity}),
             )
             all_chord_events.extend(
                 HarmonyStrategyRegistry.resolve(hrctx.source).apply(hctx)

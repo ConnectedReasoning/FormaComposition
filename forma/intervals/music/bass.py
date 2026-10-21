@@ -91,6 +91,20 @@ def _pitch_class_to_bass_note(pc: int, octave_bottom: int, octave_top: int) -> i
     return note
 
 
+def _soften(velocity: int, delta: int, floor: int) -> int:
+    """
+    A bass accent: `delta` softer than the base, but not below `floor` -- and
+    never LOUDER than the base.
+
+    The styles used to write max(floor, velocity - delta). At the default base
+    of 70 the floor never binds (every call site evaluates identically to
+    before), but with a hand-set bass_velocity below roughly 65 it did: base 45
+    gave a "softer" off-beat at the floor of 60, louder than the downbeat. The
+    min() caps it at the base, so a soft bass stays soft.
+    """
+    return max(1, min(velocity, max(floor, velocity - delta)))
+
+
 def bass_root(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM,
               octave_top: int = BASS_OCTAVE_TOP) -> int:
     """Return the root note of a chord dropped into bass register."""
@@ -237,7 +251,7 @@ def style_root_fifth(chords, bars_per_chord, beats_per_bar=4, density="medium",
         root = bass_root(chord, octave_bottom, octave_top)
         fifth = bass_fifth(chord, octave_bottom, octave_top) or root
         notes.append(BassNote(root, beat, half, velocity))
-        notes.append(BassNote(fifth, beat + half, half, max(60, velocity - 8)))
+        notes.append(BassNote(fifth, beat + half, half, _soften(velocity, 8, 60)))
         beat += total
     return notes
 
@@ -296,7 +310,7 @@ def style_walking(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 else:
                     n = nearest_scale_tone(prev + rng.choice([-2, -1, 1, 2]), scale)
 
-            vel = velocity if j % beats_per_bar == 0 else max(58, velocity - 6)
+            vel = velocity if j % beats_per_bar == 0 else _soften(velocity, 6, 58)
             bar_notes.append(n)
             notes.append(BassNote(n, beat + j * 1.0, 1.0, vel))
 
@@ -456,9 +470,9 @@ def style_melodic(chords, bars_per_chord, beats_per_bar=4, density="medium",
             if is_first:
                 vel = velocity
             elif dur < 1.0:
-                vel = max(50, velocity - 15)
+                vel = _soften(velocity, 15, 50)
             else:
-                vel = velocity - 4 if (t % beats_per_bar) < 0.01 else max(55, velocity - 10)
+                vel = max(1, velocity - 4) if (t % beats_per_bar) < 0.01 else _soften(velocity, 10, 55)
 
             actual_dur = min(dur, remaining)
             onset = beat + t
@@ -629,7 +643,7 @@ def style_pulse(chords, bars_per_chord, beats_per_bar=4, density="full",
         t = offset
         first_in_chord = True
         while t < total - 0.01:
-            vel = velocity if first_in_chord else max(55, velocity - 15)
+            vel = velocity if first_in_chord else _soften(velocity, 15, 55)
             notes.append(BassNote(root, beat + t, subdivision, vel))
             t += subdivision
             first_in_chord = False

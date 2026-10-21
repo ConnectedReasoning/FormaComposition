@@ -65,9 +65,13 @@ BassStyleLiteral   = Literal[
     "root_fifth", "walking", "pedal", "root_only",
     "melodic", "steady", "pulse", "motif",
 ]
+# "none" (2026-10) is the explicit opt-out from dynamic shaping: velocities
+# render exactly as authored. Unlike "plateau" it also skips the blend-in from
+# the previous section's ending level and harmony's 40-120 clamp. The schema
+# DEFAULT for SectionModel.arc stays "swell" so existing pieces are unchanged.
 ArcLiteral         = Literal[
     "swell", "fade", "build", "plateau", "decay",
-    "fade_in", "fade_out", "breath",
+    "fade_in", "fade_out", "breath", "none",
 ]
 RhythmSourceLiteral        = Literal["motif", "pattern", "free"]
 # "motif" was retired from harmony_rhythm.rhythm for one release (2026-07)
@@ -1003,6 +1007,21 @@ class SectionModel(BaseModel):
     #     drops break the line rather than add breath.
     harmony_rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     bass_rest_probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+
+    # ── Hand-set base velocities for the two voices that had none (2026-10) ────
+    # Melody (voices[].velocity), extra voices and drums were already
+    # hand-settable; harmony was fixed at 65 and bass at 70. Unset (None) keeps
+    # exactly those values, so existing pieces render byte-identically.
+    #   harmony_velocity: the base every harmony note is scaled from. The
+    #     "sustain" source scales by 1.0, so with arc: "none" each note is
+    #     exactly this value. "pattern" / "motif" sources multiply it by their
+    #     per-onset scale as before, and a non-"none" arc still shapes it
+    #     (and clamps harmony to 40-120 — use arc: "none" to opt out).
+    #   bass_velocity: the bass base. Accents are softer than it but never
+    #     louder. root_only and pedal add a +/-4 humanization jitter around it
+    #     by design; steady / motif scale each note by their own figure weight.
+    harmony_velocity: Optional[Annotated[int, Field(ge=1, le=127)]] = None
+    bass_velocity:    Optional[Annotated[int, Field(ge=1, le=127)]] = None
 
     # Only consumed by bass_style="pulse" -- generate_bass() warns (does not
     # silently ignore) if either is set with any other style, same pattern
