@@ -840,6 +840,18 @@ def generate_section(
     # ══════════════════════════════════════════════════════════════
     # BASS — generates first, writes snapshot for downstream voices
     # ══════════════════════════════════════════════════════════════
+    # section.bass_motif gives the bass its own riff; omitted -> the
+    # section's active theme motif, exactly as before.
+    _bass_motif_def = active_motif_def
+    if section_model.bass_motif is not None:
+        _resolved_b_motif = resolve_motif_value(section_model.bass_motif, theme_pool=motif_pool)
+        if _resolved_b_motif is not None:
+            _bass_motif_def = motif_to_dict(_resolved_b_motif)
+            if bass_style == "motif":
+                _b_desc = (section_model.bass_motif if isinstance(section_model.bass_motif, str)
+                           else (_bass_motif_def.get("name") or "(inline motif)"))
+                print(f"    Bass motif:    {_b_desc} (section override)")
+
     bass_notes = generate_bass(
         chords,
         style=bass_style,
@@ -849,7 +861,7 @@ def generate_section(
         key=key,
         mode=mode,
         seed=base_seed + seed_offset,
-        motif=active_motif_def,
+        motif=_bass_motif_def,
         swing=swing,
         rhythm_events_override=bass_rhythm_events,
         rest_probability=section_model.bass_rest_probability,

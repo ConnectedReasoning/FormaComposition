@@ -113,6 +113,9 @@ QUALITY_SYMBOLS = {
     "9":    "dominant9",
     "m11":  "minor11",
     "11":   "dominant11",
+    # Power chord: root + fifth + octave, no third. Neither major nor
+    # minor, which is the point -- a riff over it can lean either way.
+    "5":    "power",
 }
 
 # Semitone intervals for chord tones relative to chord root
@@ -140,6 +143,10 @@ CHORD_INTERVALS = {
     "dominant7b9":  (4, 7, 10, 13),
     "minor11":      (3, 7, 10, 14, 17),
     "dominant11":   (4, 7, 10, 14, 17),
+    # No third: fifth plus the doubled root. Three tones like a triad, so
+    # density caps and voicings treat it the same way; first inversion puts
+    # the fifth in the bass (the inverted "fourth" power-chord shape).
+    "power":        (7, 12),
 }
 
 # Display symbol for each CHORD_INTERVALS quality, for human-readable chord
@@ -167,6 +174,7 @@ CHORD_QUALITY_SYMBOLS = {
     "dominant7b9":  "7b9",
     "minor11":      "m11",
     "dominant11":   "11",
+    "power":        "5",
 }
 
 

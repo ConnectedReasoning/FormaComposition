@@ -532,8 +532,15 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
     rests      = motif.get("rests")
     cycle_len  = min(len(intervals), len(rhythm))
 
-    scale = get_bass_scale_tones(key, mode, octave_bottom, octave_top)
+    # A motif that names its own melodic_scale walks that scale, and is
+    # NOT snapped to chord tones: the author chose those notes on purpose
+    # (a blue note is the point, not a clash to fix), and the snap -- any
+    # pitch within a whole step of a chord tone -- otherwise collapses a
+    # stepwise riff onto the root over a two-tone chord like a power chord.
+    melodic_scale = motif.get("melodic_scale")
+    scale = get_bass_scale_tones(key, melodic_scale or mode, octave_bottom, octave_top)
     pcs = pitch_classes(scale) if scale else []
+    snap_to_chord = not melodic_scale
     notes = []
     beat = 0.0
 
@@ -569,9 +576,10 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                     candidate += 12
                 while candidate > octave_top:
                     candidate -= 12
-                nearest_chord_tone = min(chord_tones, key=lambda c: abs(c - candidate))
-                if abs(nearest_chord_tone - candidate) <= 2:
-                    candidate = nearest_chord_tone
+                if snap_to_chord:
+                    nearest_chord_tone = min(chord_tones, key=lambda c: abs(c - candidate))
+                    if abs(nearest_chord_tone - candidate) <= 2:
+                        candidate = nearest_chord_tone
                 if pcs:
                     # Re-anchor degree tracking to whatever actually gets
                     # played (a chord-tone override moves us off the raw
