@@ -1,0 +1,87 @@
+{
+  "title": "Dorian Dawn",
+  "key": "D",
+  "mode": "dorian",
+  "tempo": {
+    "min": 68,
+    "max": 76
+  },
+  "seed": 42,
+  "motif": {
+    "name": "ascending_hope",
+    "intervals": [
+      2,
+      2,
+      1,
+      -2,
+      -1
+    ],
+    "rhythm": [
+      1.0,
+      0.5,
+      0.5,
+      1.0,
+      1.0
+    ],
+    "transform_pool": [
+      "inversion",
+      "retrograde"
+    ]
+  },
+  "form_type": "song",
+  "form": [
+    "opening",
+    "lift",
+    "opening"
+  ],
+  "sections": {
+    "opening": {
+      "bars": 8,
+      "progression": [
+        "i",
+        "bVII",
+        "IV",
+        "i"
+      ],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "fade_in",
+      "rhythm": "motif",
+      "harmony_rhythm": {
+        "rhythm": "sustain"
+      },
+      "voices": [
+        {
+          "register": "alto",
+          "behavior": "develop",
+          "velocity": 90
+        }
+      ]
+    },
+    "lift": {
+      "bars": 8,
+      "progression": [
+        "i",
+        "v",
+        "bVII",
+        "IV"
+      ],
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "root_fifth",
+      "arc": "swell",
+      "rhythm": "motif",
+      "harmony_rhythm": {
+        "rhythm": "sustain"
+      },
+      "voices": [
+        {
+          "register": "alto",
+          "behavior": "develop",
+          "velocity": 90
+        }
+      ]
+    }
+  }
+}
