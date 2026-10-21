@@ -401,12 +401,12 @@ its own seed offset (independent of every other voice's), and its own optional
 | `groove` | — | valid groove name — free species only |
 | `motif` | — | object — free species only |
 | `note_length_range` | — | `{min, max, quantum?}` — free species only |
-| `register` | `below` | `above, below` |
+| `register` | `tenor` | named registers only (`above`/`below` were removed) |
 | `rhythm_density` | `medium` | `low, sparse, medium, full` — free species only |
 | `species` | `free` | `free, first, second, third, fourth, fifth` |
 | `velocity` | 58 | 1–127 |
 
-- `register` (`above`/`below`) is relative to melody's rendered range, not a fixed band.
+- `register` is a named, fixed 18-semitone box like everywhere else. `above`/`below` were removed (they had no band and let lines roam ~3 octaves); `python forma/migrate_registers.py <piece.json ...>` converts old files in place.
 - Of the `species` values, only `free`/`first` are implemented. The others are schema-valid — they pass validation — but raise a `ValueError` and abort the render if you actually use one; the lint pass flags this beforehand so it shows up as a warning, not a traceback mid-render.
 - `motif` on a counterpoint voice affects rhythm only, never pitch.
 - Cap: 3 voices max.
@@ -421,7 +421,7 @@ its own seed offset (independent of every other voice's), and its own optional
 | `entry_role` | — | `subject, answer` |
 | `leap_probability` | 0.0 | 0.0–1.0 — `behavior: "lyrical"` only, see below |
 | `motif` | — | object |
-| `register` | `mid` | `high, mid, low_mid, low, above, below` + SATB names |
+| `register` | `mid` | `soprano, alto, tenor, baritone, bass` + legacy `high, mid, low_mid, low` |
 | `rest_probability` | — | 0.0–1.0 |
 | `rhythm_pattern` | — | object — **currently consumed only on `second_melody`, not on a `voices[]` peer** (see above) |
 | `species` | — | `free, first, second, third, fourth, fifth` |
@@ -433,7 +433,7 @@ its own seed offset (independent of every other voice's), and its own optional
 - **`dissonance` only has an effect when `species` is also set on this same voice.** It's read exclusively inside the counterpoint-path call (`generate_counterpoint`); a lead voice, a melody-path peer voice (no `species`), or an `entry_role` voice all silently ignore it.
 - **`leap_probability`** (opt-in, default 0.0 — byte-identical to pre-existing behavior when unset): per-note probability that `behavior: "lyrical"` considers a skip-a-degree leap (2 scale-degree steps, not 2 semitones — mode-aware, so it means the same musical thing in `pelog` as in `ionian`) instead of only its normal stepwise/chord-adjacent motion. Exists because `lyrical`'s candidate filter was hardcoded to fixed semitone thresholds regardless of mode, so non-heptatonic modes (`pelog`, `hirajoshi`, `insen`, etc.) never got to show the wide "gap" leaps that are their actual distinguishing character. Schema-legal but currently a no-op on every other behavior — `generative`/`sparse` already permit wider motion natively, and `develop` reads motif intervals literally and ignores this field regardless of its value.
 - `motif` applies to any voice, lead or peer — see the Motif selection table above for exactly what each path does with it (rhythm only under `species`, pitch only under `behavior: "develop"`, rhythm *and* pitch under `entry_role`).
-- `register` is absolute (unlike counterpoint's relative `above`/`below`).
+- `register` is absolute: every voice, lead or peer, sits in a fixed box. Whether a peer is treated as above/below the lead is derived from the boxes' centres.
 - `rest_probability` overrides the section default.
 - **`rhythm_pattern` is schema-legal on any `voices[]` entry but only actually consumed on `second_melody`** — set on an ordinary peer voice (`voices[1:]`), it validates cleanly and has no effect on generation. Extending it to peer voices is a known, not-yet-shipped follow-up.
 - Setting `species` switches the voice onto the counterpoint path.
@@ -591,7 +591,7 @@ object — both are accepted, mixed freely in the same array.
 | `high` | 67–85 (not soprano) |
 | `low` | 36–54 (not bass) |
 
-Default melody register: 63–81. Counterpoint's `above`/`below` is relative to melody's actual range, not one of these fixed bands.
+Default melody register: 63–81. The relative `above`/`below` registers no longer exist; every voice uses one of these fixed boxes.
 
 This table is melody's own named-register vocabulary. Bass and harmony don't have named
 presets — see `bass_register`/`harmony_register` under Register & voicing overrides
