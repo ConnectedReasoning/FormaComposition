@@ -250,9 +250,12 @@ class TestVoiceModelAbsorbedCounterpointFields:
         assert v.groove == "push"
         assert v.note_length_range.as_tuple() == (0.5, 2.0)
 
-    def test_counterpoint_relative_register_aliases_still_accepted(self):
-        assert VoiceModel(species="free", register="above").v_register == "above"
-        assert VoiceModel(species="free", register="below").v_register == "below"
+    def test_relative_register_aliases_are_rejected(self):
+        # "above"/"below" had no fixed band and were removed; the error
+        # points at forma/migrate_registers.py.
+        for alias in ("above", "below"):
+            with pytest.raises(ValidationError, match="was removed"):
+                VoiceModel(species="free", register=alias)
 
     def test_unimplemented_species_still_blocked_at_validation(self):
         with pytest.raises(ValidationError, match="not implemented"):
@@ -267,12 +270,10 @@ class TestVoiceModel:
     def test_valid(self):
         m = VoiceModel(register="soprano", behavior="lyrical", velocity=90)
         assert m.bounds() == (63, 81)  # soprano, 18 semitones, centered C5
-        assert m.is_relative() is False
 
-    def test_valid_relative_register(self):
-        m = VoiceModel(register="above")
-        assert m.bounds() is None
-        assert m.is_relative() is True
+    def test_relative_register_is_rejected(self):
+        with pytest.raises(ValidationError, match="was removed"):
+            VoiceModel(register="above")
 
     def test_invalid_unimplemented_species(self):
         with pytest.raises(ValidationError, match="not implemented"):
