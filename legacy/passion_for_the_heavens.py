@@ -31,7 +31,7 @@ def makeFixedRandomTrack(name, scale, note_length, minutes):
     track.append(Message('program_change', program=1, time=0))
     total_time = 0
     while total_time < duration - note_length:
-        total_time += 100 + note_lengthel1mac
+        total_time += 100 + note_length
         note = scale[random.randint(0, len(scale) - 1)]
         track.append(Message('note_on', note=note, velocity=84, time=100))
         track.append(Message('note_off', note=note, velocity=84, time=note_length))
