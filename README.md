@@ -6,7 +6,13 @@ No training data, no statistical model. Every note the engine writes — which c
 
 Built and maintained by [Connected Reasoning](https://github.com/ConnectedReasoning).
 
+FormaComposition began as legacy/Passion_for_the_heavens.py, a hand-written generative MIDI script. Over the past year it grew into this engine with substantial help from Claude (Anthropic), which is visible in the commit history. The code is a work in progress: some modules are large, some comments are historical notes rather than explanations, and parts of the test suite are still being tightened. Expect rough edges.
+
+https://www.youtube.com/watch?v=QkIUaP-FF60&list=RDQkIUaP-FF60&start_radio=1
+
+
 ---
+
 
 ## Quickstart
 
