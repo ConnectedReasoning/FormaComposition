@@ -1,7 +1,7 @@
 """
 melodic_shape.py — Intervals Engine
 
-Apex/goal-tone mechanism (Phase 1 of the apex/goal-tone build). Two
+Apex/goal-tone mechanism. Two
 independent, composable pieces of phrase-level melodic direction that none
 of the four melody behaviors (generative, lyrical, sparse, develop) have
 today:
@@ -32,9 +32,8 @@ was written:
     using the exact same formula rhythm.section_position_t() already uses
     for the dynamic arc envelope, so a section's loudest moment and its
     melodic apex are guaranteed to agree about what "70% through" means —
-    two independent implementations of that concept is precisely the shape
-    Finding 0 was (two implementations of one transform-dispatch concept,
-    one got fixed, the other silently didn't). This module only accepts
+    two independent implementations of that concept could silently drift
+    apart. This module only accepts
     position_t as a plain float; it has no opinion on bar indices, beat
     offsets, or which voice's time base produced it.
 
@@ -54,11 +53,11 @@ was written:
     and motif.py's intervals already use — NOT the 1-indexed "scale degree
     5" language a composer would use when talking about the dominant.
     That translation (composer-facing 1-indexed -> engine-internal
-    0-indexed) belongs in the schema/wiring layer (Phase 6), not here;
+    0-indexed) belongs in the schema/wiring layer, not here;
     this module stays consistent with the internal convention it composes
     with directly (pitch_to_degree/degree_to_pitch).
 
-  - Strength is a hardcoded module constant for v1 (Phase 0 decision #4),
+  - Strength is a hardcoded module constant,
     not yet a schema-exposed field — smaller surface area to validate on
     the first pass; promotable to a real field later without changing
     this module's contract, since every function already accepts strength
@@ -71,7 +70,7 @@ from intervals.music.scale_degrees import pitch_classes, degree_to_pitch, pitch_
 
 
 # ---------------------------------------------------------------------------
-# Tunable defaults (Phase 0 decision #4: hardcoded for v1, not schema-exposed)
+# Tunable defaults (hardcoded, not schema-exposed)
 # ---------------------------------------------------------------------------
 
 # How many times a preferred candidate is repeated in the weighted list
@@ -88,7 +87,7 @@ APEX_BIAS_STRENGTH = 3
 # so it pulls harder by default.
 CADENCE_BIAS_STRENGTH = 4
 
-# Phase 4 (generate_develop): max diatonic scale-degree steps a single
+# generate_develop: max diatonic scale-degree steps a single
 # retile's anchor is allowed to shift toward a target (apex or cadence
 # resolution) in one move. develop has no per-note candidate list to
 # weight the way lyrical/generative do -- motif_to_notes builds each
@@ -164,21 +163,17 @@ def apex_degree_reachable(
     in at least one octave placement — i.e. the register genuinely spans
     this degree as declared, not merely "some pitch survives being folded
     there by resolve_apex_pitch()" (folding always succeeds; this checks
-    whether the target was honored as authored, for the Phase 6 lint
+    whether the target was honored as authored, for the lint
     warning that tells a composer their apex_degree doesn't fit the
     section's register before they render, not after).
 
-    BUG FIX (found during Phase 6's own lint-check test-writing, not by
-    inspection): the octave search here used to be centered on
-    apex_degree's own raw value near degree 0 (MIDI's near-zero octave),
-    not on the actual register. For a register far from that neighborhood
-    — which is to say, the ACTUAL DEFAULT melody register every behavior
-    uses (63-81, over five octaves above MIDI 0) — a completely ordinary
-    apex_degree like 4 (the dominant) could be reported unreachable, when
-    resolve_apex_pitch (which anchors to a given PITCH, not a raw degree
-    number) placed it correctly the whole time. Anchoring the search to
-    the register's own center pitch, the same way resolve_apex_pitch
-    anchors to wherever the melody actually is, fixes it.
+    The octave search is anchored to the register's own center pitch, the
+    same way resolve_apex_pitch anchors to wherever the melody actually
+    is -- NOT to apex_degree's raw value near degree 0 (MIDI's near-zero
+    octave). Otherwise, for a register far from that neighborhood (the
+    default melody register, 63-81, is over five octaves above MIDI 0), an
+    ordinary apex_degree like 4 (the dominant) would be reported
+    unreachable even though resolve_apex_pitch places it correctly.
     """
     pcs = pitch_classes(scale_tones)
     n = len(pcs)
@@ -254,7 +249,7 @@ def cadence_weighted_candidates(
     """
     Re-weight `candidates` toward resolution_pitch (typically the current
     chord's root, or the tonic) for use at a cadential moment — the last
-    note, or last two, of whichever chord Phase 0's cadence decision
+    note, or last two, of whichever chord the cadence decision
     identifies as cadential (see melody.py's eventual wiring: either the
     section's true final chord, or every progression-cycle boundary,
     depending on the section's resolve_every_cycle setting — this
@@ -298,8 +293,8 @@ def directed_anchor_shift(
     """
     Nudge a retile anchor's pitch toward target_pitch, by at most
     max_step_degrees diatonic scale-degree steps, in the direction
-    implied by position_t vs apex_position (Phase 4: generate_develop's
-    anchor-shift mechanism — see module docstring's Phase 4 note above
+    implied by position_t vs apex_position (generate_develop's
+    anchor-shift mechanism — see the note above
     on why this differs from apex_weighted_candidates/
     cadence_weighted_candidates rather than reusing them directly).
 

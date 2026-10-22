@@ -3,37 +3,27 @@ scale_degrees.py — Intervals Engine
 
 Shared diatonic scale-degree <-> absolute-pitch primitives.
 
-Promoted out of melody.py's _sequence_intervals_diatonically (Phase B1 of
-the diatonic-motif migration — see motif.py's Motif.intervals docstring for
-the full contract this serves). That function needed to convert an absolute
-MIDI pitch to an unbounded scale-degree index and back, purely to implement
-one transform ("sequence"). Phase B2 needs the exact same conversion as the
-core of motif_to_notes itself once Motif.intervals natively holds diatonic
-steps, so the primitive is generalized here rather than re-implemented.
+Used by melody.py's _sequence_intervals_diatonically and motif_to_notes
+(see motif.py's Motif.intervals docstring for the diatonic contract they
+serve): both convert between an absolute MIDI pitch and an unbounded
+scale-degree index, so the conversion lives here once.
 
 Degree indexing is unbounded (not folded to a register window): degree 0 is
 the scale tone at the reference pitch class list's index 0, within whatever
 octave the target pitch falls in. `degree_to_pitch` and `pitch_to_degree`
 are exact inverses of one another for any degree an int can hold.
 
-Tie-break fix (Phase B1): the original _pitch_to_degree picked the nearest
-scale degree by pitch-class distance alone, iterating candidates in a fixed
-order — which meant a pitch sitting exactly halfway between two scale tones
-(e.g. one semitone below the tonic in a mode whose scale gap there is a
-whole tone) could resolve to whichever candidate happened to be considered
-first, silently jumping a full octave rather than taking the small step.
-This surfaced twice: once inside the engine's own nearest_scale_tone/
-motif_to_notes path (the bug that motivated the whole diatonic-motif
-migration), and again in an offline catalog-conversion script written to
-migrate existing pieces' motif data, which hit the identical failure mode
-on real catalog motifs (piece_train, piece_shake's "plea") before the fix
-below was applied. pitch_to_degree here takes an explicit `prev_degree` and
-breaks ties toward whichever candidate is the smaller degree-step away from
-it, so a genuine tie resolves to local continuity instead of an accidental
+Tie-break: a pitch sitting exactly halfway between two scale tones (e.g.
+one semitone below the tonic in a mode whose scale gap there is a whole
+tone) must not resolve to whichever candidate happens to be considered
+first, which could silently jump a full octave rather than take the small
+step. pitch_to_degree therefore takes an explicit `prev_degree` and breaks
+ties toward whichever candidate is the smaller degree-step away from it,
+so a genuine tie resolves to local continuity instead of an accidental
 octave leap. Callers doing a one-shot, non-sequential conversion can omit
 `prev_degree` (defaults to 0); callers walking a sequence of pitches should
 thread the previous call's return value through, exactly as
-_sequence_intervals_diatonically and motif_to_notes (Phase B2) both do.
+_sequence_intervals_diatonically and motif_to_notes both do.
 """
 
 from typing import Iterable

@@ -30,37 +30,26 @@ class Motif:
     """
     A motif: interval sequence + rhythmic profile + metadata.
 
-    intervals:      CONTRACT (as of 2026-08, pending implementation — see
-                    Phase B of the diatonic-motif migration): diatonic
-                    scale-degree steps between successive notes, resolved
-                    against the piece's mode. e.g. [2, -1, 3, -2] means: up
-                    2 scale degrees, down 1, up 3, down 2 — NOT semitones.
-                    A diatonic step always lands on a scale tone by
-                    construction, so downstream snap-to-scale quantization
-                    (melody.py's motif_to_notes) no longer erases small
-                    steps the way semitone intervals did (see the E-mixolydian
-                    trace that motivated this: four of nine ±1-semitone
-                    steps collapsed back to their starting pitch because the
-                    local scale gap was a whole tone).
-                    STATUS: motif_to_notes (Phase B2) now walks diatonic
-                    degree space natively, apply_transform's transpose
-                    (Phase B3) uses the decided magnitude of 1 diatonic
-                    step, melodic_scale (Phase B4) lets a motif walk a
-                    scale decoupled from the piece's harmonic mode, and
-                    interval_range()/semitone_span() (Phase B5) now state
-                    plainly which of the two questions each one answers —
-                    scale-degree span vs. actual semitone/register width —
-                    instead of leaving that ambiguous. All now implement
-                    this docstring's contract, not the old one. Still
-                    untouched: mutate()'s and generate_random()'s default
-                    interval_range/max_interval values (2 and 5) were tuned
-                    for semitone-scale variation; whether those specific
-                    defaults are still the right magnitudes for diatonic-
-                    step variation is a separate, unscoped question -- not
-                    addressed by B2/B3/B5, since none of those functions
-                    are apply_transform/transform()/interval_range().
+    intervals:      Diatonic scale-degree steps between successive notes,
+                    resolved against the piece's mode. e.g. [2, -1, 3, -2]
+                    means: up 2 scale degrees, down 1, up 3, down 2 — NOT
+                    semitones. A diatonic step always lands on a scale tone,
+                    so snap-to-scale quantization (melody.py's
+                    motif_to_notes) never collapses a small step back onto
+                    its starting pitch the way semitone intervals did when
+                    the local scale gap was a whole tone.
+                    motif_to_notes walks diatonic degree space natively;
+                    apply_transform's transpose moves by 1 diatonic step;
+                    melodic_scale lets a motif walk a scale decoupled from
+                    the piece's harmonic mode; interval_range() reports
+                    scale-degree span and semitone_span() the actual
+                    semitone/register width.
+                    Open question: mutate()'s and generate_random()'s
+                    default interval_range/max_interval values (2 and 5)
+                    were tuned for semitone-scale variation, and may not be
+                    the right magnitudes for diatonic-step variation.
                     Chromatic alterations (borrowed chords, secondary-
-                    dominant coloring of the melodic line) remain
+                    dominant coloring of the melodic line) are
                     intentionally out of scope for this field — those are
                     authored manually in Logic after render, not modeled
                     by `intervals`.
@@ -71,10 +60,9 @@ class Motif:
     generation:     How many transforms away from the original (0 = source).
     parent_name:    Name of the motif this was derived from.
     melodic_scale:  Optional scale override for THIS motif's pitches,
-                    independent of the piece's harmonic mode (Phase B4 —
-                    see schemas.py's MotifModel._validate_melodic_scale for
-                    the full contract). None means "use the piece's mode",
-                    unchanged from before this field existed.
+                    independent of the piece's harmonic mode (see
+                    schemas.py's MotifModel._validate_melodic_scale for
+                    the full contract). None means "use the piece's mode".
     """
     intervals: list[int]
     rhythm: list[float]
@@ -118,11 +106,9 @@ class Motif:
         Total DIATONIC SCALE-DEGREE span of the motif — how many scale
         steps separate its highest and lowest points, not semitones.
 
-        This is a genuine unit change (Phase B5), not a hedge: every motif
-        produced by motif_to_notes or apply_transform's transpose (Phase
-        B2/B3) now holds diatonic steps in `intervals`, so this number
-        means "spans N scale degrees," e.g. 4 means a fourth-to-fifth-ish
-        range depending on the mode — not "spans 4 semitones." A motif
+        `intervals` holds diatonic steps, so this number means "spans N
+        scale degrees," e.g. 4 means a fourth-to-fifth-ish range depending
+        on the mode — not "spans 4 semitones." A motif
         with the same shape sounds like a wider or narrower leap in
         different modes even though this number is identical, because a
         diatonic step is a variable number of semitones depending on where
@@ -143,14 +129,11 @@ class Motif:
         """
         Actual semitone width the motif spans when interpreted in `mode`.
 
-        interval_range() alone can't answer this (Phase B5): it returns
-        diatonic-DEGREE span, which doesn't translate to a fixed semitone
-        count without knowing the mode's own step pattern. This resolves
-        each cumulative scale-degree position to its real semitone offset
-        within `mode` and returns the true register width — the question
-        interval_range() used to answer for free back when `intervals`
-        held semitones directly, before Phase B2/B3 changed what unit is
-        actually stored.
+        interval_range() alone can't answer this: it returns diatonic-DEGREE
+        span, which doesn't translate to a fixed semitone count without
+        knowing the mode's own step pattern. This resolves each cumulative
+        scale-degree position to its real semitone offset within `mode` and
+        returns the true register width.
 
         Reuses harmony.py's MODES (already a sorted pitch-class list per
         mode, same shape scale_degrees.degree_to_pitch expects) rather
@@ -186,7 +169,7 @@ TRANSFORM_DESCRIPTIONS = {
     "retrograde":    "Reverse the interval sequence",
     "augmentation":  "Double all note durations",
     "diminution":    "Halve all note durations",
-    # DECIDED (Phase B3): 1 diatonic step (nearest scale-degree neighbor).
+    # One diatonic step (nearest scale-degree neighbor).
     "transpose_up":  "Shift all intervals up by 1 diatonic step",
     "transpose_down":"Shift all intervals down by 1 diatonic step",
     "shuffle":       "Randomly reorder intervals",
@@ -241,8 +224,7 @@ def transform(motif: Motif, transform_name: str, seed: Optional[int] = None) -> 
         rhythm = [max(0.25, r * 0.5) for r in rhythm]
 
     elif transform_name == "transpose_up":
-        # Phase B3: 1 diatonic step (decided) -- was 2 under the old
-        # semitone contract; see TRANSFORM_DESCRIPTIONS above.
+        # One diatonic step; see TRANSFORM_DESCRIPTIONS above.
         intervals = [i + 1 for i in intervals]
 
     elif transform_name == "transpose_down":
@@ -322,10 +304,8 @@ def mutate(
     Args:
         motif:          Source Motif
         mutation_rate:  Probability each interval is mutated (0.0–1.0)
-        interval_range: Max change per mutation, in whatever unit
-                        motif.intervals currently holds (semitones today;
-                        diatonic scale-degree steps once Phase B lands —
-                        see Motif.intervals docstring)
+        interval_range: Max change per mutation, in diatonic
+        scale-degree steps (see Motif.intervals docstring)
         seed:           Random seed
 
     Returns:
@@ -366,10 +346,8 @@ def generate_random(
 
     Args:
         length:       Number of intervals
-        max_interval: Maximum absolute jump, in whatever unit
-                      motif.intervals currently holds (semitones today;
-                      diatonic scale-degree steps once Phase B lands —
-                      see Motif.intervals docstring)
+        max_interval: Maximum absolute jump, in diatonic
+        scale-degree steps (see Motif.intervals docstring)
         rhythm_pool:  Durations to sample from (default: [0.5, 1.0, 1.5, 2.0])
         name:         Motif name
         seed:         Random seed
@@ -476,7 +454,7 @@ def from_dict(d: dict) -> Motif:
     Build a Motif from a dictionary (e.g. parsed from theme.json).
 
     Expected keys: intervals, rhythm, name (optional), transform_pool (optional),
-    melodic_scale (optional, Phase B4 — see Motif.melodic_scale docstring)
+    melodic_scale (optional — see Motif.melodic_scale docstring)
     """
     return Motif(
         intervals=d["intervals"],
@@ -598,11 +576,10 @@ def generate_subject_entry(
     intervals = motif_dict.get("intervals") or []
     rhythm    = motif_dict.get("rhythm") or []
     rests     = motif_dict.get("rests")
-    # Motif carries no .velocities attribute (a pre-existing gap — see
-    # generator.py's _resolve_voice_motif_rhythm docstring); this stays
-    # None via to_dict exactly as it does for every other motif-driven
-    # voice, kept here only so a future velocities field needs no change
-    # to this function.
+    # Motif carries no .velocities attribute (see generator.py's
+    # _resolve_voice_motif_rhythm docstring); this stays None via to_dict
+    # exactly as it does for every other motif-driven voice, kept here only
+    # so a future velocities field needs no change to this function.
     velocities = motif_dict.get("velocities")
 
     n = min(len(intervals), len(rhythm))

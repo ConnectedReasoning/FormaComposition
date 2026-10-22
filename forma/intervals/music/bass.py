@@ -62,25 +62,18 @@ def _pitch_class_to_bass_note(pc: int, octave_bottom: int, octave_top: int) -> i
     Place a pitch class into [octave_bottom, octave_top] register bounds,
     correctly, regardless of whether octave_bottom itself happens to be a C.
 
-    Bug fix (2026-08): the previous formula in bass_root/bass_fifth/
-    bass_third was `octave_bottom + pc`, which only produces the right
-    absolute pitch when octave_bottom IS a C (pitch class 0) -- true for
-    this module's own BASS_OCTAVE_BOTTOM=36 (C2) default, so the bug never
-    surfaced until a caller passed a non-C-aligned box through
+    Why not `octave_bottom + pc`: that only produces the right absolute
+    pitch when octave_bottom IS a C (pitch class 0), as this module's own
+    BASS_OCTAVE_BOTTOM=36 (C2) default is. A non-C-aligned box through
     section.bass_register (e.g. schemas.py's REGISTER_BOUNDS["bass"] =
-    (39, 57), deliberately centered on C3 with an asymmetric 18-semitone
-    span -- its floor, D#2, is NOT a C). With that box, every chord root
-    landed up to 11 semitones off the intended pitch class -- silently:
-    no error, no warning, no schema violation, just the wrong note. Caught
-    only by a composer looking at the piano roll and asking why a C-chord
-    bass note was D#.
+    (39, 57), centered on C3 with an asymmetric 18-semitone span -- its
+    floor, D#2, is NOT a C) would put every chord root up to 11 semitones
+    off the intended pitch class, silently: no error, no warning, just the
+    wrong note.
 
-    Fix: find the C at or below octave_bottom, add the pitch class to
-    THAT, then fold into range with the same wrap-loop as before. For a
-    C-aligned octave_bottom (base_c == octave_bottom) this is byte-
-    identical to the old formula -- verified against test_bass.py's
-    existing bass_root/bass_fifth/bass_third assertions, all of which use
-    the C-aligned default and are unaffected.
+    So: find the C at or below octave_bottom, add the pitch class to THAT,
+    then fold into range with a wrap-loop. For a C-aligned octave_bottom
+    (base_c == octave_bottom) this is identical to `octave_bottom + pc`.
     """
     base_c = (octave_bottom // 12) * 12
     note = base_c + pc
@@ -729,15 +722,10 @@ def _apply_swing_to_bass(notes: list[BassNote], swing_ratio: float) -> list[Bass
     Apply swing displacement to a finished bass note list, uniformly,
     regardless of which style produced it.
 
-    This used to be each style's own responsibility -- style_melodic and
-    style_motif applied it inline, per-note, during construction; every
-    other style silently ignored swing_ratio entirely. That meant swing
-    only ever worked for two of the eight styles, and a new style added
-    later would silently be swing-deaf unless someone remembered to wire
-    it in by hand. Centralizing it here as a single post-pass (mirroring
-    rhythm.py's apply_swing() for melody, and percussion.py's
-    _apply_swing_to_drums()) means every style gets identical, correct
-    swing behavior automatically, including styles added in the future.
+    Swing lives here as a single post-pass (mirroring rhythm.py's
+    apply_swing() for melody, and percussion.py's _apply_swing_to_drums())
+    rather than inside each style, so every style gets identical, correct
+    swing automatically, including styles added in the future.
 
     Only offbeat-eighth onsets (beat % 1.0 == 0.5, within swing_offset()'s
     tolerance) are ever displaced -- an onset on a whole beat is returned

@@ -48,13 +48,13 @@ def build_harmony_rhythm_context_from_model(
     _explicit_h_rhythm = hr.rhythm if hr is not None else None
     h_source = _explicit_h_rhythm or section.rhythm
 
-    # "motif" is a valid harmony rhythm source again (reintroduced 2026-07,
-    # see schemas.py HarmonyRhythmSourceLiteral) — but only when set
-    # explicitly on the harmony_rhythm block itself. This line still
-    # inherits section.rhythm when harmony_rhythm is absent/unset, and
-    # nearly every melodic section sets rhythm="motif" — letting that
-    # inheritance activate harmony's independent motif mechanism would
-    # reopen the exact back door "motif" was retired for the first time.
+    # "motif" is a valid harmony rhythm source (see schemas.py
+    # HarmonyRhythmSourceLiteral) — but only when set explicitly on the
+    # harmony_rhythm block itself. This line still inherits section.rhythm
+    # when harmony_rhythm is absent/unset, and nearly every melodic section
+    # sets rhythm="motif" — letting that inheritance activate harmony's
+    # independent motif mechanism would make every such section's harmony
+    # follow the motif unintentionally.
     # Coerce the *inherited* case to "free"; the *explicit* case dispatches
     # to _MotifHarmonyStrategy normally.
     if h_source == "motif" and _explicit_h_rhythm != "motif":

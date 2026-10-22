@@ -14,10 +14,7 @@ Motif is defined in theme.json as:
                                      # notes, resolved against the piece's
                                      # mode (NOT semitones) — see
                                      # motif.py's Motif.intervals docstring
-                                     # for the full contract. PENDING as of
-                                     # 2026-08: motif_to_notes below still
-                                     # implements the old semitone contract;
-                                     # this comment states the Phase B target.
+                                     # for the full contract.
     "rhythm":    [1.0, 0.5, 0.5],   # note durations in beats
     "transform_pool": ["inversion", "retrograde", "augmentation"]
   }
@@ -188,11 +185,8 @@ def _sequence_intervals_diatonically(
     Transpose a motif's interval shape by `degree_shift` diatonic scale
     steps (not semitones), snapping each note to the scale.
 
-    PENDING (Phase B): this function currently assumes `intervals` arrives
-    in semitones. Once Motif.intervals natively holds diatonic steps (see
-    that docstring), Phase B2 reuses the same scale_degrees primitives this
-    function now calls — motif_to_notes will walk degree space directly
-    instead of converting semitones to degrees just for this one transform.
+    Note: this function assumes `intervals` arrives in semitones (see
+    Motif.intervals for the diatonic contract motif_to_notes follows).
 
     This is a real/tonal sequence in the Piston sense: the harmony moves by
     some interval (e.g. the descending-fifths vi-ii-v-I chain), and the
@@ -213,7 +207,7 @@ def _sequence_intervals_diatonically(
     so this only needs to get the pitch-class shape right; register
     placement is someone else's job, correctly, downstream.
 
-    Pitch-to-degree conversion (Phase B1) is sequential: each note's degree
+    Pitch-to-degree conversion is sequential: each note's degree
     is resolved relative to the previous note's degree, not independently,
     so a genuine tie (a pitch exactly halfway between two scale degrees)
     breaks toward the small step rather than an accidental octave jump —
@@ -234,19 +228,14 @@ def _sequence_intervals_diatonically(
         degrees.append(d)
         prev_degree = d
 
-    # PRE-EXISTING BUG FIX (found while doing Phase B1, not introduced by
-    # it — the original code had this same defect, just never exercised by
-    # any test): motif_to_notes consumes `intervals` as successive deltas
-    # (each one added cumulatively to a running pitch), the same convention
-    # every other transform in apply_transform already follows. The
-    # previous version here returned offsets-from-the-first-note instead,
-    # which is a different shape entirely once fed through cumulative
-    # addition (verified: produced deltas like 16, 31, 43 on a real motif
-    # instead of small diatonic steps). Fixed by shifting the anchor's own
-    # degree along with every note's, then re-deriving successive deltas
-    # from that shifted reference point — this preserves the motif's shape
-    # exactly the way "sequence" is supposed to (same relative contour,
-    # restated `degree_shift` diatonic steps higher/lower).
+    # motif_to_notes consumes `intervals` as successive deltas (each added
+    # cumulatively to a running pitch), the same convention every other
+    # transform in apply_transform follows. So shift the anchor's own degree
+    # along with every note's, then re-derive successive deltas from that
+    # shifted reference point. This preserves the motif's shape exactly the
+    # way "sequence" is supposed to (same relative contour, restated
+    # `degree_shift` diatonic steps higher/lower). Offsets from the first
+    # note would give wrong deltas under cumulative addition.
     shifted_anchor_pitch = degree_to_pitch(anchor_degree + degree_shift, pcs)
     shifted_pitches = [degree_to_pitch(d + degree_shift, pcs) for d in degrees]
     deltas = []
@@ -272,10 +261,8 @@ def apply_transform(
       retrograde   — reverse the sequence
       augmentation — double all durations (applied to rhythm separately)
       diminution   — halve all durations (applied to rhythm separately)
-      transpose    — shift all intervals by +1 diatonic step (decided,
-                     Phase B3 — was +2 semitones under the old contract;
-                     adds variety; NOT harmony-aware, unlike "sequence"
-                     below)
+      transpose    — shift all intervals by +1 diatonic step (adds
+                     variety; NOT harmony-aware, unlike "sequence" below)
       shuffle      — randomly reorder intervals
       sequence     — diatonic (harmony-aware) restatement at a new scale
                      degree; requires scale_tones + degree_shift from the
@@ -439,10 +426,9 @@ def motif_to_notes(
     generate_subject_entry always passes True; it has no cadence-pull
     mechanism to break.
 
-    intervals: diatonic scale-degree steps (Phase B2 of the diatonic-motif
-    migration — see motif.py's Motif.intervals docstring for the full
-    contract). Each step moves `current` by that many scale-degree
-    positions in `scale_tones`, not semitones — by construction, every
+    intervals: diatonic scale-degree steps (see motif.py's
+    Motif.intervals docstring for the full contract). Each step moves
+    `current` by that many scale-degree positions in `scale_tones`, not semitones — by construction, every
     resulting pitch is a scale tone, so there is no separate quantization
     pass and nothing to erase. This replaces the old behavior (add the
     interval as semitones, then snap the result to the nearest scale tone),
@@ -513,7 +499,7 @@ def motif_to_notes(
 def _position_t_from_context(context: Optional[dict], local_start_beat: float) -> float:
     """
     Melody's normalized position within the SECTION (not just the current
-    chord), for apex/cadence bias (Phase 2 of the apex/goal-tone build).
+    chord), for apex/cadence bias.
 
     generate_lyrical/generate_develop/etc. are called per-CHORD with
     rhythm_events expressed in chord-LOCAL beat coordinates (first onset
@@ -609,7 +595,7 @@ def _pick_start_note(chord_tones: list[int], scale_tones: list[int], prev_note: 
 
 
 # ---------------------------------------------------------------------------
-# melody_engine "v2": scored note chooser (2026-10)
+# melody_engine "v2": scored note chooser
 #
 # v1's generative/lyrical behaviors pick each note by rng.choice over a
 # candidate pool -- a memoryless random walk. Measured on rendered MIDI
@@ -630,9 +616,9 @@ def _pick_start_note(chord_tones: list[int], scale_tones: list[int], prev_note: 
 #   * last onset of a chord leans toward the next chord's tones
 #   * mild pull back toward register center when hugging a wall
 #
-# Opt-in via VoiceModel.melody_engine = "v2" (default "v1": byte-identical
-# to before this existed). Not applied to sparse (rest-dominated, wide by
-# design) or develop (motif-derived; its quality is set by the motif).
+# Opt-in via VoiceModel.melody_engine = "v2" (default "v1", unchanged).
+# Not applied to sparse (rest-dominated, wide by design) or develop
+# (motif-derived; its quality is set by the motif).
 # ---------------------------------------------------------------------------
 
 # Weight by scale-degree distance from the current note.
@@ -768,7 +754,7 @@ def _v2_choose(
 
 
 # ---------------------------------------------------------------------------
-# Phrase restatement (2026-10) -- opt-in, melody_engine "v2" only
+# Phrase restatement -- opt-in, melody_engine "v2" only
 #
 # v2 fixes how single notes are chosen but gives a listener nothing to
 # recognize: every chord is generated independently, so no pitch shape ever
@@ -909,12 +895,12 @@ def generate_generative(
     """
     Freely picks notes from weighted pool of chord + scale tones.
 
-    Apex/goal-tone bias (Phase 3 of the apex/goal-tone build): when
+    Apex/goal-tone bias: when
     context["melodic_arc"] is present with an "apex_degree", the
     proximity-filtered candidate pool below is additionally weighted
     toward the declared apex before apex_position, and away from it
     after — see melodic_shape.apex_weighted_candidates. Absent
-    melodic_arc, behavior is byte-identical to before this existed.
+    melodic_arc, behavior is unchanged.
 
     Cadence pull is new here, not a generalization of an existing
     mechanism the way it was for generate_lyrical (which already had an
@@ -1000,24 +986,24 @@ def generate_lyrical(
     """
     Stepwise motion, gravitates toward chord tones, longer phrases.
 
-    Apex/goal-tone bias (Phase 2 of the apex/goal-tone build): when
+    Apex/goal-tone bias: when
     context["melodic_arc"] is present with an "apex_degree", this
     behavior's previously-aimless per-note coin flip (`direction =
     rng.choice([-1, 1])`) is replaced by a purposeful bias toward the
     declared apex before apex_position, and away from it (settling)
     after — see melodic_shape.apex_weighted_candidates. Absent
-    melodic_arc, behavior is byte-identical to before this existed: same
+    melodic_arc, behavior is unchanged: same
     coin flip, same everything.
 
-    Cadence pull layers on top, independently: at whichever chord Phase
-    0's cadence decision marks as cadential (context["is_cadential_chord"]),
+    Cadence pull layers on top, independently: at whichever chord is
+    marked cadential (context["is_cadential_chord"]),
     the final note is additionally weighted toward that chord's root —
     generalizing the existing next-chord-tone extension below (which stays
     unconditional; it's a different, always-useful thing: smooth
     voice-leading into whatever comes next, not a harmonic arrival).
 
-    Skip-degree leap (2026-08): context["leap_probability"] (default 0.0,
-    absent context also 0.0 — byte-identical to before this existed) is a
+    Skip-degree leap: context["leap_probability"] (default 0.0,
+    absent context also 0.0 — no leaps) is a
     per-note chance to additionally offer the 2-scale-degree-away tones
     (see _skip_degree_candidates) alongside the normal stepwise/chord-
     adjacent pool. Exists because this behavior's stepwise/chord_nearby
@@ -1123,15 +1109,12 @@ def generate_sparse(
     """
     Wide intervals, few notes, lots of space. Very ambient.
 
-    Decoupled (2026-07): rest_probability used to be absorbed into this
-    behavior's own onset-thinning via `max(0.10, 0.40 - rest_probability)`.
-    That mixed two concerns into one number and, worse, silently collapsed:
-    every rest_probability >= 0.30 floored at the same 0.10 play rate, so a
-    section arc that graduates rest_probability upward (e.g. 0.5 -> 0.6 ->
-    0.85 -> 0.9 across a dissolve) produced IDENTICAL melody density at
-    every step instead of actually thinning further.
+    rest_probability is kept separate from this behavior's own scarcity,
+    so a section arc that graduates rest_probability upward (e.g. 0.5 ->
+    0.6 -> 0.85 -> 0.9 across a dissolve) keeps thinning the melody at
+    every step instead of flooring at one play rate.
 
-    Now rest_probability is the same flat per-onset filter every other
+    rest_probability is the same flat per-onset filter every other
     behavior (generative/lyrical/develop) already uses, applied first.
     SPARSE_PLAY_PROBABILITY governs only this behavior's own baked-in
     scarcity, applied independently to whatever onsets survive that filter.
@@ -1141,9 +1124,8 @@ def generate_sparse(
     matching the other three behaviors' contract instead of floor-locking
     at 10% no matter how high rest_probability climbs.
 
-    Apex/goal-tone bias (Phase 5 of the apex/goal-tone build, wired for
-    consistency across all four behaviors — the LAST of the four, and
-    deliberately given less confidence than the others): when
+    Apex/goal-tone bias (wired for consistency across all four
+    behaviors, with less confidence than the others): when
     context["melodic_arc"] is present, this behavior's uniform
     "chord tone anywhere in register" choice gets the same
     apex_weighted_candidates/cadence_weighted_candidates treatment as
@@ -1214,24 +1196,13 @@ def generate_develop(
     Builds the melody FROM the motif, using transforms for variety across
     repetitions. Falls back to generative if no motif provided.
 
-    Rewritten (2026-07): the previous version built exactly one statement
-    of the (transformed) motif per chord and let every onset past the end
-    of that single statement fall through to unrelated rng.choice(chord_tones)
-    filler. For any chord whose rhythm grid spans more than one motif cycle
-    — the common case, since rhythm="motif" tiles the cycle across the
-    whole section — that meant the overwhelming majority of "develop"
-    notes were never motif-derived at all (measured: 87.5% filler on a
-    64-beat chord against an 8-beat cycle). That's not development, it's a
-    single quotation followed by unrelated noise wearing its label.
-
-    Now: the motif is retiled, once per full cycle, for as many
+    The motif is retiled, once per full cycle, for as many
     repetitions as the chord's onset grid requires. Each repetition picks
     its own transform independently (never the same transform as the
     immediately preceding repetition, when the pool has more than one
-    option) — this is the "variety" half of the request: real developing
-    variation restates the cell continuously, changing how each time,
-    rather than reaching for unrelated material once the first statement
-    runs out.
+    option) — real developing variation restates the cell continuously,
+    changing how each time, rather than reaching for unrelated material
+    once the first statement runs out.
     """
     if motif is None or not motif.get("intervals"):
         return generate_generative(
@@ -1255,17 +1226,11 @@ def generate_develop(
         """One retransformed pass of the motif, avoiding an immediate repeat
         of the previous repetition's transform when the pool allows it.
 
-        Unified (Finding 0, scoped separately from Phase C): previously this
-        called three independent functions -- apply_transform (pitch),
-        apply_rhythm_transform (rhythm), apply_rests_transform (rests) --
-        none of which recognized transpose_up/transpose_down/
-        retrograde_inversion/expand/compress, all of which are valid
-        TransformLiteral schema values. Any pool containing one of those
-        silently did nothing when chosen: no error, no log, just an
-        unchanged repetition indistinguishable from a deliberate one. Now
-        routes through motif.py's transform() -- the canonical, complete
-        implementation already used by the piece-level transform_sequence
-        mechanism -- for every transform except two that transform() can't
+        Routes through motif.py's transform() -- the canonical, complete
+        implementation also used by the piece-level transform_sequence
+        mechanism, and the one that recognizes every TransformLiteral value
+        (transpose_up/transpose_down/retrograde_inversion/expand/compress
+        included) -- for every transform except two that transform() can't
         (or, for one of them, must not) handle:
 
         - "sequence": harmony-aware (needs scale_tones + degree_shift from
@@ -1276,26 +1241,15 @@ def generate_develop(
           ValueError("Unknown transform: 'original'") -- it has no no-op
           case, because motif.py's other caller (the piece-level
           transform_sequence mechanism) handles "original" as a sentinel
-          BEFORE ever calling transform(), not inside it. Here, the only
-          reason "original" appearing in a transform_pool has ever worked
-          is that the OLD three-function split's fallthrough (`else:
-          return list(intervals)`) happened to produce the right answer by
-          accident. That fallthrough is exactly what's being removed, so
-          "original" needs its own explicit no-op case now, or a piece
-          using it in transform_pool would start crashing instead of
-          silently working -- a real regression risk, caught during
-          scoping, not after.
+          BEFORE ever calling transform(), not inside it. So here "original"
+          needs its own explicit no-op case, or a piece using it in
+          transform_pool would crash.
 
-        A real, deliberate behavior change from unifying (not a bug in
-        this change): motif.py's shuffle reorders intervals+rhythm+rests
-        TOGETHER as one paired shuffle. The old split-call approach
-        couldn't do that -- neither apply_transform nor
-        apply_rhythm_transform had a "shuffle" case for rhythm/rests, so
-        pitch reordered while rests stayed in original position: the
-        WRONG notes could end up treated as the ones to skip. This is
-        NOT an audible-duration change, though -- generate_develop always
-        takes a note's actual duration from the external rhythm_events
-        grid (see the final MelodyNote construction below: `note, _ =
+        motif.py's shuffle reorders intervals+rhythm+rests TOGETHER as one
+        paired shuffle, so a rest stays attached to its own note rather than
+        to a position. This does not change audible duration --
+        generate_develop always takes a note's actual duration from the
+        external rhythm_events grid (see the final MelodyNote construction below: `note, _ =
         motif_notes[statement_idx]` discards the motif's own rhythm
         value explicitly). The observable consequence of correct pairing
         here is which pitches survive a rest-bearing motif's shuffle, not
@@ -1482,17 +1436,16 @@ def generate_develop(
                         max_step_degrees=REGISTER_WALL_MAX_STEP,
                     )
 
-            # Apex/cadence bias (Phase 4 of the apex/goal-tone build).
+            # Apex/cadence bias.
             # develop has no per-note candidate list to weight the way
             # lyrical/generative do -- motif_to_notes builds each
             # retiled statement deterministically from wherever the
             # anchor sits, so bias here means nudging THIS anchor before
             # the statement gets built from it, cascading through every
-            # note of the next statement. See melodic_shape.py's Phase 4
-            # module note for why this is directed_anchor_shift, not
+            # note of the next statement. See melodic_shape.py's module note
+            # for why this is directed_anchor_shift, not
             # apex_weighted_candidates. Absent melodic_arc, `anchor` is
-            # completely unchanged from before this phase existed --
-            # both branches below (normal and augmentation/diminution)
+            # unchanged -- both branches below (normal and augmentation/diminution)
             # consume whatever `anchor` holds without needing to know
             # whether it was shifted.
             if apex_pitch is not None:
@@ -1690,11 +1643,10 @@ def generate_melody(
     if behavior not in BEHAVIOR_GENERATORS:
         raise ValueError(f"Unknown behavior: '{behavior}'. Choose from {list(BEHAVIOR_GENERATORS.keys())}.")
 
-    # Phase B4: a motif can declare its own melodic_scale, independent of
+    # A motif can declare its own melodic_scale, independent of
     # the piece's harmonic mode (e.g. a blues/pentatonic melody scale over
     # ordinary diatonic I-IV-V7 harmony). Falls back to the piece's mode
-    # when absent -- every motif without this field behaves exactly as
-    # before it existed. Chord/Roman-numeral resolution is untouched by
+    # when absent. Chord/Roman-numeral resolution is untouched by
     # this: chords are already resolved (VoicedChord objects passed in)
     # using the piece's true mode before generate_melody ever runs, so
     # this only ever affects which scale the MELODY line is quantized to.
@@ -1857,8 +1809,8 @@ def generate_melody_for_progression(
             previous_melody, which reflects a DIFFERENT preceding section
             for the repeat than it did for the first occurrence.
         arc: The section's declared arc (used only for the opening bias).
-        melodic_arc: Optional apex/goal-tone config (Phase 2 of the
-            apex/goal-tone build — see melodic_shape.py), e.g.
+        melodic_arc: Optional apex/goal-tone config (see
+            melodic_shape.py), e.g.
             {"apex_degree": 4, "apex_position": 0.7}. Absent (the
             default) means no apex or cadence bias at all — every call
             site that doesn't pass this behaves exactly as before this
@@ -1866,8 +1818,7 @@ def generate_melody_for_progression(
             lyrical, sparse, develop) — see schemas.py's MelodicArcModel
             docstring for the same fact stated the correct way.
         progression_cycle_length: The ORIGINAL (untiled) progression
-            length, for cadence detection (Phase 0's "resolve every
-            cycle" decision) — REQUIRED if melodic_arc's
+            length, for cadence detection — REQUIRED if melodic_arc's
             resolve_every_cycle is True, since `chords` here is already
             tiled (see resolved_progression() in schemas.py) and carries
             no memory of how long one repeat was. resolve_every_cycle
@@ -1891,8 +1842,8 @@ def generate_melody_for_progression(
     else:
         bpc_list = list(bars_per_chord)
 
-    # Section-wide bar count, for apex/cadence bias's position_t (Phase 2
-    # of the apex/goal-tone build) -- matches generator.py's
+    # Section-wide bar count, for apex/cadence bias's position_t -- matches
+    # generator.py's
     # env_total_bars = max(1, int(round(total_beats / beats_per_bar)))
     # rounding convention exactly, so melody's dynamic-arc position and
     # its apex-bias position agree on what "N bars" means for this
@@ -1900,7 +1851,7 @@ def generate_melody_for_progression(
     # (already unified via rhythm.section_position_t).
     section_total_bars = max(1, int(round(sum(bpc_list))))
     # resolve_every_cycle is the single, actually-functional toggle here
-    # (Phase 0's cadence decision) -- not a separate cycle_length knob a
+    # -- not a separate cycle_length knob a
     # caller could set inconsistently with what melodic_arc declares.
     # progression_cycle_length is only consulted when resolve_every_cycle
     # is explicitly True; otherwise cadence always means "the section's
@@ -2064,7 +2015,7 @@ def generate_melody_for_progression(
             # actual range instead of the global melody default.
             "octave_bottom": octave_bottom,
             "octave_top": octave_top,
-            # Apex/goal-tone bias (Phase 2 of the apex/goal-tone build).
+            # Apex/goal-tone bias.
             # melodic_arc itself is just handed through unchanged; the
             # three fields below let a behavior function compute this
             # note's position_t via _position_t_from_context() without
@@ -2076,8 +2027,8 @@ def generate_melody_for_progression(
             "section_total_bars": section_total_bars,
             "section_beat_offset": beat_offset,
             "beats_per_bar": beats_per_bar,
-            # True exactly at the chord(s) Phase 0's cadence decision
-            # identifies as cadential: every effective_cycle_length-th
+            # True exactly at the chord(s) identified as cadential: every
+            # effective_cycle_length-th
             # chord. effective_cycle_length == len(chords) (the default,
             # cycle_length not passed) means this fires ONCE, on the
             # section's true final chord only -- a vamp/loop keeps its
@@ -2089,7 +2040,7 @@ def generate_melody_for_progression(
             # the one place that decision is made, so every behavior's
             # notion of "is this cadential" means the same thing.
             "is_cadential_chord": (i % effective_cycle_length) == (effective_cycle_length - 1),
-            # 2026-08: see generate_lyrical's docstring / VoiceModel's
+            # See generate_lyrical's docstring / VoiceModel's
             # leap_probability field. Default 0.0 -- no-op unless a caller
             # explicitly passes a nonzero value through this function.
             "leap_probability": leap_probability,

@@ -30,7 +30,7 @@ from intervals.music.melody import MelodyNote
 from intervals.music.rhythm import get_pattern
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    pass  # (CounterpointModel import retired 2026-09)
+    pass
 
 # ---------------------------------------------------------------------------
 # Interval classification
@@ -814,15 +814,15 @@ def generate_free_species(
     total_beats = max(n.start_beat + n.duration_beats for n in melody_notes)
 
     # ── 1. Generate this voice's own rhythm grid, independent of the melody ──
-    # rhythm_events_override (item MT-1): when the generator supplies a
+    # rhythm_events_override: when the generator supplies a
     # pre-tiled RhythmEvent list — this VOICE's own assigned motif, tiled via
     # _motif_rhythm_to_events, the same shared primitive melody and harmony
     # use — it REPLACES the density/groove grid below. This is the only thing
     # a counterpoint voice takes from a motif: its rhythm. Pitch selection in
     # the loop below is untouched by this branch — the loop reads only
     # ev.start_beat from whichever grid it gets, never any pitch information,
-    # so consonance/voice-leading stays fully rule-driven either way (MT-1
-    # decision (i): rhythm only, never pitch). Matches generate_bass /
+    # so consonance/voice-leading stays fully rule-driven either way (rhythm
+    # only, never pitch). Matches generate_bass /
     # generate_melody_for_progression, which already accept an override on
     # the same terms.
     rhythm_seed = seed if seed is not None else rng.randint(0, 10_000_000)
@@ -1070,9 +1070,6 @@ def generate_counterpoint(
     Returns:
         List of CounterpointNote
     """
-    # cp_model was removed 2026-09 along with CounterpointModel — callers
-    # pass every field explicitly now, which is what generator.py's
-    # voices[] path already did.
 
     if species == "first":
         return generate_first_species(

@@ -50,7 +50,7 @@ MODES = {
     "whole_tone":      [0, 2, 4, 6, 8, 10],      # all whole steps — Debussy, dreamy
     "diminished":      [0, 2, 3, 5, 6, 8, 9, 11],# alternating whole/half — tension
     "augmented_hexatonic":[ 0, 3, 4, 7, 8, 11],
-    # 2026-08: four new modes, added for the drone_blues / gamelan exploration.
+    # Four non-heptatonic modes, for drone and gamelan-style material.
     # Non-heptatonic (6 or 5 notes) — see the ROMAN NUMERAL CAVEAT note below
     # before writing progressions in these modes.
     "pelog":     [0, 2, 3, 6, 7, 9],       # hexatonic, gapped wide leaps — not
@@ -651,21 +651,15 @@ def _clamp_preserving_pitch_class(candidate: int, pc: int, floor: int, ceiling: 
     class -- steps by whole octaves rather than snapping to the boundary
     value directly.
 
-    STANDALONE BUG FIX, unrelated to tensions or Phase 3: the "open"
-    voicing algorithm below has always clamped an overflowing candidate
-    with plain `max(floor, min(ceiling, candidate))`. When a computed
-    slot genuinely overshoots (enough upper voices + a modest register --
-    no tensions required to trigger it), that naive clamp silently
-    substitutes WHATEVER pitch class the boundary happens to be, which
-    can duplicate an existing tone's pitch class while dropping the
-    tone that was supposed to be there entirely -- corrupted harmonic
-    content with no error, no warning. Reproduced on a plain 6-tone
-    chord with zero tensions involved, so this predates today's tension
-    work; only found because Phase 3's testing pushed harder on "open"
-    voicing's headroom limits than any prior test had. Now used
-    unconditionally in the "open" base algorithm (not just the tension
-    repair pass) since a wrong pitch class is a correctness bug
-    regardless of whether the chord happens to carry a tension.
+    Used unconditionally in the "open" base algorithm (not just the
+    tension repair pass): plain `max(floor, min(ceiling, candidate))`
+    clamping an overflowing candidate (enough upper voices + a modest
+    register -- no tensions required) silently substitutes WHATEVER pitch
+    class the boundary happens to be, which can duplicate an existing
+    tone's pitch class while dropping the tone that was supposed to be
+    there -- corrupted harmonic content with no error, no warning. A wrong
+    pitch class is a correctness bug regardless of whether the chord
+    carries a tension.
 
     If no in-range octave of this pitch class exists (a genuinely narrow
     register), returns the closest in-range value even if that means
@@ -845,7 +839,7 @@ def spread_voicing(
         if headroom <= 0 or n == 0:
             base = voiced
         else:
-            # Otherwise identical to the original algorithm -- only the
+            # Otherwise identical to the previous algorithm; only the
             # clamp changed, from a plain numeric clamp (which could
             # silently corrupt a pitch class on overflow) to
             # _clamp_preserving_pitch_class (see its docstring: a
@@ -1162,7 +1156,7 @@ if __name__ == "__main__":
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# Harmony chord-event generation — relocated from strategies.py (item 9, ST-2a)
+# Harmony chord-event generation
 # ═════════════════════════════════════════════════════════════════════════════
 #
 # Everything below was in intervals/core/strategies.py. It moved here because
@@ -1460,9 +1454,9 @@ class _PatternHarmonyStrategy(HarmonyStrategy):
 
 class _MotifHarmonyStrategy(HarmonyStrategy):
     """
-    Harmony source: "motif" — reintroduced 2026-07 as an independent
-    per-section onset stream (see the HarmonyRhythmSourceLiteral comment
-    in schemas.py for the full history/design rationale).
+    Harmony source: "motif" — an independent per-section onset stream
+    (see the HarmonyRhythmSourceLiteral comment in schemas.py for the
+    design rationale).
 
     generator.py's generate_section() resolves harmony's own motif
     (harmony_rhythm.motif, falling back to the section's active theme
@@ -1648,7 +1642,7 @@ def build_harmony_chord_context(
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# Section-level rhythm source resolution — relocated from generator.py (item 9, ST-2b)
+# Section-level rhythm source resolution
 # ═════════════════════════════════════════════════════════════════════════════
 #
 # This is harmony's other rhythm decision, distinct from build_harmony_chord_context
@@ -1741,8 +1735,7 @@ def resolve_harmony_section_events(
                           f"({len(harmony_pattern['onsets'])} onsets)")
             return events, "\n".join(lines)
         # harmony_rhythm.rhythm == "pattern" but no harmony_pattern block was
-        # supplied. Original switchboard fell all the way through with no
-        # events, no print, no error — same here.
+        # supplied: no events, no print, no error.
         return None, ("\n".join(lines) if lines else None)
 
     if source == "motif":
@@ -1757,7 +1750,7 @@ def resolve_harmony_section_events(
                 f"(neither harmony_rhythm.motif nor the theme's motif)"
             )
 
-        # item 17 / ST-5: "strict" (harmony inherits melody's transform
+        # "strict" (harmony inherits melody's transform
         # choice each repetition) is not yet implemented. Raising here
         # rather than silently falling back to independent selection or
         # ignoring the field -- exactly the silent-no-op failure mode this
@@ -1776,7 +1769,7 @@ def resolve_harmony_section_events(
         # density selects onset articulation — full/stressed/anchor, the same
         # subsetting _motif_rhythm_to_events already offers melody and bass —
         # so density has a real, audible effect here instead of being
-        # silently ignored the way the retired version left it. groove is
+        # silently ignored. groove is
         # intentionally NOT consulted: the motif cell already IS the rhythm,
         # same as melody's "motif" rhythm source. lint.py flags
         # harmony_rhythm.groove set alongside this as a no-op.
@@ -1793,7 +1786,7 @@ def resolve_harmony_section_events(
         # window; _MotifHarmonyStrategy consumes those slices exactly like
         # _PatternHarmonyStrategy does.
         #
-        # item 17 / ST-5 fix: each cycle of the tile now gets its own
+        # Each cycle of the tile gets its own
         # independently-chosen transform from the motif's transform_pool
         # (empty/absent pool degrades to exactly the old verbatim-tiling
         # behavior — see _motif_rhythm_to_events_varied's own docstring),

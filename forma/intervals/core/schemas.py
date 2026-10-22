@@ -65,7 +65,7 @@ BassStyleLiteral   = Literal[
     "root_fifth", "walking", "pedal", "root_only",
     "melodic", "steady", "pulse", "motif",
 ]
-# "none" (2026-10) is the explicit opt-out from dynamic shaping: velocities
+# "none" is the explicit opt-out from dynamic shaping: velocities
 # render exactly as authored. Unlike "plateau" it also skips the blend-in from
 # the previous section's ending level and harmony's 40-120 clamp. The schema
 # DEFAULT for SectionModel.arc stays "swell" so existing pieces are unchanged.
@@ -74,16 +74,13 @@ ArcLiteral         = Literal[
     "fade_in", "fade_out", "breath", "none",
 ]
 RhythmSourceLiteral        = Literal["motif", "pattern", "free"]
-# "motif" was retired from harmony_rhythm.rhythm for one release (2026-07)
-# because the old implementation never built independent harmony content:
-# it silently borrowed melody's motif rhythm verbatim (filtered to
-# "stressed" onsets) and ignored this block's own density/groove fields,
-# since _motif_rhythm_to_events took neither.
+# rhythm == "motif" builds independent harmony content: it does not borrow
+# melody's motif rhythm, and it honours this block's own density and groove.
 #
-# Reintroduced (2026-07, same release) as a real, independent mechanism:
+# How it works:
 #   - harmony_rhythm.motif names its own motif (string ref or embedded
 #     dict), independent of melody's. Omitted -> falls back to the
-#     section's active theme motif, same as before this field existed.
+#     section's active theme motif.
 #   - The motif's rhythm cell is tiled across the WHOLE SECTION as one
 #     continuous onset stream, then sliced per chord window (see
 #     generator.py's _enrich_chords_with_rhythm / strategies.py
@@ -109,22 +106,17 @@ CounterpointSpeciesLiteral  = Literal["free", "first", "second", "third", "fourt
 CounterpointRegisterLiteral = Literal["above", "below"]
 DissonanceLiteral           = Literal["none", "passing", "neighbor", "free"]
 # Grooves are a fixed onset-accent vocabulary defined in rhythm.py's GROOVES
-# dict (verified against source 2026-07). groove was previously plain str
-# at all four of its locations (section, harmony_rhythm, counterpoint,
-# drums) — schema-legal for any typo, only caught (as "Unknown groove:
-# '...'") deep in rhythm.py at render time. Literal-typing it here closes
-# that gap the same way every other music-vocabulary field in this file
-# already is; keep this list in sync with rhythm.py's GROOVES keys by hand
-# (no import — schemas.py doesn't depend on the render modules, matching
-# this file's existing direction of dependency).
+# dict. Literal-typed so a typo fails at validation, not deep in rhythm.py at
+# render time. Keep this list in sync with GROOVES by hand: this file does not
+# import the render modules.
 GrooveLiteral = Literal[
     "straight", "push", "backbeat", "syncopated", "halftime",
     "shuffle", "broken", "clave", "waltz", "offbeat", "driving",
 ]
 # Harmony chord voicing shape — how the pad's tones are arranged in pitch
 # space, independent of which inversion carries the bass note. "closed"
-# is every piece's behavior before this field existed (tight cluster
-# within one octave above the bass note); "open"/"drop2" are real
+# is the default (tight cluster within one octave above the bass note);
+# "open"/"drop2" are real
 # arranging techniques, not decorative aliases — see harmony.py's
 # spread_voicing() docstring for what each actually does to the chord.
 VoicingLiteral = Literal["closed", "open", "drop2"]
@@ -141,7 +133,7 @@ VoiceRegisterLiteral        = Literal[
     "high", "mid", "low_mid", "low",
 ]
 
-# "above" / "below" were accepted as voice registers until 2026-10. They had
+# "above" / "below" were once accepted as voice registers. They had
 # no fixed band: a voice using one stretched across the melody's whole span
 # plus margins (~30 semitones, three octaves), which let counterpoint lines
 # leap between registers (measured on piece_eno: 29-semitone jumps) -- while
@@ -158,7 +150,7 @@ REMOVED_RELATIVE_REGISTERS = ("above", "below")
 # it's given (motif_to_notes octave-folds into [octave_bottom, octave_top]
 # with no center-weighting), so the box's width IS the piece's effective
 # melodic range, not a ceiling that's rarely touched. Narrowing directly
-# caps that. Centers are unchanged from the original 24-semitone version, so
+# caps that. Centers are unchanged, so
 # nothing shifted relative to another voice's center — soprano is still
 # centered on C5, tenor still on C4, etc. — only each wall moved 3
 # semitones closer to its own center.
@@ -169,13 +161,10 @@ REGISTER_BOUNDS: dict[str, tuple[int, int]] = {
     "tenor":    (51, 69),   # D#3–A4, centered C4
     "baritone": (46, 64),   # A#2–E4, centered G3
     "bass":     (39, 57),   # D#2–A3, centered C3
-    # Legacy aliases. "high" and "low" were always distinct boxes; "mid"
-    # and "low_mid" used to be exact duplicates of soprano/tenor (dead
-    # names, not real choices) -- now genuinely between their SATB
-    # neighbors, so all nine names are distinct usable positions instead
-    # of six. This changes the rendered pitch of any existing piece using
-    # melody/voice register: "mid" or "low_mid" -- deliberately, per the
-    # goal of making the existing catalog sound less uniform.
+    # Legacy aliases, kept so existing pieces validate. "mid" and "low_mid"
+    # sit between their SATB neighbours, so all nine names are distinct
+    # positions. Pieces using "mid" or "low_mid" render at different pitches
+    # than they once did.
     "high":     (67, 85),   # G4–C#6, centered E5
     "mid":      (60, 78),   # C4–F#5, centered A4  (between alto and soprano)
     "low_mid":  (48, 66),   # C3–F#4, centered A3  (between baritone and tenor)
@@ -268,21 +257,11 @@ class HarmonyRhythmModel(BaseModel):
     # 0.5-straight scale apply_swing()/_apply_swing_to_drums() consume.
     swing:         Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
-    # Item 17 / ST-5: harmony's motif rhythm used to tile the exact same
-    # cell verbatim across a whole section -- untransformed clones, no
-    # variation. Default (None): harmony picks its own transform each
-    # repetition, independently, from the motif's transform_pool -- this is
-    # "free imitation" in counterpoint-theory terms (voices vary
-    # independently), so it needs no literal value of its own; absence
-    # already means it. "strict" opts INTO "strict imitation" instead --
-    # harmony inherits melody's transform choice each repetition and
-    # reapplies it to its own comping shape, staying in lockstep.
-    #
-    # RETIRED 2026-09: `transform_imitation` was schema-legal with exactly
-    # one accepted value ("strict") whose only implementation was a
-    # ValueError. Absence already meant free imitation, so the field could
-    # never do anything but crash. Removed; reintroduce it the day strict
-    # imitation actually renders.
+    # Harmony picks its own transform on each repetition, independently, from
+    # the motif's transform_pool ("free imitation"). Absence is that default,
+    # so there is no field for it. A "strict" option (harmony inheriting
+    # melody's transform each repetition) was removed: it had no working
+    # implementation. Reintroduce it only once it renders.
 
 class NoteLengthRangeModel(BaseModel):
     """
@@ -473,10 +452,10 @@ class VoiceModel(BaseModel):
     dissonance: DissonanceLiteral                           = "passing"
     canon_offset: Annotated[float, Field(ge=0.0)]           = 0.0
 
-    # 2026-08: opt-in, defaults to 0.0 (byte-identical to pre-existing
-    # behavior). Per-note probability that "lyrical" behavior considers a
+    # Opt-in, defaults to 0.0 (byte-identical to the previous behavior).
+    # Per-note probability that "lyrical" behavior considers a
     # skip-a-degree leap (2 scale-degree steps) instead of only its normal
-    # stepwise/chord-adjacent motion. Added because generate_lyrical's
+    # stepwise/chord-adjacent motion. It exists because generate_lyrical's
     # candidate filter was hardcoded to <=3/<=5 semitones regardless of
     # mode, which meant non-heptatonic modes (pelog, hirajoshi, insen,
     # etc.) never got to show the wide "gap" leaps that are their actual
@@ -487,8 +466,8 @@ class VoiceModel(BaseModel):
     # develop reads motif intervals literally and ignores this field).
     leap_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
-    # 2026-10: opt-in melody note chooser. "v1" (default) is the original
-    # memoryless pick -- output byte-identical to before this field existed.
+    # Opt-in melody note chooser. "v1" (default) is the original memoryless
+    # pick and is unchanged.
     # "v2" scores each candidate on scale-degree proximity, direction
     # persistence, leap recovery, anti-wobble, and chord-tone placement on
     # strong beats (see melody.py _v2_choose). Consumed by "generative" and
@@ -496,7 +475,7 @@ class VoiceModel(BaseModel):
     # None (default) inherits the piece-level melody_engine (itself default "v1").
     melody_engine: Optional[Literal["v1", "v2"]] = None
 
-    # 2026-10: phrase restatement for melody_engine "v2" (see melody.py's
+    # Phrase restatement for melody_engine "v2" (see melody.py's
     # _derive_phrase_chord). phrase_form is a letter pattern, e.g. "aaba":
     # chords are grouped phrase_chords at a time, the first phrase of each
     # letter is generated fresh and later ones are re-derived from it
@@ -525,10 +504,8 @@ class VoiceModel(BaseModel):
     # Per-voice rest probability (overrides section default when set)
     rest_probability: Optional[Annotated[float, Field(ge=0.0, le=1.0)]] = None
 
-    # ── Absorbed from the retired CounterpointModel (2026-09) ───────────
-    # These three were the only fields CounterpointModel carried that
-    # VoiceModel didn't, so they move here verbatim to make the
-    # counterpoint[] -> voices[] migration lossless. All three are free
+    # ── Counterpoint fields ─────────────────────────────────────────────
+    # All three are free
     # species only: "first" species is note-against-note with the cantus
     # firmus by classical convention and ignores them, and a melody-path
     # voice (species absent) takes its grid from the section.
@@ -538,9 +515,8 @@ class VoiceModel(BaseModel):
     # in-range independently; when None it inherits section.note_length_range.
     note_length_range: Optional[NoteLengthRangeModel]   = None
 
-    # Independent per-voice rhythm override (2026-08). Consumed by every
-    # melody-path voice in voices[] (wired 2026-09, when second_melody was
-    # folded into voices[] — before that it was read only there). When set,
+    # Independent per-voice rhythm override. Consumed by every melody-path
+    # voice in voices[]. When set,
     # this voice's rhythm is computed once via
     # rhythm_pattern_to_events() tiled across the FULL section length (not
     # reset per chord/bar), exactly like harmony_pattern already works —
@@ -922,13 +898,9 @@ class SectionModel(BaseModel):
     key:  Optional[str] = None
     mode: Optional[str] = None
 
-    # RETIRED 2026-09: section-level `motif`/`motifs` were never read at
-    # render time — only the theme's motif pool was ever consulted, so a
-    # section override did nothing at all (lint.py's
-    # _check_section_motif_override existed solely to say so). Removed
-    # rather than wired up: per-voice `voices[].motif` already covers the
-    # real use case with clearer scope. Rejected loudly by
-    # _reject_retired_fields below.
+    # Section-level `motif`/`motifs` are rejected: they were never read at
+    # render time. Per-voice `voices[].motif` covers the real use case.
+    # _reject_retired_fields below enforces this.
 
     # ── Harmony / progression ─────────────────────────────────────────────────
     progression:   list[str]          = Field(min_length=1)
@@ -942,9 +914,8 @@ class SectionModel(BaseModel):
     # default 'mid' register (60-81). Dict form: same shape as a voices[]
     # entry ({behavior, register, velocity, ...}) — lets the lead line get
     # an explicit register without needing the full voices array wrapper.
-    # Plain behavior-string shorthand for the lead voice. The dict/VoiceModel
-    # arm was RETIRED 2026-09 — a lead that needs its own register, velocity,
-    # motif or rhythm is voices[0], the same as every other voice.
+    # Plain behavior-string shorthand for the lead voice. A lead that needs its
+    # own register, velocity, motif or rhythm is voices[0], like every other voice.
     melody:     MelodyLiteral    = "generative"
     bass_style: BassStyleLiteral = "root_fifth"
     arc:        ArcLiteral       = "swell"
@@ -956,7 +927,7 @@ class SectionModel(BaseModel):
     harmony_pattern: Optional[RhythmPatternModel] = None
 
     # Melody pitch-source strategy when rhythm == "motif" and the theme has
-    # more than one motif in its pool (item MT-3). Default (None): pitch is
+    # more than one motif in its pool. Default (None): pitch is
     # PINNED to the same motif driving the rhythm — one motif, fully
     # committed, both dimensions. "isorhythmic" opts INTO the previously-
     # unreconciled behavior where rhythm stays anchored to one motif while
@@ -988,10 +959,10 @@ class SectionModel(BaseModel):
     # or a "pattern"/"motif" rhythm source (lint flags both).
     note_length_range: Optional[NoteLengthRangeModel]           = None
 
-    # Apex/goal-tone phrase shaping (Phase 6 of the apex/goal-tone build).
+    # Apex/goal-tone phrase shaping.
     # See MelodicArcModel's docstring for the full contract, including the
     # documented sparse caveat. Optional; absent means every section
-    # behaves exactly as before this feature existed.
+    # behaves as if this field were not set.
     melodic_arc: Optional[MelodicArcModel] = None
 
     # ── Per-voice rest probability (independent of melody rest_probability) ────
@@ -1008,10 +979,9 @@ class SectionModel(BaseModel):
     harmony_rest_probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
     bass_rest_probability:    Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
 
-    # ── Hand-set base velocities for the two voices that had none (2026-10) ────
-    # Melody (voices[].velocity), extra voices and drums were already
-    # hand-settable; harmony was fixed at 65 and bass at 70. Unset (None) keeps
-    # exactly those values, so existing pieces render byte-identically.
+    # ── Hand-set base velocities for harmony and bass ─────────────────────
+    # Unset (None) keeps the defaults (harmony 65, bass 70), so existing pieces
+    # render byte-identically.
     #   harmony_velocity: the base every harmony note is scaled from. The
     #     "sustain" source scales by 1.0, so with arc: "none" each note is
     #     exactly this value. "pattern" / "motif" sources multiply it by their
@@ -1040,7 +1010,7 @@ class SectionModel(BaseModel):
     # The bass's own motif for bass_style="motif" -- a motif name (theme
     # pool / library) or an embedded dict, resolved exactly like
     # harmony_rhythm.motif. Omitted -> the bass follows the section's active
-    # theme motif, unchanged from before this field existed. Lets a section
+    # theme motif. Lets a section
     # double its own riff in the bass (a B riff in a chorus) instead of
     # always the piece's main motif. Ignored (see lint.py) for any other
     # bass_style -- nothing else reads a motif.
@@ -1052,12 +1022,9 @@ class SectionModel(BaseModel):
     # model works -- it means "let generate_section() derive this
     # section's value from the piece's seed" (see generator.py's
     # derive_register_defaults()). That's a deliberate departure from this
-    # file's usual convention, and it's why every existing piece renders
-    # differently after this feature shipped even though not one of them
-    # was edited: the seed already existed per piece/section, so an
-    # unedited JSON's sections now land on different (but still
-    # deterministic, reproducible) register windows and voicing shapes
-    # than they did before this field existed.
+    # file's usual convention. Unset sections therefore get seed-derived (but
+    # still deterministic) register windows and voicing shapes, not the old
+    # fixed defaults.
     #
     # Setting any of these explicitly opts a section OUT of seed-derived
     # variation and pins it to exactly what's written, same as every
@@ -1073,31 +1040,13 @@ class SectionModel(BaseModel):
     # voices[1:] are peers, each either a counterpoint voice (species set) or
     # an independent melody-path line (species absent).
     #
-    # RETIRED 2026-09 in favor of this one list:
-    #   section.counterpoint[]  — was already superseded by voices[] in
-    #                             generator.py; see the CounterpointModel note.
-    #   section.second_melody   — was a melody-path peer voice in all but
-    #                             name: the generator branch for it and the
-    #                             one for a melody-path peer made the same
-    #                             generate_melody_for_progression() call.
-    #                             Its one real capability, a per-voice
-    #                             rhythm_pattern for genuine polymeter, is
-    #                             now wired into every melody-path peer, so
-    #                             voices[] does everything it did.
-    #   section.melody as a dict — the lead's register/velocity/motif belong
-    #                             on voices[0]. `melody` stays as the plain
-    #                             behavior-string shorthand it always was.
-    #
-    # Four ways to say "add a voice" was the single biggest source of both
-    # parameter count and silent no-ops in this schema (voices[N].behavior=
-    # 'develop' never receiving a motif, species on a voice that can't use
-    # one, counterpoint[] evaporating when voices[] appeared). One list, one
-    # code path, one set of rules.
+    # One list for every voice: the lead, then peers. Earlier schemas had
+    # four ways to add a voice, which caused silent no-ops. Now there is one
+    # code path and one set of rules.
     voices: Optional[list[VoiceModel]] = None
 
     drums:        Optional[DrumModel]         = None
-    # RETIRED 2026-09: `percussion` was an untyped future-proofing stub,
-    # read by absolutely nothing in the engine. Drums live in `drums`.
+    # Drums live in `drums`.
 
     # ── Free-form documentation ───────────────────────────────────────────────
     notes: Optional[str] = None
@@ -1162,7 +1111,7 @@ class SectionModel(BaseModel):
             raise ValueError(f"Section mode '{v}' is not valid. Choose from {sorted(VALID_MODES)}.")
         return v.lower()
 
-    # ── Retired-field rejection ───────────────────────────────────────────
+    # ── Rejected legacy fields ───────────────────────────────────────────
     # SectionModel is extra="allow", so a retired field name would otherwise
     # validate cleanly and then render as if it were never written — exactly
     # the silent no-op failure mode this refactor exists to kill. Fail loud
@@ -1336,7 +1285,7 @@ class SectionModel(BaseModel):
                 # mismatch. resolved_progression()/bars_list() do the tiling.
 
             else:
-                # Original behavior: chord_bars is the complete sequence.
+                # chord_bars is the complete sequence.
                 derived = cell_bars
                 if self.bars is not None and abs(derived - self.bars) > 0.01:
                     warnings.warn(
@@ -1441,7 +1390,7 @@ class SectionModel(BaseModel):
         harmony_motif_value  = (
             self.harmony_rhythm.motif if self.harmony_rhythm is not None else None
         )
-        # Inline motif pool (item MT-0): a string motif reference on a voice
+        # Inline motif pool: a string motif reference on a voice
         # or harmony_rhythm resolves against motifs declared inline in the
         # theme before the external library. model_dump each MotifModel to the
         # plain-dict shape resolve_motif_value matches names against.
@@ -1449,7 +1398,7 @@ class SectionModel(BaseModel):
         # Falls back to the singular `motif` field when `motifs` isn't set,
         # mirroring primary_motif's own fallback — otherwise a piece using
         # the standard single-motif format could never have a voice
-        # reference its own top-level motif by name (item MT-1).
+        # reference its own top-level motif by name.
         pool_source = theme_model.motifs or (
             [theme_model.motif] if theme_model.motif is not None else None
         )
@@ -1548,9 +1497,7 @@ class SectionModel(BaseModel):
         # this method's ValueError. voices[0] is skipped here — already
         # covered above via voice_motif / lead_voice().
         #
-        # The parallel counterpoint[] loop that used to sit here went away
-        # with CounterpointModel (2026-09); those voices are voices[] now
-        # and are covered by this same loop.
+        # Peer voices are voices[] entries and are covered by this same loop.
         for peer in (self.voices or [])[1:]:
             if peer.motif is not None:
                 peer_motif = _resolve_motif_value_safe(peer.motif, theme_pool)
@@ -1754,10 +1701,8 @@ class TempoRangeModel(BaseModel):
             raise ValueError(f"tempo.min ({self.min}) must be ≤ tempo.max ({self.max})")
         return self
 
-# ThemeModel retired — its fields (name, key, mode, tempo, motif, motifs)
-# and validators (_validate_theme_key/_mode, _warn_obsolete_theme_keys,
-# _motif_consistency, primary_motif) are absorbed directly into PieceModel
-# below (single-file format: theme merged into piece).
+# Theme fields (name, key, mode, tempo, motif, motifs) and their validators
+# live directly on PieceModel (single-file format).
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PieceModel
@@ -1781,7 +1726,7 @@ class PieceModel(BaseModel):
     tempo:     Optional[TempoRangeModel] = None
     seed:      int = 42
 
-    # 2026-10: piece-wide default for the melody note chooser; a voice may
+    # Piece-wide default for the melody note chooser; a voice may
     # override it with its own melody_engine. "v1" = original behavior.
     melody_engine: Literal["v1", "v2"] = "v1"
 
@@ -1866,13 +1811,12 @@ class PieceModel(BaseModel):
         VALID_MODES = {
             "ionian", "dorian", "phrygian", "lydian",
             "mixolydian", "aeolian", "locrian",
-            # 2026-08: unblocked — these were already fully implemented in
-            # harmony.py's MODES dict (imported by melody/bass/counterpoint
-            # too) but rejected here before ever reaching the generator.
+            # Implemented in harmony.py's MODES dict (imported by melody, bass
+            # and counterpoint).
             "harmonic_minor", "melodic_minor",
             "pentatonic_major", "pentatonic_minor",
             "blues", "whole_tone", "diminished",
-            # 2026-08: new — see harmony.py's MODES dict for interval
+            # See harmony.py's MODES dict for interval
             # sourcing/caveats (non-heptatonic roman numeral aliasing).
             "pelog", "arabic", "hirajoshi", "insen", "augmented_hexatonic"
         }

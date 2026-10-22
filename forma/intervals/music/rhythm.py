@@ -856,10 +856,10 @@ def section_position_t(bar_index: int, total_bars: int) -> float:
     arc; eventually: apex/goal-tone pitch bias) computes it identically,
     rather than each keeping its own copy that could silently drift apart.
 
-    That's not a hypothetical risk in this codebase — it's exactly the
-    shape Finding 0 was (two independent implementations of "apply this
-    transform," one got fixed, the other silently didn't). Two
-    independent implementations of "where are we in the section" would
+    That's not a hypothetical risk: two independent implementations of
+    "apply this transform" can drift, one getting fixed while the other
+    silently doesn't. Two independent implementations of "where are we
+    in the section" would
     mean a section's loudest moment and its melodic apex could stop
     lining up the moment either formula changed, with nothing to catch it.
 
@@ -1316,16 +1316,15 @@ def _slice_events_into_window(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Rhythm-domain motif transforms — relocated from melody.py (item 17 / ST-5)
+# Rhythm-domain motif transforms
 # ═══════════════════════════════════════════════════════════════════════════════
 #
-# Moved here rather than imported harmony.py -> melody.py: this engine's
-# import graph deliberately keeps voice modules from depending on each other
-# (ST-0 severed exactly this kind of edge for strategies.py). Both functions
-# are generic rhythm-array operations with no melody-specific content, so
-# they belong alongside the other shared tiling primitives in this file —
-# melody.py's own usage (develop behavior's per-repetition transform choice)
-# is unaffected, just imports from here now instead of defining locally.
+# Defined here rather than imported harmony.py -> melody.py: this engine's
+# import graph deliberately keeps voice modules from depending on each other.
+# Both functions are generic rhythm-array operations with no melody-specific
+# content, so they belong alongside the other shared tiling primitives in
+# this file. melody.py imports them from here (develop behavior's
+# per-repetition transform choice).
 
 def apply_rhythm_transform(rhythm: list, transform: str) -> list:
     """Apply time-based transforms to a rhythm sequence."""

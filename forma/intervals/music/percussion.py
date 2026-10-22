@@ -514,7 +514,7 @@ def generate_drums(
                                           placement mechanism, which stays
                                           structural via `placement`.
                         Omitted (None, the default): no fills, output
-                        unchanged from before this feature existed.
+                        unchanged.
         accelerando:    Optional dict describing a multi-bar accelerando
                         roll -- a DIFFERENT mechanism from `fill` (see
                         _generate_accelerando_hits's docstring for why),
@@ -546,7 +546,7 @@ def generate_drums(
                                               once per roll EVENT, same as
                                               `fill`'s probability
                         Omitted (None, the default): no accelerando, output
-                        unchanged from before this feature existed.
+                        unchanged.
         trap_hats:      Optional dict describing a continuous trap hi-hat
                         texture -- a THIRD mechanism, distinct from both
                         `fill` and `accelerando` (see
@@ -582,7 +582,7 @@ def generate_drums(
                         which doesn't apply once the hi-hat itself is the
                         continuously-varying voice.
                         Omitted (None, the default): no trap hats, output
-                        unchanged from before this feature existed.
+                        unchanged.
 
     Returns:
         List of DrumHit
