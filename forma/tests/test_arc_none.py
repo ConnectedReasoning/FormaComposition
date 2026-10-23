@@ -139,13 +139,8 @@ def _piece(arcs, harmony_motif=False, drums=True):
         s = _section(name=f"s{i}", bars=8, arc=arc,
                      progression=["i", "VII", "iv", "v"], rest_probability=0.0)
         if harmony_motif:
-            # Harmony's per-onset velocity scale comes from harmony_pattern
-            # (0.3 * base 65 = 19: well under the 40 floor).
-            s["harmony_rhythm"] = {"rhythm": "pattern"}
-            s["harmony_pattern"] = {
-                "onsets": [0.0, 2.0], "durations": [2.0, 2.0],
-                "velocities": [0.3, 0.3], "length_beats": 4.0,
-            }
+            # A hand-set harmony velocity of 19: well under the 40 floor.
+            s["harmony_velocity"] = 19
         if drums:
             s["drums"] = {"pattern": "backbeat"}
         secs.append(s)

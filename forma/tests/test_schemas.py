@@ -107,8 +107,8 @@ class TestRhythmPatternModel:
 
 class TestHarmonyRhythmModel:
     def test_valid(self):
-        m = HarmonyRhythmModel(rhythm="pattern", density="medium", groove="straight", swing=0.5)
-        assert m.rhythm == "pattern"
+        m = HarmonyRhythmModel(rhythm="free", density="medium", groove="straight", swing=0.5)
+        assert m.rhythm == "free"
         assert m.swing == 0.5
 
     def test_invalid_bad_enum_rhythm(self):
@@ -535,41 +535,21 @@ class TestSectionModel:
             voices=[{"register": "soprano"}] + [{"species": "free"}] * 4))
         assert len(s.voices) == 5
 
-    def test_invalid_harmony_rhythm_pattern_requires_block(self):
-        with pytest.raises(ValidationError, match="harmony_pattern block"):
+    def test_harmony_rhythm_pattern_is_rejected(self):
+        """Harmony has no pattern source (it emulated strumming and was
+        removed); the literal no longer admits it."""
+        with pytest.raises(ValidationError):
             SectionModel.model_validate(_minimal_section(
                 harmony_rhythm={"rhythm": "pattern"},
             ))
 
-    def test_invalid_inherited_pattern_requires_harmony_pattern_block(self):
-        """Known-issues #7: section.rhythm='pattern' with no harmony_rhythm
-        override at all inherits 'pattern' for harmony too — previously this
-        rendered zero harmony events with no warning. Now a schema error,
-        same as the explicit case just above."""
-        with pytest.raises(ValidationError, match="inherited by harmony"):
-            SectionModel.model_validate(_minimal_section(
-                rhythm="pattern",
-                rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-            ))
-
-    def test_invalid_inherited_pattern_with_empty_harmony_rhythm_block(self):
-        """Same gap, but with an explicit harmony_rhythm block present that
-        doesn't set rhythm (e.g. only overrides density/groove) — still
-        inherits 'pattern' from the section, still needs harmony_pattern."""
-        with pytest.raises(ValidationError, match="inherited by harmony"):
-            SectionModel.model_validate(_minimal_section(
-                rhythm="pattern",
-                rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-                harmony_rhythm={"density": "sparse"},
-            ))
-
-    def test_valid_inherited_pattern_with_harmony_pattern_block(self):
-        """The inherited case is fine once a harmony_pattern block is
-        supplied — should not raise."""
+    def test_inherited_pattern_is_valid_and_needs_no_harmony_block(self):
+        """section.rhythm='pattern' used to demand a harmony_pattern block
+        because harmony inherited 'pattern'. Harmony now holds the chords
+        (sustain) in that case, so there is nothing to require."""
         SectionModel.model_validate(_minimal_section(
             rhythm="pattern",
             rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
-            harmony_pattern={"onsets": [0.0], "durations": [1.0]},
         ))
 
     def test_valid_inherited_pattern_with_explicit_harmony_rhythm_override(self):

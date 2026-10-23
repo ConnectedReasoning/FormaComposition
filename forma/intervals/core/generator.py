@@ -783,22 +783,8 @@ def generate_section(
     # harmony.py now (item 9, ST-2b). generate_piece() still resolves the
     # config reads that stay translation-layer work: which motif harmony
     # should use (harmony_rhythm.motif vs the theme's active default — same
-    # kind of read generate_piece() already does for melody's motif) and
-    # dumping harmony_pattern's Pydantic model to a plain dict.
+    # kind of read generate_piece() already does for melody's motif).
     _explicit_h_rhythm = _hr_model.rhythm if _hr_model is not None else None
-
-    # harmony_pattern is its own independent SectionModel field (schemas.py:489)
-    # — schema-legal even with no harmony_rhythm block at all (section.rhythm
-    # inherits to "pattern", harmony_pattern set on its own). The original
-    # switchboard read section_model.harmony_pattern unconditionally, with no
-    # dependency on _hr_model's presence; gating this on `_hr_model is not
-    # None` was a bug introduced during the ST-2b move, caught by a probe
-    # built specifically for the inherited-pattern-with-no-harmony_rhythm-
-    # block case (see session notes) — silently dropped a declared pattern
-    # and fell back to "free" for any section using it.
-    _hr_harmony_pattern = None
-    if section_model.harmony_pattern is not None:
-        _hr_harmony_pattern = section_model.harmony_pattern.model_dump(exclude_none=True)
 
     _harmony_motif_def, _harmony_motif_desc = None, "theme (shared default)"
     _hr_motif_value = _hr_model.motif if _hr_model is not None else None
@@ -816,7 +802,6 @@ def generate_section(
         section_name=section_model.name or "",
         total_beats_section=total_beats_section,
         density=density,
-        harmony_pattern=_hr_harmony_pattern,
         hr_density=(_hr_model.density if _hr_model is not None else None),
         harmony_motif_def=_harmony_motif_def,
         harmony_motif_desc=_harmony_motif_desc,
@@ -1118,7 +1103,7 @@ def _expand_song_form(piece: dict) -> list[dict]:
 # intervals/music/rhythm.py (imported at the top of this file).
 # _resolve_harmony_rhythm has been removed — its logic now lives entirely
 # in the HarmonyStrategy subclasses (_SustainHarmonyStrategy, _FreeHarmonyStrategy,
-# _PatternHarmonyStrategy, _MotifHarmonyStrategy), dispatched via HarmonyStrategyRegistry.
+# _MotifHarmonyStrategy), dispatched via HarmonyStrategyRegistry.
 
 
 def _enrich_chords_with_rhythm(
@@ -1132,9 +1117,8 @@ def _enrich_chords_with_rhythm(
 
     This is the Enrichment Pass — the single place that translates section-level
     pre-tiled harmony events into per-chord beat-local coordinates.  The resulting
-    chord.rhythm_events list is consumed by _PatternHarmonyStrategy and
-    _MotifHarmonyStrategy as Priority 1 (DNA path), bypassing the legacy
-    slice-on-demand path in those strategies.
+    chord.rhythm_events list is consumed by _MotifHarmonyStrategy as
+    Priority 1 (DNA path), bypassing the legacy slice-on-demand path.
 
     Returns new VoicedChord instances (via dataclasses.replace); originals are
     never mutated.
@@ -1522,8 +1506,8 @@ def generate_piece(
                     # across the FULL section rather than reset per chord or
                     # bar, so a length_beats that doesn't evenly divide the
                     # bar drifts genuinely against the rest of the ensemble
-                    # instead of resyncing — same mechanism harmony_pattern
-                    # uses. This is what made second_melody worth having;
+                    # instead of resyncing — same mechanism the section's
+                    # rhythm_pattern uses. This is what made second_melody worth having;
                     # every melody-path peer can do it now.
                     v_rhythm_override = None
                     if v.rhythm_pattern is not None:

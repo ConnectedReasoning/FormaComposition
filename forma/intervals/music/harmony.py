@@ -22,7 +22,7 @@ from intervals.core.musical_time import MusicalTime, bar_beat_from_event_offset
 from intervals.music.rhythm import (
     RhythmEvent, get_pattern,
     apply_velocity_arc, apply_swing, remap_swing_ratio,
-    _slice_events_into_window, rhythm_pattern_to_events,
+    _slice_events_into_window,
     _motif_rhythm_to_events_varied,
 )
 
@@ -1181,7 +1181,7 @@ class HarmonyRhythmContext:
     Context data for harmony chord rhythm resolution.
     Consumed by HarmonyStrategyRegistry dispatch (_*HarmonyStrategy.apply).
     """
-    source: str                        # "sustain" | "pattern" | "motif" | "free"
+    source: str                        # "sustain" | "motif" | "free"
     total_beats_section: float         # full section length (for pattern tiling)
     total_per_chord: float             # this chord window's beat length
     beat_offset: float                 # absolute offset of this chord in section
@@ -1190,9 +1190,6 @@ class HarmonyRhythmContext:
     groove: Optional[str] = None
     beats_per_bar: int = 4
     swing: float = 0.0
-
-    # Hand-played harmony pattern (optional, used by _PatternHarmonyStrategy)
-    harmony_pattern: Optional[dict] = None
 
     # Motif rhythm fields
     motif_rhythm: Optional[list[float]] = None
@@ -1404,54 +1401,6 @@ class _SustainHarmonyStrategy(HarmonyStrategy):
         )
 
 
-class _PatternHarmonyStrategy(HarmonyStrategy):
-    """
-    Harmony source: "pattern" (hand-played harmony groove)
-
-    Priority dispatch:
-      1. chord.rhythm_events       — DNA: pre-enriched chord-local events. Use as-is.
-      2. rctx.precomputed_events   — global stencil: slice on demand (legacy path).
-      3. Single sustain event      — fallback when both sources are absent or empty.
-    """
-
-    @property
-    def label(self) -> str:
-        return "pattern"
-
-    def apply(self, ctx: HarmonyChordContext) -> list[tuple]:
-        rctx = ctx.harmony_rhythm_ctx
-
-        # Priority 1 — DNA path: chord was pre-enriched by _enrich_chords_with_rhythm.
-        # Events are already in chord-local coordinates; use them directly.
-        if ctx.chord.rhythm_events:
-            rhythm_events = ctx.chord.rhythm_events
-
-        # Priority 2 — global stencil: slice from section-level tiled events.
-        # This is the legacy path for any chord that was not enriched.
-        elif rctx.precomputed_events and rctx.precomputed_events != "sustain":
-            rhythm_events = _slice_events_into_window(
-                rctx.precomputed_events,
-                rctx.beat_offset,
-                rctx.total_per_chord,
-                min_duration=0.25,
-            )
-            if not rhythm_events:
-                rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 0.7, False)]
-
-        # Priority 3 — sustain fallback.
-        else:
-            rhythm_events = [RhythmEvent(0.0, rctx.total_per_chord, 1.0, False)]
-
-        return _build_chord_events(
-            rhythm_events, ctx.chord,
-            ctx.global_beat, ctx.beat_offset_local,
-            ctx.arc, ctx.h_swing, ctx.base_velocity, ctx.channel,
-            rest_probability=ctx.harmony_rest_probability,
-            rest_seed=rctx.seed, source=rctx.source, arc_t=ctx.arc_t,
-            prev_arc_end=ctx.prev_arc_end, arc_blend_t=ctx.arc_blend_t,
-        )
-
-
 class _MotifHarmonyStrategy(HarmonyStrategy):
     """
     Harmony source: "motif" — an independent per-section onset stream
@@ -1468,14 +1417,12 @@ class _MotifHarmonyStrategy(HarmonyStrategy):
     pattern keeps its own life through a chord change rather than
     resetting at every chord boundary.
 
-    Priority dispatch mirrors _PatternHarmonyStrategy — same consumption
-    shape, different upstream source for the section-wide event list:
+    Priority dispatch:
       1. chord.rhythm_events       — DNA: pre-enriched chord-local events.
       2. rctx.precomputed_events   — global motif stencil, sliced on demand
                                       (legacy path — DNA should cover every
                                       chord once enrichment runs, but this
-                                      stays as the same escape hatch
-                                      _PatternHarmonyStrategy keeps).
+                                      stays as an escape hatch).
       3. Single sustain event      — fallback.
     """
 
@@ -1581,7 +1528,6 @@ class _StrategyRegistry:
 HarmonyStrategyRegistry = _StrategyRegistry(
     strategies=[
         _SustainHarmonyStrategy(),
-        _PatternHarmonyStrategy(),
         _MotifHarmonyStrategy(),
         _FreeHarmonyStrategy(),
     ],
@@ -1646,15 +1592,14 @@ def build_harmony_chord_context(
 # ═════════════════════════════════════════════════════════════════════════════
 #
 # This is harmony's other rhythm decision, distinct from build_harmony_chord_context
-# above: which source (sustain/pattern/motif/free) applies to the WHOLE section,
+# above: which source (sustain/motif/free) applies to the WHOLE section,
 # and what section-wide event stream (if any) that source produces. Formerly an
 # inline switchboard in generate_piece() — moved here so harmony owns both halves
 # of its rhythm decision in one module, matching build_harmony_chord_context's
 # per-chord half.
 #
 # Deliberately NOT moved here: resolving harmony's motif (harmony_rhythm.motif vs
-# the theme's active_motif_def fallback) and dumping harmony_pattern's Pydantic
-# model to a plain dict. Both are declared-config reads keyed off SectionModel,
+# the theme's active_motif_def fallback) Both are declared-config reads keyed off SectionModel,
 # same translation-layer work generate_piece() already does for melody's motif —
 # keeping them there avoids harmony.py importing schemas.py (a music -> core
 # import this module has never needed) and motif_loader.py (a further core ->
@@ -1666,7 +1611,6 @@ def resolve_harmony_section_events(
     section_name: str,
     total_beats_section: float,
     density: str,
-    harmony_pattern: Optional[dict],
     hr_density: Optional[str],
     harmony_motif_def: Optional[dict],
     harmony_motif_desc: str,
@@ -1689,14 +1633,6 @@ def resolve_harmony_section_events(
     Returns (harmony_section_events, description):
       harmony_section_events — "sustain" | list[RhythmEvent] | None.
         None means "free": the _FreeHarmonyStrategy density grid handles it.
-        The "pattern declared but no harmony_pattern supplied" branch below
-        is now unreachable through normal validated construction — schemas.py's
-        SectionModel._validate_rhythm_dependencies (known-issues #7 fix)
-        rejects that combination at validation time, for both the explicit
-        harmony_rhythm.rhythm='pattern' case and the inherited
-        section.rhythm='pattern' case. The branch is left in place as
-        defense-in-depth for callers that construct events without going
-        through schema validation, not as the primary guard anymore.
       description — a ready-to-print string, possibly containing an embedded
         newline (the inherited-motif coercion case produces two lines, exactly
         as the original two separate print() calls did), or None when nothing
@@ -1719,6 +1655,10 @@ def resolve_harmony_section_events(
     # return) so the two print lines the original produced — the coercion
     # notice, then "free"'s own line — are both preserved.
     lines = []
+    if source == "pattern":
+        source = "sustain"
+        lines.append("    Harmony rhythm: 'pattern' inherited from section rhythm — "
+                      "harmony has no pattern source, defaulting to 'sustain'")
     if source == "motif" and explicit_source != "motif":
         source = "free"
         lines.append("    Harmony rhythm: 'motif' inherited from section rhythm — "
@@ -1727,16 +1667,6 @@ def resolve_harmony_section_events(
     if source == "sustain":
         lines.append("    Harmony rhythm: sustain")
         return "sustain", "\n".join(lines)
-
-    if source == "pattern":
-        if harmony_pattern:
-            events = rhythm_pattern_to_events(harmony_pattern, total_beats=total_beats_section)
-            lines.append(f"    Harmony rhythm: hand-played pattern "
-                          f"({len(harmony_pattern['onsets'])} onsets)")
-            return events, "\n".join(lines)
-        # harmony_rhythm.rhythm == "pattern" but no harmony_pattern block was
-        # supplied: no events, no print, no error.
-        return None, ("\n".join(lines) if lines else None)
 
     if source == "motif":
         # Harmony's own motif, independent of melody's. Resolution (which
@@ -1783,8 +1713,7 @@ def resolve_harmony_section_events(
         # runs continuously through chord changes — the "its own syncopated
         # life against the bass" behavior the theme file asks for.
         # _enrich_chords_with_rhythm slices this into each chord's local
-        # window; _MotifHarmonyStrategy consumes those slices exactly like
-        # _PatternHarmonyStrategy does.
+        # window; _MotifHarmonyStrategy consumes those slices.
         #
         # Each cycle of the tile gets its own
         # independently-chosen transform from the motif's transform_pool

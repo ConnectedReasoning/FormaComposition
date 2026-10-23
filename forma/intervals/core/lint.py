@@ -99,8 +99,8 @@ IMPLEMENTED_COUNTERPOINT_SPECIES: frozenset[str] = frozenset({"first", "free"})
 # (section_index * 10) + chord_index before hashing (generator.py). A section
 # with more than this many chords can derive the same seed as a different
 # chord in another section. Currently only audible for harmony sources whose
-# randomness actually gets consumed ("free"/"motif" — "sustain" and "pattern"
-# don't roll any chord-level randomness from this seed).
+# randomness actually gets consumed ("free"/"motif" — "sustain"
+# doesn't roll any chord-level randomness from this seed).
 LONG_PROGRESSION_SEED_COLLISION_THRESHOLD: int = 10
 SEED_COLLISION_RISK_HARMONY_SOURCES: frozenset[str] = frozenset({"free", "motif"})
 
@@ -109,12 +109,6 @@ SEED_COLLISION_RISK_HARMONY_SOURCES: frozenset[str] = frozenset({"free", "motif"
 # explicitly) to "free" — harmony's own motif mechanism only activates when
 # harmony_rhythm.rhythm is set to "motif" directly on that block. This is
 # printed as a status line at render time, but not surfaced in the lint report.
-#
-# Separately: an inherited "pattern" source (section.rhythm == "pattern",
-# no harmony_rhythm block at all) with no harmony_pattern block produces
-# NO events, no print, no error — the schema's "rhythm='pattern' requires a
-# pattern block" check only fires for an EXPLICIT harmony_rhythm.rhythm=
-# "pattern", not this inherited case.
 
 
 
@@ -152,16 +146,12 @@ COUPLINGS: list[str] = [
     "progression longer than "
     f"{LONG_PROGRESSION_SEED_COLLISION_THRESHOLD} chords risks a harmony "
     "seed collision with a different chord in another section, audible "
-    "under harmony sources 'free'/'motif' (not 'sustain'/'pattern', which "
-    "don't consume that seed).",
+    "under harmony sources 'free'/'motif' (not 'sustain', which "
+    "doesn't consume that seed).",
     "harmony_rhythm.rhythm inherited as 'motif' from section.rhythm (i.e. "
     "no harmony_rhythm.rhythm set explicitly) is coerced to 'free' — "
     "harmony's own motif mechanism only activates when set explicitly on "
     "harmony_rhythm itself.",
-    "harmony_rhythm inherited as 'pattern' from section.rhythm, with no "
-    "harmony_pattern block present, produces zero harmony events silently — "
-    "the schema's pattern-requires-a-block check only fires for an "
-    "EXPLICIT harmony_rhythm.rhythm='pattern'.",
     "fugal_techniques.canon_interval  is a no-op unless "
     "fugal_techniques.canonic_imitation is also true — the voice's entrance "
     "is only delayed when both are set together.",
@@ -300,7 +290,7 @@ def _check_harmony_motif_without_motif_rhythm(section: SectionModel) -> Iterator
 
 def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradiction]:
     """
-    groove is inert under two of harmony_rhythm's four rhythm sources:
+    groove is inert under two of harmony_rhythm's three rhythm sources:
 
       - 'motif':   the motif cell supplies its own fixed onset grid, tiled
                    across the section, the same way melody's 'motif' rhythm
@@ -310,12 +300,7 @@ def _check_harmony_motif_groove_noop(section: SectionModel) -> Iterator[Contradi
                    accent.
 
     groove is only ever audible under 'free' (the onset grid a groove
-    shapes actually exists there). 'pattern' supplies its own hand-authored
-    onsets via harmony_pattern and doesn't consult groove either, but that
-    combination isn't flagged here -- harmony_pattern authors are already
-    hand-placing onsets/velocities directly, so a stray groove alongside it
-    is a much smaller footgun than the silent, easy-to-reach motif/sustain
-    cases.
+    shapes actually exists there).
 
     Previously this only checked the 'motif' case. The 'sustain' case was a
     real coverage gap -- confirmed live in piece_long_amen.json, which sets
@@ -936,8 +921,7 @@ def _check_harmony_melody_ratio(section: SectionModel, primary_motif: Optional[d
 
     Skips entirely — no finding either way — when a "motif" side has no
     resolvable rhythm, or melody's source is "pattern" (not modeled).
-    "sustain" harmony (one note per chord span) and hand-authored "pattern"
-    harmony (its own onset count) are both exact, not estimates.
+    "sustain" harmony (one note per chord span) is exact, not an estimate.
     """
     beats_per_bar = section.beats_per_bar
     chord_beats = [b * beats_per_bar for b in section.bars_list()]
@@ -970,13 +954,11 @@ def _check_harmony_melody_ratio(section: SectionModel, primary_motif: Optional[d
     h_source = explicit_h_rhythm or section.rhythm
     if h_source == "motif" and explicit_h_rhythm != "motif":
         h_source = "free"  # inherited-motif-blocked-to-free, same as generation
+    if h_source == "pattern":
+        h_source = "sustain"  # inherited pattern holds the chords, same as generation
 
     if h_source == "sustain":
         harmony_count = len(chord_beats)
-    elif h_source == "pattern":
-        if section.harmony_pattern is None:
-            return
-        harmony_count = len(section.harmony_pattern.onsets)
     elif h_source == "motif":
         harmony_count = _motif_note_count(total_beats, motif_rhythm, "stressed")
         if harmony_count is None:

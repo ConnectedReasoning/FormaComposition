@@ -14,7 +14,7 @@ Contract
   * Unset -> exactly the old behaviour (harmony 65, bass 70): byte-identical.
   * harmony_velocity is the base the harmony rhythm source scales. "sustain"
     scales by 1.0, so with arc: "none" every harmony note renders at exactly
-    the value written. Other sources (pattern / motif) multiply it by their
+    the value written. Other sources (motif / free) multiply it by their
     per-onset scale, as before.
   * bass_velocity is the bass base. Bass accents (root_fifth's fifth, walking
     and melodic off-beats, pulse repeats) are softer than the base but must
@@ -118,15 +118,6 @@ class TestHarmonyVelocity:
         vels = _vels(p, "Harmony")
         assert max(vels) > min(vels)        # shaped, not flat
         assert max(vels) <= 100             # fade_out never exceeds its start
-
-    def test_pattern_source_scales_the_base(self, tmp_path):
-        p = _render(
-            tmp_path, harmony_velocity=100,
-            harmony_rhythm={"rhythm": "pattern"},
-            harmony_pattern={"onsets": [0.0, 2.0], "durations": [2.0, 2.0],
-                             "velocities": [0.5, 0.5], "length_beats": 4.0},
-        )
-        assert set(_vels(p, "Harmony")) == {50}
 
 
 # ---------------------------------------------------------------------------

@@ -59,6 +59,10 @@ def build_harmony_rhythm_context_from_model(
     # to _MotifHarmonyStrategy normally.
     if h_source == "motif" and _explicit_h_rhythm != "motif":
         h_source = "free"
+    # Harmony has no "pattern" source; an inherited section.rhythm="pattern"
+    # (explicit "pattern" is rejected by the schema) holds the chords.
+    if h_source == "pattern":
+        h_source = "sustain"
 
     # Harmony-specific overrides (groove / density come from the hr block when set)
     density = (hr.density if hr is not None and hr.density is not None
@@ -72,10 +76,6 @@ def build_harmony_rhythm_context_from_model(
         motif_rhythm     = active_motif_def.get("rhythm")
         motif_velocities = active_motif_def.get("velocities")
 
-    harmony_pattern_dict: Optional[dict] = None
-    if h_source == "pattern" and section.harmony_pattern is not None:
-        harmony_pattern_dict = section.harmony_pattern.model_dump(exclude_none=True)
-
     return HarmonyRhythmContext(
         source=h_source,
         total_beats_section=total_beats_section,
@@ -84,7 +84,6 @@ def build_harmony_rhythm_context_from_model(
         density=density,
         groove=groove,
         beats_per_bar=section.beats_per_bar,
-        harmony_pattern=harmony_pattern_dict,
         motif_rhythm=motif_rhythm,
         motif_velocities=motif_velocities,
         precomputed_events=precomputed_events,

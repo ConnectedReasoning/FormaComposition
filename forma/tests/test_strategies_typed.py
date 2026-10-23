@@ -181,27 +181,18 @@ class TestMotifNonLeak:
         assert ctx.motif_rhythm is None
         assert ctx.motif_velocities is None
 
-    def test_harmony_pattern_only_populated_when_source_is_pattern(self):
-        """Same non-leak principle for the pattern block: it should only
-        surface in the context when harmony's own source is 'pattern'."""
-        section_free = _section(rhythm="free")
-        ctx_free = build_harmony_rhythm_context_from_model(
-            section_free, None, total_beats_section=32.0, total_per_chord=16.0,
+    def test_inherited_pattern_becomes_sustain(self):
+        """Harmony has no pattern source: an inherited section.rhythm of
+        'pattern' holds the chords rather than reaching dispatch."""
+        section = _section(
+            rhythm="pattern",
+            rhythm_pattern={"onsets": [0.0], "durations": [1.0]},
+        )
+        ctx = build_harmony_rhythm_context_from_model(
+            section, None, total_beats_section=32.0, total_per_chord=16.0,
             beat_offset=0.0, precomputed_events=None,
         )
-        assert ctx_free.harmony_pattern is None
-
-        section_pattern = _section(
-            rhythm="free",
-            harmony_rhythm={"rhythm": "pattern"},
-            harmony_pattern={"onsets": [0.0], "durations": [1.0]},
-        )
-        ctx_pattern = build_harmony_rhythm_context_from_model(
-            section_pattern, None, total_beats_section=32.0, total_per_chord=16.0,
-            beat_offset=0.0, precomputed_events=None,
-        )
-        assert ctx_pattern.harmony_pattern is not None
-        assert ctx_pattern.harmony_pattern["onsets"] == [0.0]
+        assert ctx.source == "sustain"
 
 
 # ===========================================================================
