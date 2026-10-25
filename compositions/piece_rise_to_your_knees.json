@@ -18,7 +18,8 @@
     "form": [
       "the_hum",
       "the_riff",
-      { "section": "the_riff", "exact_repeat": true },
+      "the_hammer",
+      { "section": "the_riff", "exact_repeat": false },
       "the_climb",
       "the_hammer",
       "the_climb",

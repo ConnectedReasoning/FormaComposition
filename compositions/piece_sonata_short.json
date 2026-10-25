@@ -1,0 +1,60 @@
+{
+  "piece": {
+    "name": "Threshold",
+    "key": "C",
+    "mode": "ionian",
+    "tempo": 84,
+    "motif": {
+      "name": "subject",
+      "intervals": [ 1,   1,   -2,   2  ],
+      "rhythm":    [ 1.0, 0.5,  0.5, 2.0 ],
+      "transform_pool": [
+        "inversion",
+        "retrograde",
+        "augmentation",
+        "retrograde_inversion"
+      ]
+    },
+    "title": "Threshold Sonata",
+    "seed": 5,
+    "transform_sequence": [
+      "original",
+      "original",
+      "inversion",
+      "retrograde_inversion",
+      "original",
+      "augmentation"
+    ],
+    "sections": [
+      {
+        "name": "development",
+        "bars": 20,
+        "progression": [ "I", "v", "IV", "ii", "bVII", "I" ],
+        "chord_bars": [   1,  0.5, 0.5,    1,   0.5,   0.5 ],
+        "density": "medium",
+        "harmony_register": {
+          "min": 64,
+          "max": 80
+        },
+        "harmony_velocity": 70,
+        "melody": "develop",
+        "bass_style": "walking",
+        "rhythm": "motif",
+        "rest_probability": 0.15,
+        "voices": [
+          {
+            "behavior": "develop",
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "passing",
+            "canon_offset": 2,
+            "velocity": 58
+          }
+        ]
+      }
+    ]
+  }
+}

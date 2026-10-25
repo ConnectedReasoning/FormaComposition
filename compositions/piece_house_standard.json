@@ -1,0 +1,414 @@
+{
+  "piece": {
+    "name": "house_band_standard",
+    "title": "House Band Standard",
+    "key": "Bb",
+    "mode": "ionian",
+    "tempo": {
+      "min": 120,
+      "max": 120
+    },
+    "seed": 126,
+    "form_type": "song",
+    "form": [
+      "intro",
+      {
+        "section": "a",
+        "exact_repeat": true
+      },
+      {
+        "section": "a",
+        "exact_repeat": true
+      },
+      "b",
+      {
+        "section": "a",
+        "exact_repeat": true
+      },
+      {
+        "section": "a",
+        "exact_repeat": true
+      },
+      {
+        "section": "a",
+        "exact_repeat": true
+      },
+      "b",
+      {
+        "section": "a",
+        "exact_repeat": true
+      }
+    ],
+    "sections": {
+      "intro": {
+        "name": "intro",
+        "bars": 4,
+        "progression": [
+          "ii",
+          "V7",
+          "I",
+          "V7/ii"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {
+          "intervals": [
+            0,
+            1,
+            2,
+            1
+          ],
+          "rhythm": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0,
+            1,
+            1.667,
+            2,
+            3,
+            3.667,
+            4,
+            4.667,
+            5,
+            6,
+            7
+          ],
+          "durations": [
+            1,
+            1.667,
+            1.333,
+            1,
+            1.667,
+            1.333,
+            1.667,
+            1.333,
+            1,
+            1,
+            1
+          ],
+          "velocities": [
+            1.0,
+            0.8,
+            0.7,
+            0.9,
+            0.85,
+            0.7,
+            0.9,
+            0.7,
+            0.85,
+            0.8,
+            0.9
+          ],
+          "length_beats": 8
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 40,
+        "bass_velocity": 72,
+        "harmony_register": {
+          "min": 50,
+          "max": 68
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voicing": "open",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 76,
+            "melody_engine": "v2",
+            "phrase_form": "aa",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.1
+          }
+        ],
+        "notes": "Four-bar intro turnaround."
+      },
+      "a": {
+        "name": "a",
+        "bars": 8,
+        "progression": [
+          "I",
+          "vi",
+          "ii",
+          "V7",
+          "iii",
+          "V7/ii",
+          "ii",
+          "V7"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {
+          "intervals": [
+            0,
+            1,
+            2,
+            1
+          ],
+          "rhythm": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0,
+            1,
+            1.667,
+            2,
+            3,
+            3.667,
+            4,
+            4.667,
+            5,
+            6,
+            7
+          ],
+          "durations": [
+            1,
+            0.667,
+            0.333,
+            1,
+            0.667,
+            0.333,
+            0.667,
+            0.333,
+            1,
+            1,
+            1
+          ],
+          "velocities": [
+            1.0,
+            0.8,
+            0.7,
+            0.9,
+            0.85,
+            0.7,
+            0.9,
+            0.7,
+            0.85,
+            0.8,
+            0.9
+          ],
+          "length_beats": 8
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 40,
+        "bass_velocity": 72,
+        "harmony_register": {
+          "min": 50,
+          "max": 68
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voicing": "open",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 84,
+            "melody_engine": "v2",
+            "phrase_form": "aa",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.1
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 62,
+            "melody_engine": "v2",
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 1.0
+            },
+            "rest_probability": 0.15
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 58,
+            "melody_engine": "v2",
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 1.0
+            },
+            "rest_probability": 0.15
+          }
+        ],
+        "notes": "A section: I-vi-ii-V turnaround changes. Lead horn plus two obbligato horns, sax-section pad, walking bass."
+      },
+      "b": {
+        "name": "b",
+        "bars": 8,
+        "progression": [
+          "V7/vi",
+          "V7/ii",
+          "V7/V",
+          "V7"
+        ],
+        "chord_bars": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "density": "medium",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {
+          "intervals": [
+            0,
+            1,
+            2,
+            1
+          ],
+          "rhythm": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0,
+            1,
+            1.667,
+            2,
+            3,
+            3.667,
+            4,
+            4.667,
+            5,
+            6,
+            7
+          ],
+          "durations": [
+            1,
+            0.667,
+            0.333,
+            1,
+            0.667,
+            0.333,
+            0.667,
+            0.333,
+            1,
+            1,
+            1
+          ],
+          "velocities": [
+            1.0,
+            0.8,
+            0.7,
+            0.9,
+            0.85,
+            0.7,
+            0.9,
+            0.7,
+            0.85,
+            0.8,
+            0.9
+          ],
+          "length_beats": 8
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 40,
+        "bass_velocity": 72,
+        "harmony_register": {
+          "min": 50,
+          "max": 68
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voicing": "open",
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 80,
+            "melody_engine": "v2",
+            "phrase_form": "aa",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.1
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 62,
+            "melody_engine": "v2",
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 1.0
+            },
+            "rest_probability": 0.15
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 58,
+            "melody_engine": "v2",
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 1.0
+            },
+            "rest_probability": 0.15
+          }
+        ],
+        "notes": "Bridge: dominant seventh cycle, two bars each."
+      }
+    },
+    "notes": "Swing-era small-group standard, 32-bar AABA, two choruses. Lead horn (voices[0], e.g. clarinet or trumpet), two obbligato horns (voices[1] alto sax, voices[2] tenor sax), sax-section pad on the Harmony track, and a walking bass (drums left to the DAW)."
+  }
+}

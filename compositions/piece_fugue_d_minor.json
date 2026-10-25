@@ -1,0 +1,833 @@
+{
+  "piece": {
+    "name": "fugue_in_d_minor",
+    "title": "Fugue in D minor",
+    "key": "D",
+    "mode": "aeolian",
+    "tempo": {
+      "min": 84,
+      "max": 84
+    },
+    "seed": 298,
+    "form_type": "song",
+    "form": [
+      "ex1",
+      "ex2",
+      "ex3",
+      "ep1",
+      "mid",
+      "ep2",
+      "stretto",
+      "coda"
+    ],
+    "motif": {
+      "name": "subject",
+      "intervals": [
+        0,
+        4,
+        -2,
+        1,
+        -2,
+        1,
+        -2,
+        -1,
+        1
+      ],
+      "rhythm": [
+        2,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        2,
+        4
+      ],
+      "transform_pool": [
+        "original",
+        "sequence",
+        "inversion",
+        "diminution"
+      ]
+    },
+    "sections": {
+      "ex1": {
+        "name": "ex1",
+        "bars": 4,
+        "progression": [
+          "i",
+          "iv",
+          "V/i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 80,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          }
+        ],
+        "notes": "Exposition 1: alto states the subject alone."
+      },
+      "ex2": {
+        "name": "ex2",
+        "bars": 4,
+        "progression": [
+          "i",
+          "iv",
+          "V/i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 80,
+            "entry_role": "answer",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 0.5,
+              "max": 1.0,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "Exposition 2: soprano answers at the fifth; alto has free counterpoint against it."
+      },
+      "ex3": {
+        "name": "ex3",
+        "bars": 4,
+        "progression": [
+          "i",
+          "iv",
+          "V/i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "bass",
+            "behavior": "develop",
+            "velocity": 80,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 0.5,
+              "max": 1.0,
+              "quantum": 0.5
+            }
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 1.0,
+              "max": 2.0,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "Exposition 3: bass states the subject; both upper voices counterpoint."
+      },
+      "ep1": {
+        "name": "ep1",
+        "bars": 8,
+        "progression": [
+          "I",
+          "V",
+          "vi",
+          "iii",
+          "IV",
+          "I",
+          "ii",
+          "V"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 80,
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 0.5,
+              "max": 1.0,
+              "quantum": 0.5
+            }
+          },
+          {
+            "register": "bass",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 1.0,
+              "max": 2.0,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "Episode 1 (F major): soprano develops the subject by sequence/inversion/diminution.",
+        "key": "F",
+        "mode": "ionian"
+      },
+      "mid": {
+        "name": "mid",
+        "bars": 4,
+        "progression": [
+          "i",
+          "iv",
+          "V/i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 80,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 0.5,
+              "max": 1.0,
+              "quantum": 0.5
+            }
+          },
+          {
+            "register": "bass",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 1.0,
+              "max": 2.0,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "Middle entry in A minor (the dominant).",
+        "key": "A",
+        "mode": "aeolian"
+      },
+      "ep2": {
+        "name": "ep2",
+        "bars": 8,
+        "progression": [
+          "i",
+          "VII",
+          "VI",
+          "iv",
+          "i",
+          "VII",
+          "III",
+          "V/i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "motif",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 80,
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 0.5,
+              "max": 1.0,
+              "quantum": 0.5
+            }
+          },
+          {
+            "register": "bass",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "species": "free",
+            "dissonance": "passing",
+            "rhythm_density": "medium",
+            "note_length_range": {
+              "min": 1.0,
+              "max": 2.0,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "Episode 2 (G minor): further development of the subject.",
+        "key": "G",
+        "mode": "aeolian"
+      },
+      "stretto": {
+        "name": "stretto",
+        "bars": 6,
+        "progression": [
+          "i",
+          "iv",
+          "V/i",
+          "i",
+          "iv",
+          "V/i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "free",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 80,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            }
+          },
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 76,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            },
+            "canon_offset": 4.0
+          },
+          {
+            "register": "bass",
+            "behavior": "develop",
+            "velocity": 72,
+            "entry_role": "subject",
+            "motif": {
+              "name": "subject",
+              "intervals": [
+                0,
+                4,
+                -2,
+                1,
+                -2,
+                1,
+                -2,
+                -1,
+                1
+              ],
+              "rhythm": [
+                2,
+                1,
+                1,
+                2,
+                2,
+                1,
+                1,
+                2,
+                4
+              ],
+              "transform_pool": [
+                "original",
+                "sequence",
+                "inversion",
+                "diminution"
+              ]
+            },
+            "canon_offset": 8.0
+          }
+        ],
+        "notes": "Stretto: subject enters in all three voices, four beats apart."
+      },
+      "coda": {
+        "name": "coda",
+        "bars": 4,
+        "progression": [
+          "iv",
+          "V/i",
+          "V/i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "none",
+        "rhythm": "pattern",
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 40,
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 80,
+            "melody_engine": "v2"
+          },
+          {
+            "register": "alto",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "rhythm_pattern": {
+              "onsets": [
+                0,
+                4,
+                8,
+                12
+              ],
+              "durations": [
+                4,
+                4,
+                4,
+                4
+              ],
+              "length_beats": 16
+            }
+          },
+          {
+            "register": "bass",
+            "behavior": "lyrical",
+            "velocity": 72,
+            "rhythm_pattern": {
+              "onsets": [
+                0,
+                4,
+                8,
+                12
+              ],
+              "durations": [
+                4,
+                4,
+                4,
+                4
+              ],
+              "length_beats": 16
+            }
+          }
+        ],
+        "notes": "Coda: slow cadence ending on D.",
+        "rhythm_pattern": {
+          "onsets": [
+            0,
+            2,
+            4,
+            6,
+            8,
+            10,
+            12
+          ],
+          "durations": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            4
+          ],
+          "length_beats": 16
+        }
+      }
+    },
+    "notes": "Three-voice fugue sketch: exposition (subject, answer, subject), episode, middle entry in the dominant, second episode, stretto, coda. Intended for organ or harpsichord; delete or mute the Harmony and Bass tracks."
+  }
+}

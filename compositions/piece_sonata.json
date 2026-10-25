@@ -6,18 +6,8 @@
     "tempo": 84,
     "motif": {
       "name": "subject",
-      "intervals": [
-        1,
-        1,
-        -2,
-        2
-      ],
-      "rhythm": [
-        1.0,
-        0.5,
-        0.5,
-        2.0
-      ],
+      "intervals": [ 1,   1,   -2,   2  ],
+      "rhythm":    [ 1.0, 0.5,  0.5, 2.0 ],
       "transform_pool": [
         "inversion",
         "retrograde",
@@ -38,32 +28,21 @@
     "sections": [
       {
         "name": "exposition_first",
-        "bars": 12,
-        "progression": [
-          "i",
-          "iv",
-          "v",
-          "i"
-        ],
+        "bars": 7,
+        "progression": [ "i", "iv", "v", "i" ],
+        "chord_bars": [1, 0.5, 1, 1],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
         "arc": "swell",
         "rhythm": "motif",
-        "rest_probability": 0.35
+        "rest_probability": 0.15
       },
       {
         "name": "exposition_second",
         "bars": 12,
-        "key": "F",
-        "mode": "ionian",
-        "progression": [
-          "I",
-          "IV",
-          "ii",
-          "V"
-        ],
-        "density": "medium",
+        "progression": ["I", "IV", "ii", "V" ],
+        "chord_bars": [1, 0.5, 0.5, 1],
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "plateau",
@@ -73,16 +52,8 @@
       {
         "name": "development",
         "bars": 20,
-        "key": "A",
-        "mode": "mixolydian",
-        "progression": [
-          "I",
-          "v",
-          "IV",
-          "ii",
-          "bVII",
-          "I"
-        ],
+        "progression": [ "I", "v",   "IV",  "ii",  "bVII",  "I" ],
+        "chord_bars": [1, 0.5, 0.5, 1, 0.5, 0.5],
         "density": "full",
         "melody": "develop",
         "bass_style": "walking",
