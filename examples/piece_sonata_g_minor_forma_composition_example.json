@@ -1,0 +1,452 @@
+{
+  "piece": {
+    "name": "sonata_in_g_minor",
+    "title": "Sonata in G minor",
+    "key": "G",
+    "mode": "aeolian",
+    "tempo": 132,
+    "seed": 1194,
+    "form_type": "song",
+    "form": [
+      {"section": "P", "exact_repeat": true},
+      {"section": "TR1", "exact_repeat": true},
+      {"section": "TR2", "exact_repeat": true},
+      {"section": "S", "exact_repeat": true},
+      {"section": "CL", "exact_repeat": true},
+      {"section": "P", "exact_repeat": true},
+      {"section": "TR1", "exact_repeat": true},
+      {"section": "TR2", "exact_repeat": true},
+      {"section": "S", "exact_repeat": true},
+      {"section": "CL", "exact_repeat": true},
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "RT",
+      {"section": "P", "exact_repeat": true},
+      "TR_R",
+      "S_R",
+      "CL_R",
+      "CODA"
+    ],
+    "sections": {
+      "P": {
+        "name": "p",
+        "bars": 8,
+        "progression": [ "i", "V/i", "i", "V/i", "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,     1,   1,     1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   1.5, 2,   3,   4,   5.5, 6 ],
+          "durations":  [ 1.5, 0.5, 1,   1,   1.5, 0.5, 2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 1.0, 0.8, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 86, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 4, "phrase_restate": "exact", "leap_probability": 0.1}
+        ],
+        "notes": "Primary theme (G minor). Dotted rhythm repeated every bar pair. 4+4 period: antecedent ends on a half cadence (V), consequent on a perfect authentic cadence."
+      },
+      "TR1": {
+        "name": "tr1",
+        "bars": 4,
+        "progression": [ "i", "iv", "VII", "III" ],
+        "chord_bars":   [ 1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,    1.5, 2,    2.5, 3,    3.5, 4,   5,    6 ],
+          "durations":  [ 0.5, 0.5, 0.5,  0.5, 0.5,  0.5, 0.5,  0.5, 1,   1,    2 ],
+          "velocities": [ 1.0, 0.8, 0.85, 0.8, 0.95, 0.8, 0.85, 0.8, 1.0, 0.85, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 90, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Transition, part 1 (G minor). Running eighths; ends on III (B-flat), the new tonic."
+      },
+      "TR2": {
+        "name": "tr2",
+        "bars": 4,
+        "key": "Bb",
+        "mode": "ionian",
+        "progression": [ "IV", "ii", "V" ],
+        "chord_bars":   [ 1,    1,    2 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,    1.5, 2,    2.5, 3,    3.5, 4,   5,    6 ],
+          "durations":  [ 0.5, 0.5, 0.5,  0.5, 0.5,  0.5, 0.5,  0.5, 1,   1,    2 ],
+          "velocities": [ 1.0, 0.8, 0.85, 0.8, 0.95, 0.8, 0.85, 0.8, 1.0, 0.85, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 90, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 3, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Transition, part 2: B-flat major (IV in B-flat = VI in G minor, the pivot). Ends on V of B-flat, the medial caesura."
+      },
+      "S": {
+        "name": "s",
+        "bars": 8,
+        "key": "Bb",
+        "mode": "ionian",
+        "progression": [ "I", "IV", "I", "V", "vi", "ii", "V", "I" ],
+        "chord_bars":   [ 1,   1,    1,   1,   1,    1,    1,   1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   1,   2,   3,   4,   5,    5.5,  6 ],
+          "durations":  [ 1,   1,   1,   1,   1,   0.5,  0.5,  2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 1.0, 0.85, 0.75, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 70, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 4, "phrase_restate": "sequence", "leap_probability": 0.16}
+        ],
+        "notes": "Secondary theme in the relative major (B-flat). Smoother and softer than P; ends with a perfect authentic cadence."
+      },
+      "CL": {
+        "name": "cl",
+        "bars": 4,
+        "key": "Bb",
+        "mode": "ionian",
+        "progression": [ "I", "IV", "V", "I" ],
+        "chord_bars":   [ 1,   1,    1,   1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,    1.5, 2,    2.5, 3,    3.5, 4,   5,    6 ],
+          "durations":  [ 0.5, 0.5, 0.5,  0.5, 0.5,  0.5, 0.5,  0.5, 1,   1,    2 ],
+          "velocities": [ 1.0, 0.8, 0.85, 0.8, 0.95, 0.8, 0.85, 0.8, 1.0, 0.85, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 82, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "exact", "leap_probability": 0.1}
+        ],
+        "notes": "Closing group (B-flat major). Confirms the new key."
+      },
+      "D1": {
+        "name": "d1",
+        "bars": 4,
+        "key": "Bb",
+        "mode": "ionian",
+        "progression": [ "I", "V", "I", "V" ],
+        "chord_bars":   [ 1,   1,   1,   1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,   1.5, 2,    3,    4,   4.5, 5,   5.5, 6 ],
+          "durations":  [ 0.5, 0.5, 0.5, 0.5, 1,    1,    0.5, 0.5, 0.5, 0.5, 2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 0.95, 0.85, 1.0, 0.8, 0.9, 0.8, 0.95 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 86, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Development 1: opening material restated in B-flat major, where the exposition ended."
+      },
+      "D2": {
+        "name": "d2",
+        "bars": 4,
+        "key": "F",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,   1.5, 2,    3,    4,   4.5, 5,   5.5, 6 ],
+          "durations":  [ 0.5, 0.5, 0.5, 0.5, 1,    1,    0.5, 0.5, 0.5, 0.5, 2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 0.95, 0.85, 1.0, 0.8, 0.9, 0.8, 0.95 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 88, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Development 2: F minor. V/i gives the major dominant with raised leading tone."
+      },
+      "D3": {
+        "name": "d3",
+        "bars": 4,
+        "key": "C",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,   1.5, 2,    3,    4,   4.5, 5,   5.5, 6 ],
+          "durations":  [ 0.5, 0.5, 0.5, 0.5, 1,    1,    0.5, 0.5, 0.5, 0.5, 2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 0.95, 0.85, 1.0, 0.8, 0.9, 0.8, 0.95 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 88, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Development 3: C minor, rising-fifths sequence from F minor."
+      },
+      "D4": {
+        "name": "d4",
+        "bars": 4,
+        "key": "D",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,   1.5, 2,    3,    4,   4.5, 5,   5.5, 6 ],
+          "durations":  [ 0.5, 0.5, 0.5, 0.5, 1,    1,    0.5, 0.5, 0.5, 0.5, 2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 0.95, 0.85, 1.0, 0.8, 0.9, 0.8, 0.95 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 90, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Development 4: D minor, the dominant of the home key."
+      },
+      "RT": {
+        "name": "rt",
+        "bars": 4,
+        "key": "G",
+        "mode": "aeolian",
+        "progression": [ "iv", "V/i" ],
+        "chord_bars":   [ 1,    3 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   2,    4,    6 ],
+          "durations":  [ 2,   2,    2,    2 ],
+          "velocities": [ 1.0, 0.85, 0.95, 0.85 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 76, "melody_engine": "v2", "phrase_form": "a", "phrase_chords": 2, "phrase_restate": "exact", "leap_probability": 0.1}
+        ],
+        "notes": "Retransition (G minor): a long major dominant (D) that prepares the return of the primary theme."
+      },
+      "TR_R": {
+        "name": "tr_r",
+        "bars": 4,
+        "key": "G",
+        "mode": "aeolian",
+        "progression": [ "i", "VI", "iv", "V/i" ],
+        "chord_bars":   [ 1,   1,    1,    1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,    1.5, 2,    2.5, 3,    3.5, 4,   5,    6 ],
+          "durations":  [ 0.5, 0.5, 0.5,  0.5, 0.5,  0.5, 0.5,  0.5, 1,   1,    2 ],
+          "velocities": [ 1.0, 0.8, 0.85, 0.8, 0.95, 0.8, 0.85, 0.8, 1.0, 0.85, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 90, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "sequence", "leap_probability": 0.1}
+        ],
+        "notes": "Recapitulation transition. Stays in G minor (no modulation) and ends on V, so the secondary theme can arrive in the tonic."
+      },
+      "S_R": {
+        "name": "s_r",
+        "bars": 8,
+        "key": "G",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "i", "V/i", "VI", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,   1,     1,    1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   1,   2,   3,   4,   5,    5.5,  6 ],
+          "durations":  [ 1,   1,   1,   1,   1,   0.5,  0.5,  2 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 1.0, 0.85, 0.75, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 70, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 4, "phrase_restate": "sequence", "leap_probability": 0.16}
+        ],
+        "notes": "Secondary theme returns in the tonic (G minor)."
+      },
+      "CL_R": {
+        "name": "cl_r",
+        "bars": 4,
+        "key": "G",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,     1 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   0.5, 1,    1.5, 2,    2.5, 3,    3.5, 4,   5,    6 ],
+          "durations":  [ 0.5, 0.5, 0.5,  0.5, 0.5,  0.5, 0.5,  0.5, 1,   1,    2 ],
+          "velocities": [ 1.0, 0.8, 0.85, 0.8, 0.95, 0.8, 0.85, 0.8, 1.0, 0.85, 0.9 ],
+          "length_beats": 8.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 84, "melody_engine": "v2", "phrase_form": "aa", "phrase_chords": 2, "phrase_restate": "exact", "leap_probability": 0.1}
+        ],
+        "notes": "Recapitulation closing group (G minor)."
+      },
+      "CODA": {
+        "name": "coda",
+        "bars": 8,
+        "key": "G",
+        "mode": "aeolian",
+        "progression": [ "i", "iv", "V/i", "i", "iv", "V/i", "i" ],
+        "chord_bars":   [ 1,   1,    1,     1,   1,    1,     2 ],
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "motif",
+        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets":     [ 0,   1.5, 2,   3,   4,   5.5, 6,   8,   9.5, 10,  11,  12,  13.5, 14,  16,  17,   18,   19,   20,  21,   22,   23,   24,  26,  28 ],
+          "durations":  [ 1.5, 0.5, 1,   1,   1.5, 0.5, 2,   1.5, 0.5, 1,   1,   1.5, 0.5,  2,   1,   1,    1,    1,    1,   1,    1,    1,    2,   2,   4 ],
+          "velocities": [ 1.0, 0.8, 0.9, 0.8, 1.0, 0.8, 0.9, 1.0, 0.8, 0.9, 0.8, 1.0, 0.8,  0.9, 1.0, 0.85, 0.95, 0.85, 1.0, 0.85, 0.95, 0.85, 1.0, 0.9, 1.0 ],
+          "length_beats": 32.0
+        },
+        "rest_probability": 0.0,
+        "harmony_rhythm": {"rhythm": "sustain"},
+        "harmony_velocity": 30,
+        "bass_velocity": 54,
+        "harmony_register": {"min": 50, "max": 66},
+        "bass_register": {"min": 40, "max": 60},
+        "voices": [
+          {"register": "soprano", "behavior": "lyrical", "velocity": 92, "melody_engine": "v2", "phrase_form": "a", "phrase_chords": 2, "phrase_restate": "exact", "leap_probability": 0.1}
+        ],
+        "notes": "Coda: repeated cadences in G minor, ending on a whole-note tonic."
+      }
+    },
+    "notes": "Classical sonata-allegro form in a minor key, after Mozart and his contemporaries. Exposition (P in G minor, TR modulating to the relative major, S in B-flat, CL) with exact repeat; development through B-flat, F minor, C minor and D minor, ending on a long dominant; recapitulation with the secondary theme back in the tonic minor; coda. Rhythms are written out (rhythm_pattern) so the melody keeps returning to the beat. Tracks: Melody = right hand; Bass = Alberti-figure left hand; Harmony = soft sustained triads (inner voices or strings; mute it for solo piano)."
+  }
+}

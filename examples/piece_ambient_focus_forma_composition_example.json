@@ -1,0 +1,374 @@
+{
+  "piece": {
+    "name": "discreet_landscapes",
+    "title": "Discreet Landscapes (Music for Quiet Rooms)",
+    "key": "B",
+    "mode": "pentatonic_major",
+    "tempo": 65,
+    "seed": 1975,
+    "notes": "A 30-minute continuous ambient composition generated according to background music guidelines. Uses D Lydian for floating, open harmonic color (#4). Features ultra-long chord holds (16-27 bars per chord), zero-motion sustained harmony beds, pedal and root-only bass, and high rest-probability generative melody lines. Counterpoint voices act as asynchronous Brian Eno-style tape loop reflections and high bell-like flourishes.",
+    "motif": {
+      "name": "ambient_loop_cell",
+      "intervals":  [ 2,    3,   2,    0,    1   ],
+      "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
+      "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
+      "transform_pool": [ "augmentation", "diminution" ]
+    },
+    "form_type": "song",
+    "form": [
+      "i_first_light_drift",   "i_first_light_drift","i_first_light_drift",   "i_first_light_drift",
+      "ii_unfolding_expanse", "ii_unfolding_expanse","ii_unfolding_expanse", "ii_unfolding_expanse",
+      "iii_plateau_of_stillness", "iii_plateau_of_stillness","iii_plateau_of_stillness", "iii_plateau_of_stillness",
+      "iv_reflected_horizon", "iv_reflected_horizon", "iv_reflected_horizon",
+      "v_dissolving_into_air", "v_dissolving_into_air", "v_dissolving_into_air"
+    ],
+    "sections": {
+      "i_first_light_drift": {
+        "bars": 5,
+        "progression": [ "I",  "II", "I", "IV" ],
+        "chord_bars":  [  0.5, 1.5,   1,    2  ],
+        "rhythm": "motif",
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rest_probability": 0.15,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "notes": "Opening movement (~4.8 minutes). D Lydian I-II-IV-I cycle with 18 bars per chord. Tonic pedal bass anchors sustained chord pads while high-register counterpoint acts as a delicate tape-loop shimmer.",
+        "voices": [
+          {
+            "behavior": "develop",
+            "species": "first",
+            "register": "soprano",
+            "dissonance": "none",
+            "motif":{
+              "name": "ambient_loop_cell",
+              "intervals":  [ 0,    3,   2,    2,   4   ],
+              "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
+              "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
+              "transform_pool": [ "augmentation", "diminution" ]
+            },
+            "velocity": 90
+          },
+          {
+            "behavior": "develop",
+            "species": "free",
+            "register": "alto",
+            "dissonance": "none",
+            "motif":{
+              "name": "ambient_loop_shimmer",
+              "intervals":  [ 0,    2,   -1,    -2,   -3   ],
+              "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
+              "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 90
+          },
+          {
+            "behavior": "develop",
+            "species": "free",
+            "register": "mid",
+            "dissonance": "none",
+            "motif":{
+              "name": "ambient_loop_cell",
+              "intervals":  [ 0,   0,    2,    1,   -1   ],
+              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
+              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "transform_pool": [ "augmentation", "diminution" ]
+            },
+            "velocity": 90
+          },
+          {
+            "behavior": "generative",
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "none",
+            "velocity": 90
+          }
+        ]
+      },
+      "ii_unfolding_expanse": {
+        "bars": 16,
+        "progression": [ "I", "I", "II", "IV", "I", "II"],
+        "chord_bars":  [  1,   1,    2,    1,   2,    1],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rest_probability": 0.1,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "notes": "Second movement (~6.4 minutes). Expands the texture with two independent counterpoint voices providing Frippertronics-style overlapping reflections below and above.",
+        "voices": [
+          {
+            "species": "free",
+            "register": "alto",
+            "motif": {
+              "name": "ambient_loop_anchor",
+              "intervals":  [ 0,   -1,    2,    1   ],
+              "rhythm":     [ 2.0,  1.0,  0.5,  0.5 ],
+              "velocities": [ 0.9,  0.7,  0.6,  0.7 ],
+              "transform_pool": [ "augmentation" ]
+            },
+            "velocity": 85
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "free",
+            "motif": {
+              "name": "ambient_loop_shimmer",
+              "intervals":  [ 0,    2,   0,     3,    2   ],
+              "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
+              "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 72
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "free",
+            "motif": {
+              "name": "ambient_loop_pulse",
+              "intervals":  [ 0,   0,    2,    1,    0  ],
+              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
+              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 75
+          },
+          {
+            "behavior": "develop",
+            "species": "free",
+            "register": "mid",
+            "dissonance": "none",
+            "motif":{
+              "name": "ambient_loop_pulse",
+              "intervals":  [ 0,   0,    2,    1,   -1   ],
+              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
+              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 90
+          }
+        ]
+      },
+      "iii_plateau_of_stillness": {
+        "bars": 24,
+        "progression": [ "I", "IV", "II", "I"],
+        "chord_bars": [ 1, 2, 1, 2 ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rest_probability": 0.5,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "notes": "Central movement (~7.2 minutes). Ultra-long 27-bar chord holds create an immobile, timeless glass-like surface. Minimal generative melody in tenor register.",
+        "voices": [
+          {
+            "behavior": "generative",
+            "register": "tenor",
+            "velocity": 70,
+            "motif": {
+              "name": "plateau_hold",
+              "intervals":  [ 0,    0,   1,   -1  ],
+              "rhythm":     [ 2.0,  1.0, 0.5,  0.5 ],
+              "velocities": [ 0.7,  0.5, 0.55, 0.5 ],
+              "transform_pool": [ "retrograde" ]
+            }
+          },
+          {
+            "species": "free",
+            "register": "alto",
+            "dissonance": "free",
+            "motif": {
+              "name": "plateau_glint",
+              "intervals":  [ 0,    1,   -1  ],
+              "rhythm":     [ 2.0,  0.5, 1.5 ],
+              "velocities": [ 0.5,  0.6, 0.45 ]
+            },
+            "velocity": 80
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "none",
+            "motif": {
+              "name": "plateau_bell",
+              "intervals":  [ 0,    1,    -1   ],
+              "rhythm":     [ 3.0,  2.5,  2.5  ],
+              "velocities": [ 0.4,  0.35, 0.3  ]
+            },
+            "velocity": 45
+          },
+          {
+            "species": "free",
+            "register": "baritone",
+            "dissonance": "none",
+            "motif": {
+              "name": "plateau_ground",
+              "intervals":  [ 0,    -1,   1    ],
+              "rhythm":     [ 2.0,  1.0,  1.0  ],
+              "velocities": [ 0.5,  0.4,  0.45 ]
+            },
+            "velocity": 48
+          }
+        ]
+      },
+      "iv_reflected_horizon": {
+        "bars": 48,
+        "progression": [ "II", "IV", "I", "II", "I", "I" ],
+        "chord_bars": [    2,    1,   3,    2,   1,   3  ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rest_probability": 0.85,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "notes": "Fourth movement (~6.4 minutes). Lydian II chord (E major) brings floating, optimistic brightness into the high register before returning home to I.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "soprano",
+            "motif": {
+              "name": "horizon_mirror",
+              "intervals":  [ 0,    1,   1,    -1,   -1  ],
+              "rhythm":     [ 2.0,  1.0, 2.0,  1.0,  2.0 ],
+              "velocities": [ 0.6,  0.7, 0.8,  0.7,  0.6 ],
+              "transform_pool": [ "retrograde", "inversion" ]
+            },
+            "velocity": 84
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "free",
+            "motif": {
+              "name": "horizon_line",
+              "intervals":  [ 0,    -1,  1   ],
+              "rhythm":     [ 1.5,  1.0, 1.5 ],
+              "velocities": [ 0.5,  0.4, 0.5 ]
+            },
+            "velocity":74
+          },
+          {
+            "species": "free",
+            "register": "alto",
+            "dissonance": "none",
+            "motif": {
+              "name": "horizon_echo",
+              "intervals":  [ 0,    -1,   -1,   1,    1    ],
+              "rhythm":     [ 4.0,  2.0,  4.0,  2.0,  4.0  ],
+              "velocities": [ 0.5,  0.55, 0.6,  0.55, 0.5  ]
+            },
+            "velocity": 70
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "none",
+            "motif": {
+              "name": "horizon_depth",
+              "intervals":  [ 0,    1,    -1   ],
+              "rhythm":     [ 3.0,  2.0,  3.0  ],
+              "velocities": [ 0.45, 0.4,  0.45 ]
+            },
+            "velocity": 86
+          }
+        ]
+      },
+      "v_dissolving_into_air": {
+        "bars": 54,
+        "progression": [ "IV", "I", "IV", "I" ],
+        "chord_bars": [    2,   2,    3,   2  ],
+        "rhythm": "free",
+        "density": "sparse",
+        "melody": "lyrical",
+        "bass_style": "root_only",
+        "arc": "plateau",
+        "rest_probability": 0.85,
+        "beats_per_bar": 4,
+        "harmony_rhythm": {
+          "rhythm": "sustain",
+          "density": "full",
+          "groove": "straight"
+        },
+        "notes": "Final movement (~5.2 minutes). Plagal IV-I oscillation with a long fade_out arc. Total duration across all 5 sections = 450 bars = exactly 30 minutes at 60 BPM.",
+        "voices": [
+          {
+            "behavior": "lyrical",
+            "register": "soprano",
+            "motif": {
+              "name": "air_dissolve",
+              "intervals":  [ 0,    -1,  -1,   1,    1   ],
+              "rhythm":     [ 1.0,  1.0, 2.0,  4.0,  4.0 ],
+              "velocities": [ 0.7,  0.6, 0.5,  0.4,  0.3 ],
+              "transform_pool": [ "diminution" ]
+            },
+            "velocity": 80
+          },
+          {
+            "species": "free",
+            "register": "soprano",
+            "dissonance": "free",
+            "motif": {
+              "name": "air_trace",
+              "intervals":  [ 0,    1,   -1   ],
+              "rhythm":     [ 6.0,  2.0, 8.0  ],
+              "velocities": [ 0.45, 0.35, 0.25 ]
+            },
+            "velocity": 70
+          },
+          {
+            "species": "free",
+            "register": "alto",
+            "dissonance": "none",
+            "motif": {
+              "name": "air_wisp",
+              "intervals":  [ 0,    -1,   1,    0    ],
+              "rhythm":     [ 2.0,  2.0,  4.0,  12.0 ],
+              "velocities": [ 0.4,  0.35, 0.3,  0.2  ]
+            },
+            "velocity": 80
+          },
+          {
+            "species": "free",
+            "register": "tenor",
+            "dissonance": "none",
+            "motif": {
+              "name": "air_settle",
+              "intervals":  [ 0,    -1,   1    ],
+              "rhythm":     [ 12.0, 4.0,  8.0  ],
+              "velocities": [ 0.35, 0.25, 0.2  ]
+            },
+            "velocity": 75
+          }
+        ]
+      }
+    },
+    "melody_engine": "v2"
+  }
+}
