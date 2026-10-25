@@ -46,7 +46,10 @@ def build_harmony_rhythm_context_from_model(
     #   KeyError at dispatch) for any harmony_rhythm block that set
     #   density/groove without also setting rhythm.
     _explicit_h_rhythm = hr.rhythm if hr is not None else None
-    h_source = _explicit_h_rhythm or section.rhythm
+    # Harmony rhythm is opt-in: unset means "sustain" (one held chord per
+    # chord_bars entry). The section's melody rhythm source is NOT inherited.
+    # Keep in sync with resolve_harmony_section_events() in harmony.py.
+    h_source = _explicit_h_rhythm or "sustain"
 
     # "motif" is a valid harmony rhythm source (see schemas.py
     # HarmonyRhythmSourceLiteral) — but only when set explicitly on the

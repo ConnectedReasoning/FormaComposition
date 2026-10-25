@@ -1429,6 +1429,13 @@ def generate_piece(
             _sec_nlr = _sec_nlr_model.as_tuple() if _sec_nlr_model is not None else None
             _sec_nlr_q = _sec_nlr_model.quantum if _sec_nlr_model is not None else 0.25
 
+            # Peer voices follow the SECTION's key/mode (section override, else the piece
+            # key), exactly like the lead melody and harmony. They previously read
+            # theme["key"] directly, so a section with its own key/mode got peers in the
+            # wrong key.
+            _peer_key  = section_model.key  or theme["key"]
+            _peer_mode = section_model.mode or theme["mode"]
+
             for voice_idx, v in enumerate(section_model.voices[1:]):
                 vb = v.bounds()
                 # above/below relationship for counterpoint peers is derived
@@ -1453,7 +1460,7 @@ def generate_piece(
                     peer_notes = generate_subject_entry(
                         v.motif,
                         entry_role=v.entry_role,
-                        key=theme["key"], mode=theme["mode"],
+                        key=_peer_key, mode=_peer_mode,
                         total_beats=total_beats,
                         register_bounds=vb,
                         answer_interval=v.answer_interval,
@@ -1480,7 +1487,7 @@ def generate_piece(
                         _first_cp_prev.setdefault(_cp_key, _cp_prev_pitch)
                     peer_notes = generate_counterpoint(
                         melody_notes,
-                        key=theme["key"], mode=theme["mode"],
+                        key=_peer_key, mode=_peer_mode,
                         species=v.species, register=rel,
                         beats_per_bar=section_model.beats_per_bar,
                         velocity=v.velocity, dissonance=v.dissonance,
@@ -1516,7 +1523,7 @@ def generate_piece(
                             total_beats,
                         )
                     peer_notes = generate_melody_for_progression(
-                        chords, theme["key"], theme["mode"],
+                        chords, _peer_key, _peer_mode,
                         behavior=v.behavior, density=density,
                         bars_per_chord=bars_list, beats_per_bar=beats_per_bar,
                         seed=base_seed + seed_offsets[i] + voice_idx,
@@ -1546,7 +1553,7 @@ def generate_piece(
                     sec_ctx.add_voice(f"voice_{voice_idx + 1}", compute_voice_snapshot(
                         pitches=p_pitches, durations=p_durs,
                         total_beats=_tb, total_slots=int(_tb * 2),
-                        key=theme["key"], mode=theme["mode"],
+                        key=_peer_key, mode=_peer_mode,
                     ))
 
                 # Feed forward so later peers avoid this one.

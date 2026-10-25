@@ -103,25 +103,26 @@ class TestScaffoldThreading:
         )
         assert ctx.source == "sustain"
 
-    def test_absent_harmony_rhythm_block_falls_back_to_section_rhythm(self):
+    def test_absent_harmony_rhythm_block_defaults_to_sustain(self):
+        """Harmony rhythm is opt-in: no block means sustain, regardless of
+        the section's own (melody) rhythm source."""
         section = _section(rhythm="free")
         ctx = build_harmony_rhythm_context_from_model(
             section, None, total_beats_section=32.0, total_per_chord=16.0,
             beat_offset=0.0, precomputed_events=None,
         )
-        assert ctx.source == "free"
+        assert ctx.source == "sustain"
 
-    def test_harmony_rhythm_block_present_but_rhythm_unset_still_falls_back(self):
-        """Regression case named directly in the source comment: a
-        harmony_rhythm block that only sets density/groove (leaving
-        .rhythm None) must still fall back to section.rhythm, not
-        silently produce source=None."""
+    def test_harmony_rhythm_block_present_but_rhythm_unset_defaults_to_sustain(self):
+        """A harmony_rhythm block that only sets density/groove (leaving
+        .rhythm None) must resolve to sustain, not source=None and not the
+        section's melody rhythm."""
         section = _section(rhythm="free", harmony_rhythm={"density": "full"})
         ctx = build_harmony_rhythm_context_from_model(
             section, None, total_beats_section=32.0, total_per_chord=16.0,
             beat_offset=0.0, precomputed_events=None,
         )
-        assert ctx.source == "free"
+        assert ctx.source == "sustain"
 
 
 # ===========================================================================
@@ -131,7 +132,7 @@ class TestScaffoldThreading:
 
 class TestMotifNonLeak:
     def test_motif_data_absent_when_harmony_source_is_free(self):
-        section = _section(rhythm="free")
+        section = _section(rhythm="free", harmony_rhythm={"rhythm": "free"})
         ctx = build_harmony_rhythm_context_from_model(
             section, MOTIF, total_beats_section=32.0, total_per_chord=16.0,
             beat_offset=0.0, precomputed_events=None,
@@ -146,14 +147,14 @@ class TestMotifNonLeak:
         purposes. Letting that inheritance silently activate harmony's
         independent motif mechanism would be per-voice data (melody's
         motif choice) leaking into a voice that never asked for it.
-        Confirmed: source coerces to 'free', motif fields stay None even
+        Confirmed: source defaults to 'sustain', motif fields stay None even
         though a real motif dict was passed in."""
         section = _section(rhythm="motif")  # no explicit harmony_rhythm block at all
         ctx = build_harmony_rhythm_context_from_model(
             section, MOTIF, total_beats_section=32.0, total_per_chord=16.0,
             beat_offset=0.0, precomputed_events=None,
         )
-        assert ctx.source == "free"  # coerced, not "motif"
+        assert ctx.source == "sustain"  # default, not inherited "motif"
         assert ctx.motif_rhythm is None
         assert ctx.motif_velocities is None
 

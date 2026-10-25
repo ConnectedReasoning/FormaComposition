@@ -1644,7 +1644,11 @@ def resolve_harmony_section_events(
       and set, else None. melody_rhythm_source: the section's top-level rhythm
       (harmony's fallback when explicit_source is unset).
     """
-    source = explicit_source or melody_rhythm_source
+    # Harmony rhythm is opt-in. Unset means "sustain": one held chord per
+    # chord_bars entry, so harmonic rhythm is controlled by chord_bars alone.
+    # The section's melody rhythm source is deliberately NOT inherited --
+    # that fallback silently put harmony on the "free" density grid.
+    source = explicit_source or "sustain"
 
     # "motif" is only valid for harmony when set EXPLICITLY on harmony_rhythm
     # itself. Falling back to the section's top-level `rhythm` — "motif" for
