@@ -175,7 +175,7 @@ class Mode:
 
 
 # Tonal harmonic progression mapped from Part I through Movement 29 of J.S. Bach's
-# St. John Passion (BWV 245), tracing the 45 key centers from the opening chorus
+# St. Matthew's Passion Pt 1, tracing the 45 key centers from the opening chorus
 # through the central trial and crucifixion up to the death of Christ (closing on E minor).
 
 myMode = Mode()
