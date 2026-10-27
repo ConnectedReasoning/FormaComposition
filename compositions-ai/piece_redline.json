@@ -2,8 +2,10 @@
   "title": "Redline",
   "tempo": 120,
   "key": {"tonic": "C", "mode": "mixolydian"},
-  "sections": [
-    {
+  "form_type": "song",
+  "form": ["Verse1"],
+  "sections": {
+    "Verse1": {
       "name": "Verse1",
       "bars": 8,
       "progression": ["I", "bVII", "I", "bVII"],
@@ -29,5 +31,5 @@
         }
       ]
     }
-  ]
+  }
 }

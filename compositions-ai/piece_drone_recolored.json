@@ -5,8 +5,10 @@
   "mode": "ionian",
   "tempo": 58,
   "seed": 42,
-  "sections": [
-    {
+  "form_type": "song",
+  "form": ["i_tonic_plane", "ii_subdominant_tide", "iii_dominant_haze", "iv_return_recolored"],
+  "sections": {
+    "i_tonic_plane": {
       "name": "i_tonic_plane",
       "bars": 64,
       "progression": [
@@ -57,7 +59,7 @@
         }
       ]
     },
-    {
+    "ii_subdominant_tide": {
       "name": "ii_subdominant_tide",
       "bars": 56,
       "progression": [
@@ -106,7 +108,7 @@
         }
       ]
     },
-    {
+    "iii_dominant_haze": {
       "name": "iii_dominant_haze",
       "bars": 48,
       "progression": [
@@ -146,7 +148,7 @@
         }
       ]
     },
-    {
+    "iv_return_recolored": {
       "name": "iv_return_recolored",
       "bars": 64,
       "progression": [
@@ -197,5 +199,5 @@
         }
       ]
     }
-  ]
+  }
 }

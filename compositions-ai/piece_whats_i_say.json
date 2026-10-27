@@ -35,8 +35,10 @@
     "notes": "E mixolydian \u2014 the flat-7 (D natural) is a chord tone, not tension. Gospel-funk feel. Motif is a short jabbing call phrase designed to be answered.",
     "title": "What'd I Say",
     "seed": 44,
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["vamp_intro", "call", "response", "build", "peak", "drop", "return"],
+    "sections": {
+      "vamp_intro": {
         "name": "vamp_intro",
         "notes": "Pure I chord vamp. Bass locks in, harmony comps relentlessly on shuffle. No chord changes \u2014 the groove IS the music. This establishes the feel before anything moves.",
         "bars": 8,
@@ -57,7 +59,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "call": {
         "name": "call",
         "notes": "12-bar blues form with the Ray Charles anticipation \u2014 IV arrives a half-bar early at bar 3.5 instead of bar 4. That half-beat early hit is the signature. I chord holds long, then IV sneaks in.",
         "bars": 12,
@@ -84,7 +86,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "response": {
         "name": "response",
         "notes": "The answer phrase. Same progression but melody develops \u2014 the call got stated, now the harmony responds. Bass stays locked. Intensity rises.",
         "bars": 12,
@@ -111,7 +113,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "build": {
         "name": "build",
         "notes": "Harmonic rhythm doubles \u2014 now the IV and V chords get shorter windows, changes come faster. The anticipation is still there but compressed. This is where the crowd starts hollering back.",
         "bars": 8,
@@ -140,7 +142,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "peak": {
         "name": "peak",
         "notes": "Maximum intensity. One-bar changes, full shuffle, melody screaming. V-IV-I turnaround at the end pulls it back to the top. This is the What'd I Say breakdown.",
         "bars": 8,
@@ -175,7 +177,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "drop": {
         "name": "drop",
         "notes": "Sudden dynamic drop. Ray's trick \u2014 after the peak, strip it back to almost nothing. Sparse harmony, pedal bass, just the groove skeleton. Makes the return hit harder.",
         "bars": 8,
@@ -198,7 +200,7 @@
           "groove": "shuffle"
         }
       },
-      {
+      "return": {
         "name": "return",
         "notes": "Back to the 12-bar with the anticipation hit. Full density restored. The drop made this feel like a new beginning even though it's the same changes.",
         "bars": 12,
@@ -225,6 +227,6 @@
           "groove": "shuffle"
         }
       }
-    ]
+    }
   }
 }

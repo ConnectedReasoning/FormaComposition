@@ -4,7 +4,7 @@
     "key": "G",
     "mode": "ionian",
     "tempo": 92,
-    "title": "Stand By Me",
+    "title": "based on the chord progression from Stand By Me",
     "seed": 162,
     "form_type": "song",
     "form": [
@@ -26,20 +26,8 @@
         "key": "G",
         "mode": "ionian",
         "bars": 8,
-        "progression": [
-          "I",
-          "vi",
-          "IV",
-          "V",
-          "I"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          1,
-          1,
-          2
-        ],
+        "progression": ["I", "vi", "IV", "V",  "I"  ],
+        "chord_bars":  [2,     2,    1,   1,    2   ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",

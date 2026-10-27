@@ -25,8 +25,10 @@
     },
     "title": "Deep Work Current",
     "seed": 31,
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["surface", "current", "undertow", "stillness"],
+    "sections": {
+      "surface": {
         "name": "surface",
         "bars": 20,
         "progression": [
@@ -45,7 +47,7 @@
         },
         "rest_probability": 0.35
       },
-      {
+      "current": {
         "name": "current",
         "bars": 24,
         "progression": [
@@ -68,7 +70,7 @@
         },
         "rest_probability": 0.3
       },
-      {
+      "undertow": {
         "name": "undertow",
         "bars": 24,
         "progression": [
@@ -91,7 +93,7 @@
         },
         "rest_probability": 0.3
       },
-      {
+      "stillness": {
         "name": "stillness",
         "bars": 20,
         "progression": [
@@ -114,6 +116,6 @@
         },
         "rest_probability": 0.4
       }
-    ]
+    }
   }
 }

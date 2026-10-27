@@ -6,8 +6,10 @@
     "mode": "dorian",
     "tempo": 96,
     "notes": "Cakewalk syncopation transplanted into D dorian -- for fun, testing how far the tresillo groove travels outside plain major. Same proven architecture as Cakewalk Strut v2 (ABA form, groove:'broken' at density:'full', swing:0.0, real breakdown before the reprise), just a different mode entirely. Dorian's signature color is its major IV (raised 6th relative to natural minor) -- i-IV (Dm-G) is the classic dorian vamp, so the progressions lean on that i-bVII-IV-i shape throughout rather than the plain I-IV-V-I of the original. Moodier, jazzier, more noir than the parlor-piano original -- same strut, different lighting.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["intro", "strain_a", "strain_b", "breakdown", "strain_a_reprise", "outro"],
+    "sections": {
+      "intro": {
         "name": "intro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -39,7 +41,7 @@
           }
         ]
       },
-      {
+      "strain_a": {
         "name": "strain_a",
         "bars": 16,
         "beats_per_bar": 4,
@@ -83,7 +85,7 @@
           }
         ]
       },
-      {
+      "strain_b": {
         "name": "strain_b",
         "bars": 16,
         "beats_per_bar": 4,
@@ -133,7 +135,7 @@
           }
         ]
       },
-      {
+      "breakdown": {
         "name": "breakdown",
         "bars": 8,
         "beats_per_bar": 4,
@@ -164,7 +166,7 @@
           }
         ]
       },
-      {
+      "strain_a_reprise": {
         "name": "strain_a_reprise",
         "bars": 16,
         "beats_per_bar": 4,
@@ -208,7 +210,7 @@
           }
         ]
       },
-      {
+      "outro": {
         "name": "outro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -240,6 +242,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

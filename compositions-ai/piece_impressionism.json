@@ -27,8 +27,10 @@
       ]
     },
     "seed": 1894,
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["clouds", "refraction", "evaporation"],
+    "sections": {
+      "clouds": {
         "name": "clouds",
         "bars": 16,
         "progression": [
@@ -47,7 +49,7 @@
         },
         "rest_probability": 0.3
       },
-      {
+      "refraction": {
         "name": "refraction",
         "bars": 20,
         "progression": [
@@ -72,7 +74,7 @@
         },
         "rest_probability": 0.4
       },
-      {
+      "evaporation": {
         "name": "evaporation",
         "bars": 16,
         "progression": [
@@ -90,6 +92,6 @@
         },
         "rest_probability": 0.5
       }
-    ]
+    }
   }
 }

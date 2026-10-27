@@ -105,8 +105,10 @@
     ],
     "title": "Shake the Disease (FormaComposition)",
     "seed": 1985,
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["intro", "verse_1", "chorus_1", "verse_2", "chorus_2", "bridge", "chorus_final", "outro"],
+    "sections": {
+      "intro": {
         "name": "intro",
         "bars": 8,
         "progression": [
@@ -127,7 +129,7 @@
         },
         "notes": "Bass pulse only. Primary melody (plea motif) enters as a fragment. Counterpoint voices silent here \u2014 sparse texture only."
       },
-      {
+      "verse_1": {
         "name": "verse_1",
         "bars": 16,
         "progression": [
@@ -167,7 +169,7 @@
           }
         ]
       },
-      {
+      "chorus_1": {
         "name": "chorus_1",
         "bars": 12,
         "chord_bars": [
@@ -213,7 +215,7 @@
           }
         ]
       },
-      {
+      "verse_2": {
         "name": "verse_2",
         "bars": 16,
         "progression": [
@@ -253,7 +255,7 @@
           }
         ]
       },
-      {
+      "chorus_2": {
         "name": "chorus_2",
         "bars": 12,
         "chord_bars": [
@@ -298,7 +300,7 @@
           }
         ]
       },
-      {
+      "bridge": {
         "name": "bridge",
         "bars": 8,
         "progression": [
@@ -338,7 +340,7 @@
           }
         ]
       },
-      {
+      "chorus_final": {
         "name": "chorus_final",
         "bars": 16,
         "chord_bars": [
@@ -384,7 +386,7 @@
           }
         ]
       },
-      {
+      "outro": {
         "name": "outro",
         "bars": 8,
         "progression": [
@@ -417,6 +419,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

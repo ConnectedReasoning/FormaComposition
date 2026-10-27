@@ -26,9 +26,9 @@
       ]
     },
     "notes": "20-minute four-movement ambient/cinematic work in B aeolian. Inspired by Faltermeyer's Top Gun Anthem bed. FormaComposition generates pad + anthem melody tracks. Juno-6V arpeggiator runs externally in Logic, synced at 116 BPM, 8th notes, receiving MIDI from harmony track. Guitar layered live at M2 peak and M4 climax. Four movements: Approach (5 min), Engagement (5 min), Descent (4 min), Return (6 min).",
-    "sections": [
-      {
-        "name": "m1_bed",
+    "form_type": "song",
+    "sections": {
+      "m1_bed": {
         "notes": "MOVEMENT 1: APPROACH. Pure bed \u2014 pad and bass only. No anthem melody yet. The arpeggio (Juno-6V external) establishes the pulse. Motif transform: inversion \u2014 the motif shape descends, questioning. Fade in from silence.",
         "bars": 32,
         "progression": [
@@ -51,8 +51,7 @@
         "rest_probability": 0.55,
         "beats_per_bar": 4
       },
-      {
-        "name": "m1_anthem",
+      "m1_anthem": {
         "notes": "Anthem melody enters \u2014 lyrical, simple, first statement of motif in inversion. Melody is the question. Bass moves to root_fifth for gentle forward motion. Arc breathes across the section.",
         "bars": 48,
         "progression": [
@@ -75,8 +74,7 @@
         "rest_probability": 0.35,
         "beats_per_bar": 4
       },
-      {
-        "name": "m2_build",
+      "m2_build": {
         "notes": "MOVEMENT 2: ENGAGEMENT. Harmonic departure to D major (bIII) \u2014 brighter, more open, tension with B aeolian tonal center. Motif transform: augmentation \u2014 same shape, twice as slow, more weight. Density builds. Bass walks for forward motion.",
         "bars": 32,
         "progression": [
@@ -99,8 +97,7 @@
         "rest_probability": 0.25,
         "beats_per_bar": 4
       },
-      {
-        "name": "m2_peak",
+      "m2_peak": {
         "notes": "Full density peak. Anthem motif augmented \u2014 long, sustained, heroic. GUITAR ENTERS HERE. Walking bass drives forward. This is the emotional apex of the piece. Counterpoint added below melody for extra harmonic weight.",
         "bars": 48,
         "progression": [
@@ -135,8 +132,7 @@
           }
         ]
       },
-      {
-        "name": "m3_dissolve",
+      "m3_dissolve": {
         "notes": "MOVEMENT 3: DESCENT. Harmonic shift to E minor (iv relative). Motif transform: retrograde \u2014 the anthem played backwards, fragmenting. Density drops sharply. Guitar gone. Melody becomes generative, wandering rather than stating. The bed unravels.",
         "bars": 32,
         "progression": [
@@ -159,8 +155,7 @@
         "rest_probability": 0.45,
         "beats_per_bar": 4
       },
-      {
-        "name": "m3_void",
+      "m3_void": {
         "notes": "Stripped back to near silence. Sparse, pedal bass, generative melody fragments. The arpeggio (external) slows or stops at your discretion in Logic \u2014 automate Juno-6V arpeggiator rate here. The harmonic valley before the return.",
         "bars": 32,
         "progression": [
@@ -183,8 +178,7 @@
         "rest_probability": 0.65,
         "beats_per_bar": 4
       },
-      {
-        "name": "m4_return",
+      "m4_return": {
         "notes": "MOVEMENT 4: RETURN. Back to B aeolian but wider harmonic sweep \u2014 i-VI-III-VII gives more space than the original i-VII-VI-VII. Motif transform: expand \u2014 intervals widened, more heroic than the original. Anthem voice returns lyrical. The arpeggio resumes. Fade in from the void.",
         "bars": 48,
         "progression": [
@@ -207,8 +201,7 @@
         "rest_probability": 0.3,
         "beats_per_bar": 4
       },
-      {
-        "name": "m4_climax",
+      "m4_climax": {
         "notes": "Final climax. Full density, develop behavior, expanded motif at full expression. GUITAR RETURNS \u2014 sustained, sparse, high register. Walking bass. Counterpoint below. The piece resolves what Movement 2 declared.",
         "bars": 32,
         "progression": [
@@ -243,8 +236,7 @@
           }
         ]
       },
-      {
-        "name": "m4_fade",
+      "m4_fade": {
         "notes": "Dissolution back to the bed. Sparse, pedal, generative \u2014 mirrors the opening but now the motif has been heard in all its transforms. The piece ends as it began, but earned. Fade to silence.",
         "bars": 16,
         "progression": [
@@ -267,6 +259,6 @@
         "rest_probability": 0.55,
         "beats_per_bar": 4
       }
-    ]
+    }
   }
 }

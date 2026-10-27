@@ -28,8 +28,10 @@
     },
     "notes": "A 10-minute romantic piece for Rebecca. Strings-forward, no piano. G major \u2014 warm, open, and resonant under guitar or voice. Emotional arc: quiet arrival \u2192 growing tenderness \u2192 full warmth \u2192 bloom at center \u2192 a breath of stillness \u2192 return with memory \u2192 gentle evening close. Manuel plays guitar or sings over the bed. The generated track is the embrace; his instrument is the voice in it.",
     "title": "Rebecca",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["approach", "tenderness", "warmth", "bloom", "stillness", "return", "evening"],
+    "sections": {
+      "approach": {
         "name": "approach",
         "bars": 12,
         "progression": [
@@ -44,7 +46,7 @@
         "rhythm": "motif",
         "notes": "She doesn't know it's about to begin. Sparse strings open slowly \u2014 single notes, long tones. The I-V-vi-IV progression is deliberately familiar and warm. Pedal bass barely moves. Leave room for silence."
       },
-      {
+      "tenderness": {
         "name": "tenderness",
         "bars": 20,
         "progression": [
@@ -72,7 +74,7 @@
           }
         ]
       },
-      {
+      "warmth": {
         "name": "warmth",
         "bars": 24,
         "progression": [
@@ -101,7 +103,7 @@
           }
         ]
       },
-      {
+      "bloom": {
         "name": "bloom",
         "bars": 20,
         "progression": [
@@ -119,7 +121,7 @@
         "rhythm": "motif",
         "notes": "The emotional peak. The iii chord (B minor in G) appears for the first time \u2014 a touch of shadow that makes the resolution back to I feel earned. Full density, developed melody, walking bass. This is the center of the song \u2014 where it says what it has been building toward. No counterpoint here; the developed motif carries it."
       },
-      {
+      "stillness": {
         "name": "stillness",
         "bars": 16,
         "progression": [
@@ -134,7 +136,7 @@
         "rhythm": "motif",
         "notes": "A quiet breath after the bloom. Sparse texture, pedal bass, generative melody wanders gently \u2014 like watching light move. I-IV-I is a rocking motion, almost lullaby-like. This is where a listener catches their breath before the return."
       },
-      {
+      "return": {
         "name": "return",
         "bars": 24,
         "progression": [
@@ -164,7 +166,7 @@
           }
         ]
       },
-      {
+      "evening": {
         "name": "evening",
         "bars": 24,
         "progression": [
@@ -181,6 +183,6 @@
         "rhythm": "motif",
         "notes": "The piece does not end \u2014 it simply becomes quiet. Sparse melody, root-only bass, long slow fade. The I-V-I-IV-I progression is the most resolved thing in tonal music. By the end only the strings remain, then silence. Give this section long reverb tails in Logic."
       }
-    ]
+    }
   }
 }

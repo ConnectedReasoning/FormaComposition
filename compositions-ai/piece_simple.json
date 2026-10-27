@@ -2,8 +2,10 @@
       "title": "Simple",
       "tempo": 120,
       "transform_sequence": ["original", "inversion", "retrograde"],
-      "sections": [
-          {
+      "form_type": "song",
+      "form": ["opening"],
+      "sections": {
+          "opening": {
               "name": "opening",
               "rest_probability": 0.15,
               "bars": 48,
@@ -15,6 +17,5 @@
               "rhythm": "motif",
               "harmony_rhythm": { "rhythm": "motif" }
           }
-
-      ]
+      }
   }

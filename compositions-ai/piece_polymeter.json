@@ -6,8 +6,10 @@
     "mode": "ionian",
     "tempo": 100,
     "notes": "Isolated test of the new SectionModel.second_melody field. Lead melody runs plain free rhythm (no groove) at the normal 4/4 bar grid. second_melody carries its own rhythm_pattern with length_beats=3.0, tiled continuously across the full 16-bar (64-beat) section via rhythm_pattern_to_events -- since 3 doesn't divide the 4-beat bar evenly, its onsets should drift out of phase with the bar grid over the section instead of resyncing every bar: genuine polymeter, not just a different subdivision. One counterpoint voice also present to prove second_melody coexists with the existing counterpoint list mechanism without conflict.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["main"],
+    "sections": {
+      "main": {
         "name": "main",
         "bars": 16,
         "beats_per_bar": 4,
@@ -73,6 +75,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

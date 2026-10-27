@@ -50,8 +50,13 @@
       "retrograde_inversion"
     ],
     "notes": "Faux-serial cinematic piece in B locrian. Four chromatic chords rotated across five movements. Transform sequence drives melodic mutation across the arc. Canon counterpoint in movement II. Total ~140 bars, approx 10-12 minutes at 96 BPM. transform_sequence corrected: original 4 entries wrapped across 6 sections, which silently misassigned two movements against their own stated intent -- suspension would have received retrograde_inversion instead of the retrograde its own notes describe, and inversion_mirror would have received original instead of the retrograde_inversion its own notes explicitly name. Extended to 6 entries, one per section. positions 0/1/3/4 (prime_statement/inversion_entry/suspension/inversion_mirror) are read directly from each section's own notes. positions 2/5 (contrapuntal_web/dissolution) have no single explicit transform claim in their notes and were a judgment call, not a correction -- worth confirming these two specifically.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": [
+      "prime_statement", "inversion_entry", "contrapuntal_web", "suspension",
+      "inversion_mirror", "dissolution"
+    ],
+    "sections": {
+      "prime_statement": {
         "name": "prime_statement",
         "notes": "MOVEMENT I. Row introduced in original form. Sparse, angular, searching. The motif appears once or twice \u2014 no development yet, just declaration. Bass anchors on root only. No counterpoint. Arc holds flat \u2014 no emotional direction yet.",
         "bars": 16,
@@ -74,7 +79,7 @@
         "rhythm": "motif",
         "rest_probability": 0.2
       },
-      {
+      "inversion_entry": {
         "name": "inversion_entry",
         "notes": "Row inversion enters. Melodic shape descends where it previously rose \u2014 the mirror image. Density increases slightly. Bass moves to melodic for forward motion. Still no counterpoint \u2014 the single voice is enough here.",
         "bars": 20,
@@ -97,7 +102,7 @@
         "rhythm": "motif",
         "rest_probability": 0.15
       },
-      {
+      "contrapuntal_web": {
         "name": "contrapuntal_web",
         "notes": "MOVEMENT II. Full contrapuntal complexity. Canon at 1.5 bars offset \u2014 the row chasing itself. All four transforms active via transform_sequence. Walking bass drives forward relentlessly. Two breath waves across 32 bars. This is the emotional and intellectual center of the piece.",
         "bars": 32,
@@ -133,7 +138,7 @@
           }
         ]
       },
-      {
+      "suspension": {
         "name": "suspension",
         "notes": "MOVEMENT III. Slow movement \u2014 near silence after the complexity of Movement II. Sparse melody fragments, pedal bass, very long rests. The row appears in retrograde \u2014 backward, dissolving. No counterpoint. Arc holds flat. This is the void at the center of the piece.",
         "bars": 24,
@@ -156,7 +161,7 @@
         "rhythm": "free",
         "rest_probability": 0.6
       },
-      {
+      "inversion_mirror": {
         "name": "inversion_mirror",
         "notes": "MOVEMENT IV. Mirror of Movement I but darker \u2014 retrograde_inversion now drives the melody. The same chromatic chords but entered from bVII, which shifts the harmonic gravity. Density builds back toward full. Bass becomes melodic again. Counterpoint re-enters below the melody \u2014 a reversal of Movement II where it sat above.",
         "bars": 24,
@@ -191,7 +196,7 @@
           }
         ]
       },
-      {
+      "dissolution": {
         "name": "dissolution",
         "notes": "MOVEMENT V. The row breaks apart. Sparse, generative melody \u2014 fragments only, no complete statements. Bass pulls back to root_only. No counterpoint. Arc fades to nothing. The piece ends mid-thought, unresolved \u2014 serial logic demands no cadence.",
         "bars": 24,
@@ -214,6 +219,6 @@
         "rhythm": "free",
         "rest_probability": 0.55
       }
-    ]
+    }
   }
 }

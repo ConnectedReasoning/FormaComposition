@@ -32,8 +32,10 @@
     },
     "notes": "Prog rock cinematic instrumental. E aeolian. Seven sections across ~8-9 minutes. Arc: atmosphere \u2192 motif birth \u2192 building complexity \u2192 climax \u2192 breakdown \u2192 recapitulation \u2192 dissolution. Layer Mellotron flutes on counterpoint track in Logic. ARP 2600 or Mini V lead over the melody track. Add a synth arpeggio manually in Logic over the harmony chords \u2014 the Xanadu-ish running 16th-note figure the engine cannot generate.",
     "title": "Xanadu Voyage",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["prologue", "awakening", "statement", "development", "breakdown", "recapitulation", "coda"],
+    "sections": {
+      "prologue": {
         "name": "prologue",
         "bars": 16,
         "beats_per_bar": 4,
@@ -57,7 +59,7 @@
         "rest_probability": 0.15,
         "notes": "Pure atmosphere. Pedal E drone underneath slowly shifting harmony. No motif \u2014 this is mist and space. Where the synth arpeggio enters manually in Logic. Very long, very spacious. Fade in from silence."
       },
-      {
+      "awakening": {
         "name": "awakening",
         "bars": 16,
         "beats_per_bar": 4,
@@ -81,7 +83,7 @@
         "rest_probability": 0.15,
         "notes": "Motif appears for the first time \u2014 sparse, tentative, like something stirring. The xanadu_call shape in its original form only. Bass stays minimal. No counterpoint yet. The \u266dIII (G) arrives for the first prog color moment."
       },
-      {
+      "statement": {
         "name": "statement",
         "bars": 24,
         "beats_per_bar": 4,
@@ -125,7 +127,7 @@
           }
         ]
       },
-      {
+      "development": {
         "name": "development",
         "bars": 32,
         "beats_per_bar": 4,
@@ -177,7 +179,7 @@
           }
         ]
       },
-      {
+      "breakdown": {
         "name": "breakdown",
         "bars": 16,
         "beats_per_bar": 4,
@@ -201,7 +203,7 @@
         "rest_probability": 0.15,
         "notes": "The piece pulls back dramatically after the development peak. Sparse texture, pedal bass, long rests. Like the eye of the storm. No counterpoint. Sets up the recapitulation. The Mellotron strings thin out here \u2014 let them decay in Logic."
       },
-      {
+      "recapitulation": {
         "name": "recapitulation",
         "bars": 24,
         "beats_per_bar": 4,
@@ -245,7 +247,7 @@
           }
         ]
       },
-      {
+      "coda": {
         "name": "coda",
         "bars": 20,
         "beats_per_bar": 4,
@@ -269,6 +271,6 @@
         "rest_probability": 0.3,
         "notes": "Dissolution. Back to the opening harmonic simplicity \u2014 Em, D, C, Em. Very long chord durations (5 bars each). The motif appears once, maybe twice, then stops. Bass anchors on root only. No counterpoint. The piece exhales into silence. Let Valhalla Supermassive tail ring for 8+ seconds after the last note."
       }
-    ]
+    }
   }
 }

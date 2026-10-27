@@ -49,8 +49,14 @@
     ],
     "title": "Slack Key Suite",
     "seed": 4,
-    "sections": [
-      {
+    "form_type": "song",
+    "form": [
+      "porch_open", "porch_open_2", "porch_step", "breath_1",
+      "afternoon_light", "evening_breeze", "porch_recede", "breath_2",
+      "night_porch", "porch_echo", "receding", "porch_reprise"
+    ],
+    "sections": {
+      "porch_open": {
         "name": "porch_open",
         "bars": 4,
         "progression": [
@@ -78,7 +84,7 @@
           }
         ]
       },
-      {
+      "porch_open_2": {
         "name": "porch_open",
         "bars": 30,
         "progression": [
@@ -106,7 +112,7 @@
           }
         ]
       },
-      {
+      "porch_step": {
         "name": "porch_step",
         "bars": 30,
         "progression": [
@@ -134,7 +140,7 @@
           }
         ]
       },
-      {
+      "breath_1": {
         "name": "breath_1",
         "bars": 8,
         "progression": [
@@ -147,7 +153,7 @@
         "rhythm": "free",
         "rest_probability": 0.3
       },
-      {
+      "afternoon_light": {
         "name": "afternoon_light",
         "bars": 90,
         "progression": [
@@ -175,7 +181,7 @@
           }
         ]
       },
-      {
+      "evening_breeze": {
         "name": "evening_breeze",
         "bars": 70,
         "progression": [
@@ -203,7 +209,7 @@
           }
         ]
       },
-      {
+      "porch_recede": {
         "name": "porch_recede",
         "bars": 60,
         "progression": [
@@ -230,7 +236,7 @@
           }
         ]
       },
-      {
+      "breath_2": {
         "name": "breath_2",
         "bars": 8,
         "progression": [
@@ -244,7 +250,7 @@
         "rhythm": "free",
         "rest_probability": 0.28
       },
-      {
+      "night_porch": {
         "name": "night_porch",
         "bars": 100,
         "progression": [
@@ -275,7 +281,7 @@
           }
         ]
       },
-      {
+      "porch_echo": {
         "name": "porch_echo",
         "bars": 70,
         "progression": [
@@ -303,7 +309,7 @@
           }
         ]
       },
-      {
+      "receding": {
         "name": "receding",
         "bars": 50,
         "progression": [
@@ -330,7 +336,7 @@
           }
         ]
       },
-      {
+      "porch_reprise": {
         "name": "porch_reprise",
         "bars": 39,
         "progression": [
@@ -344,6 +350,6 @@
         "rhythm": "free",
         "rest_probability": 0.05
       }
-    ]
+    }
   }
 }

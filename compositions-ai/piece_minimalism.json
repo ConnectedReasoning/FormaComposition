@@ -34,8 +34,10 @@
       "retrograde",
       "diminution"
     ],
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["ground", "shift", "accumulation"],
+    "sections": {
+      "ground": {
         "name": "ground",
         "bars": 32,
         "progression": [
@@ -57,7 +59,7 @@
         "rhythm": "motif",
         "rest_probability": 0.0
       },
-      {
+      "shift": {
         "name": "shift",
         "bars": 32,
         "progression": [
@@ -91,7 +93,7 @@
           }
         ]
       },
-      {
+      "accumulation": {
         "name": "accumulation",
         "bars": 32,
         "progression": [
@@ -125,6 +127,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

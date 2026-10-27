@@ -27,8 +27,10 @@
     },
     "notes": "A 5-minute meditation on returning to a place that's home but changed. D Mixolydian throughout \u2014 the flattened 7 (C natural) is the bittersweet color. The false resolution V\u2192bVI in 'Passage' is the moment of 'not quite home.' The piece doesn't resolve this; it settles with it. Emotional arc: hesitation \u2192 walking through \u2192 recognition \u2192 acceptance.",
     "title": "Return",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["threshold", "passage", "recognition", "settling"],
+    "sections": {
+      "threshold": {
         "name": "threshold",
         "bars": 12,
         "progression": [
@@ -48,7 +50,7 @@
         "rhythm": "free",
         "notes": "Standing at a door. The question mark. Pedal bass holds D (home, but absent). I-V-vi progression is open, unresolved. Melody barely moves \u2014 just hints of the motif, fragmented. Long silences. The listener should feel anticipation, not comfort."
       },
-      {
+      "passage": {
         "name": "passage",
         "bars": 16,
         "progression": [
@@ -82,7 +84,7 @@
           }
         ]
       },
-      {
+      "recognition": {
         "name": "recognition",
         "bars": 20,
         "progression": [
@@ -108,7 +110,7 @@
         "rhythm": "free",
         "notes": "In the rooms. The bVII chord (C major) appears for the first time \u2014 this is the D Mixolydian color revealed. The place is familiar (I, IV, V anchors), but that C natural makes it foreign. Walking bass drives the motion without urgency. Developed melody (augmentation or inversion of the motif) stretches the arrival gesture into longer phrases. This is where the piece says: 'I'm home, but it's not the home I left.' The breath arc means it swells naturally \u2014 no forced climax, just inevitable growth."
       },
-      {
+      "settling": {
         "name": "settling",
         "bars": 16,
         "progression": [
@@ -130,6 +132,6 @@
         "rhythm": "free",
         "notes": "The arrival is quiet. Sparse texture, single bass notes (root only). The melody barely moves \u2014 echoes of the motif, retrograded or inverted. The piece cycles through D\u2192C\u2192G\u2192D, never resolving the Mixolydian ambiguity. By the end, the bittersweet quality (C natural) is just accepted as part of home. Not resolved, not answered \u2014 just inhabited. The fade is gradual; the piece doesn't end, it becomes silence."
       }
-    ]
+    }
   }
 }

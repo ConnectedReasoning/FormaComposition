@@ -6,8 +6,10 @@
     "mode": "lydian",
     "tempo": 120,
     "notes": "Cakewalk syncopation transplanted into C lydian -- the other end of the color spectrum from Gaslight Strut's dorian. Same proven architecture (ABA form, groove:'broken' at density:'full', swing:0.0, real breakdown before the reprise), but lydian's raised 4th makes II a major chord instead of the usual minor ii -- that's the whole personality of the mode (Simpsons-theme, 'Flying'-from-E.T. brightness). I-II is lydian's signature vamp the way i-IV was dorian's, so it drives strain A. Faster tempo than Gaslight Strut on purpose -- brighter mode, quicker skip in the step.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["intro", "strain_a", "strain_b", "breakdown", "strain_a_reprise", "outro"],
+    "sections": {
+      "intro": {
         "name": "intro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -39,7 +41,7 @@
           }
         ]
       },
-      {
+      "strain_a": {
         "name": "strain_a",
         "bars": 16,
         "beats_per_bar": 4,
@@ -83,7 +85,7 @@
           }
         ]
       },
-      {
+      "strain_b": {
         "name": "strain_b",
         "bars": 16,
         "beats_per_bar": 4,
@@ -133,7 +135,7 @@
           }
         ]
       },
-      {
+      "breakdown": {
         "name": "breakdown",
         "bars": 8,
         "beats_per_bar": 4,
@@ -164,7 +166,7 @@
           }
         ]
       },
-      {
+      "strain_a_reprise": {
         "name": "strain_a_reprise",
         "bars": 16,
         "beats_per_bar": 4,
@@ -208,7 +210,7 @@
           }
         ]
       },
-      {
+      "outro": {
         "name": "outro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -240,6 +242,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

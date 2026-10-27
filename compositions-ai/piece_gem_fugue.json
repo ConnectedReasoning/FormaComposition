@@ -6,7 +6,7 @@
     "mode": "aeolian",
     "tempo": 85,
     "seed": 1750,
-    "form_type": "narrative",
+    "form_type": "song",
     "motif": {
       "name": "fugue_subject",
       "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
@@ -14,8 +14,9 @@
       "transform_pool": ["inversion", "retrograde"]
     },
     "notes": "A 4-part algorithmic fugue. Section 1 is the Exposition, with voices entering every 4 beats (Soprano -> Alto -> Tenor -> Bass). Section 2 is the Stretto Development, compressing the entries to every 2 beats. Section 3 is the Coda, applying 'augmentation' to stretch the subject to twice its length over a massive pedal point.",
-    "sections": [
-      {
+    "form": ["exposition", "stretto_development", "augmentation_coda"],
+    "sections": {
+      "exposition": {
         "name": "exposition",
         "bars": 16,
         "progression": ["i", "v", "i", "iv", "V", "i", "V", "i"],
@@ -59,7 +60,7 @@
           }
         ]
       },
-      {
+      "stretto_development": {
         "name": "stretto_development",
         "bars": 12,
         "progression": ["i", "IV", "V", "i", "iv", "V"],
@@ -103,7 +104,7 @@
           }
         ]
       },
-      {
+      "augmentation_coda": {
         "name": "augmentation_coda",
         "bars": 16,
         "progression": ["i", "v", "i", "V", "i", "iv", "V", "i"],
@@ -143,6 +144,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

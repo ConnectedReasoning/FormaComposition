@@ -6,8 +6,14 @@
     "mode": "ionian",
     "tempo": 100,
     "notes": "Classic 4-minute pop song, a little prog / a little yacht rock -- Supertramp lane (Logical Song / Take the Long Way Home territory: quartal-adjacent extended chords at density='full', laid-back light-swing pocket, sax-like countermelody). Structure: intro, verse, chorus, verse, chorus, transition (real breakdown -- learned from Cakewalk Strut not to stay 'too alive' the whole way through), bridge (borrowed bVII for a modal-mixture lift + second_melody carrying a genuine polymeter drift as the 'prog' touch), final chorus modulated up a whole step G->A (uses the sec_key/sec_mode fix made today -- confirmed counterpoint and second_melody now actually follow a section-level key override instead of silently staying in the piece's original key), outro. swing=0.15 throughout on purpose (unlike the cakewalk/ragtime rule of swing=0.0 -- yacht rock's pocket, e.g. Steely Dan/Doobie Brothers, genuinely does want a light shuffle, a different genre calling for a different informed choice, not the same rule applied blindly). Counterpoint (one voice, below, sax/horn-like) present only in choruses/bridge/final chorus, absent in verses -- enters with the hook the way Xanadu's counterpoint did.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": [
+      "intro", "verse_1", "chorus_1", "verse_2",
+      "chorus_2", "transition", "bridge", "final_chorus",
+      "outro"
+    ],
+    "sections": {
+      "intro": {
         "name": "intro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -42,7 +48,7 @@
           }
         ]
       },
-      {
+      "verse_1": {
         "name": "verse_1",
         "bars": 16,
         "beats_per_bar": 4,
@@ -85,7 +91,7 @@
           }
         ]
       },
-      {
+      "chorus_1": {
         "name": "chorus_1",
         "bars": 16,
         "beats_per_bar": 4,
@@ -135,7 +141,7 @@
           }
         ]
       },
-      {
+      "verse_2": {
         "name": "verse_2",
         "bars": 12,
         "beats_per_bar": 4,
@@ -174,7 +180,7 @@
           }
         ]
       },
-      {
+      "chorus_2": {
         "name": "chorus_2",
         "bars": 16,
         "beats_per_bar": 4,
@@ -224,7 +230,7 @@
           }
         ]
       },
-      {
+      "transition": {
         "name": "transition",
         "bars": 4,
         "beats_per_bar": 4,
@@ -253,7 +259,7 @@
           }
         ]
       },
-      {
+      "bridge": {
         "name": "bridge",
         "bars": 16,
         "beats_per_bar": 4,
@@ -319,7 +325,7 @@
           }
         ]
       },
-      {
+      "final_chorus": {
         "name": "final_chorus",
         "bars": 16,
         "beats_per_bar": 4,
@@ -370,7 +376,7 @@
           }
         ]
       },
-      {
+      "outro": {
         "name": "outro",
         "bars": 4,
         "beats_per_bar": 4,
@@ -404,6 +410,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

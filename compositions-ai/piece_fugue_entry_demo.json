@@ -10,8 +10,10 @@
     "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
     "transform_pool": ["inversion", "retrograde", "augmentation"]
   },
-  "sections": [
-    {
+  "form_type": "song",
+  "form": ["exposition"],
+  "sections": {
+    "exposition": {
       "name": "exposition",
       "bars": 8,
       "beats_per_bar": 4,
@@ -41,5 +43,5 @@
         }
       ]
     }
-  ]
+  }
 }

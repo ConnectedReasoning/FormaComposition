@@ -27,8 +27,14 @@
     "title": "Still Cove",
     "notes": "v2 \u2014 same three-movement shape but each movement now has internal sectional variation rather than a single long bar count. Opening builds from breath to arrival; center has a hinge and peak; release dissolves through two stages.",
     "logic_session": "still_cove_v1.logicx",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": [
+      "opening_breath", "awaken", "opening_motion", "opening_arrival",
+      "opening_motion", "opening_arrival", "center_hinge", "center_swell",
+      "center_peak", "release_turn", "release_dissolve"
+    ],
+    "sections": {
+      "opening_breath": {
         "name": "opening_breath",
         "bars": 2,
         "notes": "Arrival from silence. Nothing stated yet \u2014 harmony barely breathes, melody almost absent. Let the reverb tails from Logic do the work.",
@@ -46,7 +52,7 @@
         },
         "rest_probability": 0.15
       },
-      {
+      "awaken": {
         "name": "awaken",
         "bars": 8,
         "notes": "Arrival from silence. Nothing stated yet \u2014 harmony barely breathes, melody almost absent. Let the reverb tails from Logic do the work.",
@@ -64,7 +70,7 @@
         },
         "rest_probability": 0.05
       },
-      {
+      "opening_motion": {
         "name": "opening_motion",
         "bars": 12,
         "notes": "First movement enters. Melody starts developing, bass still anchored, counterpoint begins underneath.",
@@ -93,7 +99,7 @@
           }
         ]
       },
-      {
+      "opening_arrival": {
         "name": "opening_arrival",
         "bars": 10,
         "notes": "The opening lands. Full texture, melody lyrical, bass moves to root_fifth. This is where the cinematic feeling crystallizes.",
@@ -122,65 +128,7 @@
           }
         ]
       },
-      {
-        "name": "opening_motion",
-        "bars": 12,
-        "notes": "First movement enters. Melody starts developing, bass still anchored, counterpoint begins underneath.",
-        "progression": [
-          "i",
-          "VII",
-          "iv",
-          "v"
-        ],
-        "density": "medium",
-        "melody": "develop",
-        "bass_style": "pedal",
-        "arc": "swell",
-        "rhythm": "free",
-        "rest_probability": 0.15,
-        "voices": [
-          {
-            "behavior": "develop",
-            "velocity": 72
-          },
-          {
-            "species": "first",
-            "register": "tenor",
-            "dissonance": "none",
-            "velocity": 58
-          }
-        ]
-      },
-      {
-        "name": "opening_arrival",
-        "bars": 10,
-        "notes": "The opening lands. Full texture, melody lyrical, bass moves to root_fifth. This is where the cinematic feeling crystallizes.",
-        "progression": [
-          "i",
-          "VII",
-          "iv",
-          "v"
-        ],
-        "density": "medium",
-        "melody": "lyrical",
-        "bass_style": "root_fifth",
-        "arc": "plateau",
-        "rhythm": "free",
-        "rest_probability": 0.1,
-        "voices": [
-          {
-            "behavior": "lyrical",
-            "velocity": 72
-          },
-          {
-            "species": "first",
-            "register": "tenor",
-            "dissonance": "none",
-            "velocity": 58
-          }
-        ]
-      },
-      {
+      "center_hinge": {
         "name": "center_hinge",
         "bars": 16,
         "notes": "Harmonic shift \u2014 III and VII brought forward, creating a brighter dorian color. A moment of openness before the long swell.",
@@ -209,7 +157,7 @@
           }
         ]
       },
-      {
+      "center_swell": {
         "name": "center_swell",
         "bars": 32,
         "notes": "The long ascent. Density increases, arc builds steadily. The emotional center of the piece.",
@@ -238,7 +186,7 @@
           }
         ]
       },
-      {
+      "center_peak": {
         "name": "center_peak",
         "bars": 32,
         "notes": "Sustain the peak before the turn. Plateau here \u2014 no crescendo, just fullness. The breath before the release.",
@@ -267,7 +215,7 @@
           }
         ]
       },
-      {
+      "release_turn": {
         "name": "release_turn",
         "bars": 24,
         "notes": "The turn. iv-i darkens the color and begins the dissolution. Bass pulls back to root_only. Counterpoint drops out.",
@@ -284,7 +232,7 @@
         "rhythm": "free",
         "rest_probability": 0.15
       },
-      {
+      "release_dissolve": {
         "name": "release_dissolve",
         "bars": 32,
         "notes": "Final dissolution. Only iv and i remain \u2014 minimal harmonic motion, long chord durations, melody sparse. Let it evaporate.",
@@ -302,6 +250,6 @@
         },
         "rest_probability": 0.5
       }
-    ]
+    }
   }
 }
