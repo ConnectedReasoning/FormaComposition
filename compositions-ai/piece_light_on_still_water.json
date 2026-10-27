@@ -4,8 +4,10 @@
     "theme": "Open Sky",
     "tempo": 60,
     "notes": "F Lydian companion piece to Still Cove. Slower and more luminous. The raised 4th (I-II Lydian shimmer) is the signature. Counterpoint only in rise section. Not yet tested in Logic — try Still Cove instrument palette first as a starting point.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["dawn", "rise", "peak", "dissolve"],
+    "sections": {
+      "dawn": {
         "name": "dawn",
         "bars": 8,
         "progression": ["I", "II", "I", "II"],
@@ -16,7 +18,7 @@
         "rhythm": "motif",
         "notes": "Pure Lydian shimmer. I-II establishes the raised 4th floating quality immediately."
       },
-      {
+      "rise": {
         "name": "rise",
         "bars": 12,
         "progression": ["I", "II", "VII", "I"],
@@ -33,7 +35,7 @@
         "rhythm": "motif",
         "notes": "Emotional center. Counterpoint strings enter here."
       },
-      {
+      "peak": {
         "name": "peak",
         "bars": 10,
         "progression": ["I", "V", "II", "VII", "I"],
@@ -44,7 +46,7 @@
         "rhythm": "motif",
         "notes": "Most harmonic motion. Walking bass + develop melody + full voicings."
       },
-      {
+      "dissolve": {
         "name": "dissolve",
         "bars": 8,
         "progression": ["I", "II", "I"],
@@ -55,6 +57,6 @@
         "rhythm": "motif",
         "notes": "Returns to opening shimmer. Generative melody wanders over Lydian I-II drone."
       }
-    ]
+    }
   }
 }

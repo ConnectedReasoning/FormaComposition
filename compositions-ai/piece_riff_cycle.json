@@ -22,8 +22,10 @@
       ]
     },
     "notes": "Test piece for the six-motif / two-counterpoint experiment. Simpler and shorter than Xanadu Voyage on purpose: 6 sections, 64 bars, ~2 minutes at 128bpm, D mixolydian (I-VII-IV rock vamp, no chromatic bass tricks). IMPORTANT lesson from first render: section-level 'motif' (top-level key) is a no-op for melody -- confirmed by the engine's own lint. The wired path is melody-as-dict (VoiceModel shape) with 'motif' embedded inside it, which is what every section below actually uses. transform_pool:[] on chorus_a/chorus_b's motifs verified against melody.py's generate_develop: empty pool -> transform_name resolves to None -> untransformed base intervals every retiling -- genuine riff repetition, not development. Bass in both chorus halves uses bass_style:'motif' so bass and lead state the same riff in unison (bass.py's style_motif threads the section's active_motif_def through). Two counterpoint voices (above + below) run from the verse through the bridge. harmony_rhythm:'sustain' added everywhere melody uses rhythm:'motif', after the first render showed 'motif' rhythm on a section cascades to harmony as 'free' (NOT 'motif' -- that's deliberate, see schemas.py), producing 7-12x more chord events than melody notes and burying the tune; 'sustain' holds the harmonic span instead of re-onsetting constantly. Lead velocities raised for headroom over bass/harmony defaults (70/65). Suggested instruments, following the recent 'simple synths reveal detail better' conclusion: Juno-6V for bass (clean DCO, no drift to muddy the riff unison), Jup-8V or Mini V for lead, Mellotron flutes or a second simple pad for the two counterpoint voices kept in contrasting registers so they stay separable by ear.",
-    "sections": [
-      {
+    "form_type": "song",
+    "form": ["intro", "verse", "chorus_a", "chorus_b", "bridge", "outro"],
+    "sections": {
+      "intro": {
         "name": "intro",
         "bars": 8,
         "beats_per_bar": 4,
@@ -73,7 +75,7 @@
           }
         ]
       },
-      {
+      "verse": {
         "name": "verse",
         "bars": 16,
         "beats_per_bar": 4,
@@ -140,7 +142,7 @@
           }
         ]
       },
-      {
+      "chorus_a": {
         "name": "chorus_a",
         "bars": 8,
         "beats_per_bar": 4,
@@ -210,7 +212,7 @@
           }
         ]
       },
-      {
+      "chorus_b": {
         "name": "chorus_b",
         "bars": 8,
         "beats_per_bar": 4,
@@ -280,7 +282,7 @@
           }
         ]
       },
-      {
+      "bridge": {
         "name": "bridge",
         "bars": 16,
         "beats_per_bar": 4,
@@ -357,7 +359,7 @@
           }
         ]
       },
-      {
+      "outro": {
         "name": "outro",
         "bars": 8,
         "beats_per_bar": 4,
@@ -405,6 +407,6 @@
           }
         ]
       }
-    ]
+    }
   }
 }

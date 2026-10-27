@@ -50,8 +50,14 @@
       "change": "arp -1 octave; melody drops its last note; alternate arp notes panned left/right"
     }
   ],
-  "sections": [
-    {
+  "form_type": "song",
+  "form": [
+    "INTRO", "VERSE 1", "VERSE 2", "PRE-CHORUS",
+    "CHORUS", "CHORUS LIFT", "BRIDGE", "BREAKDOWN",
+    "INSTRUMENTAL", "OUTRO"
+  ],
+  "sections": {
+    "INTRO": {
       "id": 1,
       "name": "INTRO",
       "role": "opener / reset",
@@ -73,7 +79,7 @@
       "texture": "soft pad",
       "phrase_arc": "arp alone phrases 1-2; pad phrase 3; bass phrase 4; thin out phrase 7"
     },
-    {
+    "VERSE 1": {
       "id": 2,
       "name": "VERSE 1",
       "role": "verse",
@@ -95,7 +101,7 @@
       "texture": "pad",
       "phrase_arc": "melody enters phrase 3"
     },
-    {
+    "VERSE 2": {
       "id": 3,
       "name": "VERSE 2",
       "role": "verse",
@@ -117,7 +123,7 @@
       "texture": "soft shimmer",
       "phrase_arc": "melody enters phrase 2; shimmer phrases 4-7"
     },
-    {
+    "PRE-CHORUS": {
       "id": 4,
       "name": "PRE-CHORUS",
       "role": "build",
@@ -139,7 +145,7 @@
       "texture": "filtered riser",
       "phrase_arc": "range widens each phrase; riser from phrase 4"
     },
-    {
+    "CHORUS": {
       "id": 5,
       "name": "CHORUS",
       "role": "hook",
@@ -161,7 +167,7 @@
       "texture": "pad + light bells",
       "phrase_arc": "full from phrase 1; bells phrases 4-7"
     },
-    {
+    "CHORUS LIFT": {
       "id": 6,
       "name": "CHORUS LIFT",
       "role": "peak",
@@ -183,7 +189,7 @@
       "texture": "bells + pad",
       "phrase_arc": "counter-line enters phrase 3; hold peak to phrase 7"
     },
-    {
+    "BRIDGE": {
       "id": 7,
       "name": "BRIDGE",
       "role": "contrast",
@@ -205,7 +211,7 @@
       "texture": "wide pad",
       "phrase_arc": "half-time feel; stepwise-descending chords; pad swells phrases 4-7"
     },
-    {
+    "BREAKDOWN": {
       "id": 8,
       "name": "BREAKDOWN",
       "role": "breath",
@@ -227,7 +233,7 @@
       "texture": "air / noise bed",
       "phrase_arc": "pedal and ghost arp only; one bell on phrase 4"
     },
-    {
+    "INSTRUMENTAL": {
       "id": 9,
       "name": "INSTRUMENTAL",
       "role": "development",
@@ -249,7 +255,7 @@
       "texture": "pad",
       "phrase_arc": "response line enters phrase 3"
     },
-    {
+    "OUTRO": {
       "id": 10,
       "name": "OUTRO",
       "role": "closer",
@@ -271,7 +277,7 @@
       "texture": "pad",
       "phrase_arc": "layers fall away; arp thins every 2 phrases"
     }
-  ],
+  },
   "order_rules": "Each section plays exactly 6 times; first play is INTRO, last is OUTRO; no section twice in a row; energy never jumps more than 3 levels; never three energy-4+ sections in a row.",
   "order": [
     "INTRO",
