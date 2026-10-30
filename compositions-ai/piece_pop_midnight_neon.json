@@ -58,14 +58,9 @@
     "notes": "An upbeat, driving pop anthem designed according to pop_music_guidelines.md. Features the classic 4-chord I-V-vi-IV loop in the chorus with a recognizable motif, high energy density, and strong 4-on-the-floor drum/pulse bass foundation. The verse pulls back to a sparser texture (I-vi-IV-V) with lyrical melody, while the bridge introduces a build arc and a minor-leaning progression.",
     "sections": {
       "intro": {
-        "bars": 12,
-        "progression": [
-          "I",
-          "IV"
-        ],
-        "chord_bars": [
-          6,
-          6
+        "harmony": [
+          { "chord": "I",  "bars": 6.0 },
+          { "chord": "IV", "bars": 6.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -90,26 +85,15 @@
         ]
       },
       "verse_1": {
-        "bars": 16,
-        "progression": [
-          "I",
-          "vi",
-          "IV",
-          "V",
-          "I",
-          "vi",
-          "IV",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -135,26 +119,15 @@
         ]
       },
       "verse_2": {
-        "bars": 16,
-        "progression": [
-          "I",
-          "vi",
-          "IV",
-          "V",
-          "I",
-          "vi",
-          "IV",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -163,7 +136,7 @@
         "rhythm": "free",
         "rest_probability": 0.1,
         "harmony_rhythm": {
-          "rhythm": "pattern",
+          "rhythm": "free",
           "density": "medium",
           "groove": "syncopated"
         },
@@ -199,26 +172,15 @@
         ]
       },
       "chorus": {
-        "bars": 16,
-        "progression": [
-          "I",
-          "V",
-          "vi",
-          "IV",
-          "I",
-          "V",
-          "vi",
-          "IV"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -227,7 +189,7 @@
         "rhythm": "motif",
         "rest_probability": 0.15,
         "harmony_rhythm": {
-          "rhythm": "pattern",
+          "rhythm": "free",
           "density": "full",
           "groove": "driving"
         },
@@ -262,18 +224,11 @@
         ]
       },
       "bridge": {
-        "bars": 8,
-        "progression": [
-          "vi",
-          "IV",
-          "ii",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "ii", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "generative",
@@ -282,7 +237,7 @@
         "rhythm": "free",
         "rest_probability": 0.1,
         "harmony_rhythm": {
-          "rhythm": "pattern",
+          "rhythm": "free",
           "density": "medium",
           "groove": "straight"
         },
@@ -313,18 +268,11 @@
         ]
       },
       "outro": {
-        "bars": 8,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "I"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 }
         ],
         "density": "sparse",
         "melody": "sparse",

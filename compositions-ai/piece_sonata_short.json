@@ -31,8 +31,14 @@
       "development": {
         "name": "development",
         "bars": 20,
-        "progression": [ "I", "v", "IV", "ii", "bVII", "I" ],
-        "chord_bars": [   1,  0.5, 0.5,    1,   0.5,   0.5 ],
+        "harmony": [
+          { "chord": "I",    "bars": 1.0 },
+          { "chord": "v",    "bars": 0.5 },
+          { "chord": "IV",   "bars": 0.5 },
+          { "chord": "ii",   "bars": 1.0 },
+          { "chord": "bVII", "bars": 0.5 },
+          { "chord": "I",    "bars": 0.5 }
+        ],
         "density": "medium",
         "harmony_register": {
           "min": 64,

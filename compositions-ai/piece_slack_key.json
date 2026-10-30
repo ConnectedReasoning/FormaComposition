@@ -59,11 +59,11 @@
       "porch_open": {
         "name": "porch_open",
         "bars": 4,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "V" }
         ],
         "density": "sparse",
         "melody": "lyrical",
@@ -87,11 +87,11 @@
       "porch_open_2": {
         "name": "porch_open",
         "bars": 30,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "V" }
         ],
         "density": "low",
         "melody": "lyrical",
@@ -115,11 +115,11 @@
       "porch_step": {
         "name": "porch_step",
         "bars": 30,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -143,8 +143,8 @@
       "breath_1": {
         "name": "breath_1",
         "bars": 8,
-        "progression": [
-          "I"
+        "harmony": [
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -156,11 +156,11 @@
       "afternoon_light": {
         "name": "afternoon_light",
         "bars": 90,
-        "progression": [
-          "I",
-          "vi",
-          "IV",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "vi" },
+          { "chord": "IV" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -184,11 +184,11 @@
       "evening_breeze": {
         "name": "evening_breeze",
         "bars": 70,
-        "progression": [
-          "IV",
-          "V",
-          "vi",
-          "I"
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "vi" },
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -212,10 +212,10 @@
       "porch_recede": {
         "name": "porch_recede",
         "bars": 60,
-        "progression": [
-          "vi",
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "vi" },
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "lyrical",
@@ -239,9 +239,9 @@
       "breath_2": {
         "name": "breath_2",
         "bars": 8,
-        "progression": [
-          "I",
-          "IV"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -253,14 +253,14 @@
       "night_porch": {
         "name": "night_porch",
         "bars": 100,
-        "progression": [
-          "I",
-          "ii",
-          "IV",
-          "V",
-          "vi",
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "vi" },
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -284,11 +284,11 @@
       "porch_echo": {
         "name": "porch_echo",
         "bars": 70,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -312,10 +312,10 @@
       "receding": {
         "name": "receding",
         "bars": 50,
-        "progression": [
-          "IV",
-          "V",
-          "I"
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -339,9 +339,9 @@
       "porch_reprise": {
         "name": "porch_reprise",
         "bars": 39,
-        "progression": [
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "develop",

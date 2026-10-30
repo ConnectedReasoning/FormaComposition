@@ -14,8 +14,7 @@
     "form": ["intro"],
     "sections": {
       "intro": {
-        "bars": 8, "progression": ["i", "iv"], "chord_bars": [1.0, 1.0],
-        "density": "medium", "melody": "generative", "bass_style": "motif",
+        "bars": 8, "harmony": [ { "chord": "i", "bars": 1.0 }, { "chord": "iv", "bars": 1.0 } ], "density": "medium", "melody": "generative", "bass_style": "motif",
         "arc": "plateau", "rhythm": "free",
         "harmony_rhythm": {"rhythm": "sustain"}, "rest_probability": 0.0
         ,"note_length_range": {"min": 0.5, "max": 1.0}

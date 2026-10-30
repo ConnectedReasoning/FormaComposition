@@ -30,7 +30,10 @@
     "sections": {
       "intro": {
         "bars": 4,
-        "progression": ["I", "VII"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "VII" }
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pulse",
@@ -45,7 +48,12 @@
       },
       "verse_1": {
         "bars": 8,
-        "progression": ["I", "VII", "I", "VII"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "VII" },
+          { "chord": "I" },
+          { "chord": "VII" }
+        ],
         "density": "sparse",
         "bass_style": "pulse",
         "bass_subdivision": 0.5,
@@ -63,7 +71,12 @@
       },
       "chorus": {
         "bars": 8,
-        "progression": ["IV", "VII", "I", "I"],
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "VII" },
+          { "chord": "I" },
+          { "chord": "I" }
+        ],
         "density": "medium",
         "bass_style": "pulse",
         "bass_subdivision": 0.5,
@@ -81,7 +94,12 @@
       },
       "verse_2": {
         "bars": 8,
-        "progression": ["I", "VII", "I", "VII"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "VII" },
+          { "chord": "I" },
+          { "chord": "VII" }
+        ],
         "density": "sparse",
         "bass_style": "pulse",
         "bass_subdivision": 0.5,
@@ -99,7 +117,9 @@
       },
       "break": {
         "bars": 8,
-        "progression": ["I"],
+        "harmony": [
+          { "chord": "I" }
+        ],
         "density": "sparse",
         "bass_style": "pedal",
         "bass_register": { "min": 39, "max": 57 },
@@ -115,7 +135,12 @@
       },
       "chorus_final": {
         "bars": 8,
-        "progression": ["IV", "VII", "I", "I"],
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "VII" },
+          { "chord": "I" },
+          { "chord": "I" }
+        ],
         "density": "full",
         "bass_style": "pulse",
         "bass_subdivision": 0.5,
@@ -133,7 +158,11 @@
       },
       "outro": {
         "bars": 4,
-        "progression": ["I", "VII", "I"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "VII" },
+          { "chord": "I" }
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",

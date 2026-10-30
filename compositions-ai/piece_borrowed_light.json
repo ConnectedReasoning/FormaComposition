@@ -16,9 +16,12 @@
     "sections": {
       "verse": {
         "name": "verse",
-        "bars": 8,
-        "progression": ["I", "bIII", "bVI", "bVII"],
-        "chord_bars": [2, 2, 2, 2],
+        "harmony": [
+          { "chord": "I",    "bars": 2.0 },
+          { "chord": "bIII", "bars": 2.0 },
+          { "chord": "bVI",  "bars": 2.0 },
+          { "chord": "bVII", "bars": 2.0 }
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "melody": "generative",
@@ -27,9 +30,12 @@
       },
       "chorus": {
         "name": "chorus",
-        "bars": 8,
-        "progression": ["I", "bVI", "IV", "V"],
-        "chord_bars": [2, 2, 2, 2],
+        "harmony": [
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "bVI", "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "V",   "bars": 2.0 }
+        ],
         "rhythm": "motif",
         "density": "medium",
         "melody": "lyrical",

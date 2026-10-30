@@ -25,9 +25,13 @@
         "section_name": "verse_loop",
         "key": "G",
         "mode": "ionian",
-        "bars": 8,
-        "progression": ["I", "vi", "IV", "V",  "I"  ],
-        "chord_bars":  [2,     2,    1,   1,    2   ],
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 2.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 2.0 }
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "steady",

@@ -12,7 +12,12 @@
     "sections": {
       "verse": {
         "bars": 16,
-        "progression": ["I", "vi", "IV", "V"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "vi" },
+          { "chord": "IV" },
+          { "chord": "V" }
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pedal",
@@ -32,7 +37,11 @@
 
       "chorus": {
         "bars": 12,
-        "progression": ["I", "IV", "V"],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "V" }
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "pedal",

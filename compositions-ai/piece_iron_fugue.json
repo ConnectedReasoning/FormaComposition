@@ -54,14 +54,9 @@
       "exposition_subject": {
         "name": "exposition_subject",
         "notes": "Subject enters alone. Single melodic voice, no harmony comping \u2014 just the motif statement over a slow harmonic pad. Bass walks stepwise. This is the fugue announcing itself. Sparse and exposed.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          4
-        ],
-        "progression": [
-          "i",
-          "iv"
+        "harmony": [
+          { "chord": "i",  "bars": 4.0 },
+          { "chord": "iv", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -75,16 +70,10 @@
       "exposition_answer": {
         "name": "exposition_answer",
         "notes": "Answer enters at the fifth (A minor) while subject continues below. Two independent voices. Harmony rhythm still restrained \u2014 the counterpoint IS the texture. Bass continues walking. Medium density now that two voices are active.",
-        "bars": 8,
-        "chord_bars": [
-          2,
-          2,
-          4
-        ],
-        "progression": [
-          "v",
-          "i",
-          "iv"
+        "harmony": [
+          { "chord": "v",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "iv", "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "generative",
@@ -112,18 +101,11 @@
       "exposition_third": {
         "name": "exposition_third",
         "notes": "Third entry \u2014 subject returns in bass register (melodic bass), upper voices free above it. All three layers now active. The pad swells underneath. This is the full exposition completing.",
-        "bars": 8,
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
-        ],
-        "progression": [
-          "i",
-          "VI",
-          "iv",
-          "Vmaj"
+        "harmony": [
+          { "chord": "i",    "bars": 2.0 },
+          { "chord": "VI",   "bars": 2.0 },
+          { "chord": "iv",   "bars": 2.0 },
+          { "chord": "Vmaj", "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -151,22 +133,13 @@
       "episode_1": {
         "name": "episode_1",
         "notes": "Transitional episode \u2014 no full subject statement. Sequences derived from the motif head, descending stepwise through the progression. Walking bass accelerates harmonically. This is the bridge between exposition and middle entries. More harmonic movement, shorter chord windows.",
-        "bars": 8,
-        "chord_bars": [
-          1,
-          1,
-          2,
-          1,
-          1,
-          2
-        ],
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "iv",
-          "Vmaj",
-          "i"
+        "harmony": [
+          { "chord": "i",    "bars": 1.0 },
+          { "chord": "VII",  "bars": 1.0 },
+          { "chord": "VI",   "bars": 2.0 },
+          { "chord": "iv",   "bars": 1.0 },
+          { "chord": "Vmaj", "bars": 1.0 },
+          { "chord": "i",    "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "generative",
@@ -194,16 +167,10 @@
       "middle_entry_relative": {
         "name": "middle_entry_relative",
         "notes": "Subject enters in relative major (F major) \u2014 the emotional lift of major after all that minor. This is the middle entry in the relative key, standard fugue procedure. Bass stays in D minor underneath creating a bitonal tension. Electronic textures justify this more than acoustic would.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          2,
-          2
-        ],
-        "progression": [
-          "III",
-          "VII",
-          "i"
+        "harmony": [
+          { "chord": "III", "bars": 4.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "i",   "bars": 2.0 }
         ],
         "density": "full",
         "melody": "generative",
@@ -219,24 +186,14 @@
       "stretto": {
         "name": "stretto",
         "notes": "Stretto \u2014 subject entries compressed and overlapping. Short chord windows simulate the feeling of voices piling on top of each other before the other has finished. One-bar changes. Maximum harmonic rhythm. This is the fugue's crisis point.",
-        "bars": 7,
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          0.5,
-          0.5,
-          2
-        ],
-        "progression": [
-          "i",
-          "iv",
-          "Vmaj",
-          "i",
-          "VII",
-          "Vmaj",
-          "i"
+        "harmony": [
+          { "chord": "i",    "bars": 1.0 },
+          { "chord": "iv",   "bars": 1.0 },
+          { "chord": "Vmaj", "bars": 1.0 },
+          { "chord": "i",    "bars": 1.0 },
+          { "chord": "VII",  "bars": 0.5 },
+          { "chord": "Vmaj", "bars": 0.5 },
+          { "chord": "i",    "bars": 2.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -264,14 +221,9 @@
       "augmentation": {
         "name": "augmentation",
         "notes": "Subject in augmentation \u2014 same intervals, double the note values. Everything slows while the bass carries the theme at half speed. Upper voices continue in normal time creating a layered time feel. Nils Frahm would do this. The pad swells hard.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          4
-        ],
-        "progression": [
-          "i",
-          "Vmaj"
+        "harmony": [
+          { "chord": "i",    "bars": 4.0 },
+          { "chord": "Vmaj", "bars": 4.0 }
         ],
         "density": "full",
         "melody": "sparse",
@@ -287,16 +239,10 @@
       "coda": {
         "name": "coda",
         "notes": "Pedal point on D. Bass holds the tonic while upper voices resolve all tension above it. Harmony rhythm drops to sustain \u2014 no more comping, just the voices finding rest. The electronic pad fades. Strict authentic cadence V-i at the end.",
-        "bars": 8,
-        "chord_bars": [
-          6,
-          1,
-          1
-        ],
-        "progression": [
-          "i",
-          "Vmaj",
-          "i"
+        "harmony": [
+          { "chord": "i",    "bars": 6.0 },
+          { "chord": "Vmaj", "bars": 1.0 },
+          { "chord": "i",    "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",

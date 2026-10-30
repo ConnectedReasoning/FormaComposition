@@ -19,7 +19,12 @@
       "beats_per_bar": 4,
       "rhythm": "free",
       "harmony_rhythm": {"rhythm": "sustain"},
-      "progression": ["i", "iv", "v", "i"],
+      "harmony": [
+        { "chord": "i" },
+        { "chord": "iv" },
+        { "chord": "v" },
+        { "chord": "i" }
+      ],
       "voices": [
         {
           "register": "mid",

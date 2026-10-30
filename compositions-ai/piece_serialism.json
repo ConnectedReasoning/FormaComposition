@@ -59,18 +59,11 @@
       "prime_statement": {
         "name": "prime_statement",
         "notes": "MOVEMENT I. Row introduced in original form. Sparse, angular, searching. The motif appears once or twice \u2014 no development yet, just declaration. Bass anchors on root only. No counterpoint. Arc holds flat \u2014 no emotional direction yet.",
-        "bars": 16,
-        "progression": [
-          "i",
-          "bII",
-          "bV",
-          "bVII"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",    "bars": 4.0 },
+          { "chord": "bII",  "bars": 4.0 },
+          { "chord": "bV",   "bars": 4.0 },
+          { "chord": "bVII", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -82,18 +75,11 @@
       "inversion_entry": {
         "name": "inversion_entry",
         "notes": "Row inversion enters. Melodic shape descends where it previously rose \u2014 the mirror image. Density increases slightly. Bass moves to melodic for forward motion. Still no counterpoint \u2014 the single voice is enough here.",
-        "bars": 20,
-        "progression": [
-          "bII",
-          "bV",
-          "bVII",
-          "i"
-        ],
-        "chord_bars": [
-          5,
-          5,
-          5,
-          5
+        "harmony": [
+          { "chord": "bII",  "bars": 5.0 },
+          { "chord": "bV",   "bars": 5.0 },
+          { "chord": "bVII", "bars": 5.0 },
+          { "chord": "i",    "bars": 5.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -105,18 +91,11 @@
       "contrapuntal_web": {
         "name": "contrapuntal_web",
         "notes": "MOVEMENT II. Full contrapuntal complexity. Canon at 1.5 bars offset \u2014 the row chasing itself. All four transforms active via transform_sequence. Walking bass drives forward relentlessly. Two breath waves across 32 bars. This is the emotional and intellectual center of the piece.",
-        "bars": 32,
-        "progression": [
-          "bV",
-          "bVII",
-          "i",
-          "bII"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "bV",   "bars": 8.0 },
+          { "chord": "bVII", "bars": 8.0 },
+          { "chord": "i",    "bars": 8.0 },
+          { "chord": "bII",  "bars": 8.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -141,18 +120,11 @@
       "suspension": {
         "name": "suspension",
         "notes": "MOVEMENT III. Slow movement \u2014 near silence after the complexity of Movement II. Sparse melody fragments, pedal bass, very long rests. The row appears in retrograde \u2014 backward, dissolving. No counterpoint. Arc holds flat. This is the void at the center of the piece.",
-        "bars": 24,
-        "progression": [
-          "bVII",
-          "i",
-          "bII",
-          "bV"
-        ],
-        "chord_bars": [
-          6,
-          6,
-          6,
-          6
+        "harmony": [
+          { "chord": "bVII", "bars": 6.0 },
+          { "chord": "i",    "bars": 6.0 },
+          { "chord": "bII",  "bars": 6.0 },
+          { "chord": "bV",   "bars": 6.0 }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -164,18 +136,11 @@
       "inversion_mirror": {
         "name": "inversion_mirror",
         "notes": "MOVEMENT IV. Mirror of Movement I but darker \u2014 retrograde_inversion now drives the melody. The same chromatic chords but entered from bVII, which shifts the harmonic gravity. Density builds back toward full. Bass becomes melodic again. Counterpoint re-enters below the melody \u2014 a reversal of Movement II where it sat above.",
-        "bars": 24,
-        "progression": [
-          "bVII",
-          "bV",
-          "bII",
-          "i"
-        ],
-        "chord_bars": [
-          6,
-          6,
-          6,
-          6
+        "harmony": [
+          { "chord": "bVII", "bars": 6.0 },
+          { "chord": "bV",   "bars": 6.0 },
+          { "chord": "bII",  "bars": 6.0 },
+          { "chord": "i",    "bars": 6.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -199,18 +164,11 @@
       "dissolution": {
         "name": "dissolution",
         "notes": "MOVEMENT V. The row breaks apart. Sparse, generative melody \u2014 fragments only, no complete statements. Bass pulls back to root_only. No counterpoint. Arc fades to nothing. The piece ends mid-thought, unresolved \u2014 serial logic demands no cadence.",
-        "bars": 24,
-        "progression": [
-          "i",
-          "bV",
-          "bII",
-          "bVII"
-        ],
-        "chord_bars": [
-          6,
-          6,
-          6,
-          6
+        "harmony": [
+          { "chord": "i",    "bars": 6.0 },
+          { "chord": "bV",   "bars": 6.0 },
+          { "chord": "bII",  "bars": 6.0 },
+          { "chord": "bVII", "bars": 6.0 }
         ],
         "density": "sparse",
         "melody": "sparse",

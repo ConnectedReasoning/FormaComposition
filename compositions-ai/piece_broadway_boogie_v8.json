@@ -83,19 +83,19 @@
       "m1_grid_1": {
         "name": "m1_grid_1",
         "bars": 12,
-        "progression": [
-          "ii",
-          "v",
-          "I",
-          "ii",
-          "v",
-          "I",
-          "ii",
-          "v",
-          "I",
-          "ii",
-          "v",
-          "I"
+        "harmony": [
+          { "chord": "ii" },
+          { "chord": "v" },
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "v" },
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "v" },
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "v" },
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -121,25 +121,15 @@
       "m1_grid_2": {
         "name": "m1_grid_2",
         "bars": 16,
-        "progression": [
-          "ii",
-          "v",
-          "I",
-          "ii",
-          "v",
-          "I",
-          "ii",
-          "v"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v",  "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -165,17 +155,11 @@
       "m1_grid_3": {
         "name": "m1_grid_3",
         "bars": 16,
-        "progression": [
-          "I",
-          "v7",
-          "ii",
-          "v7"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "v7", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v7", "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -201,25 +185,15 @@
       "m2_accumulation": {
         "name": "m2_accumulation",
         "bars": 16,
-        "progression": [
-          "I",
-          "bVII",
-          "ii",
-          "v",
-          "I",
-          "bVII",
-          "ii",
-          "v"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",    "bars": 1.0 },
+          { "chord": "bVII", "bars": 1.0 },
+          { "chord": "ii",   "bars": 1.0 },
+          { "chord": "v",    "bars": 1.0 },
+          { "chord": "I",    "bars": 1.0 },
+          { "chord": "bVII", "bars": 1.0 },
+          { "chord": "ii",   "bars": 1.0 },
+          { "chord": "v",    "bars": 1.0 }
         ],
         "density": "low",
         "melody": "develop",
@@ -245,15 +219,10 @@
       "m3_canon_entry": {
         "name": "m3_canon_entry",
         "bars": 16,
-        "progression": [
-          "ii",
-          "iii\u00b0",
-          "v"
-        ],
-        "chord_bars": [
-          4,
-          2,
-          2
+        "harmony": [
+          { "chord": "ii",        "bars": 4.0 },
+          { "chord": "iii\u00b0", "bars": 2.0 },
+          { "chord": "v",         "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -285,25 +254,15 @@
       "m3_canon_full": {
         "name": "m3_canon_full",
         "bars": 32,
-        "progression": [
-          "ii",
-          "iii\u00b0",
-          "v",
-          "I",
-          "ii",
-          "iii\u00b0",
-          "v",
-          "I"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "ii",        "bars": 1.0 },
+          { "chord": "iii\u00b0", "bars": 1.0 },
+          { "chord": "v",         "bars": 1.0 },
+          { "chord": "I",         "bars": 1.0 },
+          { "chord": "ii",        "bars": 1.0 },
+          { "chord": "iii\u00b0", "bars": 1.0 },
+          { "chord": "v",         "bars": 1.0 },
+          { "chord": "I",         "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -335,15 +294,10 @@
       "m4_peak_build_1": {
         "name": "m4_peak_build_1",
         "bars": 8,
-        "progression": [
-          "vi",
-          "ii",
-          "v"
-        ],
-        "chord_bars": [
-          1,
-          2,
-          1
+        "harmony": [
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 2.0 },
+          { "chord": "v",  "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -375,25 +329,15 @@
       "m4_peak_hold_1": {
         "name": "m4_peak_hold_1",
         "bars": 24,
-        "progression": [
-          "vi",
-          "ii",
-          "v",
-          "I",
-          "vi",
-          "ii",
-          "v",
-          "I"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "v",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",

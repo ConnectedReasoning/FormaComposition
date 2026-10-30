@@ -10,22 +10,13 @@
   "sections": {
     "i_tonic_plane": {
       "name": "i_tonic_plane",
-      "bars": 64,
-      "progression": [
-        "I",
-        "IV",
-        "ii",
-        "IV",
-        "bVII",
-        "I"
-      ],
-      "chord_bars": [
-        8,
-        16,
-        8,
-        16,
-        8,
-        8
+      "harmony": [
+        { "chord": "I",    "bars": 8.0 },
+        { "chord": "IV",   "bars": 16.0 },
+        { "chord": "ii",   "bars": 8.0 },
+        { "chord": "IV",   "bars": 16.0 },
+        { "chord": "bVII", "bars": 8.0 },
+        { "chord": "I",    "bars": 8.0 }
       ],
       "density": "sparse",
       "melody": "lyrical",
@@ -61,20 +52,12 @@
     },
     "ii_subdominant_tide": {
       "name": "ii_subdominant_tide",
-      "bars": 56,
-      "progression": [
-        "IV",
-        "bVII",
-        "vi",
-        "bVI",
-        "IV"
-      ],
-      "chord_bars": [
-        12,
-        10,
-        12,
-        10,
-        12
+      "harmony": [
+        { "chord": "IV",   "bars": 12.0 },
+        { "chord": "bVII", "bars": 10.0 },
+        { "chord": "vi",   "bars": 12.0 },
+        { "chord": "bVI",  "bars": 10.0 },
+        { "chord": "IV",   "bars": 12.0 }
       ],
       "density": "sparse",
       "melody": "lyrical",
@@ -110,18 +93,11 @@
     },
     "iii_dominant_haze": {
       "name": "iii_dominant_haze",
-      "bars": 48,
-      "progression": [
-        "v",
-        "bVII",
-        "IV",
-        "v"
-      ],
-      "chord_bars": [
-        12,
-        12,
-        12,
-        12
+      "harmony": [
+        { "chord": "v",    "bars": 12.0 },
+        { "chord": "bVII", "bars": 12.0 },
+        { "chord": "IV",   "bars": 12.0 },
+        { "chord": "v",    "bars": 12.0 }
       ],
       "density": "sparse",
       "melody": "sparse",
@@ -150,22 +126,13 @@
     },
     "iv_return_recolored": {
       "name": "iv_return_recolored",
-      "bars": 64,
-      "progression": [
-        "I",
-        "bVII",
-        "vi",
-        "IV",
-        "bVI",
-        "I"
-      ],
-      "chord_bars": [
-        6,
-        12,
-        12,
-        12,
-        14,
-        8
+      "harmony": [
+        { "chord": "I",    "bars": 6.0 },
+        { "chord": "bVII", "bars": 12.0 },
+        { "chord": "vi",   "bars": 12.0 },
+        { "chord": "IV",   "bars": 12.0 },
+        { "chord": "bVI",  "bars": 14.0 },
+        { "chord": "I",    "bars": 8.0 }
       ],
       "density": "sparse",
       "melody": "lyrical",

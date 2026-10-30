@@ -40,19 +40,12 @@
     "sections": {
       "intro": {
         "name": "intro",
-        "bars": 8,
         "notes": "Chords alone, establishing the jazz-extended harmony bed before drums enter.",
-        "progression": [
-          "i9",
-          "iv9",
-          "bVIImaj7",
-          "V9"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "i9",       "bars": 2.0 },
+          { "chord": "iv9",      "bars": 2.0 },
+          { "chord": "bVIImaj7", "bars": 2.0 },
+          { "chord": "V9",       "bars": 2.0 }
         ],
         "density": "full",
         "melody": "sparse",
@@ -75,19 +68,12 @@
       },
       "verse": {
         "name": "verse",
-        "bars": 16,
         "notes": "backbeat + swing for the boom-bap pocket. Melody stays sparse/lyrical, never fighting the chord bed's own color.",
-        "progression": [
-          "i9",
-          "iv9",
-          "bVIImaj7",
-          "V9"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i9",       "bars": 4.0 },
+          { "chord": "iv9",      "bars": 4.0 },
+          { "chord": "bVIImaj7", "bars": 4.0 },
+          { "chord": "V9",       "bars": 4.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -115,15 +101,10 @@
       },
       "outro": {
         "name": "outro",
-        "bars": 8,
         "notes": "Drums drop out, back to the bare chord bed for a soft landing.",
-        "progression": [
-          "iv9",
-          "V9"
-        ],
-        "chord_bars": [
-          4,
-          4
+        "harmony": [
+          { "chord": "iv9", "bars": 4.0 },
+          { "chord": "V9",  "bars": 4.0 }
         ],
         "density": "full",
         "melody": "sparse",

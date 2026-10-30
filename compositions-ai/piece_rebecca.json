@@ -34,11 +34,11 @@
       "approach": {
         "name": "approach",
         "bars": 12,
-        "progression": [
-          "I",
-          "V",
-          "vi",
-          "IV"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "V" },
+          { "chord": "vi" },
+          { "chord": "IV" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -49,11 +49,11 @@
       "tenderness": {
         "name": "tenderness",
         "bars": 20,
-        "progression": [
-          "I",
-          "IV",
-          "vi",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "vi" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -77,12 +77,12 @@
       "warmth": {
         "name": "warmth",
         "bars": 24,
-        "progression": [
-          "I",
-          "ii",
-          "IV",
-          "V",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -106,13 +106,13 @@
       "bloom": {
         "name": "bloom",
         "bars": 20,
-        "progression": [
-          "I",
-          "V",
-          "vi",
-          "iii",
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "V" },
+          { "chord": "vi" },
+          { "chord": "iii" },
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "full",
         "melody": "develop",
@@ -124,10 +124,10 @@
       "stillness": {
         "name": "stillness",
         "bars": 16,
-        "progression": [
-          "I",
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "generative",
@@ -139,13 +139,13 @@
       "return": {
         "name": "return",
         "bars": 24,
-        "progression": [
-          "I",
-          "IV",
-          "vi",
-          "V",
-          "I",
-          "IV"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "vi" },
+          { "chord": "V" },
+          { "chord": "I" },
+          { "chord": "IV" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -169,12 +169,12 @@
       "evening": {
         "name": "evening",
         "bars": 24,
-        "progression": [
-          "I",
-          "V",
-          "I",
-          "IV",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "V" },
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "sparse",

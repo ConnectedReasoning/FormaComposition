@@ -11,15 +11,10 @@
     "sections": {
       "intro": {
         "name": "intro",
-        "bars": 4,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2
+        "harmony": [
+          { "chord": "I", "bars": 2.0 },
+          { "chord": "V", "bars": 2.0 }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -43,27 +38,16 @@
       },
       "strain_a": {
         "name": "strain_a",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V",
-          "I",
-          "IV",
-          "I",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -87,27 +71,16 @@
       },
       "strain_b": {
         "name": "strain_b",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "IV",
-          "I",
-          "ii",
-          "V",
-          "IV",
-          "I",
-          "ii",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "ii", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "ii", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -137,15 +110,10 @@
       },
       "breakdown": {
         "name": "breakdown",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "IV"
-        ],
-        "chord_bars": [
-          4,
-          4
+        "harmony": [
+          { "chord": "I",  "bars": 4.0 },
+          { "chord": "IV", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "lyrical",
@@ -168,27 +136,16 @@
       },
       "strain_a_reprise": {
         "name": "strain_a_reprise",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V",
-          "I",
-          "IV",
-          "I",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -212,15 +169,10 @@
       },
       "outro": {
         "name": "outro",
-        "bars": 4,
         "beats_per_bar": 4,
-        "progression": [
-          "V",
-          "I"
-        ],
-        "chord_bars": [
-          2,
-          2
+        "harmony": [
+          { "chord": "V", "bars": 2.0 },
+          { "chord": "I", "bars": 2.0 }
         ],
         "density": "full",
         "melody": "lyrical",

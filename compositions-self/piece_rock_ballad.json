@@ -29,7 +29,10 @@
       "intro": {
         "name": "intro",
         "bars": 8,
-        "progression": ["I", "IV"   ],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" }
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",
@@ -38,12 +41,17 @@
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
-        "rest_probability": 0.15
+        "rest_probability": 0.3
       },
       "verse": {
         "name": "verse",
         "bars": 16,
-        "progression": [ "I", "V", "vi","IV" ],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "V" },
+          { "chord": "vi" },
+          { "chord": "IV" }
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -57,7 +65,12 @@
       "chorus": {
         "name": "chorus",
         "bars": 16,
-        "progression": ["IV", "I", "V", "vi" ],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "vi" }
+        ],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "steady",
@@ -70,7 +83,12 @@
       "bridge": {
         "name": "bridge",
         "bars": 12,
-        "progression": [ "vi","IV", "ii", "V" ],
+        "harmony": [
+          { "chord": "vi" },
+          { "chord": "IV" },
+          { "chord": "ii" },
+          { "chord": "V" }
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "melodic",
@@ -84,7 +102,11 @@
       "outro": {
         "name": "outro",
         "bars": 8,
-        "progression": [ "I", "IV", "I" ],
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" }
+        ],
         "density": "sparse",
         "melody": "sparse",
         "bass_style": "pedal",

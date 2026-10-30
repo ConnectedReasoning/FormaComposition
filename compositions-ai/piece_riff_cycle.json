@@ -27,19 +27,12 @@
     "sections": {
       "intro": {
         "name": "intro",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "VII",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "I",   "bars": 2.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -77,27 +70,16 @@
       },
       "verse": {
         "name": "verse",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "v",
-          "IV",
-          "VII",
-          "I",
-          "v",
-          "IV",
-          "VII"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "v",   "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "v",   "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -144,27 +126,16 @@
       },
       "chorus_a": {
         "name": "chorus_a",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "VII",
-          "I",
-          "VII",
-          "I",
-          "VII",
-          "I",
-          "VII"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -214,27 +185,16 @@
       },
       "chorus_b": {
         "name": "chorus_b",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [
-          "IV",
-          "VII",
-          "IV",
-          "VII",
-          "IV",
-          "VII",
-          "IV",
-          "VII"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "IV",  "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "IV",  "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "IV",  "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "IV",  "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -284,27 +244,16 @@
       },
       "bridge": {
         "name": "bridge",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "vi",
-          "IV",
-          "I",
-          "VII",
-          "vi",
-          "IV",
-          "I",
-          "VII"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "vi",  "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "vi",  "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -361,19 +310,12 @@
       },
       "outro": {
         "name": "outro",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "VII",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",   "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "IV",  "bars": 2.0 },
+          { "chord": "I",   "bars": 2.0 }
         ],
         "density": "sparse",
         "melody": "develop",

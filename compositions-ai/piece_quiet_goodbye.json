@@ -46,15 +46,15 @@
     "sections": {
       "verse": {
         "bars": 8,
-        "progression": [
-          "Imaj7(9)",
-          "vim7(9)",
-          "iim7(9)",
-          "V7(9)",
-          "Imaj7(9)",
-          "IV(9)",
-          "iim7(9)",
-          "V7(9)"
+        "harmony": [
+          { "chord": "Imaj7(9)" },
+          { "chord": "vim7(9)" },
+          { "chord": "iim7(9)" },
+          { "chord": "V7(9)" },
+          { "chord": "Imaj7(9)" },
+          { "chord": "IV(9)" },
+          { "chord": "iim7(9)" },
+          { "chord": "V7(9)" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -83,15 +83,15 @@
       },
       "chorus": {
         "bars": 8,
-        "progression": [
-          "Imaj7(9)",
-          "V7(9)/vi",
-          "vim7(9)",
-          "IV(9)",
-          "ivm7(9)",
-          "Imaj7(9)",
-          "iim7(9)",
-          "V7(9,13)"
+        "harmony": [
+          { "chord": "Imaj7(9)" },
+          { "chord": "V7(9)/vi" },
+          { "chord": "vim7(9)" },
+          { "chord": "IV(9)" },
+          { "chord": "ivm7(9)" },
+          { "chord": "Imaj7(9)" },
+          { "chord": "iim7(9)" },
+          { "chord": "V7(9,13)" }
         ],
         "density": "full",
         "melody": "develop",
@@ -125,11 +125,11 @@
       },
       "outro": {
         "bars": 4,
-        "progression": [
-          "ivm7(9)",
-          "Imaj7(9)",
-          "iim7(9)",
-          "Imaj7(9)"
+        "harmony": [
+          { "chord": "ivm7(9)" },
+          { "chord": "Imaj7(9)" },
+          { "chord": "iim7(9)" },
+          { "chord": "Imaj7(9)" }
         ],
         "density": "medium",
         "melody": "develop",

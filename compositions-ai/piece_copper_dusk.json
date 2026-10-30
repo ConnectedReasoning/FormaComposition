@@ -42,14 +42,9 @@
       "open": {
         "name": "open",
         "notes": "Sparse density \u2014 harmony re-strikes at bar boundaries only. Should sound like a pad player holding long notes with a fresh attack each bar. NOT a wall of whole notes.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          4
-        ],
-        "progression": [
-          "i",
-          "VII"
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -64,18 +59,11 @@
       "stir": {
         "name": "stir",
         "notes": "Medium density \u2014 harmony hits beats 1 and 3, with occasional ghost notes. Chord movement is faster so the articulation pattern is clearly audible across chord changes.",
-        "bars": 8,
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
-        ],
-        "progression": [
-          "i",
-          "iv",
-          "VII",
-          "III"
+        "harmony": [
+          { "chord": "i",   "bars": 2.0 },
+          { "chord": "iv",  "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "III", "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -90,18 +78,11 @@
       "push": {
         "name": "push",
         "notes": "Full density \u2014 harmony plays quarter notes with accent on beats 1 and 3, occasional breath rest on beat 4. The groove makes the chord changes swing. This is the Africa test.",
-        "bars": 8,
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
-        ],
-        "progression": [
-          "III",
-          "VII",
-          "iv",
-          "i"
+        "harmony": [
+          { "chord": "III", "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "iv",  "bars": 2.0 },
+          { "chord": "i",   "bars": 2.0 }
         ],
         "density": "full",
         "melody": "generative",
@@ -116,14 +97,9 @@
       "motif_driven": {
         "name": "motif_driven",
         "notes": "Harmony rhythm driven by the motif rhythm \u2014 [1.0, 0.5, 0.5, 1.0, 1.0]. The chord articulates on exactly those durations, tiled across the section. The motif shape is audible in the harmony layer.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          4
-        ],
-        "progression": [
-          "iv",
-          "i"
+        "harmony": [
+          { "chord": "iv", "bars": 4.0 },
+          { "chord": "i",  "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -137,18 +113,11 @@
       "groove_push": {
         "name": "groove_push",
         "notes": "Backbeat groove applied to harmony \u2014 harmony hits fall on the push pattern. Medium density, but the groove gives it rhythmic personality rather than mechanical grid.",
-        "bars": 8,
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
-        ],
-        "progression": [
-          "i",
-          "III",
-          "iv",
-          "VII"
+        "harmony": [
+          { "chord": "i",   "bars": 2.0 },
+          { "chord": "III", "bars": 2.0 },
+          { "chord": "iv",  "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -164,14 +133,9 @@
       "return": {
         "name": "return",
         "notes": "Back to sparse \u2014 but now the ear has heard the full range. Same chord as the opening but feels earned. Harmony re-strikes per bar, long sustains, fade out.",
-        "bars": 8,
-        "chord_bars": [
-          4,
-          4
-        ],
-        "progression": [
-          "i",
-          "VII"
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "develop",

@@ -37,11 +37,11 @@
   "sections": {
     "opening": {
       "bars": 8,
-      "progression": [
-        "i",
-        "bVII",
-        "IV",
-        "i"
+      "harmony": [
+        { "chord": "i" },
+        { "chord": "bVII" },
+        { "chord": "IV" },
+        { "chord": "i" }
       ],
       "density": "sparse",
       "melody": "develop",
@@ -61,11 +61,11 @@
     },
     "lift": {
       "bars": 8,
-      "progression": [
-        "i",
-        "v",
-        "bVII",
-        "IV"
+      "harmony": [
+        { "chord": "i" },
+        { "chord": "v" },
+        { "chord": "bVII" },
+        { "chord": "IV" }
       ],
       "density": "medium",
       "melody": "develop",

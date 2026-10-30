@@ -50,15 +50,15 @@
     "sections": {
       "verse_vamp": {
         "bars": 8,
-        "progression": [
-          "I7(9,13)",
-          "I7(9,13)",
-          "bVII7(9)",
-          "I7(9,13)",
-          "I7(#9)",
-          "bVII7(9)",
-          "I7(9,13)",
-          "I7(9,13)"
+        "harmony": [
+          { "chord": "I7(9,13)" },
+          { "chord": "I7(9,13)" },
+          { "chord": "bVII7(9)" },
+          { "chord": "I7(9,13)" },
+          { "chord": "I7(#9)" },
+          { "chord": "bVII7(9)" },
+          { "chord": "I7(9,13)" },
+          { "chord": "I7(9,13)" }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -92,15 +92,15 @@
       },
       "chorus": {
         "bars": 8,
-        "progression": [
-          "ii7(9)",
-          "V7(9,13)",
-          "I7(9)",
-          "IV7(9)",
-          "ii7(9)",
-          "V7(b13)",
-          "I7(#9)",
-          "I7(9,13)"
+        "harmony": [
+          { "chord": "ii7(9)" },
+          { "chord": "V7(9,13)" },
+          { "chord": "I7(9)" },
+          { "chord": "IV7(9)" },
+          { "chord": "ii7(9)" },
+          { "chord": "V7(b13)" },
+          { "chord": "I7(#9)" },
+          { "chord": "I7(9,13)" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -134,11 +134,11 @@
       },
       "bridge": {
         "bars": 4,
-        "progression": [
-          "IV7(13)",
-          "IV7(13)",
-          "bVII7(9)",
-          "I7(9,13)"
+        "harmony": [
+          { "chord": "IV7(13)" },
+          { "chord": "IV7(13)" },
+          { "chord": "bVII7(9)" },
+          { "chord": "I7(9,13)" }
         ],
         "density": "medium",
         "melody": "develop",

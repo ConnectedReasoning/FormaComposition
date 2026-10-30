@@ -30,11 +30,11 @@
     "sections": {
       "arrival":{
         "bars": 24,
-        "progression": [
-          "I",
-          "IV",
-          "vi",
-          "IV"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "vi" },
+          { "chord": "IV" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -48,11 +48,11 @@
       },
       "suspension":{
         "bars": 28,
-        "progression": [
-          "IV",
-          "I",
-          "ii",
-          "vi"
+        "harmony": [
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "ii" },
+          { "chord": "vi" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -65,16 +65,10 @@
         "rest_probability": 0.45
       },
       "dissolve": {
-        "bars": 24,
-        "progression": [
-          "vi",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "vi", "bars": 8.0 },
+          { "chord": "IV", "bars": 8.0 },
+          { "chord": "I",  "bars": 8.0 }
         ],
         "density": "sparse",
         "melody": "sparse",

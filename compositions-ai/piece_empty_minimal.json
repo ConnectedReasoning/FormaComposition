@@ -61,17 +61,11 @@
       "name": "only",
       "key": "C",
       "mode": "ionian",
-      "progression": [
-        "i",
-        "iv",
-        "v",
-        "iv"
-      ],
-      "chord_bars": [
-        2,
-        2,
-        2,
-        2
+      "harmony": [
+        { "chord": "i",  "bars": 2.0 },
+        { "chord": "iv", "bars": 2.0 },
+        { "chord": "v",  "bars": 2.0 },
+        { "chord": "iv", "bars": 2.0 }
       ],
       "bars": 16,
       "beats_per_bar": 1,

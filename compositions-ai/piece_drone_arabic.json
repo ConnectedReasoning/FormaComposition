@@ -11,9 +11,9 @@
   "sections": {
     "drone_verse": {
       "name": "drone_verse",
-      "bars": 64,
-      "progression": [ "I" ],
-      "chord_bars": [ 64 ],
+      "harmony": [
+        { "chord": "I", "bars": 64.0 }
+      ],
       "density": "sparse",
       "bass_style": "pedal",
       "arc": "plateau",

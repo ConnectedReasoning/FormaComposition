@@ -19,7 +19,12 @@
       "intro": {
         "name": "intro",
         "bars": 8,
-        "progression":[ "i", "VI", "III", "VII" ],
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VI" },
+          { "chord": "III" },
+          { "chord": "VII" }
+        ],
         "density": "medium",
         "melody": "sparse",
         "bass_style": "pulse",
@@ -39,7 +44,12 @@
       "verse": {
         "name": "verse",
         "bars": 16,
-        "progression":[ "i", "VI", "III", "VII"  ],
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VI" },
+          { "chord": "III" },
+          { "chord": "VII" }
+        ],
         "density": "medium",
         "melody": "generative",
         "bass_style": "pulse",
@@ -59,7 +69,12 @@
       "chorus": {
         "name": "chorus",
         "bars": 16,
-        "progression":[ "VI", "VII", "i", "v" ],
+        "harmony": [
+          { "chord": "VI" },
+          { "chord": "VII" },
+          { "chord": "i" },
+          { "chord": "v" }
+        ],
         "density": "full",
         "melody": "lyrical",
         "bass_style": "pulse",
@@ -78,7 +93,12 @@
       "middle_eight": {
         "name": "middle_eight",
         "bars": 8,
-        "progression":[ "iv", "VI", "VII", "v" ],
+        "harmony": [
+          { "chord": "iv" },
+          { "chord": "VI" },
+          { "chord": "VII" },
+          { "chord": "v" }
+        ],
         "density": "medium",
         "melody": "develop",
         "bass_style": "root_fifth",
@@ -94,7 +114,12 @@
       "outro": {
         "name": "outro",
         "bars": 12,
-        "progression":[ "i", "VI", "III", "VII" ],
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VI" },
+          { "chord": "III" },
+          { "chord": "VII" }
+        ],
         "density": "full",
         "melody": "sparse",
         "bass_style": "pulse",

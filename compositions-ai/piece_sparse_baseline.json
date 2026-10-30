@@ -12,8 +12,12 @@
     "sections": {
       "drift": {
         "bars": 24,
-        "progression": ["i", "VI", "III", "VII"],
-        "chord_bars": [2.0, 2.0, 2.0, 2.0],
+        "harmony": [
+          { "chord": "i",   "bars": 2.0 },
+          { "chord": "VI",  "bars": 2.0 },
+          { "chord": "III", "bars": 2.0 },
+          { "chord": "VII", "bars": 2.0 }
+        ],
         "_chord_bars_note": "cell totals 8 bars, tiles 3x to fill 24 bars -- matches the 3-cycle progression used to render sparse_baseline.mid.",
         "density": "sparse",
         "melody": "sparse",

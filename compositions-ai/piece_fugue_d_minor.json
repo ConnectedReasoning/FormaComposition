@@ -54,18 +54,11 @@
     "sections": {
       "ex1": {
         "name": "ex1",
-        "bars": 4,
-        "progression": [
-          "i",
-          "iv",
-          "V/i",
-          "i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -120,18 +113,11 @@
       },
       "ex2": {
         "name": "ex2",
-        "bars": 4,
-        "progression": [
-          "i",
-          "iv",
-          "V/i",
-          "i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -199,18 +185,11 @@
       },
       "ex3": {
         "name": "ex3",
-        "bars": 4,
-        "progression": [
-          "i",
-          "iv",
-          "V/i",
-          "i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -291,26 +270,15 @@
       },
       "ep1": {
         "name": "ep1",
-        "bars": 8,
-        "progression": [
-          "I",
-          "V",
-          "vi",
-          "iii",
-          "IV",
-          "I",
-          "ii",
-          "V"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "V",   "bars": 1.0 },
+          { "chord": "vi",  "bars": 1.0 },
+          { "chord": "iii", "bars": 1.0 },
+          { "chord": "IV",  "bars": 1.0 },
+          { "chord": "I",   "bars": 1.0 },
+          { "chord": "ii",  "bars": 1.0 },
+          { "chord": "V",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -392,18 +360,11 @@
       },
       "mid": {
         "name": "mid",
-        "bars": 4,
-        "progression": [
-          "i",
-          "iv",
-          "V/i",
-          "i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -486,26 +447,15 @@
       },
       "ep2": {
         "name": "ep2",
-        "bars": 8,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "iv",
-          "i",
-          "VII",
-          "III",
-          "V/i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "VI",  "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "VII", "bars": 1.0 },
+          { "chord": "III", "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -587,22 +537,13 @@
       },
       "stretto": {
         "name": "stretto",
-        "bars": 6,
-        "progression": [
-          "i",
-          "iv",
-          "V/i",
-          "i",
-          "iv",
-          "V/i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -733,18 +674,11 @@
       },
       "coda": {
         "name": "coda",
-        "bars": 4,
-        "progression": [
-          "iv",
-          "V/i",
-          "V/i",
-          "i"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
         ],
         "density": "sparse",
         "melody": "lyrical",

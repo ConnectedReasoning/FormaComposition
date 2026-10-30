@@ -42,11 +42,11 @@
     "sections": {
       "intro_riff": {
         "bars": 8,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V7"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "I" },
+          { "chord": "V7" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -79,15 +79,15 @@
       },
       "verse": {
         "bars": 16,
-        "progression": [
-          "I",
-          "vim7",
-          "iim7",
-          "V7",
-          "I",
-          "IV",
-          "iim7",
-          "V7(9)"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "vim7" },
+          { "chord": "iim7" },
+          { "chord": "V7" },
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "iim7" },
+          { "chord": "V7(9)" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -120,15 +120,15 @@
       },
       "horn_hook": {
         "bars": 16,
-        "progression": [
-          "I7(9)",
-          "IV7(9)",
-          "iim7(13)",
-          "V7(9,13)",
-          "vim7(9)",
-          "IV7(9)",
-          "V7(#9)",
-          "I7(9,13)"
+        "harmony": [
+          { "chord": "I7(9)" },
+          { "chord": "IV7(9)" },
+          { "chord": "iim7(13)" },
+          { "chord": "V7(9,13)" },
+          { "chord": "vim7(9)" },
+          { "chord": "IV7(9)" },
+          { "chord": "V7(#9)" },
+          { "chord": "I7(9,13)" }
         ],
         "density": "full",
         "melody": "develop",
@@ -161,11 +161,11 @@
       },
       "outro_vamp": {
         "bars": 8,
-        "progression": [
-          "I7(9,13)",
-          "IV7(9)",
-          "V7(#9)",
-          "I7(9,13)"
+        "harmony": [
+          { "chord": "I7(9,13)" },
+          { "chord": "IV7(9)" },
+          { "chord": "V7(#9)" },
+          { "chord": "I7(9,13)" }
         ],
         "density": "full",
         "melody": "develop",

@@ -24,9 +24,12 @@
     ],
     "sections": {
       "i_first_light_drift": {
-        "bars": 5,
-        "progression": [ "I",  "II", "I", "IV" ],
-        "chord_bars":  [  0.5, 1.5,   1,    2  ],
+        "harmony": [
+          { "chord": "I",  "bars": 0.5 },
+          { "chord": "II", "bars": 1.5 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 2.0 }
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "melody": "lyrical",
@@ -94,8 +97,14 @@
       },
       "ii_unfolding_expanse": {
         "bars": 16,
-        "progression": [ "I", "I", "II", "IV", "I", "II"],
-        "chord_bars":  [  1,   1,    2,    1,   2,    1],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "II", "bars": 2.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "II", "bars": 1.0 }
+        ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",
@@ -166,8 +175,12 @@
       },
       "iii_plateau_of_stillness": {
         "bars": 24,
-        "progression": [ "I", "IV", "II", "I"],
-        "chord_bars": [ 1, 2, 1, 2 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "II", "bars": 1.0 },
+          { "chord": "I",  "bars": 2.0 }
+        ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",
@@ -234,8 +247,14 @@
       },
       "iv_reflected_horizon": {
         "bars": 48,
-        "progression": [ "II", "IV", "I", "II", "I", "I" ],
-        "chord_bars": [    2,    1,   3,    2,   1,   3  ],
+        "harmony": [
+          { "chord": "II", "bars": 2.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 3.0 },
+          { "chord": "II", "bars": 2.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "I",  "bars": 3.0 }
+        ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",
@@ -302,8 +321,12 @@
       },
       "v_dissolving_into_air": {
         "bars": 54,
-        "progression": [ "IV", "I", "IV", "I" ],
-        "chord_bars": [    2,   2,    3,   2  ],
+        "harmony": [
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 3.0 },
+          { "chord": "I",  "bars": 2.0 }
+        ],
         "rhythm": "free",
         "density": "sparse",
         "melody": "lyrical",

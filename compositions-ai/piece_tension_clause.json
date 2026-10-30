@@ -44,15 +44,15 @@
     "sections": {
       "head_a": {
         "bars": 8,
-        "progression": [
-          "iim7(9)",
-          "V7(9,13)",
-          "Imaj7(9)",
-          "vim7(add13)",
-          "iim7(9)",
-          "V7(#9)",
-          "Imaj7(9)",
-          "Imaj7(9)"
+        "harmony": [
+          { "chord": "iim7(9)" },
+          { "chord": "V7(9,13)" },
+          { "chord": "Imaj7(9)" },
+          { "chord": "vim7(add13)" },
+          { "chord": "iim7(9)" },
+          { "chord": "V7(#9)" },
+          { "chord": "Imaj7(9)" },
+          { "chord": "Imaj7(9)" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -81,11 +81,11 @@
       },
       "head_b": {
         "bars": 4,
-        "progression": [
-          "V7(9)/ii",
-          "iim7(9)",
-          "V7(b13)",
-          "Imaj7(9)"
+        "harmony": [
+          { "chord": "V7(9)/ii" },
+          { "chord": "iim7(9)" },
+          { "chord": "V7(b13)" },
+          { "chord": "Imaj7(9)" }
         ],
         "density": "medium",
         "melody": "develop",

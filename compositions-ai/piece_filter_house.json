@@ -40,11 +40,11 @@
       "filter_intro": {
         "name": "filter_intro",
         "bars": 8,
-        "progression": [
-          "i7",
-          "IV7",
-          "bVII7",
-          "v7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "IV7" },
+          { "chord": "bVII7" },
+          { "chord": "v7" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -65,11 +65,11 @@
       "groove_verse": {
         "name": "groove_verse",
         "bars": 16,
-        "progression": [
-          "i7",
-          "IV7",
-          "bVII7",
-          "v7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "IV7" },
+          { "chord": "bVII7" },
+          { "chord": "v7" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -88,11 +88,11 @@
       "chorus_lift": {
         "name": "chorus_lift",
         "bars": 16,
-        "progression": [
-          "i7",
-          "IV7",
-          "bVII7",
-          "v7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "IV7" },
+          { "chord": "bVII7" },
+          { "chord": "v7" }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -123,9 +123,9 @@
       "filter_break": {
         "name": "filter_break",
         "bars": 8,
-        "progression": [
-          "i7",
-          "IV7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "IV7" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -143,10 +143,10 @@
       "outro": {
         "name": "outro",
         "bars": 8,
-        "progression": [
-          "i7",
-          "IV7",
-          "i7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "IV7" },
+          { "chord": "i7" }
         ],
         "density": "sparse",
         "melody": "sparse",

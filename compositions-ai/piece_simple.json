@@ -1,5 +1,7 @@
 {
       "title": "Simple",
+      "key": "C",
+      "mode": "ionian",
       "tempo": 120,
       "transform_sequence": ["original", "inversion", "retrograde"],
       "form_type": "song",
@@ -9,13 +11,16 @@
               "name": "opening",
               "rest_probability": 0.15,
               "bars": 48,
-              "progression": ["i", "V", "iv"],
+              "harmony": [
+                { "chord": "i" },
+                { "chord": "V" },
+                { "chord": "iv" }
+              ],
               "density": "medium",
               "melody": "sparse",
               "bass_style": "melodic",
               "arc": "fade_in",
-              "rhythm": "motif",
-              "harmony_rhythm": { "rhythm": "motif" }
+              "rhythm": "free"
           }
       }
   }

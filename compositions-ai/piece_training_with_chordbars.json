@@ -40,8 +40,8 @@
     "sections": {
       "intro": {
         "bars": 1,
-        "progression": [
-          "I"
+        "harmony": [
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -55,16 +55,10 @@
         "rest_probability": 0.05
       },
       "verse": {
-        "bars": 6,
-        "progression": [
-          "I",
-          "IV",
-          "V"
-        ],
-        "chord_bars": [
-          3,
-          2,
-          1
+        "harmony": [
+          { "chord": "I",  "bars": 3.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -78,18 +72,11 @@
         "rest_probability": 0.05
       },
       "chorus": {
-        "bars": 5,
-        "progression": [
-          "I",
-          "vi",
-          "IV",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "develop",

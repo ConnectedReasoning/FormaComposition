@@ -15,9 +15,10 @@
   "sections": {
     "drone_verse_1": {
       "name": "drone_verse_1",
-      "bars": 32,
-      "progression": ["I", "IV"],
-      "chord_bars": [ 24, 8],
+      "harmony": [
+        { "chord": "I",  "bars": 24.0 },
+        { "chord": "IV", "bars": 8.0 }
+      ],
       "density": "sparse",
       "bass_style": "pedal",
       "arc": "plateau",
@@ -54,9 +55,10 @@
     },
     "drone_verse_2": {
       "name": "drone_verse_2",
-      "bars": 32,
-      "progression": ["IV", "V"],
-      "chord_bars": [ 24, 8],
+      "harmony": [
+        { "chord": "IV", "bars": 24.0 },
+        { "chord": "V",  "bars": 8.0 }
+      ],
       "density": "sparse",
       "bass_style": "pedal",
       "arc": "plateau",
@@ -94,9 +96,10 @@
     ,
     "drone_verse_3": {
       "name": "drone_verse_3",
-      "bars": 32,
-      "progression": ["IV", "VII"],
-      "chord_bars": [ 24, 8],
+      "harmony": [
+        { "chord": "IV",  "bars": 24.0 },
+        { "chord": "VII", "bars": 8.0 }
+      ],
       "density": "sparse",
       "bass_style": "pedal",
       "arc": "plateau",

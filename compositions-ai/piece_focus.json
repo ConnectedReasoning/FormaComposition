@@ -31,11 +31,11 @@
       "surface": {
         "name": "surface",
         "bars": 20,
-        "progression": [
-          "I",
-          "II",
-          "vi",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "II" },
+          { "chord": "vi" },
+          { "chord": "I" }
         ],
         "density": "sparse",
         "melody": "generative",
@@ -50,11 +50,11 @@
       "current": {
         "name": "current",
         "bars": 24,
-        "progression": [
-          "I",
-          "V",
-          "II",
-          "vi"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "V" },
+          { "chord": "II" },
+          { "chord": "vi" }
         ],
         "density": "medium",
         "melody": "generative",
@@ -73,11 +73,11 @@
       "undertow": {
         "name": "undertow",
         "bars": 24,
-        "progression": [
-          "vi",
-          "II",
-          "I",
-          "V"
+        "harmony": [
+          { "chord": "vi" },
+          { "chord": "II" },
+          { "chord": "I" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "generative",
@@ -95,16 +95,10 @@
       },
       "stillness": {
         "name": "stillness",
-        "bars": 20,
-        "progression": [
-          "II",
-          "vi",
-          "I"
-        ],
-        "chord_bars": [
-          6,
-          6,
-          8
+        "harmony": [
+          { "chord": "II", "bars": 6.0 },
+          { "chord": "vi", "bars": 6.0 },
+          { "chord": "I",  "bars": 8.0 }
         ],
         "density": "sparse",
         "melody": "generative",

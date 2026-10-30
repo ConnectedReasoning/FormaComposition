@@ -111,11 +111,11 @@
       "intro": {
         "name": "intro",
         "bars": 8,
-        "progression": [
-          "i",
-          "VII",
-          "v",
-          "VI"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VII" },
+          { "chord": "v" },
+          { "chord": "VI" }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -132,11 +132,11 @@
       "verse_1": {
         "name": "verse_1",
         "bars": 16,
-        "progression": [
-          "i",
-          "VII",
-          "III",
-          "VI"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VII" },
+          { "chord": "III" },
+          { "chord": "VI" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -171,18 +171,11 @@
       },
       "chorus_1": {
         "name": "chorus_1",
-        "bars": 12,
-        "chord_bars": [
-          3,
-          3,
-          3,
-          3
-        ],
-        "progression": [
-          "i",
-          "iim",
-          "bVI",
-          "VI"
+        "harmony": [
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "iim", "bars": 3.0 },
+          { "chord": "bVI", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -218,11 +211,11 @@
       "verse_2": {
         "name": "verse_2",
         "bars": 16,
-        "progression": [
-          "i",
-          "VII",
-          "III",
-          "VI"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VII" },
+          { "chord": "III" },
+          { "chord": "VI" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -257,18 +250,11 @@
       },
       "chorus_2": {
         "name": "chorus_2",
-        "bars": 12,
-        "chord_bars": [
-          3,
-          3,
-          3,
-          3
-        ],
-        "progression": [
-          "i",
-          "iim",
-          "bVI",
-          "VI"
+        "harmony": [
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "iim", "bars": 3.0 },
+          { "chord": "bVI", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -303,11 +289,11 @@
       "bridge": {
         "name": "bridge",
         "bars": 8,
-        "progression": [
-          "VI",
-          "VII",
-          "VI",
-          "i"
+        "harmony": [
+          { "chord": "VI" },
+          { "chord": "VII" },
+          { "chord": "VI" },
+          { "chord": "i" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -342,18 +328,11 @@
       },
       "chorus_final": {
         "name": "chorus_final",
-        "bars": 16,
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
-        ],
-        "progression": [
-          "i",
-          "iim",
-          "bVI",
-          "VI"
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "iim", "bars": 4.0 },
+          { "chord": "bVI", "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -389,11 +368,11 @@
       "outro": {
         "name": "outro",
         "bars": 8,
-        "progression": [
-          "i",
-          "VII",
-          "v",
-          "i"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "VII" },
+          { "chord": "v" },
+          { "chord": "i" }
         ],
         "density": "sparse",
         "melody": "sparse",

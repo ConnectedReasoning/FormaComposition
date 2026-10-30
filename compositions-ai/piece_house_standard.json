@@ -42,18 +42,11 @@
     "sections": {
       "intro": {
         "name": "intro",
-        "bars": 4,
-        "progression": [
-          "ii",
-          "V7",
-          "I",
-          "V7/ii"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "ii",    "bars": 1.0 },
+          { "chord": "V7",    "bars": 1.0 },
+          { "chord": "I",     "bars": 1.0 },
+          { "chord": "V7/ii", "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -146,26 +139,15 @@
       },
       "a": {
         "name": "a",
-        "bars": 8,
-        "progression": [
-          "I",
-          "vi",
-          "ii",
-          "V7",
-          "iii",
-          "V7/ii",
-          "ii",
-          "V7"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",     "bars": 1.0 },
+          { "chord": "vi",    "bars": 1.0 },
+          { "chord": "ii",    "bars": 1.0 },
+          { "chord": "V7",    "bars": 1.0 },
+          { "chord": "iii",   "bars": 1.0 },
+          { "chord": "V7/ii", "bars": 1.0 },
+          { "chord": "ii",    "bars": 1.0 },
+          { "chord": "V7",    "bars": 1.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -282,18 +264,11 @@
       },
       "b": {
         "name": "b",
-        "bars": 8,
-        "progression": [
-          "V7/vi",
-          "V7/ii",
-          "V7/V",
-          "V7"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "V7/vi", "bars": 2.0 },
+          { "chord": "V7/ii", "bars": 2.0 },
+          { "chord": "V7/V",  "bars": 2.0 },
+          { "chord": "V7",    "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",

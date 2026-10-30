@@ -11,27 +11,16 @@
     "sections": {
       "main": {
         "name": "main",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "V",
-          "I",
-          "IV",
-          "I",
-          "V"
-        ],
-        "chord_bars": [
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2,
-          2
+        "harmony": [
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "lyrical",

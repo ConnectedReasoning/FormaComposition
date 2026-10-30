@@ -1,33 +1,30 @@
 {
   "title": "Redline",
   "tempo": 120,
-  "key": {"tonic": "C", "mode": "mixolydian"},
+  "key": "G",
+  "mode": "mixolydian",
   "form_type": "song",
   "form": ["Verse1"],
   "sections": {
     "Verse1": {
       "name": "Verse1",
       "bars": 8,
-      "progression": ["I", "bVII", "I", "bVII"],
+      "harmony": [
+        { "chord": "I" },
+        { "chord": "bVII" },
+        { "chord": "I" },
+        { "chord": "bVII" }
+      ],
+      "rhythm":"free",
       "voices": [
         {
-          "role": "synth_bass",
-          "instrument_hint": "juno6v",
-          "register": "low",
-          "harmony_source": "sustain",
-          "exact_repeat": true
+          "register": "baritone",
+          "behavior": "sparse"
+
         },
         {
-          "role": "riff_lead",
-          "instrument_hint": "mini_v_distorted",
-          "register": "mid",
-          "behavior": "sustain",
-          "motif": "riff_main",
-          "exact_repeat": true
-        },
-        {
-          "role": "percussion",
-          "pattern": "rock_backbeat"
+          "register": "tenor",
+          "behavior": "lyrical"
         }
       ]
     }

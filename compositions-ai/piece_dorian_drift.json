@@ -52,15 +52,15 @@
     "sections": {
       "main_vamp": {
         "bars": 8,
-        "progression": [
-          "im7(9)",
-          "im7(9)",
-          "IVmaj7(9)",
-          "im7(9)",
-          "VIImaj7(add13)",
-          "IVmaj7(9)",
-          "im7(9)",
-          "im7(9)"
+        "harmony": [
+          { "chord": "im7(9)" },
+          { "chord": "im7(9)" },
+          { "chord": "IVmaj7(9)" },
+          { "chord": "im7(9)" },
+          { "chord": "VIImaj7(add13)" },
+          { "chord": "IVmaj7(9)" },
+          { "chord": "im7(9)" },
+          { "chord": "im7(9)" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -89,11 +89,11 @@
       },
       "bridge": {
         "bars": 4,
-        "progression": [
-          "IIImaj7(9)",
-          "IVmaj7(9)",
-          "VIImaj7(add13)",
-          "im7(9)"
+        "harmony": [
+          { "chord": "IIImaj7(9)" },
+          { "chord": "IVmaj7(9)" },
+          { "chord": "VIImaj7(add13)" },
+          { "chord": "im7(9)" }
         ],
         "density": "medium",
         "melody": "develop",

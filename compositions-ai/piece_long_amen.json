@@ -43,17 +43,11 @@
       "opening_drift": {
         "name": "opening_drift",
         "bars": 24,
-        "progression": [
-          "I",
-          "IV",
-          "I",
-          "vi"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 }
         ],
         "rhythm": "motif",
         "density": "sparse",
@@ -72,17 +66,11 @@
       "ii_color_turn": {
         "name": "ii_color_turn",
         "bars": 24,
-        "progression": [
-          "vi",
-          "ii",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
         ],
         "rhythm": "motif",
         "density": "sparse",
@@ -100,17 +88,11 @@
       "widening": {
         "name": "widening",
         "bars": 24,
-        "progression": [
-          "I",
-          "V",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          4,
-          2,
-          2,
-          4
+        "harmony": [
+          { "chord": "I",  "bars": 4.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "I",  "bars": 4.0 }
         ],
         "rhythm": "motif",
         "density": "medium",
@@ -128,17 +110,11 @@
       "closing_hover": {
         "name": "closing_hover",
         "bars": 32,
-        "progression": [
-          "IV",
-          "I",
-          "IV",
-          "vi"
-        ],
-        "chord_bars": [
-          1,
-          1,
-          1,
-          1
+        "harmony": [
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 }
         ],
         "rhythm": "motif",
         "density": "sparse",

@@ -39,18 +39,11 @@
     "sections": {
       "ground": {
         "name": "ground",
-        "bars": 32,
-        "progression": [
-          "i",
-          "VI",
-          "i",
-          "v"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "VI", "bars": 8.0 },
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "v",  "bars": 8.0 }
         ],
         "density": "sparse",
         "melody": "develop",
@@ -61,18 +54,11 @@
       },
       "shift": {
         "name": "shift",
-        "bars": 32,
-        "progression": [
-          "i",
-          "iv",
-          "VI",
-          "v"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "iv", "bars": 8.0 },
+          { "chord": "VI", "bars": 8.0 },
+          { "chord": "v",  "bars": 8.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -95,18 +81,11 @@
       },
       "accumulation": {
         "name": "accumulation",
-        "bars": 32,
-        "progression": [
-          "VI",
-          "v",
-          "VI",
-          "v"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "VI", "bars": 8.0 },
+          { "chord": "v",  "bars": 8.0 },
+          { "chord": "VI", "bars": 8.0 },
+          { "chord": "v",  "bars": 8.0 }
         ],
         "density": "medium",
         "melody": "develop",

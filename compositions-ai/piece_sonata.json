@@ -31,8 +31,12 @@
       "exposition_first": {
         "name": "exposition_first",
         "bars": 7,
-        "progression": [ "i", "iv", "v", "i" ],
-        "chord_bars": [1, 0.5, 1, 1],
+        "harmony": [
+          { "chord": "i",  "bars": 1.0 },
+          { "chord": "iv", "bars": 0.5 },
+          { "chord": "v",  "bars": 1.0 },
+          { "chord": "i",  "bars": 1.0 }
+        ],
         "density": "medium",
         "melody": "lyrical",
         "bass_style": "root_fifth",
@@ -43,8 +47,12 @@
       "exposition_second": {
         "name": "exposition_second",
         "bars": 12,
-        "progression": ["I", "IV", "ii", "V" ],
-        "chord_bars": [1, 0.5, 0.5, 1],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 0.5 },
+          { "chord": "ii", "bars": 0.5 },
+          { "chord": "V",  "bars": 1.0 }
+        ],
         "melody": "lyrical",
         "bass_style": "walking",
         "arc": "plateau",
@@ -54,8 +62,14 @@
       "development": {
         "name": "development",
         "bars": 20,
-        "progression": [ "I", "v",   "IV",  "ii",  "bVII",  "I" ],
-        "chord_bars": [1, 0.5, 0.5, 1, 0.5, 0.5],
+        "harmony": [
+          { "chord": "I",    "bars": 1.0 },
+          { "chord": "v",    "bars": 0.5 },
+          { "chord": "IV",   "bars": 0.5 },
+          { "chord": "ii",   "bars": 1.0 },
+          { "chord": "bVII", "bars": 0.5 },
+          { "chord": "I",    "bars": 0.5 }
+        ],
         "density": "full",
         "melody": "develop",
         "bass_style": "walking",
@@ -79,12 +93,12 @@
       "recapitulation": {
         "name": "recapitulation",
         "bars": 16,
-        "progression": [
-          "i",
-          "iv",
-          "VI",
-          "v",
-          "i"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "iv" },
+          { "chord": "VI" },
+          { "chord": "v" },
+          { "chord": "i" }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -107,14 +121,9 @@
       },
       "coda": {
         "name": "coda",
-        "bars": 8,
-        "progression": [
-          "iv",
-          "i"
-        ],
-        "chord_bars": [
-          4,
-          4
+        "harmony": [
+          { "chord": "iv", "bars": 4.0 },
+          { "chord": "i",  "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "develop",

@@ -82,26 +82,15 @@
   ],
   "sections": {
     "A": {
-      "bars": 8,
-      "progression": [
-        "I",
-        "vi",
-        "ii",
-        "V7",
-        "I",
-        "IVmin",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "IVmin", "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -135,26 +124,15 @@
       ]
     },
     "B": {
-      "bars": 8,
-      "progression": [
-        "IV",
-        "V7/vi",
-        "vi",
-        "V7/V",
-        "V7",
-        "I",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "IV",    "bars": 1.0 },
+        { "chord": "V7/vi", "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "V7/V",  "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -188,26 +166,15 @@
       ]
     },
     "A2": {
-      "bars": 8,
-      "progression": [
-        "I",
-        "vi",
-        "ii",
-        "V7",
-        "I",
-        "IVmin",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "IVmin", "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -241,12 +208,8 @@
       ]
     },
     "Intro": {
-      "bars": 4,
-      "progression": [
-        "I"
-      ],
-      "chord_bars": [
-        4
+      "harmony": [
+        { "chord": "I", "bars": 4.0 }
       ],
       "density": "medium",
       "melody": "sparse",
@@ -279,26 +242,15 @@
       ]
     },
     "A_c": {
-      "bars": 8,
-      "progression": [
-        "I",
-        "vi",
-        "ii",
-        "V7",
-        "I",
-        "IVmin",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "IVmin", "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -333,26 +285,15 @@
       ]
     },
     "B_c": {
-      "bars": 8,
-      "progression": [
-        "IV",
-        "V7/vi",
-        "vi",
-        "V7/V",
-        "V7",
-        "I",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "IV",    "bars": 1.0 },
+        { "chord": "V7/vi", "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "V7/V",  "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -387,26 +328,15 @@
       ]
     },
     "A_hi": {
-      "bars": 8,
-      "progression": [
-        "I",
-        "vi",
-        "ii",
-        "V7",
-        "I",
-        "IVmin",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "IVmin", "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -440,26 +370,15 @@
       ]
     },
     "B_hi": {
-      "bars": 8,
-      "progression": [
-        "IV",
-        "V7/vi",
-        "vi",
-        "V7/V",
-        "V7",
-        "I",
-        "ii",
-        "V7"
-      ],
-      "chord_bars": [
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1
+      "harmony": [
+        { "chord": "IV",    "bars": 1.0 },
+        { "chord": "V7/vi", "bars": 1.0 },
+        { "chord": "vi",    "bars": 1.0 },
+        { "chord": "V7/V",  "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 },
+        { "chord": "I",     "bars": 1.0 },
+        { "chord": "ii",    "bars": 1.0 },
+        { "chord": "V7",    "bars": 1.0 }
       ],
       "density": "full",
       "melody": "develop",
@@ -493,12 +412,8 @@
       ]
     },
     "Coda": {
-      "bars": 8,
-      "progression": [
-        "I"
-      ],
-      "chord_bars": [
-        8
+      "harmony": [
+        { "chord": "I", "bars": 8.0 }
       ],
       "density": "medium",
       "melody": "sparse",

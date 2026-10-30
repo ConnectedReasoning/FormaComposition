@@ -29,10 +29,10 @@
     "sections": {
       "the_hum": {
         "name": "the_hum",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [ "I5" ],
-        "chord_bars":  [ 8    ],
+        "harmony": [
+          { "chord": "I5", "bars": 8.0 }
+        ],
         "rhythm": "motif",
         "density": "sparse",
         "bass_style": "pedal",
@@ -57,10 +57,10 @@
       },
       "the_riff": {
         "name": "the_riff",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [ "I5" ],
-        "chord_bars":  [ 8    ],
+        "harmony": [
+          { "chord": "I5", "bars": 8.0 }
+        ],
         "rhythm": "motif",
         "density": "full",
         "bass_style": "motif",
@@ -91,10 +91,13 @@
       },
       "the_climb": {
         "name": "the_climb",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [ "IV5", "VII5", "I5", "I5" ],
-        "chord_bars":  [ 2,     2,      2,    2    ],
+        "harmony": [
+          { "chord": "IV5",  "bars": 2.0 },
+          { "chord": "VII5", "bars": 2.0 },
+          { "chord": "I5",   "bars": 2.0 },
+          { "chord": "I5",   "bars": 2.0 }
+        ],
         "rhythm": "motif",
         "density": "full",
         "bass_style": "pedal",
@@ -135,10 +138,10 @@
       },
       "the_hammer": {
         "name": "the_hammer",
-        "bars": 8,
         "beats_per_bar": 4,
-        "progression": [ "I5" ],
-        "chord_bars":  [ 8    ],
+        "harmony": [
+          { "chord": "I5", "bars": 8.0 }
+        ],
         "rhythm": "motif",
         "density": "full",
         "bass_style": "motif",

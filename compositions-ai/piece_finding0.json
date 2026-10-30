@@ -14,8 +14,7 @@
     "form": ["intro"],
     "sections": {
       "intro": {
-        "bars": 12, "progression": ["I", "V", "IV"], "chord_bars": [1.0, 2.0, 3.0],
-        "density": "medium", "melody": "develop", "bass_style": "pedal",
+        "bars": 12, "harmony": [ { "chord": "I", "bars": 1.0 }, { "chord": "V", "bars": 2.0 }, { "chord": "IV", "bars": 3.0 } ], "density": "medium", "melody": "develop", "bass_style": "pedal",
         "arc": "plateau", "rhythm": "motif",
         "harmony_rhythm": {"rhythm": "sustain"}, "rest_probability": 0.0
       }

@@ -37,11 +37,11 @@
       "ambient_verse": {
         "name": "ambient_verse",
         "bars": 16,
-        "progression": [
-          "i7",
-          "III7",
-          "v7",
-          "IV7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "III7" },
+          { "chord": "v7" },
+          { "chord": "IV7" }
         ],
         "density": "sparse",
         "melody": "lyrical",
@@ -56,11 +56,11 @@
       "chucking_chorus": {
         "name": "chucking_chorus",
         "bars": 16,
-        "progression": [
-          "i7",
-          "III7",
-          "v7",
-          "IV7"
+        "harmony": [
+          { "chord": "i7" },
+          { "chord": "III7" },
+          { "chord": "v7" },
+          { "chord": "IV7" }
         ],
         "density": "full",
         "melody": "lyrical",

@@ -42,11 +42,11 @@
       "ritornello": {
         "name": "ritornello",
         "bars": 10,
-        "progression": [
-          "I",
-          "IV",
-          "V",
-          "I"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "V" },
+          { "chord": "I" }
         ],
         "density": "full",
         "melody": "lyrical",
@@ -72,11 +72,11 @@
         "bars": 16,
         "key": "A",
         "mode": "ionian",
-        "progression": [
-          "I",
-          "vi",
-          "ii",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "vi" },
+          { "chord": "ii" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -89,13 +89,13 @@
         "bars": 16,
         "key": "B",
         "mode": "aeolian",
-        "progression": [
-          "i",
-          "iv",
-          "VII",
-          "III",
-          "v",
-          "i"
+        "harmony": [
+          { "chord": "i" },
+          { "chord": "iv" },
+          { "chord": "VII" },
+          { "chord": "III" },
+          { "chord": "v" },
+          { "chord": "i" }
         ],
         "density": "medium",
         "melody": "develop",

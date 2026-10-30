@@ -32,16 +32,10 @@
     "sections": {
       "threshold": {
         "name": "threshold",
-        "bars": 12,
-        "progression": [
-          "I",
-          "V",
-          "vi"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "I",  "bars": 4.0 },
+          { "chord": "V",  "bars": 4.0 },
+          { "chord": "vi", "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "sparse",
@@ -52,18 +46,11 @@
       },
       "passage": {
         "name": "passage",
-        "bars": 16,
-        "progression": [
-          "V",
-          "bVI",
-          "IV",
-          "V"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "V",   "bars": 4.0 },
+          { "chord": "bVI", "bars": 4.0 },
+          { "chord": "IV",  "bars": 4.0 },
+          { "chord": "V",   "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -86,22 +73,13 @@
       },
       "recognition": {
         "name": "recognition",
-        "bars": 20,
-        "progression": [
-          "I",
-          "IV",
-          "V",
-          "I",
-          "bVII",
-          "IV"
-        ],
-        "chord_bars": [
-          3,
-          3,
-          3,
-          3,
-          4,
-          4
+        "harmony": [
+          { "chord": "I",    "bars": 3.0 },
+          { "chord": "IV",   "bars": 3.0 },
+          { "chord": "V",    "bars": 3.0 },
+          { "chord": "I",    "bars": 3.0 },
+          { "chord": "bVII", "bars": 4.0 },
+          { "chord": "IV",   "bars": 4.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -112,18 +90,11 @@
       },
       "settling": {
         "name": "settling",
-        "bars": 16,
-        "progression": [
-          "I",
-          "bVII",
-          "IV",
-          "I"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "I",    "bars": 4.0 },
+          { "chord": "bVII", "bars": 4.0 },
+          { "chord": "IV",   "bars": 4.0 },
+          { "chord": "I",    "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "sparse",

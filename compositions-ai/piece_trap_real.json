@@ -45,19 +45,12 @@
     "sections": {
       "verse": {
         "name": "verse",
-        "bars": 16,
         "notes": "trap_hats carries the groove; halftime gives the sparse, heavy kick/snare foundation trap needs underneath a busy hat.",
-        "progression": [
-          "i",
-          "VI",
-          "VII",
-          "i"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 },
+          { "chord": "i",   "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -93,19 +86,12 @@
       },
       "hook": {
         "name": "hook",
-        "bars": 16,
         "notes": "arc:build layered on top of trap_hats -- confirms the section-level velocity envelope still shapes the hi-hat texture's already-varying velocity, not just a flat pattern.",
-        "progression": [
-          "i",
-          "VI",
-          "VII",
-          "i"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 },
+          { "chord": "i",   "bars": 4.0 }
         ],
         "density": "full",
         "melody": "develop",

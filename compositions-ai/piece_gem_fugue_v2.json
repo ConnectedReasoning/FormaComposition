@@ -18,9 +18,12 @@
     "sections": {
       "exposition_entries": {
         "name": "exposition_entries",
-        "bars": 4,
-        "progression": ["i", "V", "i", "V"],
-        "chord_bars": [1, 1, 1, 1],
+        "harmony": [
+          { "chord": "i", "bars": 1.0 },
+          { "chord": "V", "bars": 1.0 },
+          { "chord": "i", "bars": 1.0 },
+          { "chord": "V", "bars": 1.0 }
+        ],
         "density": "medium",
         "rhythm": "free",
         "bass_style": "root_only",
@@ -63,9 +66,14 @@
       },
       "exposition_continuation": {
         "name": "exposition_continuation",
-        "bars": 12,
-        "progression": ["i", "iv", "V", "i", "V", "i"],
-        "chord_bars": [2, 2, 2, 2, 2, 2],
+        "harmony": [
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "iv", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 }
+        ],
         "density": "medium",
         "rhythm": "motif",
         "bass_style": "root_only",
@@ -107,9 +115,14 @@
       },
       "stretto_development": {
         "name": "stretto_development",
-        "bars": 12,
-        "progression": ["i", "IV", "V", "i", "iv", "V"],
-        "chord_bars": [2, 2, 2, 2, 2, 2],
+        "harmony": [
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "IV", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "iv", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
+        ],
         "density": "full",
         "rhythm": "motif",
         "bass_style": "root_only",
@@ -151,9 +164,16 @@
       },
       "augmentation_coda": {
         "name": "augmentation_coda",
-        "bars": 16,
-        "progression": ["i", "v", "i", "V", "i", "iv", "V", "i"],
-        "chord_bars": [2, 2, 2, 2, 2, 2, 2, 2],
+        "harmony": [
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "v",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 },
+          { "chord": "iv", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "i",  "bars": 2.0 }
+        ],
         "density": "full",
         "rhythm": "motif",
         "bass_style": "pedal",

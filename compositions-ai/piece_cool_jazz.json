@@ -36,14 +36,9 @@
     "sections": {
       "head_in": {
         "name": "head_in",
-        "bars": 16,
-        "progression": [
-          "i",
-          "ii"
-        ],
-        "chord_bars": [
-          8,
-          8
+        "harmony": [
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "ii", "bars": 8.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -54,18 +49,11 @@
       },
       "solo_verse": {
         "name": "solo_verse",
-        "bars": 32,
-        "progression": [
-          "i",
-          "ii",
-          "i",
-          "ii"
-        ],
-        "chord_bars": [
-          8,
-          8,
-          8,
-          8
+        "harmony": [
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "ii", "bars": 8.0 },
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "ii", "bars": 8.0 }
         ],
         "density": "full",
         "melody": "generative",
@@ -76,16 +64,11 @@
       },
       "solo_bridge": {
         "name": "solo_bridge",
-        "bars": 16,
         "key": "E",
         "mode": "phrygian",
-        "progression": [
-          "i",
-          "bII"
-        ],
-        "chord_bars": [
-          8,
-          8
+        "harmony": [
+          { "chord": "i",   "bars": 8.0 },
+          { "chord": "bII", "bars": 8.0 }
         ],
         "density": "full",
         "melody": "generative",
@@ -96,14 +79,9 @@
       },
       "head_out": {
         "name": "head_out",
-        "bars": 16,
-        "progression": [
-          "i",
-          "ii"
-        ],
-        "chord_bars": [
-          8,
-          8
+        "harmony": [
+          { "chord": "i",  "bars": 8.0 },
+          { "chord": "ii", "bars": 8.0 }
         ],
         "density": "medium",
         "melody": "lyrical",

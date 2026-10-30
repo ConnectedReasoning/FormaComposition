@@ -32,9 +32,16 @@
     "sections": {
       "P": {
         "name": "p",
-        "bars": 8,
-        "progression": [ "I", "V", "I", "V", "I", "IV", "V", "I" ],
-        "chord_bars":   [ 1,   1,   1,   1,   1,   1,    1,   1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -55,9 +62,12 @@
       },
       "TR1": {
         "name": "tr1",
-        "bars": 4,
-        "progression": [ "I", "vi", "IV", "ii" ],
-        "chord_bars":   [ 1,   1,    1,    1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -78,11 +88,13 @@
       },
       "TR2": {
         "name": "tr2",
-        "bars": 4,
         "key": "G",
         "mode": "ionian",
-        "progression": [ "IV", "ii", "V" ],
-        "chord_bars":   [ 1,    1,    2 ],
+        "harmony": [
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "V",  "bars": 2.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -103,11 +115,18 @@
       },
       "S": {
         "name": "s",
-        "bars": 8,
         "key": "G",
         "mode": "ionian",
-        "progression": [ "I", "IV", "I", "V", "vi", "ii", "V", "I" ],
-        "chord_bars":   [ 1,   1,    1,   1,   1,    1,    1,   1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -128,11 +147,14 @@
       },
       "CL": {
         "name": "cl",
-        "bars": 4,
         "key": "G",
         "mode": "ionian",
-        "progression": [ "I", "IV", "V", "I" ],
-        "chord_bars":   [ 1,   1,    1,   1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -153,11 +175,14 @@
       },
       "D1": {
         "name": "d1",
-        "bars": 4,
         "key": "G",
         "mode": "ionian",
-        "progression": [ "I", "V", "I", "V" ],
-        "chord_bars":   [ 1,   1,   1,   1 ],
+        "harmony": [
+          { "chord": "I", "bars": 1.0 },
+          { "chord": "V", "bars": 1.0 },
+          { "chord": "I", "bars": 1.0 },
+          { "chord": "V", "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -178,11 +203,14 @@
       },
       "D2": {
         "name": "d2",
-        "bars": 4,
         "key": "E",
         "mode": "aeolian",
-        "progression": [ "i", "iv", "V/i", "i" ],
-        "chord_bars":   [ 1,   1,    1,     1 ],
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -203,11 +231,14 @@
       },
       "D3": {
         "name": "d3",
-        "bars": 4,
         "key": "A",
         "mode": "aeolian",
-        "progression": [ "i", "iv", "V/i", "i" ],
-        "chord_bars":   [ 1,   1,    1,     1 ],
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -228,11 +259,14 @@
       },
       "D4": {
         "name": "d4",
-        "bars": 4,
         "key": "D",
         "mode": "aeolian",
-        "progression": [ "i", "iv", "V/i", "i" ],
-        "chord_bars":   [ 1,   1,    1,     1 ],
+        "harmony": [
+          { "chord": "i",   "bars": 1.0 },
+          { "chord": "iv",  "bars": 1.0 },
+          { "chord": "V/i", "bars": 1.0 },
+          { "chord": "i",   "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -253,9 +287,10 @@
       },
       "RT": {
         "name": "rt",
-        "bars": 4,
-        "progression": [ "ii", "V" ],
-        "chord_bars":   [ 1,    3 ],
+        "harmony": [
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "V",  "bars": 3.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -276,9 +311,12 @@
       },
       "TR_R": {
         "name": "tr_r",
-        "bars": 4,
-        "progression": [ "I", "vi", "ii", "V" ],
-        "chord_bars":   [ 1,   1,    1,    1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -299,9 +337,16 @@
       },
       "S_R": {
         "name": "s_r",
-        "bars": 8,
-        "progression": [ "I", "IV", "I", "V", "vi", "ii", "V", "I" ],
-        "chord_bars":   [ 1,   1,    1,   1,   1,    1,    1,   1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "vi", "bars": 1.0 },
+          { "chord": "ii", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -322,9 +367,12 @@
       },
       "CL_R": {
         "name": "cl_r",
-        "bars": 4,
-        "progression": [ "I", "IV", "V", "I" ],
-        "chord_bars":   [ 1,   1,    1,   1 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
@@ -345,9 +393,15 @@
       },
       "CODA": {
         "name": "coda",
-        "bars": 8,
-        "progression": [ "I", "IV", "V", "I", "IV", "V", "I" ],
-        "chord_bars":   [ 1,   1,    1,   1,   1,    1,   2 ],
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "IV", "bars": 1.0 },
+          { "chord": "V",  "bars": 1.0 },
+          { "chord": "I",  "bars": 2.0 }
+        ],
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",

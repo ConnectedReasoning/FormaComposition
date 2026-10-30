@@ -56,16 +56,10 @@
     ],
     "sections": {
       "intro": {
-        "bars": 6,
-        "progression": [
-          "I",
-          "V",
-          "IV"
-        ],
-        "chord_bars": [
-          1.0,
-          2.0,
-          3.0
+        "harmony": [
+          { "chord": "I",  "bars": 1.0 },
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "IV", "bars": 3.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -78,16 +72,10 @@
         "rest_probability": 0.0
       },
       "verse": {
-        "bars": 6,
-        "progression": [
-          "V",
-          "VI",
-          "V"
-        ],
-        "chord_bars": [
-          2.0,
-          2.0,
-          2.0
+        "harmony": [
+          { "chord": "V",  "bars": 2.0 },
+          { "chord": "VI", "bars": 2.0 },
+          { "chord": "V",  "bars": 2.0 }
         ],
         "density": "medium",
         "melody": "develop",
@@ -101,15 +89,10 @@
       },
       "chorus": {
         "bars": 12,
-        "progression": [
-          "VI",
-          "III",
-          "II"
-        ],
-        "chord_bars": [
-          1.0,
-          2.0,
-          3.0
+        "harmony": [
+          { "chord": "VI",  "bars": 1.0 },
+          { "chord": "III", "bars": 2.0 },
+          { "chord": "II",  "bars": 3.0 }
         ],
         "density": "medium",
         "melody": "develop",

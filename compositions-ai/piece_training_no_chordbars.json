@@ -40,8 +40,8 @@
     "sections": {
       "intro": {
         "bars": 1,
-        "progression": [
-          "I"
+        "harmony": [
+          { "chord": "I" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -56,9 +56,9 @@
       },
       "verse": {
         "bars": 4,
-        "progression": [
-          "I",
-          "IV"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" }
         ],
         "density": "medium",
         "melody": "develop",
@@ -73,10 +73,10 @@
       },
       "chorus": {
         "bars": 3,
-        "progression": [
-          "I",
-          "IV",
-          "V"
+        "harmony": [
+          { "chord": "I" },
+          { "chord": "IV" },
+          { "chord": "V" }
         ],
         "density": "medium",
         "melody": "develop",

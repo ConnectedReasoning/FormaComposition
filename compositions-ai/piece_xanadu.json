@@ -37,19 +37,12 @@
     "sections": {
       "prologue": {
         "name": "prologue",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "VII"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -61,19 +54,12 @@
       },
       "awakening": {
         "name": "awakening",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "III"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 },
+          { "chord": "III", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "lyrical",
@@ -85,27 +71,16 @@
       },
       "statement": {
         "name": "statement",
-        "bars": 24,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "III",
-          "VII",
-          "i",
-          "iv",
-          "VII"
-        ],
-        "chord_bars": [
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3
+        "harmony": [
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "VII", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 },
+          { "chord": "III", "bars": 3.0 },
+          { "chord": "VII", "bars": 3.0 },
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "iv",  "bars": 3.0 },
+          { "chord": "VII", "bars": 3.0 }
         ],
         "density": "medium",
         "melody": "lyrical",
@@ -129,35 +104,20 @@
       },
       "development": {
         "name": "development",
-        "bars": 32,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "iv",
-          "VII",
-          "III",
-          "VI",
-          "III",
-          "iv",
-          "i",
-          "VII",
-          "VI",
-          "III",
-          "VII"
-        ],
-        "chord_bars": [
-          3,
-          3,
-          2,
-          3,
-          3,
-          2,
-          3,
-          3,
-          2,
-          3,
-          3,
-          2
+        "harmony": [
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "iv",  "bars": 3.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "III", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 },
+          { "chord": "III", "bars": 2.0 },
+          { "chord": "iv",  "bars": 3.0 },
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "VII", "bars": 2.0 },
+          { "chord": "VI",  "bars": 3.0 },
+          { "chord": "III", "bars": 3.0 },
+          { "chord": "VII", "bars": 2.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -181,19 +141,12 @@
       },
       "breakdown": {
         "name": "breakdown",
-        "bars": 16,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VI",
-          "III",
-          "VII"
-        ],
-        "chord_bars": [
-          4,
-          4,
-          4,
-          4
+        "harmony": [
+          { "chord": "i",   "bars": 4.0 },
+          { "chord": "VI",  "bars": 4.0 },
+          { "chord": "III", "bars": 4.0 },
+          { "chord": "VII", "bars": 4.0 }
         ],
         "density": "sparse",
         "melody": "sparse",
@@ -205,27 +158,16 @@
       },
       "recapitulation": {
         "name": "recapitulation",
-        "bars": 24,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "III",
-          "iv",
-          "VII",
-          "VI",
-          "i"
-        ],
-        "chord_bars": [
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3,
-          3
+        "harmony": [
+          { "chord": "i",   "bars": 3.0 },
+          { "chord": "VII", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 },
+          { "chord": "III", "bars": 3.0 },
+          { "chord": "iv",  "bars": 3.0 },
+          { "chord": "VII", "bars": 3.0 },
+          { "chord": "VI",  "bars": 3.0 },
+          { "chord": "i",   "bars": 3.0 }
         ],
         "density": "full",
         "melody": "develop",
@@ -249,19 +191,12 @@
       },
       "coda": {
         "name": "coda",
-        "bars": 20,
         "beats_per_bar": 4,
-        "progression": [
-          "i",
-          "VII",
-          "VI",
-          "i"
-        ],
-        "chord_bars": [
-          5,
-          5,
-          5,
-          5
+        "harmony": [
+          { "chord": "i",   "bars": 5.0 },
+          { "chord": "VII", "bars": 5.0 },
+          { "chord": "VI",  "bars": 5.0 },
+          { "chord": "i",   "bars": 5.0 }
         ],
         "density": "sparse",
         "melody": "lyrical",
