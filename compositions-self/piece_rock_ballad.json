@@ -19,6 +19,8 @@
       "chorus",
       "verse",
       "chorus",
+      "verse",
+      "chorus",
       "bridge",
       "chorus",
       "outro"
@@ -36,7 +38,7 @@
         "harmony_rhythm": {
           "rhythm": "sustain"
         },
-        "rest_probability": 0.3
+        "rest_probability": 0.15
       },
       "verse": {
         "name": "verse",

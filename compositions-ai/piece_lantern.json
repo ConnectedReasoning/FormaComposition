@@ -1,706 +1,2093 @@
 {
-  "title": "LANTERN",
-  "key": "D Dorian",
-  "bpm": 112,
-  "meter": "4/4",
-  "bars_per_section": 28,
-  "section_seconds": 60,
-  "total_minutes": 60,
-  "feel": "warmer, bouncier arpeggio focus music; marimba and pluck timbres",
-  "join_rules": [
-    "No section modulates: every chord stays diatonic to the key, so any section can follow any other.",
-    "The last bar of every section resolves to the tonic chord, replacing the last chord of the final loop.",
-    "Overlap the last beat of each section with the first beat of the next so tails ring through.",
-    "Each section's progression_loop repeats every 4 bars; phrase_arc says which layers enter or leave per phrase."
-  ],
-  "mix_rules": [
-    "Melody stays quiet and mostly stepwise; the arp pulse carries the focus work.",
-    "Soft timbres only (pluck, marimba, felt piano, bells); no harsh saws or vocals.",
-    "Keep dynamics within about 6 dB across the whole hour."
-  ],
-  "play_variants": [
-    {
-      "play": 1,
-      "name": "as written",
-      "change": "none"
-    },
-    {
-      "play": 2,
-      "name": "register up",
-      "change": "arp +1 octave; melody inverted"
-    },
-    {
-      "play": 3,
-      "name": "rhythm mask",
-      "change": "drop arp steps 5 and 13 of 16 (3 and 7 of 8); staccato gate"
-    },
-    {
-      "play": 4,
-      "name": "reverse and ghost",
-      "change": "arp direction reversed; ghost notes at 25% velocity"
-    },
-    {
-      "play": 5,
-      "name": "slow melody, moving filter",
-      "change": "melody note lengths doubled; filter cutoff opens then closes across the section"
-    },
-    {
-      "play": 6,
-      "name": "register down",
-      "change": "arp -1 octave; melody drops its last note; alternate arp notes panned left/right"
-    }
-  ],
-  "form_type": "song",
-  "form": [
-    "INTRO", "VERSE 1", "VERSE 2", "PRE-CHORUS",
-    "CHORUS", "CHORUS LIFT", "BRIDGE", "BREAKDOWN",
-    "INSTRUMENTAL", "OUTRO"
-  ],
-  "sections": {
-    "INTRO": {
-      "id": 1,
-      "name": "INTRO",
-      "role": "opener / reset",
-      "energy": 1,
-      "progression_loop": [
-        "Dm9",
-        "Gadd9",
-        "Dm9",
-        "Am7"
+  "piece": {
+    "name": "lantern",
+    "title": "LANTERN",
+    "key": "D",
+    "mode": "dorian",
+    "tempo": 112,
+    "seed": 1112,
+    "form_type": "song",
+    "form": [
+      "INTRO",
+      "CHORUS",
+      "BRIDGE",
+      "OUTRO",
+      "BRIDGE",
+      "CHORUS",
+      "VERSE_1",
+      "PRE_CHORUS",
+      "BREAKDOWN",
+      "VERSE_1",
+      "INSTRUMENTAL",
+      "VERSE_2",
+      "OUTRO",
+      "VERSE_2",
+      "OUTRO",
+      "BRIDGE",
+      "CHORUS",
+      "CHORUS_LIFT",
+      "BRIDGE",
+      "CHORUS_LIFT",
+      "VERSE_2",
+      "VERSE_1",
+      "CHORUS_LIFT",
+      "OUTRO",
+      "CHORUS_LIFT",
+      "VERSE_1",
+      "INSTRUMENTAL",
+      "BRIDGE",
+      "INSTRUMENTAL",
+      "VERSE_1",
+      "BREAKDOWN",
+      "INTRO",
+      "BREAKDOWN",
+      "VERSE_2",
+      "PRE_CHORUS",
+      "INSTRUMENTAL",
+      "INTRO",
+      "CHORUS",
+      "INSTRUMENTAL",
+      "VERSE_2",
+      "VERSE_1",
+      "BREAKDOWN",
+      "PRE_CHORUS",
+      "BREAKDOWN",
+      "INTRO",
+      "PRE_CHORUS",
+      "INTRO",
+      "BREAKDOWN",
+      "INTRO",
+      "OUTRO",
+      "VERSE_2",
+      "CHORUS_LIFT",
+      "PRE_CHORUS",
+      "CHORUS",
+      "INSTRUMENTAL",
+      "PRE_CHORUS",
+      "CHORUS",
+      "BRIDGE",
+      "CHORUS_LIFT",
+      "OUTRO"
+    ],
+    "motif": {
+      "name": "arp",
+      "intervals": [
+        0,
+        2,
+        2,
+        -2,
+        -2,
+        2,
+        2,
+        -2
       ],
-      "arp": {
-        "pattern": "1-5-3-5",
-        "subdivision": "8th",
-        "octaves": 2,
-        "gate": "legato"
+      "rhythm": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "sections": {
+      "INTRO": {
+        "name": "intro",
+        "bars": 28,
+        "progression": [
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "v",
+          "i",
+          "IV",
+          "i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "root_whole",
+          "intervals": [
+            0
+          ],
+          "rhythm": [
+            4.0
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.5,
+            1.0,
+            1.5,
+            2.0,
+            2.5,
+            3.0,
+            3.5
+          ],
+          "durations": [
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 24,
+        "bass_velocity": 48,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 58,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                4,
+                -2,
+                2,
+                -4,
+                4,
+                -2,
+                2
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ]
+            }
+          }
+        ],
+        "notes": "opener / reset (energy 1). Melody: none. Texture: soft pad. Phrase arc: arp alone phrases 1-2; pad phrase 3; bass phrase 4; thin out phrase 7. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "none",
-      "bass": "root whole notes from phrase 3",
-      "texture": "soft pad",
-      "phrase_arc": "arp alone phrases 1-2; pad phrase 3; bass phrase 4; thin out phrase 7"
-    },
-    "VERSE 1": {
-      "id": 2,
-      "name": "VERSE 1",
-      "role": "verse",
-      "energy": 2,
-      "progression_loop": [
-        "Dm7",
-        "G6",
-        "Cmaj7",
-        "Dm7"
-      ],
-      "arp": {
-        "pattern": "1-3-5-3",
-        "subdivision": "16th",
-        "octaves": 2,
-        "gate": "medium"
+      "VERSE_1": {
+        "name": "verse_1",
+        "bars": 28,
+        "progression": [
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "root_eighths",
+          "intervals": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rhythm": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 52,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 62,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 42,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "verse (energy 2). Melody: motif 5-4-2, one quiet statement every 4 bars. Texture: pad. Phrase arc: melody enters phrase 3. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "motif 5-4-2, one quiet statement every 4 bars",
-      "bass": "root 8ths",
-      "texture": "pad",
-      "phrase_arc": "melody enters phrase 3"
-    },
-    "VERSE 2": {
-      "id": 3,
-      "name": "VERSE 2",
-      "role": "verse",
-      "energy": 2,
-      "progression_loop": [
-        "Dm9",
-        "Em7",
-        "Fmaj7",
-        "Dm9"
-      ],
-      "arp": {
-        "pattern": "1-3-5-7 up",
-        "subdivision": "16th",
-        "octaves": 2,
-        "gate": "medium"
+      "VERSE_2": {
+        "name": "verse_2",
+        "bars": 28,
+        "progression": [
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i",
+          "i",
+          "ii",
+          "III",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "root_fifth_eighths",
+          "intervals": [
+            0,
+            4,
+            0,
+            4,
+            0,
+            4,
+            0,
+            4
+          ],
+          "rhythm": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 52,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 62,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                2,
+                2,
+                2,
+                -6,
+                2,
+                2,
+                2,
+                -6,
+                2,
+                2,
+                2,
+                -6,
+                2,
+                2,
+                2
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 42,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "verse (energy 2). Melody: motif 1-2-1, one statement every 4 bars. Texture: soft shimmer. Phrase arc: melody enters phrase 2; shimmer phrases 4-7. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "motif 1-2-1, one statement every 4 bars",
-      "bass": "root-fifth 8ths",
-      "texture": "soft shimmer",
-      "phrase_arc": "melody enters phrase 2; shimmer phrases 4-7"
-    },
-    "PRE-CHORUS": {
-      "id": 4,
-      "name": "PRE-CHORUS",
-      "role": "build",
-      "energy": 3,
-      "progression_loop": [
-        "Gmaj7",
-        "Am7",
-        "Cmaj7",
-        "Dm7"
-      ],
-      "arp": {
-        "pattern": "up-down 1-3-5-8-5-3",
-        "subdivision": "16th",
-        "octaves": "2 widening to 4",
-        "gate": "medium"
+      "PRE_CHORUS": {
+        "name": "pre_chorus",
+        "bars": 28,
+        "progression": [
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i",
+          "IV",
+          "v",
+          "VII",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "pulse_eighths",
+          "intervals": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rhythm": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 36,
+        "bass_velocity": 56,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 66,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                2,
+                2,
+                3,
+                -3,
+                -2,
+                -2,
+                2,
+                2,
+                3,
+                -3,
+                -2,
+                -2,
+                2,
+                2,
+                3
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 46,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "build (energy 3). Melody: rising 1-3-5 held notes. Texture: filtered riser. Phrase arc: range widens each phrase; riser from phrase 4. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "rising 1-3-5 held notes",
-      "bass": "pulsing 8ths",
-      "texture": "filtered riser",
-      "phrase_arc": "range widens each phrase; riser from phrase 4"
-    },
-    "CHORUS": {
-      "id": 5,
-      "name": "CHORUS",
-      "role": "hook",
-      "energy": 4,
-      "progression_loop": [
-        "F",
-        "C",
-        "G",
-        "Dm"
-      ],
-      "arp": {
-        "pattern": "1-3-5-3 with 3+3+2 accents",
-        "subdivision": "16th",
-        "octaves": 3,
-        "gate": "medium"
+      "CHORUS": {
+        "name": "chorus",
+        "bars": 28,
+        "progression": [
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i",
+          "III",
+          "VII",
+          "IV",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "drive_eighths",
+          "intervals": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rhythm": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175
+          ],
+          "velocities": [
+            1.0,
+            0.7,
+            0.7,
+            1.0,
+            0.7,
+            0.7,
+            1.0,
+            0.7,
+            1.0,
+            0.7,
+            0.7,
+            1.0,
+            0.7,
+            0.7,
+            1.0,
+            0.7
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 42,
+        "bass_velocity": 60,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 70,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2,
+                -2,
+                2,
+                2,
+                -2
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 50,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "hook (energy 4). Melody: motif 1-3-5-3 up an octave, every 2 bars. Texture: pad + light bells. Phrase arc: full from phrase 1; bells phrases 4-7. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "motif 1-3-5-3 up an octave, every 2 bars",
-      "bass": "root, driving",
-      "texture": "pad + light bells",
-      "phrase_arc": "full from phrase 1; bells phrases 4-7"
-    },
-    "CHORUS LIFT": {
-      "id": 6,
-      "name": "CHORUS LIFT",
-      "role": "peak",
-      "energy": 5,
-      "progression_loop": [
-        "F",
-        "G",
-        "Am",
-        "Dm"
-      ],
-      "arp": {
-        "pattern": "octave jump 1-8-5-8",
-        "subdivision": "16th",
-        "octaves": 3,
-        "gate": "staccato"
+      "CHORUS_LIFT": {
+        "name": "chorus_lift",
+        "bars": 28,
+        "progression": [
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i",
+          "III",
+          "IV",
+          "v",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "drive_eighths",
+          "intervals": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rhythm": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 48,
+        "bass_velocity": 64,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 74,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                7,
+                -3,
+                3,
+                -7,
+                7,
+                -3,
+                3,
+                -7,
+                7,
+                -3,
+                3,
+                -7,
+                7,
+                -3,
+                3
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 54,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "peak (energy 5). Melody: motif 1-3-5-3 doubled, counter-line 5-4-2. Texture: bells + pad. Phrase arc: counter-line enters phrase 3; hold peak to phrase 7. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "motif 1-3-5-3 doubled, counter-line 5-4-2",
-      "bass": "8th-note drive",
-      "texture": "bells + pad",
-      "phrase_arc": "counter-line enters phrase 3; hold peak to phrase 7"
-    },
-    "BRIDGE": {
-      "id": 7,
-      "name": "BRIDGE",
-      "role": "contrast",
-      "energy": 3,
-      "progression_loop": [
-        "Fmaj7",
-        "Em7",
-        "Dm9",
-        "Cmaj7"
-      ],
-      "arp": {
-        "pattern": "descending 5-3-1-3",
-        "subdivision": "8th",
-        "octaves": 3,
-        "gate": "legato"
+      "BRIDGE": {
+        "name": "bridge",
+        "bars": 28,
+        "progression": [
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "VII",
+          "III",
+          "ii",
+          "i",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "root_whole",
+          "intervals": [
+            0
+          ],
+          "rhythm": [
+            4.0
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.5,
+            1.0,
+            1.5,
+            2.0,
+            2.5,
+            3.0,
+            3.5
+          ],
+          "durations": [
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 36,
+        "bass_velocity": 56,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 66,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                -2,
+                -2,
+                2,
+                2,
+                -2,
+                -2,
+                2
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ]
+            }
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 46,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "contrast (energy 3). Melody: new motif 3-2-1 in long notes. Texture: wide pad. Phrase arc: half-time feel; stepwise-descending chords; pad swells phrases 4-7. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "new motif 3-2-1 in long notes",
-      "bass": "root whole notes",
-      "texture": "wide pad",
-      "phrase_arc": "half-time feel; stepwise-descending chords; pad swells phrases 4-7"
-    },
-    "BREAKDOWN": {
-      "id": 8,
-      "name": "BREAKDOWN",
-      "role": "breath",
-      "energy": 1,
-      "progression_loop": [
-        "Dm9",
-        "Cadd9/D",
-        "Gadd9/D",
-        "Dm9"
-      ],
-      "arp": {
-        "pattern": "1-5-3-5 muted",
-        "subdivision": "8th with 16th ghost notes",
-        "octaves": 2,
-        "gate": "staccato"
+      "BREAKDOWN": {
+        "name": "breakdown",
+        "bars": 28,
+        "progression": [
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i",
+          "i",
+          "VII",
+          "IV",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "drone",
+          "intervals": [
+            0
+          ],
+          "rhythm": [
+            4.0
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.5,
+            1.0,
+            1.5,
+            2.0,
+            2.5,
+            3.0,
+            3.5
+          ],
+          "durations": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 24,
+        "bass_velocity": 48,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 50,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                4,
+                -2,
+                2,
+                -4,
+                4,
+                -2,
+                2
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ]
+            }
+          }
+        ],
+        "notes": "breath (energy 1). Melody: none. Texture: air / noise bed. Phrase arc: pedal and ghost arp only; one bell on phrase 4. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "none",
-      "bass": "sustained D pedal",
-      "texture": "air / noise bed",
-      "phrase_arc": "pedal and ghost arp only; one bell on phrase 4"
-    },
-    "INSTRUMENTAL": {
-      "id": 9,
-      "name": "INSTRUMENTAL",
-      "role": "development",
-      "energy": 3,
-      "progression_loop": [
-        "Dm",
-        "Am",
-        "C",
-        "Dm"
-      ],
-      "arp": {
-        "pattern": "random walk within chord tones",
-        "subdivision": "16th",
-        "octaves": 3,
-        "gate": "medium"
+      "INSTRUMENTAL": {
+        "name": "instrumental",
+        "bars": 28,
+        "progression": [
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i",
+          "i",
+          "v",
+          "VII",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "medium",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "walking",
+          "intervals": [
+            0,
+            2,
+            4,
+            5
+          ],
+          "rhythm": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0,
+            2.25,
+            2.5,
+            2.75,
+            3.0,
+            3.25,
+            3.5,
+            3.75
+          ],
+          "durations": [
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175,
+            0.175
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75,
+            1.0,
+            0.75,
+            0.75,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 36,
+        "bass_velocity": 56,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "soprano",
+            "behavior": "develop",
+            "velocity": 66,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                2,
+                2,
+                -2,
+                2,
+                3,
+                -3,
+                -2,
+                -2,
+                4,
+                -2,
+                2,
+                3,
+                -3,
+                -2,
+                -2
+              ],
+              "rhythm": [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          },
+          {
+            "register": "tenor",
+            "behavior": "lyrical",
+            "velocity": 46,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "development (energy 3). Melody: call and response: 5-4-2 then 2-1-2, 2 bars each. Texture: pad. Phrase arc: response line enters phrase 3. Last bar forced to tonic so any section can follow any other."
       },
-      "melody": "call and response: 5-4-2 then 2-1-2, 2 bars each",
-      "bass": "walking bass",
-      "texture": "pad",
-      "phrase_arc": "response line enters phrase 3"
+      "OUTRO": {
+        "name": "outro",
+        "bars": 28,
+        "progression": [
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i",
+          "i",
+          "IV",
+          "VII",
+          "i"
+        ],
+        "chord_bars": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "density": "sparse",
+        "melody": "develop",
+        "bass_style": "motif",
+        "bass_motif": {
+          "name": "root_whole",
+          "intervals": [
+            0
+          ],
+          "rhythm": [
+            4.0
+          ]
+        },
+        "arc": "none",
+        "rhythm": "pattern",
+        "rhythm_pattern": {
+          "onsets": [
+            0.0,
+            0.5,
+            1.0,
+            1.5,
+            2.0,
+            2.5,
+            3.0,
+            3.5
+          ],
+          "durations": [
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475,
+            0.475
+          ],
+          "velocities": [
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75,
+            1.0,
+            0.75
+          ],
+          "length_beats": 4.0
+        },
+        "harmony_rhythm": {
+          "rhythm": "sustain"
+        },
+        "harmony_velocity": 30,
+        "bass_velocity": 52,
+        "harmony_register": {
+          "min": 48,
+          "max": 67
+        },
+        "bass_register": {
+          "min": 36,
+          "max": 55
+        },
+        "voices": [
+          {
+            "register": "alto",
+            "behavior": "develop",
+            "velocity": 56,
+            "motif": {
+              "name": "arp",
+              "intervals": [
+                0,
+                4,
+                -2,
+                2,
+                -4,
+                4,
+                -2,
+                2
+              ],
+              "rhythm": [
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ]
+            }
+          },
+          {
+            "register": "soprano",
+            "behavior": "lyrical",
+            "velocity": 42,
+            "melody_engine": "v2",
+            "phrase_form": "a",
+            "phrase_chords": 4,
+            "phrase_restate": "sequence",
+            "leap_probability": 0.05,
+            "rest_probability": 0.35,
+            "note_length_range": {
+              "min": 2,
+              "max": 4,
+              "quantum": 0.5
+            }
+          }
+        ],
+        "notes": "closer (energy 2). Melody: motif 1-2-1 in last two phrases. Texture: pad. Phrase arc: layers fall away; arp thins every 2 phrases. Last bar forced to tonic so any section can follow any other."
+      }
     },
-    "OUTRO": {
-      "id": 10,
-      "name": "OUTRO",
-      "role": "closer",
-      "energy": 2,
-      "progression_loop": [
-        "Dm9",
-        "Gadd9",
-        "Cmaj7",
-        "Dm9"
-      ],
-      "arp": {
-        "pattern": "1-5-3-5",
-        "subdivision": "16th thinning to 8th to quarter",
-        "octaves": 2,
-        "gate": "legato"
-      },
-      "melody": "motif 1-2-1 in last two phrases",
-      "bass": "root whole notes",
-      "texture": "pad",
-      "phrase_arc": "layers fall away; arp thins every 2 phrases"
-    }
-  },
-  "order_rules": "Each section plays exactly 6 times; first play is INTRO, last is OUTRO; no section twice in a row; energy never jumps more than 3 levels; never three energy-4+ sections in a row.",
-  "order": [
-    "INTRO",
-    "CHORUS",
-    "BRIDGE",
-    "OUTRO",
-    "BRIDGE",
-    "CHORUS",
-    "VERSE 1",
-    "PRE-CHORUS",
-    "BREAKDOWN",
-    "VERSE 1",
-    "INSTRUMENTAL",
-    "VERSE 2",
-    "OUTRO",
-    "VERSE 2",
-    "OUTRO",
-    "BRIDGE",
-    "CHORUS",
-    "CHORUS LIFT",
-    "BRIDGE",
-    "CHORUS LIFT",
-    "VERSE 2",
-    "VERSE 1",
-    "CHORUS LIFT",
-    "OUTRO",
-    "CHORUS LIFT",
-    "VERSE 1",
-    "INSTRUMENTAL",
-    "BRIDGE",
-    "INSTRUMENTAL",
-    "VERSE 1",
-    "BREAKDOWN",
-    "INTRO",
-    "BREAKDOWN",
-    "VERSE 2",
-    "PRE-CHORUS",
-    "INSTRUMENTAL",
-    "INTRO",
-    "CHORUS",
-    "INSTRUMENTAL",
-    "VERSE 2",
-    "VERSE 1",
-    "BREAKDOWN",
-    "PRE-CHORUS",
-    "BREAKDOWN",
-    "INTRO",
-    "PRE-CHORUS",
-    "INTRO",
-    "BREAKDOWN",
-    "INTRO",
-    "OUTRO",
-    "VERSE 2",
-    "CHORUS LIFT",
-    "PRE-CHORUS",
-    "CHORUS",
-    "INSTRUMENTAL",
-    "PRE-CHORUS",
-    "CHORUS",
-    "BRIDGE",
-    "CHORUS LIFT",
-    "OUTRO"
-  ],
-  "timeline": [
-    {
-      "start": "00:00",
-      "section": "INTRO",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "01:00",
-      "section": "CHORUS",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "02:00",
-      "section": "BRIDGE",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "03:00",
-      "section": "OUTRO",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "04:00",
-      "section": "BRIDGE",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "05:00",
-      "section": "CHORUS",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "06:00",
-      "section": "VERSE 1",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "07:00",
-      "section": "PRE-CHORUS",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "08:00",
-      "section": "BREAKDOWN",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "09:00",
-      "section": "VERSE 1",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "10:00",
-      "section": "INSTRUMENTAL",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "11:00",
-      "section": "VERSE 2",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "12:00",
-      "section": "OUTRO",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "13:00",
-      "section": "VERSE 2",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "14:00",
-      "section": "OUTRO",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "15:00",
-      "section": "BRIDGE",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "16:00",
-      "section": "CHORUS",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "17:00",
-      "section": "CHORUS LIFT",
-      "play": 1,
-      "variant": "as written"
-    },
-    {
-      "start": "18:00",
-      "section": "BRIDGE",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "19:00",
-      "section": "CHORUS LIFT",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "20:00",
-      "section": "VERSE 2",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "21:00",
-      "section": "VERSE 1",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "22:00",
-      "section": "CHORUS LIFT",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "23:00",
-      "section": "OUTRO",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "24:00",
-      "section": "CHORUS LIFT",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "25:00",
-      "section": "VERSE 1",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "26:00",
-      "section": "INSTRUMENTAL",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "27:00",
-      "section": "BRIDGE",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "28:00",
-      "section": "INSTRUMENTAL",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "29:00",
-      "section": "VERSE 1",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "30:00",
-      "section": "BREAKDOWN",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "31:00",
-      "section": "INTRO",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "32:00",
-      "section": "BREAKDOWN",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "33:00",
-      "section": "VERSE 2",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "34:00",
-      "section": "PRE-CHORUS",
-      "play": 2,
-      "variant": "register up"
-    },
-    {
-      "start": "35:00",
-      "section": "INSTRUMENTAL",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "36:00",
-      "section": "INTRO",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "37:00",
-      "section": "CHORUS",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "38:00",
-      "section": "INSTRUMENTAL",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "39:00",
-      "section": "VERSE 2",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "40:00",
-      "section": "VERSE 1",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "41:00",
-      "section": "BREAKDOWN",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "42:00",
-      "section": "PRE-CHORUS",
-      "play": 3,
-      "variant": "rhythm mask"
-    },
-    {
-      "start": "43:00",
-      "section": "BREAKDOWN",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "44:00",
-      "section": "INTRO",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "45:00",
-      "section": "PRE-CHORUS",
-      "play": 4,
-      "variant": "reverse and ghost"
-    },
-    {
-      "start": "46:00",
-      "section": "INTRO",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "47:00",
-      "section": "BREAKDOWN",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "48:00",
-      "section": "INTRO",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "49:00",
-      "section": "OUTRO",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "50:00",
-      "section": "VERSE 2",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "51:00",
-      "section": "CHORUS LIFT",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "52:00",
-      "section": "PRE-CHORUS",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "53:00",
-      "section": "CHORUS",
-      "play": 5,
-      "variant": "slow melody, moving filter"
-    },
-    {
-      "start": "54:00",
-      "section": "INSTRUMENTAL",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "55:00",
-      "section": "PRE-CHORUS",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "56:00",
-      "section": "CHORUS",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "57:00",
-      "section": "BRIDGE",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "58:00",
-      "section": "CHORUS LIFT",
-      "play": 6,
-      "variant": "register down"
-    },
-    {
-      "start": "59:00",
-      "section": "OUTRO",
-      "play": 6,
-      "variant": "register down"
-    }
-  ]
+    "notes": "Ten-section song form, each section 60 s (28 bars at 112 bpm), played 6 times (60 plays, 60 min). Repeats are regenerated, so each play differs by seed. D Dorian, no modulation. Warmer, bouncier arp; suggested timbres: marimba, pluck, felt piano, bells; melody stays quiet."
+  }
 }
