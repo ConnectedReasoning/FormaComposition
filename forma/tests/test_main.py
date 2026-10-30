@@ -22,6 +22,7 @@ import subprocess
 import sys
 
 import pytest
+from song_helpers import song_piece, first_section
 
 MAIN_PY = None  # set in the main_py fixture below
 
@@ -35,11 +36,11 @@ def main_py():
 @pytest.fixture
 def piece_path(tmp_path):
     path = tmp_path / "piece.json"
-    path.write_text(json.dumps({
+    path.write_text(json.dumps(song_piece({
         "key": "C", "mode": "ionian", "tempo": {"min": 100, "max": 120},
         "title": "Test Piece",
         "sections": [{"name": "a", "progression": ["i", "iv", "v"], "rhythm": "free", "bars": 4}],
-    }))
+    })))
     return str(path)
 
 
@@ -96,12 +97,13 @@ class TestInvalidInputExitsCleanly:
     ):
         bad_piece = tmp_path / "bad_piece.json"
         bad_piece.write_text(json.dumps({
-            "key": "C", "mode": "ionian", "title": "Bad Piece", "sections": [],
+            "key": "C", "mode": "ionian", "title": "Bad Piece",
+            "form_type": "song", "form": [], "sections": {},
         }))
         result = _run(main_py, str(bad_piece))
         assert result.returncode == 1
         assert "ERRORS in" in result.stdout
-        assert "sections" in result.stdout
+        assert "form" in result.stdout
 
     def test_no_traceback_leaks_to_the_user_for_a_missing_file(self, main_py, tmp_path):
         """A missing-file error is an expected, handled case -- the CLI

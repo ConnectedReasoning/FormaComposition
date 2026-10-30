@@ -496,15 +496,9 @@ _RANK[INFO] = 0
 
 def section_timeline(piece: dict) -> list[tuple[str, float, float]]:
     """[(section_name, start_beat, end_beat), ...] in performance order."""
-    sections = piece.get("sections", {})
-    if piece.get("form_type") == "song":
-        order = [f.get("section") if isinstance(f, dict) else f
-                 for f in piece.get("form", [])]
-        lookup = sections if isinstance(sections, dict) else {s.get("name"): s for s in sections}
-    else:
-        seq = sections if isinstance(sections, list) else list(sections.values())
-        order = [s.get("name", f"section_{i}") for i, s in enumerate(seq)]
-        lookup = {s.get("name", f"section_{i}"): s for i, s in enumerate(seq)}
+    lookup = piece.get("sections", {})
+    order = [f.get("section") if isinstance(f, dict) else f
+             for f in piece.get("form", [])]
 
     timeline, clock = [], 0.0
     seen: dict[str, int] = {}

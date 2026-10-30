@@ -18,6 +18,7 @@ import pytest
 from intervals.music.motif import generate_subject_entry
 from intervals.core.schemas import VoiceModel, SectionModel, PieceModel
 from intervals.core import generator
+from song_helpers import song_piece, first_section
 
 
 # ---------------------------------------------------------------------------
@@ -222,7 +223,7 @@ def _fugue_piece(**voice_overrides):
         {"register": "soprano", "entry_role": "answer", "motif": "subj",
          "velocity": 70, "canon_offset": 2.0},
     ]
-    return {
+    return song_piece({
         "key": "D", "mode": "dorian", "tempo": 100, "seed": 3,
         "motif": {"name": "subj", "intervals": [0, 2, -1, 1], "rhythm": [1.0, 1.0, 1.0, 1.0]},
         "sections": [{
@@ -230,14 +231,14 @@ def _fugue_piece(**voice_overrides):
             "progression": ["i", "iv", "v", "i"],
             "voices": voices,
         }],
-    }
+    })
 
 
 class TestGeneratorWiring:
     def test_lead_voice_entry_role_renders_literal_subject(self):
         """voices[0] with entry_role set takes generate_subject_entry's
         path in generate_section, not generate_melody_for_progression."""
-        piece = {
+        piece = song_piece({
             "key": "C", "mode": "ionian", "tempo": 100, "seed": 1,
             "motif": {"name": "s", "intervals": [0, 2, -1, 1], "rhythm": [1.0, 1.0, 1.0, 1.0]},
             "sections": [{
@@ -245,8 +246,8 @@ class TestGeneratorWiring:
                 "progression": ["I", "IV", "V", "I"],
                 "voices": [{"register": "mid", "entry_role": "subject", "motif": "s"}],
             }],
-        }
-        res = generator.generate_section(piece["sections"][0], piece)
+        })
+        res = generator.generate_section(first_section(piece), piece)
         # C ionian, degree walk 0,+2,-1,+1 from tonic -> C E D E (relative
         # semitone shape, regardless of which octave the tonic folds
         # into for the default "mid" register).
@@ -281,7 +282,7 @@ class TestGeneratorWiring:
         -- it should still reject a subject/answer voice whose motif
         rhythm doesn't divide evenly into the bar, exactly as it already
         does for free-species peer voices."""
-        piece = {
+        piece = song_piece({
             "key": "D", "mode": "dorian", "tempo": 100, "seed": 1,
             "sections": [{
                 "name": "a", "bars": 4, "rhythm": "free",
@@ -293,7 +294,7 @@ class TestGeneratorWiring:
                               "rhythm": [1.0, 1.0, 1.0]},
                 }],
             }],
-        }
+        })
         piece_model = PieceModel.model_validate(piece)
         with pytest.raises(ValueError, match="not a whole multiple"):
             piece_model.validate_against_theme(piece_model)
@@ -303,7 +304,7 @@ class TestGeneratorWiring:
         the literal notes via against_voices with no special-casing --
         confirm it doesn't crash and produces notes."""
         piece = _fugue_piece()
-        piece["sections"][0]["voices"].append(
+        first_section(piece)["voices"].append(
             {"register": "tenor", "species": "free", "velocity": 60}
         )
         res = generator.generate_piece(piece, "/tmp/_test_fugue_species.mid")
@@ -320,21 +321,21 @@ class TestEntryRoleUnsetIsNoOp:
         generate_melody_for_progression -- confirmed by the printed
         section using a *behavior* (lyrical/generative), which
         generate_subject_entry has no notion of and would ignore."""
-        piece = {
+        piece = song_piece({
             "key": "C", "mode": "ionian", "tempo": 100, "seed": 1,
             "sections": [{
                 "name": "a", "bars": 2, "rhythm": "free",
                 "progression": ["I", "V"],
                 "voices": [{"register": "mid", "behavior": "lyrical"}],
             }],
-        }
-        res = generator.generate_section(piece["sections"][0], piece)
+        })
+        res = generator.generate_section(first_section(piece), piece)
         assert len(res.melody_notes) > 0  # generative path still produces notes
 
     def test_peer_voice_without_entry_role_unaffected(self):
         """A peer voice with species set (no entry_role) still takes the
         counterpoint path exactly as before this feature existed."""
-        piece = {
+        piece = song_piece({
             "key": "C", "mode": "ionian", "tempo": 100, "seed": 1,
             "sections": [{
                 "name": "a", "bars": 2, "rhythm": "free",
@@ -344,7 +345,7 @@ class TestEntryRoleUnsetIsNoOp:
                     {"register": "tenor", "species": "free"},
                 ],
             }],
-        }
+        })
         result = generator.generate_piece(piece, "/tmp/_test_no_entry_role.mid")
         assert result is not None
 
@@ -352,7 +353,7 @@ class TestEntryRoleUnsetIsNoOp:
         """A representative multi-voice piece with no entry_role anywhere
         validates and renders cleanly -- the schema additions must not
         perturb any existing, unrelated field."""
-        piece = {
+        piece = song_piece({
             "key": "G", "mode": "mixolydian", "tempo": 90, "seed": 5,
             "motif": {"name": "m", "intervals": [0, 1, -1, 0], "rhythm": [1.0, 1.0, 1.0, 1.0]},
             "sections": [{
@@ -363,6 +364,6 @@ class TestEntryRoleUnsetIsNoOp:
                     {"register": "tenor", "species": "first"},
                 ],
             }],
-        }
+        })
         result = generator.generate_piece(piece, "/tmp/_test_regression_full.mid")
         assert result is not None

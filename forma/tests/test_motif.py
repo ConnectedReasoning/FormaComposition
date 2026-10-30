@@ -31,6 +31,7 @@ from intervals.music.melody import (
 from intervals.music.melodic_shape import directed_anchor_shift, resolve_apex_pitch
 from intervals.music.rhythm import RhythmEvent
 from intervals.music.motif import Motif, transform as motif_transform
+from song_helpers import song_piece, first_section
 
 
 def _chord(root="C", quality="major", notes=(60, 64, 67)):
@@ -1228,7 +1229,7 @@ class TestGenerateDevelop:
         from intervals.core import generator as generator_mod
         from collections import Counter
 
-        piece = {
+        piece = song_piece({
             "name": "flatten_regression", "key": "D", "mode": "aeolian", "tempo": 85,
             "seed": 1750,
             "motif": {
@@ -1255,7 +1256,7 @@ class TestGenerateDevelop:
                     "voices": [{"register": "soprano", "behavior": "develop", "velocity": 95}],
                 },
             ],
-        }
+        })
 
         def melody_top_pitch_fraction():
             out = generator_mod.generate_piece(piece, "/tmp/_test_flatten_regression.mid")

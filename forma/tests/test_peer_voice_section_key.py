@@ -10,6 +10,7 @@ import mido
 import pytest
 
 from intervals.core import generator
+from song_helpers import song_piece, first_section
 
 NOTE_PC = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 MODES = {
@@ -35,7 +36,7 @@ def _track_pitches(path, name):
 def _piece(peer_voice):
     # Two sections: first in the piece key (D aeolian), second overrides to
     # A mixolydian. Pitch classes differ on B/Bb, C#/C, F#/F.
-    return {
+    return song_piece({
         "key": "D", "mode": "aeolian", "tempo": 84, "seed": 5,
         "sections": [
             {"name": "home", "bars": 4, "rhythm": "free", "density": "medium",
@@ -45,7 +46,7 @@ def _piece(peer_voice):
              "progression": ["I", "IV", "v", "I"], "chord_bars": [2, 2, 2, 2],
              "voices": [{"behavior": "lyrical", "velocity": 72}, peer_voice]},
         ],
-    }
+    })
 
 
 @pytest.mark.parametrize("peer_voice", [

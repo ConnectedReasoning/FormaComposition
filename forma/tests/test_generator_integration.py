@@ -43,6 +43,7 @@ from intervals.core.generator import (
     velocity_envelope,
 )
 from intervals.core.schemas import PieceModel
+from song_helpers import song_piece, first_section
 
 FIXTURES_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -437,7 +438,7 @@ class TestPeerVoiceInheritsSectionGrooveAndSwing:
         from unittest.mock import patch
         import intervals.core.generator as gen
 
-        piece = {
+        piece = song_piece({
             "key": "C", "mode": "ionian", "tempo": {"min": 100, "max": 120},
             "title": "peer-groove-swing-test", "seed": 1,
             "sections": [{
@@ -448,7 +449,7 @@ class TestPeerVoiceInheritsSectionGrooveAndSwing:
                     {"register": "alto", "behavior": "generative"},
                 ],
             }],
-        }
+        })
 
         captured_kwargs = []
         real_fn = gen.generate_melody_for_progression

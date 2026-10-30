@@ -70,21 +70,16 @@ def display_info(piece: dict) -> None:
     print(f"\n  PIECE:  {piece.get('title', '(untitled)')}")
     print(f"  Tempo:  {bpm} BPM")
 
-    form_type = piece.get("form_type", "narrative")
-    if form_type == "song":
-        print(f"  Form:   song")
-        print(f"  Form array:")
-        for form_item in piece.get("form", []):
-            if isinstance(form_item, dict):
-                section_name = form_item.get("section", "?")
-                print(f"    - {section_name}")
-            else:
-                print(f"    - {form_item}")
-        print(f"  Section definitions:")
-        sections_to_display = piece.get("sections", {}).values()
-    else:
-        print(f"  Sections:")
-        sections_to_display = piece.get("sections", [])
+    print(f"  Form:   song")
+    print(f"  Form array:")
+    for form_item in piece.get("form", []):
+        if isinstance(form_item, dict):
+            section_name = form_item.get("section", "?")
+            print(f"    - {section_name}")
+        else:
+            print(f"    - {form_item}")
+    print(f"  Section definitions:")
+    sections_to_display = piece.get("sections", {}).values()
 
     total_bars = 0
     for s in sections_to_display:

@@ -35,6 +35,7 @@ from intervals.music.rhythm import (
     arc_multiplier,
     blended_arc_multiplier,
 )
+from song_helpers import song_piece, first_section
 
 
 # ---------------------------------------------------------------------------
@@ -144,11 +145,11 @@ def _piece(arcs, harmony_motif=False, drums=True):
         if drums:
             s["drums"] = {"pattern": "backbeat"}
         secs.append(s)
-    return {
+    return song_piece({
         "name": "arc none", "title": "arc none", "key": "D", "mode": "dorian",
         "tempo": {"min": 90, "max": 90}, "seed": 42,
         "motif": LOW_VEL_MOTIF, "sections": secs,
-    }
+    })
 
 
 def _notes(path, track_name, bars=None, beats_per_bar=4):

@@ -48,6 +48,7 @@ from intervals.core.lint import (
     _check_voice_motif,
 )
 from intervals.core.schemas import PieceModel, SectionModel, VoiceModel
+from song_helpers import song_piece, first_section
 
 
 def _section(**overrides) -> SectionModel:
@@ -725,11 +726,11 @@ def test_check_canon_interval_without_canonic_imitation_silent_without_interval_
 # ===========================================================================
 
 def test_check_motif_never_developed_fires_with_no_develop_or_entry_role():
-    piece = PieceModel.model_validate({
+    piece = PieceModel.model_validate(song_piece({
         "key": "C", "mode": "ionian", "tempo": 100,
         "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
         "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
-    })
+    }))
     section = _section(voices=[{"register": "soprano", "behavior": "lyrical"}])
     found = list(_check_motif_never_developed(piece, [section]))
     assert len(found) == 1
@@ -737,11 +738,11 @@ def test_check_motif_never_developed_fires_with_no_develop_or_entry_role():
 
 
 def test_check_motif_never_developed_silent_when_lead_voice_develops():
-    piece = PieceModel.model_validate({
+    piece = PieceModel.model_validate(song_piece({
         "key": "C", "mode": "ionian", "tempo": 100,
         "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
         "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
-    })
+    }))
     section = _section(voices=[{"register": "soprano", "behavior": "develop"}])
     assert list(_check_motif_never_developed(piece, [section])) == []
 
@@ -751,11 +752,11 @@ def test_check_motif_never_developed_silent_when_lead_voice_states_entry_role():
     literally via generate_subject_entry -- this must count as "the
     motif was heard" the same way behavior='develop' does, even though
     the voice's `behavior` field itself stays at its unrelated default."""
-    piece = PieceModel.model_validate({
+    piece = PieceModel.model_validate(song_piece({
         "key": "C", "mode": "ionian", "tempo": 100,
         "motif": {"intervals": [0, 1, -1], "rhythm": [1.0, 1.0, 1.0]},
         "sections": [{"progression": ["i"], "rhythm": "free", "bars": 4}],
-    })
+    }))
     section = _section(voices=[
         {"register": "soprano", "entry_role": "subject", "motif": "m"},
     ])

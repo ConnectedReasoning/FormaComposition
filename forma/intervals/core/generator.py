@@ -1161,7 +1161,8 @@ def generate_piece(
     Generate a complete MIDI file from a single piece dict (theme fields —
     key, mode, tempo, motif/motifs — now live at the piece's top level;
     see schemas.PieceModel, absorbed from the retired ThemeModel).
-    Supports both narrative arcs and song forms.
+    Song form only: the ``form`` array gives the play order and the
+    ``sections`` dict holds the named section definitions.
 
     Creates PieceContext for cross-section memory and SectionContext
     per section for cross-voice awareness.
@@ -1247,15 +1248,8 @@ def generate_piece(
             rests=motif_dict.get("rests"),
         )
 
-    # Determine form type (song or narrative)
-    form_type = piece.get("form_type", "narrative")
-
-    if form_type == "song":
-        # Song form: expand "form" array into ordered sections with variation
-        sections = _expand_song_form(piece)
-    else:
-        # Narrative form: sections are already defined in order
-        sections = piece.get("sections", [])
+    # Song form: expand the "form" array into ordered sections with variation
+    sections = _expand_song_form(piece)
 
     if not sections:
         raise ValueError("Piece has no sections defined.")
@@ -1298,25 +1292,19 @@ def generate_piece(
     # _first_opening_anchor is populated from each section's
     # opening_anchor_used after its first occurrence completes, and
     # consulted (via forced_opening_anchor) before every repeat occurrence.
-    if form_type == "song":
-        _first_offset: dict[str, int] = {}
-        seed_offsets: list[int] = []
-        is_exact_repeat_flags: list[bool] = []
-        section_names: list[str] = []
-        for _i, _entry in enumerate(piece_model.form or []):
-            _name   = _entry if isinstance(_entry, str) else _entry.section
-            _exact  = False if isinstance(_entry, str) else _entry.exact_repeat
-            _is_repeat_occurrence = bool(_exact and _name in _first_offset)
-            _offset = _first_offset[_name] if _is_repeat_occurrence else _i * 10
-            _first_offset.setdefault(_name, _offset)
-            seed_offsets.append(_offset)
-            is_exact_repeat_flags.append(_is_repeat_occurrence)
-            section_names.append(_name)
-    else:
-        seed_offsets = [i * 10 for i in range(len(sections))]
-        is_exact_repeat_flags = [False] * len(sections)
-        section_names = [s.get("name", f"section_{i}") if isinstance(s, dict) else f"section_{i}"
-                          for i, s in enumerate(sections)]
+    _first_offset: dict[str, int] = {}
+    seed_offsets: list[int] = []
+    is_exact_repeat_flags: list[bool] = []
+    section_names: list[str] = []
+    for _i, _entry in enumerate(piece_model.form or []):
+        _name   = _entry if isinstance(_entry, str) else _entry.section
+        _exact  = False if isinstance(_entry, str) else _entry.exact_repeat
+        _is_repeat_occurrence = bool(_exact and _name in _first_offset)
+        _offset = _first_offset[_name] if _is_repeat_occurrence else _i * 10
+        _first_offset.setdefault(_name, _offset)
+        seed_offsets.append(_offset)
+        is_exact_repeat_flags.append(_is_repeat_occurrence)
+        section_names.append(_name)
 
     _first_opening_anchor: dict[str, object] = {}
     # Counterpoint twin of _first_opening_anchor: the pitch each voice was
@@ -1849,8 +1837,10 @@ if __name__ == "__main__":
             "transform_pool": ["inversion", "retrograde", "augmentation"]
         },
         "transform_sequence": ["original", "inversion", "retrograde"],
-        "sections": [
-            {
+        "form_type": "song",
+        "form": ["opening", "swell", "release"],
+        "sections": {
+            "opening": {
                 "name": "opening",
                 "bars": 8,
                 "progression": ["i", "VII", "iv", "v"],
@@ -1859,7 +1849,7 @@ if __name__ == "__main__":
                 "bass_style": "pedal",
                 "arc": "fade_in",
             },
-            {
+            "swell": {
                 "name": "swell",
                 "bars": 12,
                 "progression": ["i", "III", "VII", "i"],
@@ -1868,7 +1858,7 @@ if __name__ == "__main__":
                 "bass_style": "root_fifth",
                 "arc": "swell",
             },
-            {
+            "release": {
                 "name": "release",
                 "bars": 8,
                 "progression": ["iv", "i"],
@@ -1877,7 +1867,7 @@ if __name__ == "__main__":
                 "bass_style": "root_only",
                 "arc": "fade_out",
             },
-        ]
+        },
     }
 
     out_path = "/mnt/user-data/outputs/still_cove.mid"

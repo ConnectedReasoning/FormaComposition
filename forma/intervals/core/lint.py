@@ -1151,10 +1151,7 @@ def lint_piece(piece: PieceModel, theme: Optional[dict] = None) -> list[Contradi
     passed as -1), not treated as "pool has 0 or 1 motifs"; an unresolvable
     pool shouldn't produce a false positive.
     """
-    if piece.form_type == "song":
-        sections = list((piece.song_sections or {}).values())
-    else:
-        sections = list(piece.sections or [])
+    sections = list((piece.song_sections or {}).values())
 
     motif_pool_size = -1
     if theme is not None:

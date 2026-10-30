@@ -180,9 +180,10 @@ def _migrate_section(sec: dict, rep: Report, piece_label: str) -> bool:
 
 
 def _iter_sections(container) -> list:
-    """Sections may be a list (narrative form) or a name-keyed dict (song
-    form, under either `sections` or `song_sections` depending on how the
-    piece was written). Yield the section dicts from whichever shape."""
+    """Sections are a name-keyed dict (song form, under either `sections` or
+    `song_sections` depending on how the piece was written). A list is still
+    accepted so legacy narrative pieces can be voice-migrated before running
+    migrate_to_song.py. Yield the section dicts from whichever shape."""
     if isinstance(container, list):
         return [s for s in container if isinstance(s, dict)]
     if isinstance(container, dict):

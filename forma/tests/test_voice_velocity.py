@@ -36,6 +36,7 @@ from intervals.core.generator import generate_piece
 from intervals.core.schemas import SectionModel
 from intervals.music.bass import generate_bass
 from intervals.music.harmony import resolve_chord  # noqa: F401  (import guard only)
+from song_helpers import song_piece, first_section
 
 BASS_STYLES = ["root_only", "root_fifth", "walking", "steady", "melodic", "pulse", "pedal", "motif"]
 JITTER_STYLES = {"root_only", "pedal"}   # +/-4 around the base, by design
@@ -58,11 +59,11 @@ def _section(**over):
 
 
 def _piece(**sec_over):
-    return {
+    return song_piece({
         "name": "v", "title": "v", "key": "D", "mode": "dorian",
         "tempo": {"min": 90, "max": 90}, "seed": 42, "motif": MOTIF,
         "sections": [_section(**sec_over)],
-    }
+    })
 
 
 def _vels(path, track):

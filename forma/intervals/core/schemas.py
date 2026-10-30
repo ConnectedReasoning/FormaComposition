@@ -7,7 +7,7 @@ Single source of truth for all structural and enum-based validation.
 
 Validation hierarchy:
     PieceModel
-    ├── SectionModel          (narrative: list of these)
+    ├── SectionModel          (one per entry in the sections dict)
     │   ├── HarmonyRhythmModel
     │   ├── (CounterpointModel retired 2026-09 — voices[] covers it)
     │   ├── RhythmPatternModel
@@ -1670,15 +1670,12 @@ class TempoRangeModel(BaseModel):
 
 class PieceModel(BaseModel):
     """
-    Validated piece dict.
-    Supports both narrative (sections: list) and song (form_type='song') forms.
+    Validated piece dict. Song form is the only supported form: a ``form``
+    array gives the play order and ``sections`` is a name-keyed dict of
+    section definitions (stored on the model as ``song_sections``).
 
-    The JSON key ``sections`` is overloaded by the engine:
-    - Narrative form: a ``list[SectionModel]``
-    - Song form:      a ``dict[str, SectionModel]``
-
-    We disambiguate in ``_unwrap_nested_and_sections`` before Pydantic sees
-    the fields, populating either ``sections`` or ``song_sections``.
+    The retired narrative form (``sections`` as a list) is rejected with a
+    pointer to ``migrate_to_song.py``; see ``_unwrap_nested_and_sections``.
     """
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
@@ -1695,11 +1692,10 @@ class PieceModel(BaseModel):
     phrase_chords:  Annotated[int, Field(ge=1, le=8)] = 2
     phrase_restate: Literal["exact", "sequence", "invert"] = "exact"
 
-    form_type: Literal["narrative", "song"] = "narrative"
+    form_type: Literal["song"] = "song"
 
-    # Narrative form
-    sections:      Optional[list[SectionModel]]          = None
-    # Song form
+    # The JSON ``sections`` dict (renamed before validation, see
+    # _unwrap_nested_and_sections) and the play-order array.
     song_sections: Optional[dict[str, SectionModel]]     = None
     form:          Optional[list[Union[SongFormEntryModel, str]]] = None
 
@@ -1827,6 +1823,13 @@ class PieceModel(BaseModel):
         if isinstance(raw_tempo, (int, float)):
             data["tempo"] = {"min": raw_tempo, "max": raw_tempo}
 
+        if data.get("form_type") == "narrative" or isinstance(data.get("sections"), list):
+            raise ValueError(
+                "narrative form (form_type='narrative' / 'sections' as a list) "
+                "was removed; song form is the only supported form. Convert "
+                "existing pieces with: python migrate_to_song.py <piece.json>"
+            )
+
         raw_sections = data.get("sections")
         if isinstance(raw_sections, dict):
             data["song_sections"] = raw_sections
@@ -1837,27 +1840,22 @@ class PieceModel(BaseModel):
     @model_validator(mode="after")
     def _form_consistency(self) -> "PieceModel":
         """
-        Structural form validation.
-        Migrated from validate_piece() song/narrative form checks, including
-        the form-array → section-name resolution check.
+        Structural form validation: a non-empty 'form' array and a 'sections'
+        dict, with every form entry resolving to a defined section name.
         """
-        if self.form_type == "song":
-            if not self.form:
-                raise ValueError("form_type='song' requires a 'form' array")
-            if not self.song_sections:
+        if not self.form:
+            raise ValueError("form_type='song' requires a 'form' array")
+        if not self.song_sections:
+            raise ValueError(
+                "form_type='song' requires a 'sections' dict of named "
+                "section definitions"
+            )
+        for entry in self.form:
+            name = entry if isinstance(entry, str) else entry.section
+            if name not in (self.song_sections or {}):
                 raise ValueError(
-                    "form_type='song' requires a 'sections' dict of named "
-                    "section definitions"
+                    f"form references undefined section '{name}'"
                 )
-            for entry in self.form:
-                name = entry if isinstance(entry, str) else entry.section
-                if name not in (self.song_sections or {}):
-                    raise ValueError(
-                        f"form references undefined section '{name}'"
-                    )
-        else:
-            if not self.sections:
-                raise ValueError("Narrative piece must have a non-empty 'sections' list")
         return self
 
     @model_validator(mode="after")
@@ -1869,11 +1867,7 @@ class PieceModel(BaseModel):
         """
         if self.transform_sequence is None:
             return self
-        n_sections = (
-            len(self.form or [])
-            if self.form_type == "song"
-            else len(self.sections or [])
-        )
+        n_sections = len(self.form or [])
         if len(self.transform_sequence) < n_sections:
             warnings.warn(
                 f"transform_sequence has {len(self.transform_sequence)} entries "
@@ -1930,14 +1924,12 @@ class PieceModel(BaseModel):
 
     def iter_sections(self) -> list[SectionModel]:
         """
-        Return sections in generation order for both form types.
-        For song form this is the expanded play order: each `form` entry
-        resolved to its section definition, in sequence. Repeated entries
-        resolve to the same definition — they diverge at generation time via
-        per-repetition seed offsetting (see generator.py), not here.
+        Return sections in generation order: the expanded play order, each
+        `form` entry resolved to its section definition, in sequence.
+        Repeated entries resolve to the same definition — they diverge at
+        generation time via per-repetition seed offsetting (see
+        generator.py), not here.
         """
-        if self.form_type == "narrative":
-            return self.sections or []
         result = []
         for entry in (self.form or []):
             name = entry if isinstance(entry, str) else entry.section

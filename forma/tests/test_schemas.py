@@ -51,18 +51,27 @@ def _minimal_section(**overrides) -> dict:
     return base
 
 
+def _one_section_song(**section_overrides) -> dict:
+    """The song-form fields for a piece with a single section named "a"."""
+    return {
+        "form_type": "song",
+        "form": ["a"],
+        "sections": {"a": _minimal_section(**section_overrides)},
+    }
+
+
 def _minimal_piece(**overrides) -> dict:
     """
-    A minimal piece dict that validates cleanly through PieceModel —
-    includes key/mode/tempo (absorbed from the retired ThemeModel) plus a
-    bare sections list. Baseline for tests exercising theme-side fields
+    A minimal song-form piece dict that validates cleanly through PieceModel —
+    includes key/mode/tempo (absorbed from the retired ThemeModel) plus one
+    section. Baseline for tests exercising theme-side fields
     (motif, motifs, key, mode) now that they live on PieceModel directly.
     """
     base = {
         "key": "C",
         "mode": "ionian",
         "tempo": {"min": 60, "max": 120},
-        "sections": [_minimal_section()],
+        **_one_section_song(),
     }
     base.update(overrides)
     return base
@@ -788,15 +797,6 @@ class TestDevelopMotifCycleVsChordLength:
 # ===========================================================================
 
 class TestPieceModel:
-    def test_valid_narrative(self):
-        piece = PieceModel.model_validate({
-            "key": "C", "mode": "ionian",
-            "sections": [_minimal_section()],
-        })
-        assert piece.form_type == "narrative"
-        assert len(piece.iter_sections()) == 1
-        assert piece.seed == 42  # default
-
     def test_valid_song_form(self):
         piece = PieceModel.model_validate({
             "key": "C", "mode": "ionian",
@@ -815,13 +815,34 @@ class TestPieceModel:
     def test_valid_wrapped_piece_key(self):
         """{"piece": {...}} wrapper form must unwrap the same as flat dicts."""
         piece = PieceModel.model_validate({
-            "piece": {"key": "C", "mode": "ionian", "sections": [_minimal_section()]},
+            "piece": {"key": "C", "mode": "ionian", **_one_section_song()},
         })
         assert len(piece.iter_sections()) == 1
 
-    def test_invalid_narrative_missing_sections(self):
-        with pytest.raises(ValidationError, match="non-empty 'sections' list"):
-            PieceModel.model_validate({"key": "C", "mode": "ionian", "sections": []})
+    def test_form_type_defaults_to_song(self):
+        piece = PieceModel.model_validate(_minimal_piece())
+        assert piece.form_type == "song"
+
+    def test_narrative_list_sections_rejected_with_migration_hint(self):
+        with pytest.raises(ValidationError, match="migrate_to_song.py"):
+            PieceModel.model_validate({
+                "key": "C", "mode": "ionian",
+                "sections": [_minimal_section()],
+            })
+
+    def test_form_type_narrative_rejected_with_migration_hint(self):
+        with pytest.raises(ValidationError, match="migrate_to_song.py"):
+            PieceModel.model_validate({
+                "key": "C", "mode": "ionian",
+                **_one_section_song(), "form_type": "narrative",
+            })
+
+    def test_wrapped_narrative_rejected_with_migration_hint(self):
+        with pytest.raises(ValidationError, match="migrate_to_song.py"):
+            PieceModel.model_validate({
+                "piece": {"key": "C", "mode": "ionian",
+                          "sections": [_minimal_section()]},
+            })
 
     def test_invalid_song_missing_form(self):
         with pytest.raises(ValidationError, match="requires a 'form' array"):
@@ -852,7 +873,7 @@ class TestPieceModel:
         with pytest.raises(ValidationError):
             PieceModel.model_validate({
                 "key": "C", "mode": "ionian",
-                "sections": [_minimal_section()],
+                **_one_section_song(),
                 "tempo": 500,
             })
 
@@ -860,14 +881,14 @@ class TestPieceModel:
         with pytest.raises(ValidationError):
             PieceModel.model_validate({
                 "key": "C", "mode": "ionian",
-                "sections": [_minimal_section()],
+                **_one_section_song(),
                 "transform_sequence": ["not_a_real_transform"],
             })
 
     def test_no_tempo_warns_via_validate_against_theme(self):
         piece = PieceModel.model_validate({
             "key": "C", "mode": "ionian",
-            "sections": [_minimal_section()],
+            **_one_section_song(),
         })
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -879,7 +900,7 @@ class TestPieceModel:
         with pytest.raises(ValidationError):
             PieceModel.model_validate({
                 "mode": "ionian",
-                "sections": [_minimal_section()],
+                **_one_section_song(),
             })
 
     def test_no_motif_warns(self):
@@ -888,6 +909,6 @@ class TestPieceModel:
             warnings.simplefilter("always")
             PieceModel.model_validate({
                 "key": "C", "mode": "ionian",
-                "sections": [_minimal_section()],
+                **_one_section_song(),
             })
         assert any("no motif or motifs defined" in str(w.message) for w in caught)
