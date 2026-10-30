@@ -556,6 +556,67 @@ def normalize_motif_dict(d):
     return out
 
 
+def bar_alignment_report(rhythm: list, beats_per_bar: float, max_rows: int = 24) -> str:
+    """
+    Explain, note by note, where a motif's rhythm falls against the bar line.
+
+    Positions are bar|beat, both 1-based (1|1 is the first beat of the first
+    bar). The note that carries the motif across a bar line it does not land on
+    is marked, and the nearest totals that DO fit are offered with how many
+    beats to add or remove. Pure text; returns "" for an empty rhythm.
+
+        note  starts  beats
+           1   1|1      2.0
+           2   1|3      0.5
+           3   1|3.5    0.5
+           4   1|4      4.0   <- crosses into bar 2
+           5   2|4      2.0   <- crosses into bar 3
+        ends 3|2 (9 beats). A fit needs 8 (trim 1) or 12 (add 3).
+    """
+    if not rhythm:
+        return ""
+    bpb = float(beats_per_bar)
+    eps = 1e-6
+
+    def pos(t: float) -> str:
+        bar = int((t + eps) // bpb) + 1
+        beat = round(t - (bar - 1) * bpb + 1, 4)
+        return f"{bar}|{beat:g}"
+
+    rows = []
+    t = 0.0
+    for i, d in enumerate(rhythm):
+        end = t + d
+        nxt = (int((t + eps) // bpb) + 1) * bpb         # first bar line after this start
+        on_line = lambda x: x % bpb < eps or bpb - (x % bpb) < eps   # noqa: E731
+        # a bar line strictly inside the note; a note that starts and ends on
+        # bar lines (a whole-bar hold) is fine and is not flagged
+        crosses = nxt < end - eps and not (on_line(t) and on_line(end))
+        if crosses:
+            tag = f"   <- crosses into bar {int((nxt + eps) // bpb) + 1}"
+        else:
+            tag = ""
+        rows.append((i + 1, pos(t), f"{d:g}", tag))
+        t = end
+    total = t
+    sw = max(6, max(len(r[1]) for r in rows))
+    bw = max(5, max(len(r[2]) for r in rows))
+    lines = [f"  {'note':>4}  {'starts'.ljust(sw)}  {'beats'.rjust(bw)}"]
+    shown = rows if len(rows) <= max_rows else rows[: max_rows - 1]
+    for n, start, beats, tag in shown:
+        lines.append(f"  {n:>4}  {start.ljust(sw)}  {beats.rjust(bw)}{tag}")
+    if len(rows) > max_rows:
+        lines.append(f"  ... {len(rows) - len(shown)} more note(s)")
+    lower = (total // bpb) * bpb
+    upper = lower + bpb
+    fits = []
+    if lower > eps:
+        fits.append(f"{lower:g} (trim {total - lower:g})")
+    fits.append(f"{upper:g} (add {upper - total:g})")
+    lines.append(f"  ends {pos(total)} ({total:g} beats). A fit needs " + " or ".join(fits) + ".")
+    return "\n".join(lines)
+
+
 def from_dict(d: dict) -> Motif:
     """
     Build a Motif from a dictionary (e.g. parsed from theme.json).

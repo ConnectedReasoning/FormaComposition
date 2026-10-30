@@ -1550,6 +1550,14 @@ class SectionModel(BaseModel):
                     f"'intervals' and 'rhythm' for the bass to play it"
                 )
             self._check_bar_alignment(bass_motif.name, bass_motif.rhythm, label, where="bass_motif")
+            # bass_motif never builds a MotifModel, so its velocities were never
+            # range- or length-checked. They were also ignored; now that they
+            # apply, a stray 0-127 value would silently blast the bass.
+            from intervals.core.motif_loader import resolve_motif_velocities
+            _b_vel = resolve_motif_velocities(self.bass_motif, theme_pool=theme_pool)
+            if _b_vel is not None:
+                self._check_motif_velocities(bass_motif.name, _b_vel, bass_motif.rhythm,
+                                             label, where="bass_motif")
 
         # Peer voices[1:].motif — a *different* crash gap from the two
         # checks just above. The lead voice (voices[0]) and
@@ -1650,6 +1658,32 @@ class SectionModel(BaseModel):
                 stacklevel=4,
             )
 
+    @staticmethod
+    def _check_motif_velocities(
+        motif_name: Optional[str],
+        velocities,
+        rhythm: Optional[list[float]],
+        label: str,
+        where: str = "motif",
+    ) -> None:
+        """The MotifModel velocity rules, for motifs that stay raw dicts."""
+        who = f"Section '{label}': {where} '{motif_name or '?'}'"
+        if not (isinstance(velocities, list)
+                and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in velocities)):
+            raise ValueError(f"{who}: velocities must be a list of numbers, got {velocities!r}")
+        if rhythm is not None and len(velocities) != len(rhythm):
+            raise ValueError(
+                f"{who}: velocities length ({len(velocities)}) must match rhythm "
+                f"length ({len(rhythm)}) -- one velocity per note."
+            )
+        bad = [v for v in velocities if not (0.0 <= v <= 1.0)]
+        if bad:
+            raise ValueError(
+                f"{who}: velocities must be 0.0-1.0 scale multipliers of the "
+                f"voice's base velocity, got out-of-range value(s) {bad}. If you "
+                f"meant raw MIDI velocities, divide by 127 (or set the voice's own velocity)."
+            )
+
     def _check_bar_alignment(
         self,
         motif_name: Optional[str],
@@ -1664,6 +1698,7 @@ class SectionModel(BaseModel):
         """
         if motif_rhythm is None:
             return
+        from intervals.music.motif import bar_alignment_report
         total = sum(motif_rhythm)
         remainder = total % self.beats_per_bar
         if remainder > 1e-6 and abs(remainder - self.beats_per_bar) > 1e-6:
@@ -1675,7 +1710,8 @@ class SectionModel(BaseModel):
                 f"A motif cycle that doesn't line up with the bar means its "
                 f"phase drifts relative to the barline on every repeat — "
                 f"extend or trim the motif's rhythm so its total is a clean "
-                f"multiple of {self.beats_per_bar}."
+                f"multiple of {self.beats_per_bar}.\n"
+                + bar_alignment_report(motif_rhythm, self.beats_per_bar)
             )
 
     # ── Convenience helpers ───────────────────────────────────────────────────

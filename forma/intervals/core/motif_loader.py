@@ -201,6 +201,44 @@ def resolve_motif_value(
     )
 
 
+def resolve_motif_velocities(
+    motif_value,
+    motifs_dir: Optional[str] = None,
+    theme_pool: Optional[list] = None,
+) -> Optional[list]:
+    """
+    The ``velocities`` a motif value declares, or None.
+
+    resolve_motif_value() returns a Motif, and Motif has no velocities
+    attribute, so a caller that goes Motif -> motif_to_dict() (the bass_motif
+    path in generator.py) loses them. This resolves the same three forms the
+    same way -- inline pool name first, then library file, or an embedded dict
+    (``events`` form included) -- but reads the declared dict directly.
+    Returns None when the motif declares no velocities.
+    """
+    if motif_value is None:
+        return None
+    from intervals.music.motif import normalize_motif_dict
+    raw = None
+    if isinstance(motif_value, dict):
+        raw = motif_value
+    elif isinstance(motif_value, str):
+        for m in theme_pool or []:
+            if isinstance(m, dict) and m.get("name") == motif_value:
+                raw = m
+                break
+        else:
+            filepath = os.path.join(motifs_dir or os.path.join("compositions", "motifs"),
+                                    f"motif_{motif_value}.json")
+            if os.path.exists(filepath):
+                with open(filepath) as f:
+                    data = json.load(f)
+                raw = data.get("motif", data)
+    if not isinstance(raw, dict):
+        return None
+    return normalize_motif_dict(raw).get("velocities")
+
+
 def resolve_motif_from_theme(theme: dict, motifs_dir: Optional[str] = None) -> Optional[Motif]:
     """
     Resolve a motif from a theme dict, supporting both old and new formats.

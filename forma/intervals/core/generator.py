@@ -51,7 +51,10 @@ from intervals.music.motif    import (
 )
 from intervals.music.percussion import generate_drums, DrumHit
 
-from intervals.core.motif_loader import resolve_motif_from_theme, resolve_motif_pool_from_theme, resolve_motif_value
+from intervals.core.motif_loader import (
+    resolve_motif_from_theme, resolve_motif_pool_from_theme, resolve_motif_value,
+    resolve_motif_velocities,
+)
 from intervals.core.context import (
     PieceContext,
     SectionContext,
@@ -832,6 +835,11 @@ def generate_section(
         _resolved_b_motif = resolve_motif_value(section_model.bass_motif, theme_pool=motif_pool)
         if _resolved_b_motif is not None:
             _bass_motif_def = motif_to_dict(_resolved_b_motif)
+            # Motif has no .velocities, so to_dict() drops them; bass.py's
+            # style_motif reads motif["velocities"], so carry them across.
+            _b_vel = resolve_motif_velocities(section_model.bass_motif, theme_pool=motif_pool)
+            if _b_vel is not None:
+                _bass_motif_def["velocities"] = list(_b_vel)
             if bass_style == "motif":
                 _b_desc = (section_model.bass_motif if isinstance(section_model.bass_motif, str)
                            else (_bass_motif_def.get("name") or "(inline motif)"))
