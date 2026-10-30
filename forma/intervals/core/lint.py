@@ -551,7 +551,8 @@ def _check_even_chord_split(section: SectionModel) -> Iterator[Contradiction]:
         cause=f"no chord_bars — bars is split evenly across all {n} chords",
         effect=f"every chord is held for {even:.1f} bars, regardless of "
                f"whether that pacing was intended",
-        fix=f"set chord_bars explicitly (a {n}-entry list) to control each "
+        fix=f"give every chord its own length (a 'bars' on each harmony entry, "
+            f"or an explicit {n}-entry chord_bars list) to control each "
             f"chord's duration independent of how many chords are listed.",
     )
 

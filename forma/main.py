@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from intervals.core.generator import generate_piece, load_song, bpm_to_tempo, PPQ
-from intervals.core.schemas import PieceModel
+from intervals.core.schemas import PieceModel, expand_harmony
 from intervals.core.lint import lint_piece, format_report
 from intervals.music.motif import from_dict as motif_from_dict
 from intervals.music.rhythm import VALID_GROOVES
@@ -83,13 +83,17 @@ def display_info(piece: dict) -> None:
 
     total_bars = 0
     for s in sections_to_display:
-        bars = s.get("bars", 0)
+        # A section may be authored as `harmony` (chord/bars objects) or as the
+        # legacy parallel progression + chord_bars; expand_harmony normalizes.
+        if "harmony" in s:
+            prog_parts, chord_bars = expand_harmony(s["harmony"])
+        else:
+            prog_parts, chord_bars = s.get("progression", []), s.get("chord_bars")
+        bars = s.get("bars") or (sum(chord_bars) if chord_bars else 0)
         total_bars += bars
-        prog = " → ".join(s.get("progression", []))
-        chord_bars = s.get("chord_bars")
+        prog = " → ".join(prog_parts)
         if chord_bars:
             # Show progression with per-chord bars: I(4) → V(2) → vi(2) → IV(4)
-            prog_parts = s.get("progression", [])
             prog = " → ".join(f"{c}({int(b) if b == int(b) else b})"
                                for c, b in zip(prog_parts, chord_bars))
         groove_info = ""
@@ -98,7 +102,7 @@ def display_info(piece: dict) -> None:
             if s.get("swing"):
                 parts.append(f"swing={s['swing']}")
             groove_info = f"  groove={','.join(parts)}"
-        print(f"    [{s.get('name', '?'):12s}]  {bars:2d} bars  "
+        print(f"    [{s.get('name', '?'):12s}]  {bars:2g} bars  "
               f"{s.get('density','?'):6s}  {s.get('melody','?'):11s}  "
               f"bass={s.get('bass_style','?')}{groove_info}  [{prog}]")
         if s.get("key") or s.get("mode"):

@@ -878,6 +878,67 @@ _RETIRED_SECTION_FIELDS: dict[str, str] = {
 }
 
 
+class HarmonyEntryModel(BaseModel):
+    """
+    One chord in a section's ``harmony`` list: ``{"chord": "ii", "bars": 1.5}``.
+
+    ``bars`` may be omitted, but only on EVERY entry of a section (see
+    expand_harmony): the chords then share the section's ``bars`` evenly,
+    exactly like a progression written without chord_bars.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    chord: str = Field(min_length=1)
+    bars:  Optional[float] = Field(default=None, gt=0)
+
+
+def expand_harmony(harmony) -> tuple[list[str], Optional[list[float]]]:
+    """
+    Turn a section's ``harmony`` list into the (progression, chord_bars) pair
+    the rest of the engine consumes. Returns chord_bars=None when no entry
+    gives ``bars`` (even split of the section's ``bars``).
+
+    This is the single place that understands the ``harmony`` authoring form;
+    SectionModel and main.py's --info display both call it. Raises ValueError
+    with a message naming the offending entry.
+    """
+    if not isinstance(harmony, list) or not harmony:
+        raise ValueError(
+            "harmony must be a non-empty list of {\"chord\": ..., \"bars\": ...} "
+            "objects"
+        )
+    entries: list[HarmonyEntryModel] = []
+    for i, raw in enumerate(harmony):
+        if isinstance(raw, HarmonyEntryModel):
+            entries.append(raw)
+            continue
+        if not isinstance(raw, dict):
+            raise ValueError(
+                f"harmony[{i}] is {raw!r}; each entry must be an object like "
+                f"{{\"chord\": \"I\", \"bars\": 2}}"
+            )
+        try:
+            entries.append(HarmonyEntryModel.model_validate(raw))
+        except Exception as exc:  # pydantic ValidationError -> plain message
+            first = exc.errors()[0] if hasattr(exc, "errors") else {}
+            where = ".".join(str(p) for p in first.get("loc", ())) or "entry"
+            raise ValueError(
+                f"harmony[{i}] ({where}): {first.get('msg', exc)}"
+            ) from None
+
+    with_bars = [e.bars is not None for e in entries]
+    if any(with_bars) and not all(with_bars):
+        missing = [i for i, ok in enumerate(with_bars) if not ok]
+        raise ValueError(
+            f"harmony: 'bars' is given on some entries but missing on "
+            f"{missing}. Give every chord a 'bars' length, or none of them "
+            f"(then the section's 'bars' is split evenly)."
+        )
+    progression = [e.chord for e in entries]
+    chord_bars = [float(e.bars) for e in entries] if all(with_bars) else None
+    return progression, chord_bars
+
+
 class SectionModel(BaseModel):
     """
     Validated representation of a single section dict.
@@ -1054,6 +1115,38 @@ class SectionModel(BaseModel):
     # ─────────────────────────────────────────────────────────────────────────
     # Field coercions (mode="before")
     # ─────────────────────────────────────────────────────────────────────────
+
+    @model_validator(mode="before")
+    @classmethod
+    def _expand_harmony_field(cls, data):
+        """
+        Accept the ``harmony`` authoring form and normalize it to the
+        ``progression`` + ``chord_bars`` fields everything downstream reads:
+
+            "harmony": [ {"chord": "I", "bars": 0.5}, {"chord": "II", "bars": 1.5} ]
+              ==  "progression": ["I", "II"], "chord_bars": [0.5, 1.5]
+
+        ``bars`` at section level stays optional: when present and larger than
+        the harmony cell's total, the cell tiles (same rule as chord_bars);
+        when it equals the total (or is absent) the total is derived.
+        ``harmony`` and the legacy keys are mutually exclusive: two sources of
+        truth for the same chords is exactly the silent-disagreement trap the
+        old parallel arrays had.
+        """
+        if not isinstance(data, dict) or "harmony" not in data:
+            return data
+        clash = [k for k in ("progression", "chord_bars") if k in data]
+        if clash:
+            raise ValueError(
+                f"Section '{data.get('name')}': 'harmony' replaces "
+                f"{' and '.join(clash)} — use one or the other, not both."
+            )
+        data = dict(data)
+        progression, chord_bars = expand_harmony(data.pop("harmony"))
+        data["progression"] = progression
+        if chord_bars is not None:
+            data["chord_bars"] = chord_bars
+        return data
 
     @field_validator("progression", mode="before")
     @classmethod
