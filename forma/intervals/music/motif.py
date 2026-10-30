@@ -449,13 +449,123 @@ def to_note_sequence(
 # Serialisation helpers
 # ---------------------------------------------------------------------------
 
+_EVENT_KEYS = frozenset({"step", "beats", "velocity", "rest"})
+_LEGACY_ARRAY_KEYS = ("intervals", "rhythm", "rests", "velocities")
+
+
+def _is_number(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def expand_motif_events(events) -> dict:
+    """
+    Turn a motif's ``events`` list into the parallel arrays the engine reads.
+
+        "events": [
+          { "step":  0, "beats": 1.5 },
+          { "step":  2, "beats": 0.5, "velocity": 0.8 },
+          { "step": -2, "beats": 1.0, "rest": true }
+        ]
+
+    returns {"intervals": [0, 2, -2], "rhythm": [1.5, 0.5, 1.0],
+             "velocities": [...], "rests": [False, False, True]}.
+
+    Per event: ``step`` (diatonic scale steps from the previous note, default
+    0), ``beats`` (duration), ``velocity`` (0.0-1.0 multiplier) and ``rest``
+    (true = this slot is silent). A rest slot still carries its ``step``,
+    exactly like the legacy form, where a rests[i] slot keeps intervals[i].
+
+    ``beats`` and ``velocity`` follow the all-or-none rule that ``bars`` follows
+    in ``harmony``: give them on every event or on none. A partly-filled column
+    has no defined meaning (a missing velocity is 0.8 in one reader and 1.0 in
+    another), so it is an error rather than a silent guess. ``rest`` is
+    different: a missing ``rest`` just means false, and the ``rests`` array is
+    produced only if at least one event mentions the key.
+
+    Keys with no value (beats/velocity/rests) are simply absent from the
+    result, so the caller sees exactly what the legacy form without them
+    gives. This is the single place that understands the ``events`` form.
+    Raises ValueError naming the offending entry.
+    """
+    if not isinstance(events, list) or not events:
+        raise ValueError(
+            "events must be a non-empty list of "
+            "{\"step\": ..., \"beats\": ...} objects"
+        )
+    steps: list[int] = []
+    for i, e in enumerate(events):
+        if not isinstance(e, dict):
+            raise ValueError(
+                f"events[{i}] is {e!r}; each entry must be an object like "
+                f"{{\"step\": 2, \"beats\": 0.5}}"
+            )
+        unknown = sorted(set(e) - _EVENT_KEYS)
+        if unknown:
+            raise ValueError(
+                f"events[{i}]: unknown key(s) {unknown}; allowed: "
+                f"{sorted(_EVENT_KEYS)}"
+            )
+        step = e.get("step", 0)
+        if not _is_number(step) or step != int(step):
+            raise ValueError(f"events[{i}] (step): must be a whole number, got {step!r}")
+        steps.append(int(step))
+        if "beats" in e and not (_is_number(e["beats"]) and e["beats"] > 0):
+            raise ValueError(f"events[{i}] (beats): must be a number > 0, got {e['beats']!r}")
+        if "velocity" in e and not _is_number(e["velocity"]):
+            raise ValueError(f"events[{i}] (velocity): must be a number, got {e['velocity']!r}")
+        if "rest" in e and not isinstance(e["rest"], bool):
+            raise ValueError(f"events[{i}] (rest): must be true or false, got {e['rest']!r}")
+
+    out: dict = {"intervals": steps}
+    for key, field_name, label in (("beats", "rhythm", "beats"),
+                                   ("velocity", "velocities", "velocity")):
+        have = [key in e for e in events]
+        if any(have) and not all(have):
+            missing = [i for i, ok in enumerate(have) if not ok]
+            raise ValueError(
+                f"events: '{label}' is given on some entries but missing on "
+                f"{missing}. Give every event a '{label}', or none of them."
+            )
+        if all(have):
+            out[field_name] = [e[key] for e in events]
+    if any("rest" in e for e in events):
+        out["rests"] = [bool(e.get("rest", False)) for e in events]
+    return out
+
+
+def normalize_motif_dict(d):
+    """
+    Accept the ``events`` authoring form and return the legacy-shaped dict
+    (intervals / rhythm / rests / velocities) everything downstream reads.
+
+    A dict without ``events`` (and anything that is not a dict) is returned
+    unchanged -- the same object, so the legacy path is untouched. ``events``
+    and the four legacy arrays are mutually exclusive: two sources of truth
+    for one motif are an error, not a merge.
+    """
+    if not isinstance(d, dict) or "events" not in d:
+        return d
+    clash = [k for k in _LEGACY_ARRAY_KEYS if d.get(k) is not None]
+    if clash:
+        raise ValueError(
+            f"motif '{d.get('name', '?')}': 'events' replaces {clash}; "
+            f"use one or the other, not both"
+        )
+    out = {k: v for k, v in d.items() if k != "events" and k not in _LEGACY_ARRAY_KEYS}
+    out.update(expand_motif_events(d["events"]))
+    return out
+
+
 def from_dict(d: dict) -> Motif:
     """
     Build a Motif from a dictionary (e.g. parsed from theme.json).
 
     Expected keys: intervals, rhythm, name (optional), transform_pool (optional),
-    melodic_scale (optional — see Motif.melodic_scale docstring)
+    melodic_scale (optional — see Motif.melodic_scale docstring). The ``events``
+    authoring form is accepted in place of intervals/rhythm/rests/velocities
+    (see expand_motif_events).
     """
+    d = normalize_motif_dict(d)
     return Motif(
         intervals=d["intervals"],
         rhythm=d.get("rhythm", [1.0] * len(d["intervals"])),

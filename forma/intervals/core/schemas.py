@@ -802,6 +802,20 @@ class MotifModel(BaseModel):
             )
         return v.lower()
 
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_events(cls, data):
+        """
+        Accept the ``events`` authoring form (one object per note:
+        ``{"step": 2, "beats": 0.5, "velocity": 0.8, "rest": false}``) and
+        normalize it to the intervals / rhythm / rests / velocities fields
+        everything downstream reads. The expansion itself lives in
+        music/motif.py (expand_motif_events) so the dict-based motif paths,
+        which never build a MotifModel, share the one implementation.
+        """
+        from intervals.music.motif import normalize_motif_dict
+        return normalize_motif_dict(data)
+
     @model_validator(mode="after")
     def _rhythm_vel_match(self) -> "MotifModel":
         if self.rhythm is not None and self.velocities is not None:
@@ -1523,7 +1537,9 @@ class SectionModel(BaseModel):
         if bass_motif is not None:
             # Check the authored dict, not the resolved Motif: resolution
             # pads a missing rhythm with defaults, which would hide this.
-            _raw_b = self.bass_motif if isinstance(self.bass_motif, dict) else {}
+            from intervals.music.motif import normalize_motif_dict
+            _raw_b = (normalize_motif_dict(self.bass_motif)
+                      if isinstance(self.bass_motif, dict) else {})
             if self.bass_style == "motif" and (
                 not bass_motif.intervals
                 or (isinstance(self.bass_motif, dict) and not _raw_b.get("rhythm"))

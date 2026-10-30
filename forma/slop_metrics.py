@@ -319,7 +319,7 @@ def has_motif(piece: dict) -> bool:
     if not m:
         return False
     if isinstance(m, dict):
-        return bool(m.get("intervals"))
+        return bool(m.get("intervals") or m.get("events"))
     return True  # named string ref to a pool entry — can't resolve the pool
                  # here, so assume real rather than false-waiving a valid piece
 

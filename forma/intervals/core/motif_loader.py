@@ -64,10 +64,11 @@ def load_motif(name: str, motifs_dir: Optional[str] = None) -> Motif:
     # Unwrap if wrapped in "motif" key
     motif_dict = data.get("motif", data)
 
-    if "intervals" not in motif_dict:
+    if "intervals" not in motif_dict and "events" not in motif_dict:
         raise ValueError(
             f"Motif file {filepath} is missing 'intervals' key. "
-            f"Expected structure: {{'motif': {{'intervals': [...], 'rhythm': [...]}}}}"
+            f"Expected structure: {{'motif': {{'intervals': [...], 'rhythm': [...]}}}} "
+            f"or {{'motif': {{'events': [{{'step': 0, 'beats': 1.0}}, ...]}}}}"
         )
 
     return motif_from_dict(motif_dict)
@@ -239,7 +240,7 @@ def resolve_motif_pool_from_theme(theme: dict, motifs_dir: Optional[str] = None)
 
     Returns [] if no motif is defined.
     """
-    from intervals.music.motif import to_dict as motif_to_dict
+    from intervals.music.motif import to_dict as motif_to_dict, normalize_motif_dict
 
     # 'motifs' array takes precedence
     motifs_raw = theme.get("motifs")
@@ -249,7 +250,9 @@ def resolve_motif_pool_from_theme(theme: dict, motifs_dir: Optional[str] = None)
             if isinstance(m, str):
                 pool.append(motif_to_dict(load_motif(m, motifs_dir)))
             elif isinstance(m, dict):
-                pool.append(m)
+                # Pool entries are read as raw dicts downstream (.get("rhythm")),
+                # so the `events` form must be expanded here, not only in from_dict.
+                pool.append(normalize_motif_dict(m))
         return pool
 
     # Fall back to single motif
