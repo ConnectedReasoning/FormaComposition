@@ -71,25 +71,15 @@
     ],
     "motif": {
       "name": "arp",
-      "intervals": [
-        0,
-        2,
-        2,
-        -2,
-        -2,
-        2,
-        2,
-        -2
-      ],
-      "rhythm": [
-        0.5,
-        0.5,
-        0.5,
-        0.5,
-        0.5,
-        0.5,
-        0.5,
-        0.5
+      "events": [
+        { "step":  0, "beats": 0.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step": -2, "beats": 0.5 },
+        { "step": -2, "beats": 0.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step": -2, "beats": 0.5 }
       ]
     },
     "sections": {
@@ -130,11 +120,8 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "root_whole",
-          "intervals": [
-            0
-          ],
-          "rhythm": [
-            4.0
+          "events": [
+            { "step": 0, "beats": 4.0 }
           ]
         },
         "arc": "none",
@@ -192,25 +179,15 @@
             "velocity": 58,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                4,
-                -2,
-                2,
-                -4,
-                4,
-                -2,
-                2
-              ],
-              "rhythm": [
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
+              "events": [
+                { "step":  0, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 },
+                { "step": -4, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 }
               ]
             }
           }
@@ -254,25 +231,15 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "root_eighths",
-          "intervals": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "rhythm": [
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5
+          "events": [
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 }
           ]
         },
         "arc": "none",
@@ -354,41 +321,23 @@
             "velocity": 62,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 }
               ]
             }
           },
@@ -448,25 +397,15 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "root_fifth_eighths",
-          "intervals": [
-            0,
-            4,
-            0,
-            4,
-            0,
-            4,
-            0,
-            4
-          ],
-          "rhythm": [
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5
+          "events": [
+            { "step": 0, "beats": 0.5 },
+            { "step": 4, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 4, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 4, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 4, "beats": 0.5 }
           ]
         },
         "arc": "none",
@@ -548,41 +487,23 @@
             "velocity": 62,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                2,
-                2,
-                2,
-                -6,
-                2,
-                2,
-                2,
-                -6,
-                2,
-                2,
-                2,
-                -6,
-                2,
-                2,
-                2
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -6, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -6, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -6, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 }
               ]
             }
           },
@@ -642,25 +563,15 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "pulse_eighths",
-          "intervals": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "rhythm": [
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5
+          "events": [
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 }
           ]
         },
         "arc": "none",
@@ -742,41 +653,23 @@
             "velocity": 66,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                2,
-                2,
-                3,
-                -3,
-                -2,
-                -2,
-                2,
-                2,
-                3,
-                -3,
-                -2,
-                -2,
-                2,
-                2,
-                3
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 }
               ]
             }
           },
@@ -836,25 +729,15 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "drive_eighths",
-          "intervals": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "rhythm": [
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5
+          "events": [
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 }
           ]
         },
         "arc": "none",
@@ -936,41 +819,23 @@
             "velocity": 70,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2,
-                -2,
-                2,
-                2,
-                -2
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 }
               ]
             }
           },
@@ -1030,25 +895,15 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "drive_eighths",
-          "intervals": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "rhythm": [
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5,
-            0.5
+          "events": [
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 },
+            { "step": 0, "beats": 0.5 }
           ]
         },
         "arc": "none",
@@ -1130,41 +985,23 @@
             "velocity": 74,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                7,
-                -3,
-                3,
-                -7,
-                7,
-                -3,
-                3,
-                -7,
-                7,
-                -3,
-                3,
-                -7,
-                7,
-                -3,
-                3
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  7, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -7, "beats": 0.25 },
+                { "step":  7, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -7, "beats": 0.25 },
+                { "step":  7, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -7, "beats": 0.25 },
+                { "step":  7, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 }
               ]
             }
           },
@@ -1224,11 +1061,8 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "root_whole",
-          "intervals": [
-            0
-          ],
-          "rhythm": [
-            4.0
+          "events": [
+            { "step": 0, "beats": 4.0 }
           ]
         },
         "arc": "none",
@@ -1286,25 +1120,15 @@
             "velocity": 66,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                -2,
-                -2,
-                2,
-                2,
-                -2,
-                -2,
-                2
-              ],
-              "rhythm": [
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
+              "events": [
+                { "step":  0, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 }
               ]
             }
           },
@@ -1364,11 +1188,8 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "drone",
-          "intervals": [
-            0
-          ],
-          "rhythm": [
-            4.0
+          "events": [
+            { "step": 0, "beats": 4.0 }
           ]
         },
         "arc": "none",
@@ -1426,25 +1247,15 @@
             "velocity": 50,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                4,
-                -2,
-                2,
-                -4,
-                4,
-                -2,
-                2
-              ],
-              "rhythm": [
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
+              "events": [
+                { "step":  0, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 },
+                { "step": -4, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 }
               ]
             }
           }
@@ -1488,17 +1299,11 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "walking",
-          "intervals": [
-            0,
-            2,
-            4,
-            5
-          ],
-          "rhythm": [
-            1.0,
-            1.0,
-            1.0,
-            1.0
+          "events": [
+            { "step": 0, "beats": 1.0 },
+            { "step": 2, "beats": 1.0 },
+            { "step": 4, "beats": 1.0 },
+            { "step": 5, "beats": 1.0 }
           ]
         },
         "arc": "none",
@@ -1580,41 +1385,23 @@
             "velocity": 66,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                2,
-                2,
-                -2,
-                2,
-                3,
-                -3,
-                -2,
-                -2,
-                4,
-                -2,
-                2,
-                3,
-                -3,
-                -2,
-                -2
-              ],
-              "rhythm": [
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25,
-                0.25
+              "events": [
+                { "step":  0, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  4, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step":  2, "beats": 0.25 },
+                { "step":  3, "beats": 0.25 },
+                { "step": -3, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 },
+                { "step": -2, "beats": 0.25 }
               ]
             }
           },
@@ -1674,11 +1461,8 @@
         "bass_style": "motif",
         "bass_motif": {
           "name": "root_whole",
-          "intervals": [
-            0
-          ],
-          "rhythm": [
-            4.0
+          "events": [
+            { "step": 0, "beats": 4.0 }
           ]
         },
         "arc": "none",
@@ -1736,25 +1520,15 @@
             "velocity": 56,
             "motif": {
               "name": "arp",
-              "intervals": [
-                0,
-                4,
-                -2,
-                2,
-                -4,
-                4,
-                -2,
-                2
-              ],
-              "rhythm": [
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5,
-                0.5
+              "events": [
+                { "step":  0, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 },
+                { "step": -4, "beats": 0.5 },
+                { "step":  4, "beats": 0.5 },
+                { "step": -2, "beats": 0.5 },
+                { "step":  2, "beats": 0.5 }
               ]
             }
           },

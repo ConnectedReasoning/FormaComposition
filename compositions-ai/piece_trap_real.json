@@ -10,25 +10,15 @@
     "notes": "ZERO-context probe for the trap_hats generator specifically. halftime kick/snare as the trap foundation (kick/snare at half the beat rate), pulse bass locked to the kick, trap_hats carrying all the rhythmic motion on top.",
     "motif": {
       "name": "ghost_grid",
-      "intervals": [
-        0,
-        -2,
-        3,
-        -1,
-        2,
-        -3,
-        1,
-        -2
-      ],
-      "rhythm": [
-        1.5,
-        0.5,
-        0.5,
-        0.25,
-        0.25,
-        0.5,
-        0.25,
-        0.25
+      "events": [
+        { "step":  0, "beats": 1.50 },
+        { "step": -2, "beats": 0.50 },
+        { "step":  3, "beats": 0.50 },
+        { "step": -1, "beats": 0.25 },
+        { "step":  2, "beats": 0.25 },
+        { "step": -3, "beats": 0.50 },
+        { "step":  1, "beats": 0.25 },
+        { "step": -2, "beats": 0.25 }
       ],
       "transform_pool": [
         "original",

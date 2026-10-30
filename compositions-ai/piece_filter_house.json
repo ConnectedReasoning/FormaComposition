@@ -6,17 +6,11 @@
     "tempo": 126,
     "motif": {
       "name": "disco_slice",
-      "intervals": [
-        0,
-        1,
-        2,
-        -1
-      ],
-      "rhythm": [
-        0.5,
-        0.5,
-        0.5,
-        0.5
+      "events": [
+        { "step":  0, "beats": 0.5 },
+        { "step":  1, "beats": 0.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step": -1, "beats": 0.5 }
       ],
       "transform_pool": [
         "original",

@@ -6,31 +6,18 @@
     "tempo": 96,
     "motif": {
       "name": "prime_row",
-      "intervals": [
-        1,
-        6,
-        -5,
-        11,
-        -3,
-        7,
-        -1,
-        2,
-        -8,
-        4,
-        -9
-      ],
-      "rhythm": [
-        0.5,
-        0.75,
-        0.25,
-        1.0,
-        0.5,
-        0.5,
-        1.0,
-        0.25,
-        0.75,
-        0.5,
-        2.0
+      "events": [
+        { "step":  1, "beats": 0.50 },
+        { "step":  6, "beats": 0.75 },
+        { "step": -5, "beats": 0.25 },
+        { "step": 11, "beats": 1.00 },
+        { "step": -3, "beats": 0.50 },
+        { "step":  7, "beats": 0.50 },
+        { "step": -1, "beats": 1.00 },
+        { "step":  2, "beats": 0.25 },
+        { "step": -8, "beats": 0.75 },
+        { "step":  4, "beats": 0.50 },
+        { "step": -9, "beats": 2.00 }
       ],
       "transform_pool": [
         "inversion",

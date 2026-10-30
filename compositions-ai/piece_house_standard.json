@@ -52,17 +52,11 @@
         "melody": "lyrical",
         "bass_style": "motif",
         "bass_motif": {
-          "intervals": [
-            0,
-            1,
-            2,
-            1
-          ],
-          "rhythm": [
-            1,
-            1,
-            1,
-            1
+          "events": [
+            { "step": 0, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 },
+            { "step": 2, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 }
           ]
         },
         "arc": "none",
@@ -153,17 +147,11 @@
         "melody": "lyrical",
         "bass_style": "motif",
         "bass_motif": {
-          "intervals": [
-            0,
-            1,
-            2,
-            1
-          ],
-          "rhythm": [
-            1,
-            1,
-            1,
-            1
+          "events": [
+            { "step": 0, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 },
+            { "step": 2, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 }
           ]
         },
         "arc": "none",
@@ -274,17 +262,11 @@
         "melody": "lyrical",
         "bass_style": "motif",
         "bass_motif": {
-          "intervals": [
-            0,
-            1,
-            2,
-            1
-          ],
-          "rhythm": [
-            1,
-            1,
-            1,
-            1
+          "events": [
+            { "step": 0, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 },
+            { "step": 2, "beats": 1.0 },
+            { "step": 1, "beats": 1.0 }
           ]
         },
         "arc": "none",

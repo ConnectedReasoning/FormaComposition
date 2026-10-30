@@ -5,8 +5,16 @@
     "tempo": {"min": 100, "max": 120},
     "motif": {
       "name": "blue_call",
-      "intervals": [1, 1, -1, 1, -2, 1, 0, 0],
-      "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "events": [
+        { "step":  1, "beats": 0.5 },
+        { "step":  1, "beats": 0.5 },
+        { "step": -1, "beats": 0.5 },
+        { "step":  1, "beats": 0.5 },
+        { "step": -2, "beats": 0.5 },
+        { "step":  1, "beats": 0.5 },
+        { "step":  0, "beats": 0.5 },
+        { "step":  0, "beats": 0.5 }
+      ],
       "melodic_scale": "blues",
       "transform_pool": ["inversion", "retrograde"]
     },

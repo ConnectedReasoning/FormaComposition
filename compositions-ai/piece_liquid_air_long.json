@@ -27,26 +27,12 @@
   "motifs": [
     {
       "name": "sigh",
-      "intervals": [
-        0,
-        2,
-        1,
-        -1,
-        2
-      ],
-      "rhythm": [
-        1.0,
-        0.5,
-        0.5,
-        1.0,
-        1.0
-      ],
-      "velocities": [
-        0.55,
-        0.5,
-        0.6,
-        0.52,
-        0.65
+      "events": [
+        { "step":  0, "beats": 1.0, "velocity": 0.55 },
+        { "step":  2, "beats": 0.5, "velocity": 0.50 },
+        { "step":  1, "beats": 0.5, "velocity": 0.60 },
+        { "step": -1, "beats": 1.0, "velocity": 0.52 },
+        { "step":  2, "beats": 1.0, "velocity": 0.65 }
       ],
       "transform_pool": [
         "inversion",

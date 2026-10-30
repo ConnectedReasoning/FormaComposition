@@ -9,8 +9,16 @@
     "form_type": "song",
     "motif": {
       "name": "fugue_subject",
-      "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
-      "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "events": [
+        { "step":  0, "beats": 0.75 },
+        { "step":  1, "beats": 0.25 },
+        { "step":  1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step":  1, "beats": 0.50 },
+        { "step":  1, "beats": 0.50 }
+      ],
       "transform_pool": ["inversion", "retrograde"]
     },
     "notes": "A 4-part algorithmic fugue. Section 1 is the Exposition, with voices entering every 4 beats (Soprano -> Alto -> Tenor -> Bass). Section 2 is the Stretto Development, compressing the entries to every 2 beats. Section 3 is the Coda, applying 'augmentation' to stretch the subject to twice its length over a massive pedal point.",

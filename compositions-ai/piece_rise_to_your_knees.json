@@ -8,9 +8,16 @@
     "seed": 1971,
     "motif": {
       "name": "stairwell_riff",
-      "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
-      "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
-      "velocities": [ 1.0,  0.85, 0.9, 0.9, 0.8,  0.75, 0.9, 0.85 ],
+      "events": [
+        { "step":  0, "beats": 0.75, "velocity": 1.00 },
+        { "step":  0, "beats": 0.75, "velocity": 0.85 },
+        { "step":  1, "beats": 0.50, "velocity": 0.90 },
+        { "step":  1, "beats": 0.50, "velocity": 0.90 },
+        { "step":  1, "beats": 0.25, "velocity": 0.80 },
+        { "step": -1, "beats": 0.25, "velocity": 0.75 },
+        { "step": -1, "beats": 0.50, "velocity": 0.90 },
+        { "step": -1, "beats": 0.50, "velocity": 0.85 }
+      ],
       "melodic_scale": "blues",
       "transform_pool": []
     },
@@ -45,9 +52,16 @@
             "register": "alto",
             "motif": {
               "name": "stairwell_riff",
-              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
-              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
-              "velocities": [ 1.0,  0.85, 0.9, 0.9, 0.8,  0.75, 0.9, 0.85 ],
+              "events": [
+                { "step":  0, "beats": 0.75, "velocity": 1.00 },
+                { "step":  0, "beats": 0.75, "velocity": 0.85 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.25, "velocity": 0.80 },
+                { "step": -1, "beats": 0.25, "velocity": 0.75 },
+                { "step": -1, "beats": 0.50, "velocity": 0.90 },
+                { "step": -1, "beats": 0.50, "velocity": 0.85 }
+              ],
               "melodic_scale": "blues",
               "transform_pool": []
             },
@@ -79,9 +93,16 @@
             "register": "alto",
             "motif": {
               "name": "stairwell_riff",
-              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
-              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
-              "velocities": [ 1.0,  0.85, 0.9, 0.9, 0.8,  0.75, 0.9, 0.85 ],
+              "events": [
+                { "step":  0, "beats": 0.75, "velocity": 1.00 },
+                { "step":  0, "beats": 0.75, "velocity": 0.85 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.25, "velocity": 0.80 },
+                { "step": -1, "beats": 0.25, "velocity": 0.75 },
+                { "step": -1, "beats": 0.50, "velocity": 0.90 },
+                { "step": -1, "beats": 0.50, "velocity": 0.85 }
+              ],
               "melodic_scale": "blues",
               "transform_pool": []
             },
@@ -115,9 +136,14 @@
             "register": "alto",
             "motif": {
               "name": "stairwell_climb",
-              "intervals":  [ 0,   1,   1,   1,   -1,  -2  ],
-              "rhythm":     [ 1.0, 0.5, 0.5, 1.0, 0.5, 0.5 ],
-              "velocities": [ 0.9, 0.8, 0.85, 1.0, 0.85, 0.8 ],
+              "events": [
+                { "step":  0, "beats": 1.0, "velocity": 0.90 },
+                { "step":  1, "beats": 0.5, "velocity": 0.80 },
+                { "step":  1, "beats": 0.5, "velocity": 0.85 },
+                { "step":  1, "beats": 1.0, "velocity": 1.00 },
+                { "step": -1, "beats": 0.5, "velocity": 0.85 },
+                { "step": -2, "beats": 0.5, "velocity": 0.80 }
+              ],
               "transform_pool": []
             },
             "velocity": 96
@@ -128,8 +154,16 @@
             "dissonance": "passing",
             "motif": {
               "name": "stairwell_riff",
-              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
-              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
+              "events": [
+                { "step":  0, "beats": 0.75 },
+                { "step":  0, "beats": 0.75 },
+                { "step":  1, "beats": 0.50 },
+                { "step":  1, "beats": 0.50 },
+                { "step":  1, "beats": 0.25 },
+                { "step": -1, "beats": 0.25 },
+                { "step": -1, "beats": 0.50 },
+                { "step": -1, "beats": 0.50 }
+              ],
               "melodic_scale": "blues"
             },
             "velocity": 84
@@ -160,9 +194,16 @@
             "register": "alto",
             "motif": {
               "name": "stairwell_riff",
-              "intervals":  [ 0,    0,    1,   1,   1,    -1,   -1,  -1  ],
-              "rhythm":     [ 0.75, 0.75, 0.5, 0.5, 0.25, 0.25, 0.5, 0.5 ],
-              "velocities": [ 1.0,  0.85, 0.9, 0.9, 0.8,  0.75, 0.9, 0.85 ],
+              "events": [
+                { "step":  0, "beats": 0.75, "velocity": 1.00 },
+                { "step":  0, "beats": 0.75, "velocity": 0.85 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.50, "velocity": 0.90 },
+                { "step":  1, "beats": 0.25, "velocity": 0.80 },
+                { "step": -1, "beats": 0.25, "velocity": 0.75 },
+                { "step": -1, "beats": 0.50, "velocity": 0.90 },
+                { "step": -1, "beats": 0.50, "velocity": 0.85 }
+              ],
               "melodic_scale": "blues",
               "transform_pool": []
             },
@@ -174,8 +215,11 @@
             "dissonance": "passing",
             "motif": {
               "name": "stairwell_wail",
-              "intervals":  [ 0,   1,   -1  ],
-              "rhythm":     [ 3.0, 1.0, 4.0 ]
+              "events": [
+                { "step":  0, "beats": 3.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -1, "beats": 4.0 }
+              ]
             },
             "velocity": 92
           }

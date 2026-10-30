@@ -6,17 +6,11 @@
     "tempo": 58,
     "motif": {
       "name": "drift",
-      "intervals": [
-        2,
-        -1,
-        2,
-        -3
-      ],
-      "rhythm": [
-        2.0,
-        1.5,
-        2.0,
-        2.5
+      "events": [
+        { "step":  2, "beats": 2.0 },
+        { "step": -1, "beats": 1.5 },
+        { "step":  2, "beats": 2.0 },
+        { "step": -3, "beats": 2.5 }
       ],
       "transform_pool": [
         "inversion",

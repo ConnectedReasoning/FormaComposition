@@ -22,27 +22,16 @@
     ],
     "motif": {
       "name": "subject",
-      "intervals": [
-        0,
-        4,
-        -2,
-        1,
-        -2,
-        1,
-        -2,
-        -1,
-        1
-      ],
-      "rhythm": [
-        2,
-        1,
-        1,
-        2,
-        2,
-        1,
-        1,
-        2,
-        4
+      "events": [
+        { "step":  0, "beats": 2.0 },
+        { "step":  4, "beats": 1.0 },
+        { "step": -2, "beats": 1.0 },
+        { "step":  1, "beats": 2.0 },
+        { "step": -2, "beats": 2.0 },
+        { "step":  1, "beats": 1.0 },
+        { "step": -2, "beats": 1.0 },
+        { "step": -1, "beats": 2.0 },
+        { "step":  1, "beats": 4.0 }
       ],
       "transform_pool": [
         "original",
@@ -78,27 +67,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -137,27 +115,16 @@
             "entry_role": "answer",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -209,27 +176,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -297,27 +253,16 @@
             "velocity": 80,
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -384,27 +329,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -474,27 +408,16 @@
             "velocity": 80,
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -563,27 +486,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -600,27 +512,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",
@@ -638,27 +539,16 @@
             "entry_role": "subject",
             "motif": {
               "name": "subject",
-              "intervals": [
-                0,
-                4,
-                -2,
-                1,
-                -2,
-                1,
-                -2,
-                -1,
-                1
-              ],
-              "rhythm": [
-                2,
-                1,
-                1,
-                2,
-                2,
-                1,
-                1,
-                2,
-                4
+              "events": [
+                { "step":  0, "beats": 2.0 },
+                { "step":  4, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step":  1, "beats": 2.0 },
+                { "step": -2, "beats": 2.0 },
+                { "step":  1, "beats": 1.0 },
+                { "step": -2, "beats": 1.0 },
+                { "step": -1, "beats": 2.0 },
+                { "step":  1, "beats": 4.0 }
               ],
               "transform_pool": [
                 "original",

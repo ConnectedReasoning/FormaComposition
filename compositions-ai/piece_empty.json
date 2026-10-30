@@ -8,8 +8,13 @@
 
     "motif": {
       "name": "cell",
-      "intervals": [0, 2, 2, -2, -2],
-      "rhythm":    [1.0, 1.0, 1.0, 0.5, 0.5],
+      "events": [
+        { "step":  0, "beats": 1.0 },
+        { "step":  2, "beats": 1.0 },
+        { "step":  2, "beats": 1.0 },
+        { "step": -2, "beats": 0.5 },
+        { "step": -2, "beats": 0.5 }
+      ],
       "transform_pool": ["inversion", "sequence"]
     },
 

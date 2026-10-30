@@ -5,9 +5,14 @@
     "tempo": {"min": 100, "max": 120},
     "motif": {
       "name": "diatonic_arc",
-      "intervals": [2, 1, 1, -1, -1, -2],
-      "rhythm": [0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
-      "rests": [false, false, false, false, false, true],
+      "events": [
+        { "step":  2, "beats": 0.5               },
+        { "step":  1, "beats": 0.5               },
+        { "step":  1, "beats": 1.0               },
+        { "step": -1, "beats": 0.5               },
+        { "step": -1, "beats": 0.5               },
+        { "step": -2, "beats": 1.0, "rest": true }
+      ],
       "transform_pool": ["inversion", "retrograde"]
     },
     "seed": 42,

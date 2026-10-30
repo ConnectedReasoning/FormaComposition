@@ -9,8 +9,16 @@
     "form_type": "song",
     "motif": {
       "name": "fugue_subject",
-      "intervals": [0, 1, 1, -1, -1, -1, 1, 1],
-      "rhythm": [0.75, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+      "events": [
+        { "step":  0, "beats": 0.75 },
+        { "step":  1, "beats": 0.25 },
+        { "step":  1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step": -1, "beats": 0.50 },
+        { "step":  1, "beats": 0.50 },
+        { "step":  1, "beats": 0.50 }
+      ],
       "transform_pool": ["inversion", "retrograde"]
     },
     "notes": "v2: the exposition now actually states the subject and a real tonal/real answer (entry_role), instead of free-species voices that only shared the subject's rhythm. Section 1a (exposition_entries, 4 bars) is a strict S-A-T-B canon on tonic/dominant -- entry_role tiles each voice across its full available time, so earlier entrants (smaller canon_offset) restate more times before being joined by the next voice, building to a full 4-voice canon by bar 4. Section 1b (exposition_continuation, 12 bars) picks up with the original free-composed development once all voices have entered. Section 2 (Stretto Development) and Section 3 (Coda) are unchanged from v1 -- the coda's augmentation effect is done via fugal_techniques.motif_transform, which entry_role deliberately doesn't replace (Phase 1 ships literal/untransformed statement only).",

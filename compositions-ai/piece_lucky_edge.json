@@ -6,17 +6,11 @@
     "tempo": 116,
     "motif": {
       "name": "harmonic_echo",
-      "intervals": [
-        0,
-        4,
-        3,
-        -7
-      ],
-      "rhythm": [
-        1.0,
-        1.0,
-        1.0,
-        1.0
+      "events": [
+        { "step":  0, "beats": 1.0 },
+        { "step":  4, "beats": 1.0 },
+        { "step":  3, "beats": 1.0 },
+        { "step": -7, "beats": 1.0 }
       ],
       "transform_pool": [
         "original",

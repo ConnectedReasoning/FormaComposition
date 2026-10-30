@@ -10,25 +10,15 @@
     "notes": "ZERO-NEW-PYTHON house/techno probe. Everything here uses fields that already exist in schemas.py as of this audit. Purpose: hear how far the current engine gets toward a house/techno feel before deciding what to build. Key devices: four_on_floor drums, pulse bass (quarter notes, locked to kick), harmony_pattern with hand-authored offbeat onsets for the classic house chord stab, arc:build on the riser section.",
     "motif": {
       "name": "pulse_field",
-      "intervals": [
-        0,
-        3,
-        -1,
-        2,
-        -2,
-        4,
-        -1,
-        -2
-      ],
-      "rhythm": [
-        0.25,
-        0.25,
-        0.5,
-        1.5,
-        0.25,
-        0.25,
-        0.5,
-        0.5
+      "events": [
+        { "step":  0, "beats": 0.25 },
+        { "step":  3, "beats": 0.25 },
+        { "step": -1, "beats": 0.50 },
+        { "step":  2, "beats": 1.50 },
+        { "step": -2, "beats": 0.25 },
+        { "step":  4, "beats": 0.25 },
+        { "step": -1, "beats": 0.50 },
+        { "step": -2, "beats": 0.50 }
       ],
       "transform_pool": [
         "original",

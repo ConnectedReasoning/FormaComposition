@@ -8,26 +8,12 @@
     "motifs": [
       {
         "name": "plea",
-        "intervals": [
-          0,
-          1,
-          0,
-          -1,
-          0
-        ],
-        "rhythm": [
-          1.0,
-          0.5,
-          0.5,
-          1.0,
-          1.0
-        ],
-        "velocities": [
-          0.63,
-          0.55,
-          0.51,
-          0.59,
-          0.47
+        "events": [
+          { "step":  0, "beats": 1.0, "velocity": 0.63 },
+          { "step":  1, "beats": 0.5, "velocity": 0.55 },
+          { "step":  0, "beats": 0.5, "velocity": 0.51 },
+          { "step": -1, "beats": 1.0, "velocity": 0.59 },
+          { "step":  0, "beats": 1.0, "velocity": 0.47 }
         ],
         "transform_pool": [
           "inversion",
@@ -38,29 +24,13 @@
       },
       {
         "name": "arpeggio",
-        "intervals": [
-          2,
-          2,
-          -1,
-          0,
-          0,
-          -3
-        ],
-        "rhythm": [
-          0.5,
-          0.5,
-          0.5,
-          0.5,
-          0.5,
-          1.5
-        ],
-        "velocities": [
-          0.47,
-          0.43,
-          0.46,
-          0.41,
-          0.43,
-          0.39
+        "events": [
+          { "step":  2, "beats": 0.5, "velocity": 0.47 },
+          { "step":  2, "beats": 0.5, "velocity": 0.43 },
+          { "step": -1, "beats": 0.5, "velocity": 0.46 },
+          { "step":  0, "beats": 0.5, "velocity": 0.41 },
+          { "step":  0, "beats": 0.5, "velocity": 0.43 },
+          { "step": -3, "beats": 1.5, "velocity": 0.39 }
         ],
         "transform_pool": [
           "inversion",
@@ -71,29 +41,13 @@
       },
       {
         "name": "counterline",
-        "intervals": [
-          -1,
-          0,
-          1,
-          -1,
-          0,
-          1
-        ],
-        "rhythm": [
-          0.75,
-          0.25,
-          0.5,
-          1.0,
-          0.75,
-          0.75
-        ],
-        "velocities": [
-          0.43,
-          0.39,
-          0.41,
-          0.46,
-          0.39,
-          0.38
+        "events": [
+          { "step": -1, "beats": 0.75, "velocity": 0.43 },
+          { "step":  0, "beats": 0.25, "velocity": 0.39 },
+          { "step":  1, "beats": 0.50, "velocity": 0.41 },
+          { "step": -1, "beats": 1.00, "velocity": 0.46 },
+          { "step":  0, "beats": 0.75, "velocity": 0.39 },
+          { "step":  1, "beats": 0.75, "velocity": 0.38 }
         ],
         "transform_pool": [
           "retrograde",

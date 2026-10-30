@@ -6,17 +6,11 @@
     "tempo": 92,
     "motif": {
       "name": "modal_sketch",
-      "intervals": [
-        1,
-        1,
-        1,
-        -2
-      ],
-      "rhythm": [
-        1.0,
-        1.0,
-        0.5,
-        1.5
+      "events": [
+        { "step":  1, "beats": 1.0 },
+        { "step":  1, "beats": 1.0 },
+        { "step":  1, "beats": 0.5 },
+        { "step": -2, "beats": 1.5 }
       ],
       "transform_pool": [
         "inversion",

@@ -9,9 +9,13 @@
     "notes": "A 30-minute continuous ambient composition generated according to background music guidelines. Uses D Lydian for floating, open harmonic color (#4). Features ultra-long chord holds (16-27 bars per chord), zero-motion sustained harmony beds, pedal and root-only bass, and high rest-probability generative melody lines. Counterpoint voices act as asynchronous Brian Eno-style tape loop reflections and high bell-like flourishes.",
     "motif": {
       "name": "ambient_loop_cell",
-      "intervals":  [ 2,    3,   2,    0,    1   ],
-      "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
-      "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
+      "events": [
+        { "step": 2, "beats": 1.0, "velocity": 0.8 },
+        { "step": 3, "beats": 1.0, "velocity": 0.9 },
+        { "step": 2, "beats": 0.5, "velocity": 0.8 },
+        { "step": 0, "beats": 0.5, "velocity": 0.9 },
+        { "step": 1, "beats": 1.0, "velocity": 0.8 }
+      ],
       "transform_pool": [ "augmentation", "diminution" ]
     },
     "form_type": "song",
@@ -51,9 +55,13 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_cell",
-              "intervals":  [ 0,    3,   2,    2,   4   ],
-              "rhythm":     [ 1.0,  1.0, 0.5,  0.5,  1.0 ],
-              "velocities": [ 0.8,  0.9, 0.8,  0.9,  0.8 ],
+              "events": [
+                { "step": 0, "beats": 1.0, "velocity": 0.8 },
+                { "step": 3, "beats": 1.0, "velocity": 0.9 },
+                { "step": 2, "beats": 0.5, "velocity": 0.8 },
+                { "step": 2, "beats": 0.5, "velocity": 0.9 },
+                { "step": 4, "beats": 1.0, "velocity": 0.8 }
+              ],
               "transform_pool": [ "augmentation", "diminution" ]
             },
             "velocity": 90
@@ -65,9 +73,13 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_shimmer",
-              "intervals":  [ 0,    2,   -1,    -2,   -3   ],
-              "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
-              "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
+              "events": [
+                { "step":  0, "beats": 0.25, "velocity": 0.40 },
+                { "step":  2, "beats": 0.25, "velocity": 0.45 },
+                { "step": -1, "beats": 0.50, "velocity": 0.40 },
+                { "step": -2, "beats": 1.00, "velocity": 0.60 },
+                { "step": -3, "beats": 2.00, "velocity": 0.50 }
+              ],
               "transform_pool": [ "diminution" ]
             },
             "velocity": 90
@@ -79,9 +91,13 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_cell",
-              "intervals":  [ 0,   0,    2,    1,   -1   ],
-              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
-              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "events": [
+                { "step":  0, "beats": 0.5, "velocity": 0.6 },
+                { "step":  0, "beats": 0.5, "velocity": 0.5 },
+                { "step":  2, "beats": 1.0, "velocity": 0.7 },
+                { "step":  1, "beats": 0.5, "velocity": 0.8 },
+                { "step": -1, "beats": 1.5, "velocity": 0.6 }
+              ],
               "transform_pool": [ "augmentation", "diminution" ]
             },
             "velocity": 90
@@ -124,9 +140,12 @@
             "register": "alto",
             "motif": {
               "name": "ambient_loop_anchor",
-              "intervals":  [ 0,   -1,    2,    1   ],
-              "rhythm":     [ 2.0,  1.0,  0.5,  0.5 ],
-              "velocities": [ 0.9,  0.7,  0.6,  0.7 ],
+              "events": [
+                { "step":  0, "beats": 2.0, "velocity": 0.9 },
+                { "step": -1, "beats": 1.0, "velocity": 0.7 },
+                { "step":  2, "beats": 0.5, "velocity": 0.6 },
+                { "step":  1, "beats": 0.5, "velocity": 0.7 }
+              ],
               "transform_pool": [ "augmentation" ]
             },
             "velocity": 85
@@ -137,9 +156,13 @@
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_shimmer",
-              "intervals":  [ 0,    2,   0,     3,    2   ],
-              "rhythm":     [ 0.25, 0.25, 0.5,  1.0,  2.0 ],
-              "velocities": [ 0.4,  0.45, 0.4,  0.6,  0.5 ],
+              "events": [
+                { "step": 0, "beats": 0.25, "velocity": 0.40 },
+                { "step": 2, "beats": 0.25, "velocity": 0.45 },
+                { "step": 0, "beats": 0.50, "velocity": 0.40 },
+                { "step": 3, "beats": 1.00, "velocity": 0.60 },
+                { "step": 2, "beats": 2.00, "velocity": 0.50 }
+              ],
               "transform_pool": [ "diminution" ]
             },
             "velocity": 72
@@ -150,9 +173,13 @@
             "dissonance": "free",
             "motif": {
               "name": "ambient_loop_pulse",
-              "intervals":  [ 0,   0,    2,    1,    0  ],
-              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
-              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "events": [
+                { "step": 0, "beats": 0.5, "velocity": 0.6 },
+                { "step": 0, "beats": 0.5, "velocity": 0.5 },
+                { "step": 2, "beats": 1.0, "velocity": 0.7 },
+                { "step": 1, "beats": 0.5, "velocity": 0.8 },
+                { "step": 0, "beats": 1.5, "velocity": 0.6 }
+              ],
               "transform_pool": [ "diminution" ]
             },
             "velocity": 75
@@ -164,9 +191,13 @@
             "dissonance": "none",
             "motif":{
               "name": "ambient_loop_pulse",
-              "intervals":  [ 0,   0,    2,    1,   -1   ],
-              "rhythm":     [ 0.5, 0.5,  1.0,  0.5,  1.5 ],
-              "velocities": [ 0.6, 0.5,  0.7,  0.8,  0.6 ],
+              "events": [
+                { "step":  0, "beats": 0.5, "velocity": 0.6 },
+                { "step":  0, "beats": 0.5, "velocity": 0.5 },
+                { "step":  2, "beats": 1.0, "velocity": 0.7 },
+                { "step":  1, "beats": 0.5, "velocity": 0.8 },
+                { "step": -1, "beats": 1.5, "velocity": 0.6 }
+              ],
               "transform_pool": [ "diminution" ]
             },
             "velocity": 90
@@ -201,9 +232,12 @@
             "velocity": 70,
             "motif": {
               "name": "plateau_hold",
-              "intervals":  [ 0,    0,   1,   -1  ],
-              "rhythm":     [ 2.0,  1.0, 0.5,  0.5 ],
-              "velocities": [ 0.7,  0.5, 0.55, 0.5 ],
+              "events": [
+                { "step":  0, "beats": 2.0, "velocity": 0.70 },
+                { "step":  0, "beats": 1.0, "velocity": 0.50 },
+                { "step":  1, "beats": 0.5, "velocity": 0.55 },
+                { "step": -1, "beats": 0.5, "velocity": 0.50 }
+              ],
               "transform_pool": [ "retrograde" ]
             }
           },
@@ -213,9 +247,11 @@
             "dissonance": "free",
             "motif": {
               "name": "plateau_glint",
-              "intervals":  [ 0,    1,   -1  ],
-              "rhythm":     [ 2.0,  0.5, 1.5 ],
-              "velocities": [ 0.5,  0.6, 0.45 ]
+              "events": [
+                { "step":  0, "beats": 2.0, "velocity": 0.50 },
+                { "step":  1, "beats": 0.5, "velocity": 0.60 },
+                { "step": -1, "beats": 1.5, "velocity": 0.45 }
+              ]
             },
             "velocity": 80
           },
@@ -225,9 +261,11 @@
             "dissonance": "none",
             "motif": {
               "name": "plateau_bell",
-              "intervals":  [ 0,    1,    -1   ],
-              "rhythm":     [ 3.0,  2.5,  2.5  ],
-              "velocities": [ 0.4,  0.35, 0.3  ]
+              "events": [
+                { "step":  0, "beats": 3.0, "velocity": 0.40 },
+                { "step":  1, "beats": 2.5, "velocity": 0.35 },
+                { "step": -1, "beats": 2.5, "velocity": 0.30 }
+              ]
             },
             "velocity": 45
           },
@@ -237,9 +275,11 @@
             "dissonance": "none",
             "motif": {
               "name": "plateau_ground",
-              "intervals":  [ 0,    -1,   1    ],
-              "rhythm":     [ 2.0,  1.0,  1.0  ],
-              "velocities": [ 0.5,  0.4,  0.45 ]
+              "events": [
+                { "step":  0, "beats": 2.0, "velocity": 0.50 },
+                { "step": -1, "beats": 1.0, "velocity": 0.40 },
+                { "step":  1, "beats": 1.0, "velocity": 0.45 }
+              ]
             },
             "velocity": 48
           }
@@ -274,9 +314,13 @@
             "register": "soprano",
             "motif": {
               "name": "horizon_mirror",
-              "intervals":  [ 0,    1,   1,    -1,   -1  ],
-              "rhythm":     [ 2.0,  1.0, 2.0,  1.0,  2.0 ],
-              "velocities": [ 0.6,  0.7, 0.8,  0.7,  0.6 ],
+              "events": [
+                { "step":  0, "beats": 2.0, "velocity": 0.6 },
+                { "step":  1, "beats": 1.0, "velocity": 0.7 },
+                { "step":  1, "beats": 2.0, "velocity": 0.8 },
+                { "step": -1, "beats": 1.0, "velocity": 0.7 },
+                { "step": -1, "beats": 2.0, "velocity": 0.6 }
+              ],
               "transform_pool": [ "retrograde", "inversion" ]
             },
             "velocity": 84
@@ -287,9 +331,11 @@
             "dissonance": "free",
             "motif": {
               "name": "horizon_line",
-              "intervals":  [ 0,    -1,  1   ],
-              "rhythm":     [ 1.5,  1.0, 1.5 ],
-              "velocities": [ 0.5,  0.4, 0.5 ]
+              "events": [
+                { "step":  0, "beats": 1.5, "velocity": 0.5 },
+                { "step": -1, "beats": 1.0, "velocity": 0.4 },
+                { "step":  1, "beats": 1.5, "velocity": 0.5 }
+              ]
             },
             "velocity":74
           },
@@ -299,9 +345,13 @@
             "dissonance": "none",
             "motif": {
               "name": "horizon_echo",
-              "intervals":  [ 0,    -1,   -1,   1,    1    ],
-              "rhythm":     [ 4.0,  2.0,  4.0,  2.0,  4.0  ],
-              "velocities": [ 0.5,  0.55, 0.6,  0.55, 0.5  ]
+              "events": [
+                { "step":  0, "beats": 4.0, "velocity": 0.50 },
+                { "step": -1, "beats": 2.0, "velocity": 0.55 },
+                { "step": -1, "beats": 4.0, "velocity": 0.60 },
+                { "step":  1, "beats": 2.0, "velocity": 0.55 },
+                { "step":  1, "beats": 4.0, "velocity": 0.50 }
+              ]
             },
             "velocity": 70
           },
@@ -311,9 +361,11 @@
             "dissonance": "none",
             "motif": {
               "name": "horizon_depth",
-              "intervals":  [ 0,    1,    -1   ],
-              "rhythm":     [ 3.0,  2.0,  3.0  ],
-              "velocities": [ 0.45, 0.4,  0.45 ]
+              "events": [
+                { "step":  0, "beats": 3.0, "velocity": 0.45 },
+                { "step":  1, "beats": 2.0, "velocity": 0.40 },
+                { "step": -1, "beats": 3.0, "velocity": 0.45 }
+              ]
             },
             "velocity": 86
           }
@@ -346,9 +398,13 @@
             "register": "soprano",
             "motif": {
               "name": "air_dissolve",
-              "intervals":  [ 0,    -1,  -1,   1,    1   ],
-              "rhythm":     [ 1.0,  1.0, 2.0,  4.0,  4.0 ],
-              "velocities": [ 0.7,  0.6, 0.5,  0.4,  0.3 ],
+              "events": [
+                { "step":  0, "beats": 1.0, "velocity": 0.7 },
+                { "step": -1, "beats": 1.0, "velocity": 0.6 },
+                { "step": -1, "beats": 2.0, "velocity": 0.5 },
+                { "step":  1, "beats": 4.0, "velocity": 0.4 },
+                { "step":  1, "beats": 4.0, "velocity": 0.3 }
+              ],
               "transform_pool": [ "diminution" ]
             },
             "velocity": 80
@@ -359,9 +415,11 @@
             "dissonance": "free",
             "motif": {
               "name": "air_trace",
-              "intervals":  [ 0,    1,   -1   ],
-              "rhythm":     [ 6.0,  2.0, 8.0  ],
-              "velocities": [ 0.45, 0.35, 0.25 ]
+              "events": [
+                { "step":  0, "beats": 6.0, "velocity": 0.45 },
+                { "step":  1, "beats": 2.0, "velocity": 0.35 },
+                { "step": -1, "beats": 8.0, "velocity": 0.25 }
+              ]
             },
             "velocity": 70
           },
@@ -371,9 +429,12 @@
             "dissonance": "none",
             "motif": {
               "name": "air_wisp",
-              "intervals":  [ 0,    -1,   1,    0    ],
-              "rhythm":     [ 2.0,  2.0,  4.0,  12.0 ],
-              "velocities": [ 0.4,  0.35, 0.3,  0.2  ]
+              "events": [
+                { "step":  0, "beats":  2.0, "velocity": 0.40 },
+                { "step": -1, "beats":  2.0, "velocity": 0.35 },
+                { "step":  1, "beats":  4.0, "velocity": 0.30 },
+                { "step":  0, "beats": 12.0, "velocity": 0.20 }
+              ]
             },
             "velocity": 80
           },
@@ -383,9 +444,11 @@
             "dissonance": "none",
             "motif": {
               "name": "air_settle",
-              "intervals":  [ 0,    -1,   1    ],
-              "rhythm":     [ 12.0, 4.0,  8.0  ],
-              "velocities": [ 0.35, 0.25, 0.2  ]
+              "events": [
+                { "step":  0, "beats": 12.0, "velocity": 0.35 },
+                { "step": -1, "beats":  4.0, "velocity": 0.25 },
+                { "step":  1, "beats":  8.0, "velocity": 0.20 }
+              ]
             },
             "velocity": 75
           }

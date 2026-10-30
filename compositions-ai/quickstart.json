@@ -9,19 +9,12 @@
   "seed": 42,
   "motif": {
     "name": "ascending_hope",
-    "intervals": [
-      2,
-      2,
-      1,
-      -2,
-      -1
-    ],
-    "rhythm": [
-      1.0,
-      0.5,
-      0.5,
-      1.0,
-      1.0
+    "events": [
+      { "step":  2, "beats": 1.0 },
+      { "step":  2, "beats": 0.5 },
+      { "step":  1, "beats": 0.5 },
+      { "step": -2, "beats": 1.0 },
+      { "step": -1, "beats": 1.0 }
     ],
     "transform_pool": [
       "inversion",

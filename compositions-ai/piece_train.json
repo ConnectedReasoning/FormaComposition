@@ -8,40 +8,18 @@
       "max": 120
     },
     "motif": {
-      "intervals": [
-        0,
-        0,
-        0,
-        0,
-        1,
-        -1,
-        0,
-        0,
-        0
+      "events": [
+        { "step":  0, "beats": 0.5               },
+        { "step":  0, "beats": 1.0               },
+        { "step":  0, "beats": 2.0               },
+        { "step":  0, "beats": 1.0               },
+        { "step":  1, "beats": 0.5               },
+        { "step": -1, "beats": 0.5               },
+        { "step":  0, "beats": 1.5               },
+        { "step":  0, "beats": 0.5, "rest": true },
+        { "step":  0, "beats": 0.5, "rest": true }
       ],
       "name": "First Motif motif",
-      "rests": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true
-      ],
-      "rhythm": [
-        0.5,
-        1,
-        2,
-        1,
-        0.5,
-        0.5,
-        1.5,
-        0.5,
-        0.5
-      ],
       "transform_pool": [
         "inversion",
         "augmentation"

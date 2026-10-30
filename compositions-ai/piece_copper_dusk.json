@@ -6,26 +6,12 @@
     "tempo": 120,
     "motif": {
       "name": "copper_dusk",
-      "intervals": [
-        1,
-        0,
-        1,
-        -1,
-        1
-      ],
-      "rhythm": [
-        2.0,
-        0.5,
-        0.5,
-        4.0,
-        2.0
-      ],
-      "velocities": [
-        0.9,
-        0.65,
-        0.75,
-        0.85,
-        0.6
+      "events": [
+        { "step":  1, "beats": 2.0, "velocity": 0.90 },
+        { "step":  0, "beats": 0.5, "velocity": 0.65 },
+        { "step":  1, "beats": 0.5, "velocity": 0.75 },
+        { "step": -1, "beats": 4.0, "velocity": 0.85 },
+        { "step":  1, "beats": 2.0, "velocity": 0.60 }
       ],
       "transform_pool": [
         "inversion",

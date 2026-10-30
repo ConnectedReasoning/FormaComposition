@@ -6,25 +6,15 @@
     "tempo": 98,
     "motif": {
       "name": "boogie_cell",
-      "intervals": [
-        0,
-        2,
-        2,
-        1,
-        1,
-        -1,
-        -1,
-        -2
-      ],
-      "rhythm": [
-        1.5,
-        0.5,
-        1.0,
-        1.0,
-        0.5,
-        0.5,
-        1.0,
-        2.0
+      "events": [
+        { "step":  0, "beats": 1.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step":  2, "beats": 1.0 },
+        { "step":  1, "beats": 1.0 },
+        { "step":  1, "beats": 0.5 },
+        { "step": -1, "beats": 0.5 },
+        { "step": -1, "beats": 1.0 },
+        { "step": -2, "beats": 2.0 }
       ],
       "transform_pool": [
         "retrograde",

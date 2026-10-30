@@ -5,8 +5,12 @@
     "tempo": {"min": 100, "max": 120},
     "motif": {
       "name": "neighbor_wobble",
-      "intervals": [-1, 1, -1, 1],
-      "rhythm": [1.0, 1.0, 1.0, 1.0],
+      "events": [
+        { "step": -1, "beats": 1.0 },
+        { "step":  1, "beats": 1.0 },
+        { "step": -1, "beats": 1.0 },
+        { "step":  1, "beats": 1.0 }
+      ],
       "transform_pool": []
     },
     "seed": 1,

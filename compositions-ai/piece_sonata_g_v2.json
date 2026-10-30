@@ -8,8 +8,15 @@
     "seed": 1055,
     "motif": {
       "name": "P_head",
-      "intervals": [0, 2, -2, -2, 1, -2, 2],
-      "rhythm": [1.5, 0.5, 1, 1, 1.5, 0.5, 2],
+      "events": [
+        { "step":  0, "beats": 1.5 },
+        { "step":  2, "beats": 0.5 },
+        { "step": -2, "beats": 1.0 },
+        { "step": -2, "beats": 1.0 },
+        { "step":  1, "beats": 1.5 },
+        { "step": -2, "beats": 0.5 },
+        { "step":  2, "beats": 2.0 }
+      ],
       "transform_pool": ["original", "sequence", "inversion", "original"]
     },
     "form_type": "song",
@@ -51,7 +58,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -82,7 +89,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -114,7 +121,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -151,7 +158,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -184,7 +191,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -217,7 +224,7 @@
         "density": "sparse",
         "melody": "develop",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -250,7 +257,7 @@
         "density": "sparse",
         "melody": "develop",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -283,7 +290,7 @@
         "density": "sparse",
         "melody": "develop",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -316,7 +323,7 @@
         "density": "sparse",
         "melody": "develop",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -347,7 +354,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -380,7 +387,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -417,7 +424,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -450,7 +457,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {
@@ -486,7 +493,7 @@
         "density": "sparse",
         "melody": "lyrical",
         "bass_style": "motif",
-        "bass_motif": {"name": "alberti", "intervals": [-4, 4, -2, 2, -4, 4, -2, 2], "rhythm": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]},
+        "bass_motif": {"name": "alberti", "events": [ { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 }, { "step": -4, "beats": 0.5 }, { "step":  4, "beats": 0.5 }, { "step": -2, "beats": 0.5 }, { "step":  2, "beats": 0.5 } ]},
         "arc": "none",
         "rhythm": "pattern",
         "rhythm_pattern": {

@@ -10,21 +10,13 @@
     "notes": "ZERO-new-Python lo-fi probe. Jazz-extended harmony (maj7/m7/9ths, already fully built in CHORD_INTERVALS), backbeat pattern + swing for the boom-bap pocket, sparse/lyrical melody, pedal/walking bass. Correlated micro-timing humanization deliberately left to Logic's own Humanize MIDI Transform, not modeled here -- that's a performance-layer concern, not composition.",
     "motif": {
       "name": "window_haze",
-      "intervals": [
-        0,
-        2,
-        -1,
-        1,
-        -2,
-        1
-      ],
-      "rhythm": [
-        1.5,
-        0.25,
-        0.75,
-        1.0,
-        0.25,
-        0.25
+      "events": [
+        { "step":  0, "beats": 1.50 },
+        { "step":  2, "beats": 0.25 },
+        { "step": -1, "beats": 0.75 },
+        { "step":  1, "beats": 1.00 },
+        { "step": -2, "beats": 0.25 },
+        { "step":  1, "beats": 0.25 }
       ],
       "transform_pool": [
         "original",
