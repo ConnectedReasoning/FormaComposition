@@ -1,0 +1,55 @@
+{
+  "title": "Tape Loop B - A aeolian - 36 beats",
+  "name": "loop_b_a_aeolian_36",
+  "key": "A",
+  "mode": "aeolian",
+  "tempo": {"min": 60, "max": 60},
+  "seed": 23,
+  "form_type": "song",
+  "form": ["loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop"],
+  "motif": {
+    "name": "loop_b_head",
+    "events": [
+      { "step":  0, "beats":  5.0, "velocity": 0.9 },
+      { "step": -2, "beats":  7.0, "velocity": 0.7 },
+      { "step": -1, "beats":  7.0, "velocity": 0.8 },
+      { "step":  2, "beats":  8.0, "velocity": 1.0 },
+      { "step":  1, "beats":  9.0, "velocity": 0.7 }
+    ],
+    "transform_pool": ["original"]
+  },
+  "sections": {
+    "loop": {
+      "name": "loop",
+      "bars": 9,
+      "beats_per_bar": 4,
+      "harmony": [
+        { "chord": "i",   "bars": 3.0 },
+        { "chord": "VI",  "bars": 2.0 },
+        { "chord": "III", "bars": 2.0 },
+        { "chord": "VII", "bars": 2.0 }
+      ],
+      "rest_probability":0.2,
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [  0,   5,  12,  19,  27],
+        "durations":    [  3,   5,   4,   6,   6],
+        "velocities":   [0.9, 0.7, 0.85, 1.0, 0.7],
+        "length_beats": 36
+      },
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "harmony_velocity": 30,
+      "bass_velocity": 48,
+      "harmony_register": {"min": 52, "max": 68},
+      "bass_register": {"min": 38, "max": 52},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 66}
+      ],
+      "notes": "Loop length 36 beats (9 bars of 4/4) = 36 s at 60 BPM. Five short-to-medium notes; same white-key pitch collection as the other loops, A as tonal centre."
+    }
+  }
+}

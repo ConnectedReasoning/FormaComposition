@@ -1,0 +1,54 @@
+{
+  "title": "Tape Loop C - F lydian - 40 beats",
+  "name": "loop_c_f_lydian_40",
+  "key": "F",
+  "mode": "lydian",
+  "tempo": {"min": 60, "max": 60},
+  "seed": 37,
+  "form_type": "song",
+  "form": ["loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop"],
+  "motif": {
+    "name": "loop_c_head",
+    "events": [
+      { "step":  0, "beats":  8.0, "velocity": 0.8 },
+      { "step":  4, "beats":  9.0, "velocity": 1.0 },
+      { "step":  6, "beats": 11.0, "velocity": 0.8 },
+      { "step":  4, "beats": 12.0, "velocity": 0.9 }
+    ],
+    "transform_pool": ["original"]
+  },
+  "sections": {
+    "loop": {
+      "name": "loop",
+      "bars": 10,
+      "beats_per_bar": 4,
+      "harmony": [
+        { "chord": "I",  "bars": 3.0 },
+        { "chord": "II", "bars": 2.0 },
+        { "chord": "vi", "bars": 3.0 },
+        { "chord": "V",  "bars": 2.0 }
+      ],
+      "rest_probability":0.2,
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [  0,   8,  17,  28],
+        "durations":    [  6,   6,   8,   9],
+        "velocities":   [0.85, 1.0, 0.75, 0.9],
+        "length_beats": 40
+      },
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "harmony_velocity": 30,
+      "bass_velocity": 48,
+      "harmony_register": {"min": 52, "max": 68},
+      "bass_register": {"min": 38, "max": 52},
+      "voices": [
+        {"register": "soprano", "behavior": "develop", "velocity": 64}
+      ],
+      "notes": "Loop length 40 beats (10 bars of 4/4) = 40 s at 60 BPM. Four notes with a rising fifth-ish leap; lydian II chord gives the bright colour. Ends on V so it pulls back to I at the loop point."
+    }
+  }
+}

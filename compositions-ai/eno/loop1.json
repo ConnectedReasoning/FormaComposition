@@ -1,0 +1,54 @@
+{
+  "title": "Tape Loop A - D dorian - 33 beats",
+  "name": "loop_a_d_dorian_33",
+  "key": "D",
+  "mode": "dorian",
+  "tempo": {"min": 60, "max": 60},
+  "seed": 11,
+  "form_type": "song",
+  "form": ["loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop"],
+  "motif": {
+    "name": "loop_a_head",
+    "events": [
+      { "step":  0, "beats":  9.0, "velocity": 1.0 },
+      { "step":  2, "beats":  6.0, "velocity": 0.8 },
+      { "step":  3, "beats":  9.0, "velocity": 0.9 },
+      { "step":  0, "beats":  9.0, "velocity": 0.7 }
+    ],
+    "transform_pool": ["original"]
+  },
+  "sections": {
+    "loop": {
+      "name": "loop",
+      "bars": 11,
+      "beats_per_bar": 3,
+      "harmony": [
+        { "chord": "i",   "bars": 3.0 },
+        { "chord": "VII", "bars": 3.0 },
+        { "chord": "IV",  "bars": 3.0 },
+        { "chord": "ii",  "bars": 2.0 }
+      ],
+      "rest_probability":0.2,
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [  0,   9,  15,  24],
+        "durations":    [  6,   4,   7,   6],
+        "velocities":   [1.0, 0.8, 0.9, 0.7],
+        "length_beats": 33
+      },
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "harmony_velocity": 30,
+      "bass_velocity": 48,
+      "harmony_register": {"min": 52, "max": 68},
+      "bass_register": {"min": 38, "max": 52},
+      "voices": [
+        {"register": "tenor", "behavior": "develop", "velocity": 68}
+      ],
+      "notes": "Loop length 33 beats (11 bars of 3/4) = 33 s at 60 BPM. Four long notes with gaps; last note ends 3 beats before the loop point."
+    }
+  }
+}

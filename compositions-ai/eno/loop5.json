@@ -1,0 +1,53 @@
+{
+  "title": "Tape Loop E - E phrygian - 42 beats",
+  "name": "loop_e_e_phrygian_42",
+  "key": "E",
+  "mode": "phrygian",
+  "tempo": {"min": 60, "max": 60},
+  "seed": 53,
+  "form_type": "song",
+  "form": ["loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop"],
+  "motif": {
+    "name": "loop_e_head",
+    "events": [
+      { "step":  0, "beats": 14.0, "velocity": 0.8 },
+      { "step": -2, "beats": 15.0, "velocity": 0.9 },
+      { "step": -1, "beats": 13.0, "velocity": 0.7 }
+    ],
+    "transform_pool": ["original"]
+  },
+  "sections": {
+    "loop": {
+      "name": "loop",
+      "bars": 7,
+      "beats_per_bar": 6,
+      "harmony": [
+        { "chord": "i",   "bars": 2.0 },
+        { "chord": "II",  "bars": 2.0 },
+        { "chord": "VII", "bars": 2.0 },
+        { "chord": "iv",  "bars": 1.0 }
+      ],
+      "rest_probability":0.2,
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [  0,  14,  29],
+        "durations":    [ 10,   9,  10],
+        "velocities":   [0.8, 0.9, 0.7],
+        "length_beats": 42
+      },
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "harmony_velocity": 30,
+      "bass_velocity": 48,
+      "harmony_register": {"min": 52, "max": 68},
+      "bass_register": {"min": 38, "max": 52},
+      "voices": [
+        {"register": "baritone", "behavior": "develop", "velocity": 62}
+      ],
+      "notes": "Loop length 42 beats (7 bars of 6/4) = 42 s at 60 BPM. Only three long low notes: the anchor/drone loop. Keep this loop's bass track if you only keep one."
+    }
+  }
+}

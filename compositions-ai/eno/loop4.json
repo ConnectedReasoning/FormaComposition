@@ -1,0 +1,55 @@
+{
+  "title": "Tape Loop D - G mixolydian - 39 beats",
+  "name": "loop_d_g_mixolydian_39",
+  "key": "G",
+  "mode": "mixolydian",
+  "tempo": {"min": 60, "max": 60},
+  "seed": 41,
+  "form_type": "song",
+  "form": ["loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop", "loop"],
+  "motif": {
+    "name": "loop_d_head",
+    "events": [
+      { "step":  0, "beats":  6.0, "velocity": 0.8 },
+      { "step":  1, "beats":  8.0, "velocity": 0.9 },
+      { "step":  4, "beats":  8.0, "velocity": 0.7 },
+      { "step":  2, "beats":  9.0, "velocity": 1.0 },
+      { "step":  3, "beats":  8.0, "velocity": 0.8 }
+    ],
+    "transform_pool": ["original"]
+  },
+  "sections": {
+    "loop": {
+      "name": "loop",
+      "bars": 13,
+      "beats_per_bar": 3,
+      "harmony": [
+        { "chord": "I",   "bars": 4.0 },
+        { "chord": "VII", "bars": 3.0 },
+        { "chord": "IV",  "bars": 3.0 },
+        { "chord": "v",   "bars": 3.0 }
+      ],
+      "rest_probability":0.2,
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [  0,   6,  14,  22,  31],
+        "durations":    [  3,   4,   5,   4,   5],
+        "velocities":   [0.8, 0.9, 0.7, 1.0, 0.75],
+        "length_beats": 39
+      },
+      "harmony_rhythm": {"rhythm": "sustain"},
+      "harmony_velocity": 30,
+      "bass_velocity": 48,
+      "harmony_register": {"min": 52, "max": 68},
+      "bass_register": {"min": 38, "max": 52},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 66}
+      ],
+      "notes": "Loop length 39 beats (13 bars of 3/4) = 39 s at 60 BPM. Within 1 s of loop C (40) on purpose: slow, long-period phasing between the two, like Eno's 19.6 s / 20.1 s choir loops."
+    }
+  }
+}
