@@ -1,0 +1,381 @@
+{
+  "title": "Hexi - Leitmotif",
+  "name": "hexi_leitmotif",
+  "key": "D",
+  "mode": "aeolian",
+  "tempo": {"min": 96, "max": 96},
+  "seed": 31,
+  "form_type": "song",
+  "form": ["isolation", "stir", "twist", "combat", "conflict", "hero", "divine", "reprise"],
+  "notes": "76 bars at 96 BPM = 3:10. Stage timings: 0:00 rejected, 0:40 bully, 1:00 revenge, 1:40 changing, 2:10 goddess of light, 2:40 fully realized, 3:00 peace. One leitmotif (hexi_theme) whose later forms share its intervals, plus a separate hope melody (hexi_hope) that is present from 0:00 and becomes the centerpiece at 2:40.",
+
+  "motifs": [
+    {
+      "name": "hexi_theme",
+      "intervals":      [   0,    3,    1,   -1,   -2,    1,    2],
+      "rhythm":         [ 2.0,  1.0,  1.0,  1.0,  1.0,  0.5,  1.5],
+      "transform_pool": ["original", "original", "original", "sequence"]
+    },
+    {
+      "name": "hexi_twist",
+      "intervals":      [   0,    3,    1,   -1,   -3,    2,    3],
+      "rhythm":         [ 1.0,  0.5,  0.5,  0.5,  0.5, 0.25, 0.75],
+      "transform_pool": ["original", "original", "sequence", "transpose_down"]
+    },
+    {
+      "name": "hexi_fury",
+      "intervals":      [   0,    3,    1,   -1,   -2,    1,    2],
+      "rhythm":         [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  1.0],
+      "transform_pool": ["original", "original", "original", "transpose_up"]
+    },
+    {
+      "name": "hexi_fight",
+      "intervals":      [   0,    3,    1,   -1,   -2,    1,    3],
+      "rhythm":         [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  1.0],
+      "transform_pool": ["original", "original", "original", "transpose_up"]
+    },
+    {
+      "name": "hexi_hero",
+      "intervals":      [   0,    3,    1,   -1,   -2,    1,    3],
+      "rhythm":         [ 1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  2.0],
+      "transform_pool": ["original", "original", "original", "transpose_up"]
+    },
+    {
+      "name": "hexi_hope",
+      "intervals":      [   0,    2,   -1,    2,    1,   -2,    1],
+      "rhythm":         [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+      "transform_pool": ["original", "original", "original", "transpose_up"]
+    }
+  ],
+
+  "sections": {
+
+    "isolation": {
+      "name": "isolation",
+      "key": "D", "mode": "aeolian",
+      "harmony": [{"chord": "i",  "bars": 3}, {"chord": "VI", "bars": 3}, {"chord": "iv", "bars": 3}, {"chord": "i",  "bars": 3}],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+        "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+        "velocities":   [1.0, 0.8, 0.8, 0.9, 0.8, 0.7, 0.9],
+        "length_beats": 16
+      },
+      "harmony_velocity": 28,
+      "bass_velocity": 44,
+      "harmony_register": {"min": 46, "max": 62},
+      "bass_register":    {"min": 36, "max": 50},
+      "voices": [
+        {"register": "tenor", "behavior": "develop", "velocity": 54, "motif": "hexi_theme"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 42, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [ 8.0, 10.0, 11.0, 12.0, 14.0, 14.5, 15.0],
+            "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+            "velocities":   [ 0.8,  0.7,  0.7,  0.8,  0.6,  0.6,  0.7],
+            "length_beats": 16
+          }
+        }
+      ],
+      "notes": "0:00-0:30. Rejected Hexi. The theme in the tenor, then silence, and the hope melody answers in the gap, hidden high and quiet."
+    },
+
+    "stir": {
+      "name": "stir",
+      "key": "D", "mode": "aeolian",
+      "harmony": [{"chord": "iv",  "bars": 2}, {"chord": "V/i", "bars": 2}],
+      "density": "medium",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+        "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+        "velocities":   [1.0, 0.8, 0.8, 0.9, 0.8, 0.7, 0.9],
+        "length_beats": 8
+      },
+      "harmony_velocity": 34,
+      "bass_velocity": 54,
+      "harmony_register": {"min": 46, "max": 64},
+      "bass_register":    {"min": 36, "max": 50},
+      "drums": {"pattern": "minimal", "density": "low"},
+      "voices": [
+        {"register": "tenor", "behavior": "develop", "velocity": 62, "motif": "hexi_theme"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 40, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [ 0.0,  2.0,  3.0,  4.0,  6.0,  6.5,  7.0],
+            "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+            "velocities":   [ 0.8,  0.7,  0.7,  0.8,  0.6,  0.6,  0.7],
+            "length_beats": 8
+          }
+        }
+      ],
+      "notes": "0:30-0:40. Something starts building at the end of stage one: a low drum pulse, root bass, and the chords lean toward the dominant."
+    },
+
+    "twist": {
+      "name": "twist",
+      "key": "D", "mode": "aeolian",
+      "harmony": [{"chord": "i",   "bars": 1}, {"chord": "VI",  "bars": 1}, {"chord": "VII", "bars": 1}, {"chord": "V/i", "bars": 1},
+                  {"chord": "iv",  "bars": 1}, {"chord": "VI",  "bars": 1}, {"chord": "VII", "bars": 1}, {"chord": "V/i", "bars": 1}],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "steady",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.00, 1.00, 1.50, 2.00, 2.50, 3.00, 3.25],
+        "durations":    [1.00, 0.50, 0.50, 0.50, 0.50, 0.25, 0.75],
+        "velocities":   [1.00, 0.75, 0.85, 0.95, 0.75, 0.65, 0.90],
+        "length_beats": 4
+      },
+      "harmony_velocity": 46,
+      "bass_velocity": 72,
+      "harmony_register": {"min": 46, "max": 66},
+      "bass_register":    {"min": 36, "max": 52},
+      "drums": {"pattern": "backbeat", "density": "medium", "groove": "straight"},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 84, "motif": "hexi_twist"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 30, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [ 0.0,  2.0,  3.0,  4.0,  6.0,  6.5,  7.0],
+            "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+            "velocities":   [ 0.8,  0.7,  0.7,  0.8,  0.6,  0.6,  0.7],
+            "length_beats": 8
+          }
+        }
+      ],
+      "notes": "0:40-1:00. Bully Hexi. The theme twists (bigger leaps near the end), the backbeat arrives, and the hope melody is still there but buried."
+    },
+
+    "combat": {
+      "name": "combat",
+      "key": "D", "mode": "aeolian",
+      "harmony": [{"chord": "i",   "bars": 2}, {"chord": "VI",  "bars": 2}, {"chord": "VII", "bars": 2}, {"chord": "V/i", "bars": 2},
+                  {"chord": "i",   "bars": 2}, {"chord": "iv",  "bars": 2}, {"chord": "bII", "bars": 2}, {"chord": "V/i", "bars": 2}],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "motif",
+      "bass_motif": {
+        "intervals": [0,   0,   0,   0,   0,   0,   1,   -1 ],
+        "rhythm":    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+      },
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+        "durations":    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0],
+        "velocities":   [1.0, 0.7, 0.8, 0.7, 0.9, 0.7, 1.0],
+        "length_beats": 4
+      },
+      "harmony_velocity": 52,
+      "bass_velocity": 88,
+      "harmony_register": {"min": 46, "max": 68},
+      "bass_register":    {"min": 34, "max": 50},
+      "drums": {"pattern": "backbeat", "density": "full", "groove": "driving"},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 98, "motif": "hexi_fury"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 44, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [4.0, 6.0],
+            "durations":    [1.5, 1.5],
+            "velocities":   [0.8, 0.7],
+            "length_beats": 8
+          }
+        },
+        {
+          "register": "baritone", "behavior": "develop", "velocity": 60, "motif": "hexi_theme",
+          "rhythm_pattern": {
+            "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+            "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+            "velocities":   [1.0, 0.8, 0.8, 0.9, 0.8, 0.7, 0.9],
+            "length_beats": 16
+          }
+        }
+      ],
+      "notes": "1:00-1:40. Revenge Hexi. The theme in eighth notes (same intervals, furious rhythm). The slow tragic theme from 0:00 returns underneath in the baritone, and only fragments of the hope melody survive."
+    },
+
+    "conflict": {
+      "name": "conflict",
+      "key": "D", "mode": "dorian",
+      "harmony": [{"chord": "i",   "bars": 2}, {"chord": "IV",  "bars": 2}, {"chord": "VII", "bars": 2}, {"chord": "bII", "bars": 2},
+                  {"chord": "IV",  "bars": 2}, {"chord": "V/i", "bars": 2}],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "motif",
+      "bass_motif": {
+        "intervals": [0,   0,   0,   0,   0,   0,   1,   -1 ],
+        "rhythm":    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+      },
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+        "durations":    [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0],
+        "velocities":   [1.0, 0.7, 0.8, 0.7, 0.9, 0.7, 1.0],
+        "length_beats": 4
+      },
+      "harmony_velocity": 54,
+      "bass_velocity": 88,
+      "harmony_register": {"min": 46, "max": 68},
+      "bass_register":    {"min": 34, "max": 50},
+      "drums": {"pattern": "backbeat", "density": "full", "groove": "driving"},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 98, "motif": "hexi_fight"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 72, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [ 0.0,  2.0,  3.0,  4.0,  6.0,  6.5,  7.0],
+            "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+            "velocities":   [ 1.0,  0.8,  0.8,  0.9,  0.7,  0.7,  0.9],
+            "length_beats": 8
+          }
+        },
+        {
+          "register": "baritone", "behavior": "develop", "velocity": 60, "motif": "hexi_theme",
+          "rhythm_pattern": {
+            "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+            "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+            "velocities":   [1.0, 0.8, 0.8, 0.9, 0.8, 0.7, 0.9],
+            "length_beats": 16
+          }
+        }
+      ],
+      "notes": "1:40-2:10. Changing Hexi. No calming down: same drums and bass ostinato. D dorian puts a major IV against the dark bII, and the hope melody is now full-length and audible. The last note of the fury motif reaches one step higher."
+    },
+
+    "hero": {
+      "name": "hero",
+      "key": "D", "mode": "ionian",
+      "harmony": [{"chord": "I",   "bars": 2}, {"chord": "bVII","bars": 2}, {"chord": "IV",  "bars": 2}, {"chord": "V",   "bars": 2},
+                  {"chord": "I",   "bars": 2}, {"chord": "IV",  "bars": 1}, {"chord": "V",   "bars": 1}],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "motif",
+      "bass_motif": {
+        "intervals": [0,   0,   4,   0  ],
+        "rhythm":    [1.5, 0.5, 1.0, 1.0]
+      },
+      "arc": "none",
+      "voicing": "open",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+        "durations":    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0],
+        "velocities":   [1.0, 0.8, 0.9, 0.8, 1.0, 0.85, 1.0],
+        "length_beats": 8
+      },
+      "harmony_velocity": 58,
+      "bass_velocity": 92,
+      "harmony_register": {"min": 46, "max": 72},
+      "bass_register":    {"min": 34, "max": 52},
+      "drums": {"pattern": "backbeat", "density": "full", "groove": "driving"},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 100, "motif": "hexi_hero"},
+        {
+          "register": "soprano", "behavior": "develop", "velocity": 84, "motif": "hexi_hope",
+          "rhythm_pattern": {
+            "onsets":       [ 0.0,  2.0,  3.0,  4.0,  6.0,  6.5,  7.0],
+            "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+            "velocities":   [ 1.0,  0.9,  0.9,  1.0,  0.8,  0.8,  0.9],
+            "length_beats": 8
+          }
+        },
+        {
+          "register": "baritone", "behavior": "develop", "velocity": 66, "motif": "hexi_theme",
+          "rhythm_pattern": {
+            "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+            "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+            "velocities":   [1.0, 0.8, 0.8, 0.9, 0.8, 0.7, 0.9],
+            "length_beats": 8
+          }
+        }
+      ],
+      "notes": "2:10-2:40. Goddess of light. Same drums and intensity, but now in D major. The theme is in broad quarter notes, the hope melody is loud, and the section ends on the dominant."
+    },
+
+    "divine": {
+      "name": "divine",
+      "key": "D", "mode": "ionian",
+      "harmony": [{"chord": "I",   "bars": 2}, {"chord": "V",   "bars": 2}, {"chord": "vi",  "bars": 1}, {"chord": "IV",  "bars": 1},
+                  {"chord": "bVII","bars": 1}, {"chord": "V",   "bars": 1}],
+      "density": "full",
+      "melody": "develop",
+      "bass_style": "motif",
+      "bass_motif": {
+        "intervals": [0,   0,   4,   0  ],
+        "rhythm":    [1.5, 0.5, 1.0, 1.0]
+      },
+      "arc": "none",
+      "voicing": "open",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [ 0.0,  2.0,  3.0,  4.0,  6.0,  6.5,  7.0],
+        "durations":    [ 2.0,  1.0,  1.0,  2.0,  0.5,  0.5,  1.0],
+        "velocities":   [ 1.0,  0.9,  0.9,  1.0,  0.85, 0.85, 0.95],
+        "length_beats": 8
+      },
+      "harmony_velocity": 64,
+      "bass_velocity": 98,
+      "harmony_register": {"min": 46, "max": 74},
+      "bass_register":    {"min": 34, "max": 52},
+      "drums": {"pattern": "backbeat", "density": "full", "groove": "driving"},
+      "voices": [
+        {"register": "soprano", "behavior": "develop", "velocity": 112, "motif": "hexi_hope"},
+        {
+          "register": "alto", "behavior": "develop", "velocity": 98, "motif": "hexi_hero",
+          "rhythm_pattern": {
+            "onsets":       [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            "durations":    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0],
+            "velocities":   [1.0, 0.8, 0.9, 0.8, 1.0, 0.85, 1.0],
+            "length_beats": 8
+          }
+        },
+        {
+          "register": "baritone", "behavior": "develop", "velocity": 84, "motif": "hexi_theme",
+          "rhythm_pattern": {
+            "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5],
+            "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5],
+            "velocities":   [1.0, 0.9, 0.9, 1.0, 0.9, 0.8, 1.0],
+            "length_beats": 8
+          }
+        }
+      ],
+      "notes": "2:40-3:00. The payoff. The hope melody that was hidden at 0:00 becomes the lead, in the top voice at full velocity. The heroic theme and the slow theme play underneath it, so all three ideas sound at once. Drums and bass at their loudest."
+    },
+
+    "reprise": {
+      "name": "reprise",
+      "key": "D", "mode": "ionian",
+      "harmony": [{"chord": "I",  "bars": 2}, {"chord": "IV", "bars": 1}, {"chord": "I",  "bars": 1}],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":       [0.0, 2.0, 3.0, 4.0, 5.0, 6.0, 6.5, 8.0],
+        "durations":    [2.0, 1.0, 1.0, 1.0, 1.0, 0.5, 1.5, 8.0],
+        "velocities":   [0.7, 0.6, 0.6, 0.65, 0.6, 0.5, 0.6, 0.5],
+        "length_beats": 16
+      },
+      "harmony_velocity": 26,
+      "bass_velocity": 40,
+      "harmony_register": {"min": 48, "max": 66},
+      "bass_register":    {"min": 36, "max": 52},
+      "voices": [
+        {"register": "alto", "behavior": "develop", "velocity": 54, "motif": "hexi_theme"}
+      ],
+      "notes": "3:00-3:10. Peace and identity. Everything drops away except the original theme in its original rhythm, now in D major and quiet, ending on a long tonic."
+    }
+  }
+}
