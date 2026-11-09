@@ -32,7 +32,7 @@ from intervals.music.harmony  import (
     HarmonyStrategyRegistry, HarmonyRhythmContext, build_harmony_chord_context,
     resolve_harmony_section_events,
 )
-from intervals.music.bass     import generate_bass, BassNote
+from intervals.music.bass     import generate_bass, BassNote, thin_bass_for_melody
 from intervals.music.melody   import (
     generate_melody_for_progression, MelodyNote,
     MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
@@ -996,6 +996,13 @@ def generate_section(
             key=key,
             mode=mode,
         ))
+
+    # Melody-aware bass (opt-in): the bass was generated before the melody
+    # existed, so the complement pass has to run here, after it.
+    if section_model.bass_complement == "thin":
+        _before = len(bass_notes)
+        bass_notes = thin_bass_for_melody(bass_notes, melody_notes)
+        print(f"    Bass complement: thin ({_before} -> {len(bass_notes)} notes)")
 
     total_beats = bars * beats_per_bar
     return SectionResult(

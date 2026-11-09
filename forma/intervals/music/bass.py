@@ -932,3 +932,67 @@ def generate_bass(
         )
         return notes
     return _apply_bass_rests(notes, rest_probability, seed)
+
+
+# ---------------------------------------------------------------------------
+# Melody-aware post-pass
+# ---------------------------------------------------------------------------
+
+def thin_bass_for_melody(bass_notes, melody_notes, beat_window: float = 1.0,
+                         busy_onsets: int = 2):
+    """
+    Rhythmic complement: let the bass step back wherever the melody is busy.
+
+    The bass is generated before the melody and never sees it, so a fixed
+    eighth-note figure (Alberti etc.) keeps running underneath a melody that
+    is also running eighths -- two lines doing the same thing at once, which
+    reads as "unrelated" rather than as accompaniment. This pass runs after
+    the melody exists. For each `beat_window`-long window (default one beat)
+    that contains `busy_onsets` or more melody onsets, every bass onset that
+    does NOT fall on the window's start is dropped, and the bass note that
+    does start the window is lengthened to cover the gap. Windows where the
+    melody is sparse (held or dotted notes) are left untouched, so the
+    bass's full figure still comes through exactly where the melody gives it
+    room.
+
+    Pure and deterministic: no RNG, input lists are not mutated. Pitches are
+    never altered -- only which onsets sound and for how long -- so the bass
+    stays on the chord it was already voiced on.
+    """
+    if not bass_notes or not melody_notes:
+        return list(bass_notes)
+
+    onsets = [round(m.start_beat, 4) for m in melody_notes
+              if not getattr(m, "is_rest", False) and m.midi_note is not None]
+    if not onsets:
+        return list(bass_notes)
+
+    def window_of(beat: float) -> int:
+        return int((round(beat, 4) + 1e-6) // beat_window)
+
+    counts: dict = {}
+    for o in onsets:
+        w = window_of(o)
+        counts[w] = counts.get(w, 0) + 1
+    busy = {w for w, c in counts.items() if c >= busy_onsets}
+
+    ordered = sorted(bass_notes, key=lambda n: n.start_beat)
+    kept = []
+    for n in ordered:
+        w = window_of(n.start_beat)
+        on_window_start = abs(n.start_beat - w * beat_window) < 1e-6
+        if w in busy and not on_window_start:
+            continue
+        kept.append(n)
+
+    # A kept on-beat note in a busy window holds through the whole window,
+    # so thinning leaves a sustained note rather than a gap.
+    out = []
+    for n in kept:
+        w = window_of(n.start_beat)
+        dur = n.duration_beats
+        if w in busy:
+            dur = max(dur, (w + 1) * beat_window - n.start_beat)
+        out.append(BassNote(midi_note=n.midi_note, start_beat=n.start_beat,
+                            duration_beats=dur, velocity=n.velocity))
+    return out

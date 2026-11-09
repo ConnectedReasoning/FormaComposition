@@ -1082,6 +1082,15 @@ class SectionModel(BaseModel):
     bass_subdivision: Optional[Annotated[float, Field(gt=0.0, le=4.0)]] = None
     bass_offset:      Optional[Annotated[float, Field(ge=0.0, lt=4.0)]] = None
 
+    # Melody-aware bass. None (default) = the bass ignores the melody,
+    # exactly as before -- every existing piece renders unchanged.
+    #   "thin": after the melody is generated, drop the bass's off-beat
+    #     onsets in any beat where the melody has 2+ onsets (running
+    #     eighths or faster) and hold the on-beat note through the gap.
+    #     Where the melody is sparse, the bass keeps its full figure.
+    #     Works with every bass_style; pitches are never changed.
+    bass_complement:  Optional[Literal["thin"]] = None
+
     # The bass's own motif for bass_style="motif" -- a motif name (theme
     # pool / library) or an embedded dict, resolved exactly like
     # harmony_rhythm.motif. Omitted -> the bass follows the section's active
