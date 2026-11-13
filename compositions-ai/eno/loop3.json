@@ -10,10 +10,10 @@
   "motif": {
     "name": "loop_c_head",
     "events": [
-      { "step":  0, "beats":  8.0, "velocity": 0.8 },
+      { "step":  0, "beats": 13.0, "velocity": 0.85 },
       { "step":  4, "beats":  9.0, "velocity": 1.0 },
-      { "step":  6, "beats": 11.0, "velocity": 0.8 },
-      { "step":  4, "beats": 12.0, "velocity": 0.9 }
+      { "step":  6, "beats": 11.0, "velocity": 0.75 },
+      { "step":  4, "beats":  7.0, "velocity": 0.9 }
     ],
     "transform_pool": ["original"]
   },
@@ -35,9 +35,9 @@
       "arc": "none",
       "rhythm": "pattern",
       "rhythm_pattern": {
-        "onsets":       [  0,   8,  17,  28],
-        "durations":    [  6,   6,   8,   9],
-        "velocities":   [0.85, 1.0, 0.75, 0.9],
+        "onsets":       [  0,  13,  22,  33],
+        "durations":    [  7,   5,   7,   5],
+        "velocities":   [0.85, 1.00, 0.75, 0.90],
         "length_beats": 40
       },
       "harmony_rhythm": {"rhythm": "sustain"},
@@ -48,7 +48,7 @@
       "voices": [
         {"register": "soprano", "behavior": "develop", "velocity": 64}
       ],
-      "notes": "Loop length 40 beats (10 bars of 4/4) = 40 s at 60 BPM. Four notes with a rising fifth-ish leap; lydian II chord gives the bright colour. Ends on V so it pulls back to I at the loop point."
+      "notes": "Loop length 40 beats (10 bars of 4/4) = 40 s at 60 BPM. Four notes, one per chord, none crossing a chord change, so every pass repeats exactly."
     }
   }
 }

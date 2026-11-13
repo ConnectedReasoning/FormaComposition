@@ -12,9 +12,9 @@
     "events": [
       { "step":  0, "beats":  5.0, "velocity": 0.9 },
       { "step": -2, "beats":  7.0, "velocity": 0.7 },
-      { "step": -1, "beats":  7.0, "velocity": 0.8 },
+      { "step": -1, "beats":  9.0, "velocity": 0.85 },
       { "step":  2, "beats":  8.0, "velocity": 1.0 },
-      { "step":  1, "beats":  9.0, "velocity": 0.7 }
+      { "step":  1, "beats":  7.0, "velocity": 0.7 }
     ],
     "transform_pool": ["original"]
   },
@@ -36,9 +36,9 @@
       "arc": "none",
       "rhythm": "pattern",
       "rhythm_pattern": {
-        "onsets":       [  0,   5,  12,  19,  27],
-        "durations":    [  3,   5,   4,   6,   6],
-        "velocities":   [0.9, 0.7, 0.85, 1.0, 0.7],
+        "onsets":       [  0,   5,  12,  21,  29],
+        "durations":    [  3,   5,   4,   6,   5],
+        "velocities":   [0.90, 0.70, 0.85, 1.00, 0.70],
         "length_beats": 36
       },
       "harmony_rhythm": {"rhythm": "sustain"},
@@ -49,7 +49,7 @@
       "voices": [
         {"register": "alto", "behavior": "develop", "velocity": 66}
       ],
-      "notes": "Loop length 36 beats (9 bars of 4/4) = 36 s at 60 BPM. Five short-to-medium notes; same white-key pitch collection as the other loops, A as tonal centre."
+      "notes": "Loop length 36 beats (9 bars of 4/4) = 36 s at 60 BPM. Five notes, every chord has an onset, none crossing a chord change, so every pass repeats exactly."
     }
   }
 }

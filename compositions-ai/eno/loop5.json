@@ -10,9 +10,10 @@
   "motif": {
     "name": "loop_e_head",
     "events": [
-      { "step":  0, "beats": 14.0, "velocity": 0.8 },
-      { "step": -2, "beats": 15.0, "velocity": 0.9 },
-      { "step": -1, "beats": 13.0, "velocity": 0.7 }
+      { "step":  0, "beats": 13.0, "velocity": 0.8 },
+      { "step": -2, "beats": 13.0, "velocity": 0.9 },
+      { "step": -1, "beats": 11.0, "velocity": 0.7 },
+      { "step": -2, "beats":  5.0, "velocity": 0.75 }
     ],
     "transform_pool": ["original"]
   },
@@ -34,9 +35,9 @@
       "arc": "none",
       "rhythm": "pattern",
       "rhythm_pattern": {
-        "onsets":       [  0,  14,  29],
-        "durations":    [ 10,   9,  10],
-        "velocities":   [0.8, 0.9, 0.7],
+        "onsets":       [  0,  13,  26,  37],
+        "durations":    [  9,   9,   9,   3],
+        "velocities":   [0.80, 0.90, 0.70, 0.75],
         "length_beats": 42
       },
       "harmony_rhythm": {"rhythm": "sustain"},
@@ -47,7 +48,7 @@
       "voices": [
         {"register": "baritone", "behavior": "develop", "velocity": 62}
       ],
-      "notes": "Loop length 42 beats (7 bars of 6/4) = 42 s at 60 BPM. Only three long low notes: the anchor/drone loop. Keep this loop's bass track if you only keep one."
+      "notes": "Loop length 42 beats (7 bars of 6/4) = 42 s at 60 BPM. Four long low notes, one per chord, none crossing a chord change, so every pass repeats exactly. Keep this loop's bass track if you only keep one."
     }
   }
 }

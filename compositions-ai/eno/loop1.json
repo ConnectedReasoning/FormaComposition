@@ -10,10 +10,10 @@
   "motif": {
     "name": "loop_a_head",
     "events": [
-      { "step":  0, "beats":  9.0, "velocity": 1.0 },
-      { "step":  2, "beats":  6.0, "velocity": 0.8 },
-      { "step":  3, "beats":  9.0, "velocity": 0.9 },
-      { "step":  0, "beats":  9.0, "velocity": 0.7 }
+      { "step":  0, "beats": 11.0, "velocity": 1.0 },
+      { "step":  2, "beats":  9.0, "velocity": 0.8 },
+      { "step":  3, "beats":  8.0, "velocity": 0.9 },
+      { "step":  0, "beats":  5.0, "velocity": 0.7 }
     ],
     "transform_pool": ["original"]
   },
@@ -35,8 +35,8 @@
       "arc": "none",
       "rhythm": "pattern",
       "rhythm_pattern": {
-        "onsets":       [  0,   9,  15,  24],
-        "durations":    [  6,   4,   7,   6],
+        "onsets":       [  0,  11,  20,  28],
+        "durations":    [  6,   5,   5,   3],
         "velocities":   [1.0, 0.8, 0.9, 0.7],
         "length_beats": 33
       },
@@ -48,7 +48,7 @@
       "voices": [
         {"register": "tenor", "behavior": "develop", "velocity": 68}
       ],
-      "notes": "Loop length 33 beats (11 bars of 3/4) = 33 s at 60 BPM. Four long notes with gaps; last note ends 3 beats before the loop point."
+      "notes": "Loop length 33 beats (11 bars of 3/4) = 33 s at 60 BPM. Four notes, one per chord, none crossing a chord change, so every pass repeats exactly."
     }
   }
 }
