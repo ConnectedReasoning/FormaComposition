@@ -32,7 +32,7 @@ from intervals.music.harmony  import (
     HarmonyStrategyRegistry, HarmonyRhythmContext, build_harmony_chord_context,
     resolve_harmony_section_events,
 )
-from intervals.music.bass     import generate_bass, BassNote, thin_bass_for_melody
+from intervals.music.bass     import generate_bass, BassNote, thin_bass_for_melody, land_bass_on_root
 from intervals.music.melody   import (
     generate_melody_for_progression, MelodyNote,
     MELODY_OCTAVE_BOTTOM, MELODY_OCTAVE_TOP,
@@ -1799,6 +1799,11 @@ def generate_piece(
     mid.tracks.append(harmony_track)
 
     # Bass track
+    # The last bass note lands on the root of the final chord (a no-op when it
+    # already does), so a cycling bass figure doesn't stop on the fifth.
+    if all_bass_notes and chords:
+        _last_bass = [bn.midi_note for bn in bass_notes] or [bn.midi_note for bn in all_bass_notes]
+        land_bass_on_root(all_bass_notes, chords[-1], (min(_last_bass), max(_last_bass)))
     mid.tracks.append(build_bass_track(all_bass_notes))
 
     # Drums track (only if any sections used it)

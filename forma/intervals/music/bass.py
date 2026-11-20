@@ -141,6 +141,54 @@ def bass_chord_tones(chord: VoicedChord, octave_bottom: int = BASS_OCTAVE_BOTTOM
     return sorted(set(tones))
 
 
+def snap_to_chord_tone(candidate: int, chord_pcs, octave_bottom: int, octave_top: int,
+                       max_distance: int = 2) -> int:
+    """
+    Snap `candidate` to the nearest pitch whose pitch class is a chord tone,
+    searching within `max_distance` semitones and inside [octave_bottom,
+    octave_top]. Returns `candidate` unchanged if it already is a chord tone
+    or if no chord tone is that close.
+
+    Compares by pitch class in EVERY octave. bass_chord_tones() places each
+    chord tone in a single octave, which is fine for a one-octave register
+    but silently misses chord tones in the other octave of a wider one
+    (e.g. a 40-60 register: the walked F3 never snapped to the dominant's
+    F#2, so the bass played a D minor figure under a D major chord).
+    Ties go to the lower pitch, matching the old min()-over-sorted-tones rule.
+    """
+    pcs = set(chord_pcs)
+    for delta in sorted(range(-max_distance, max_distance + 1), key=lambda d: (abs(d), d)):
+        pitch = candidate + delta
+        if pitch % 12 in pcs and octave_bottom <= pitch <= octave_top:
+            return pitch
+    return candidate
+
+
+def land_bass_on_root(notes: list, final_chord, pitch_bounds=None) -> list:
+    """
+    Make the piece's last bass note the root of its final chord.
+
+    Motif bass figures (Alberti etc.) keep cycling to the last note, so a
+    piece can end with the bass on the chord's fifth even though the melody
+    and harmony resolve. If the last note is not the final chord's root,
+    move it to the nearest pitch with that pitch class inside
+    `pitch_bounds` (lo, hi) -- default: the range of the notes given. A last
+    note that is already the root is left untouched, so pieces that already
+    end correctly render byte-for-byte as before. Mutates and returns `notes`.
+    """
+    if not notes or final_chord is None:
+        return notes
+    last = notes[-1]
+    root_pc = CHROMATIC.index(final_chord.root_name)
+    if last.midi_note % 12 == root_pc:
+        return notes
+    lo, hi = pitch_bounds or (min(n.midi_note for n in notes), max(n.midi_note for n in notes))
+    options = [p for p in range(lo, hi + 1) if p % 12 == root_pc]
+    if options:
+        last.midi_note = min(options, key=lambda p: (abs(p - last.midi_note), p))
+    return notes
+
+
 def get_bass_scale_tones(key: str, mode: str, octave_bottom: int = BASS_OCTAVE_BOTTOM,
                           octave_top: int = BASS_OCTAVE_TOP) -> list[int]:
     """All scale tones in the bass register, sorted."""
@@ -554,7 +602,7 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
     for i, chord in enumerate(chords):
         total = bars_per_chord[i] * beats_per_bar
         root  = bass_root(chord, octave_bottom, octave_top)
-        chord_tones = bass_chord_tones(chord, octave_bottom, octave_top)
+        chord_pcs = {n % 12 for n in chord.midi_notes}
 
         current = root
         current_degree = pitch_to_degree(root, pcs) if pcs else None
@@ -584,9 +632,8 @@ def style_motif(chords, bars_per_chord, beats_per_bar=4, density="medium",
                 while candidate > octave_top:
                     candidate -= 12
                 if snap_to_chord:
-                    nearest_chord_tone = min(chord_tones, key=lambda c: abs(c - candidate))
-                    if abs(nearest_chord_tone - candidate) <= 2:
-                        candidate = nearest_chord_tone
+                    candidate = snap_to_chord_tone(candidate, chord_pcs,
+                                                   octave_bottom, octave_top)
                 if pcs:
                     # Re-anchor degree tracking to whatever actually gets
                     # played (a chord-tone override moves us off the raw
