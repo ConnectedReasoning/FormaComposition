@@ -1,0 +1,610 @@
+{
+  "title": "Clocktower Lane",
+  "name": "clocktower_lane",
+  "key": "A",
+  "mode": "ionian",
+  "tempo": { "min": 112, "max": 112 },
+  "seed": 1967,
+  "form_type": "song",
+  "form": [ "intro_1", "verse_1", "verse_2", "verse_3", "verse_4", "verse_5", "verse_6", "verse_7", "chorus_1", "chorus_2", "chorus_3", "verse_1", "verse_2", "verse_3", "verse_4", "verse_5", "verse_6", "verse_7", "chorus_1", "chorus_2", "chorus_3", "bridge_1", "chorus_1", "chorus_2", "chorus_3", "coda_1", "coda_2", "coda_3" ],
+  "motifs": [
+    { "name": "M_lane",
+      "intervals": [ 0,    2,    1,    -1,   -2   ],
+      "rhythm":    [ 0.5,  1,    0.5,  1,    1    ],
+      "transform_pool": [ "original", "original", "sequence", "inversion" ] },
+    { "name": "M_piano",
+      "intervals": [ 0,    2,    2,    -2,   -2,   2,    2,    -4   ],
+      "rhythm":    [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+      "transform_pool": [ "original", "original", "original", "sequence" ] },
+    { "name": "M_fanfare",
+      "intervals": [ 0,    1,    -1,   1,    2,    1,    -2,   -3   ],
+      "rhythm":    [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+      "transform_pool": [ "original", "sequence", "sequence", "inversion" ] }
+  ],
+  "notes": "AI-planned (Claude). Penny-Lane-style, original material. Form: intro, verse, chorus, verse, chorus, bridge, chorus, coda. Verse in A, chorus lifts a whole step to B, bridge back in A as a trumpet circle-of-fifths, coda in B. Secondary dominants (V7/ii, V7/V) and the borrowed minor iv are their own short sections keyed to that chord (mixolydian / dorian) so the melodies never cross-relate. Voices: M_lane (alto, lead), M_piano (tenor, staccato eighths: gate or shorten notes in the DAW), M_fanfare (soprano; play it an octave up on a piccolo-trumpet patch). Harmony track is a very quiet pad; mute it if the piano is enough. Bass in the stand-in MIDI is the McCartney-style line, not Forma output.",
+  "sections": {
+    "intro_1": {
+      "name": "intro_1",
+      "bars": 4,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "I", "bars": 2 },
+        { "chord": "V7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 22,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "tenor", "behavior": "develop", "velocity": 66, "motif": "M_piano" }
+      ]
+    },
+
+    "verse_1": {
+      "name": "verse_1",
+      "bars": 6,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "I", "bars": 2 },
+        { "chord": "Imaj7", "bars": 2 },
+        { "chord": "vim7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_2": {
+      "name": "verse_2",
+      "bars": 2,
+      "key": "F#",
+      "mode": "mixolydian",
+      "harmony": [
+        { "chord": "I7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_3": {
+      "name": "verse_3",
+      "bars": 2,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "iim7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_4": {
+      "name": "verse_4",
+      "bars": 2,
+      "key": "B",
+      "mode": "mixolydian",
+      "harmony": [
+        { "chord": "I7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_5": {
+      "name": "verse_5",
+      "bars": 1,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "IV", "bars": 1 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_6": {
+      "name": "verse_6",
+      "bars": 1,
+      "key": "D",
+      "mode": "dorian",
+      "harmony": [
+        { "chord": "i", "bars": 1 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "verse_7": {
+      "name": "verse_7",
+      "bars": 2,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "V7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 24,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 70, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 60, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "chorus_1": {
+      "name": "chorus_1",
+      "bars": 6,
+      "key": "B",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "I", "bars": 2 },
+        { "chord": "IVmaj7", "bars": 2 },
+        { "chord": "iiim7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 26,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 82, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 64, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } },
+        { "register": "soprano", "behavior": "develop", "velocity": 74, "motif": "M_fanfare",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "chorus_2": {
+      "name": "chorus_2",
+      "bars": 2,
+      "key": "G#",
+      "mode": "mixolydian",
+      "harmony": [
+        { "chord": "I7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 26,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 82, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 64, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } },
+        { "register": "soprano", "behavior": "develop", "velocity": 74, "motif": "M_fanfare",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "chorus_3": {
+      "name": "chorus_3",
+      "bars": 8,
+      "key": "B",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "iim7", "bars": 2 },
+        { "chord": "V7", "bars": 2 },
+        { "chord": "I", "bars": 2 },
+        { "chord": "Imaj7", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1.5,  2,    3    ],
+          "durations":   [ 0.5,  1,    0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85, 0.8  ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 26,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 82, "motif": "M_lane" },
+        { "register": "tenor", "behavior": "develop", "velocity": 64, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } },
+        { "register": "soprano", "behavior": "develop", "velocity": 74, "motif": "M_fanfare",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "bridge_1": {
+      "name": "bridge_1",
+      "bars": 8,
+      "key": "A",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "vim7", "bars": 1 },
+        { "chord": "iim7", "bars": 1 },
+        { "chord": "V7", "bars": 1 },
+        { "chord": "Imaj7", "bars": 1 },
+        { "chord": "IVmaj7", "bars": 1 },
+        { "chord": "iim7", "bars": 1 },
+        { "chord": "V7", "bars": 1 },
+        { "chord": "I", "bars": 1 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 26,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "develop", "velocity": 84, "motif": "M_fanfare" },
+        { "register": "tenor", "behavior": "develop", "velocity": 58, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "coda_1": {
+      "name": "coda_1",
+      "bars": 1,
+      "key": "B",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "IVmaj7", "bars": 1 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 22,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "develop", "velocity": 80, "motif": "M_fanfare" },
+        { "register": "tenor", "behavior": "develop", "velocity": 56, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "coda_2": {
+      "name": "coda_2",
+      "bars": 1,
+      "key": "E",
+      "mode": "dorian",
+      "harmony": [
+        { "chord": "i", "bars": 1 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 22,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "develop", "velocity": 80, "motif": "M_fanfare" },
+        { "register": "tenor", "behavior": "develop", "velocity": 56, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    },
+
+    "coda_3": {
+      "name": "coda_3",
+      "bars": 2,
+      "key": "B",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "I", "bars": 2 }
+      ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.25, 0.5,  0.75, 1,    1.5,  2,    3    ],
+          "durations":   [ 0.25, 0.25, 0.25, 0.25, 0.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.85, 0.8,  0.95, 0.8,  1.0,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "melodic",
+      "voicing": "closed",
+      "density": "medium",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 22,
+      "bass_velocity": 66,
+      "harmony_register": { "min": 54, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "develop", "velocity": 80, "motif": "M_fanfare" },
+        { "register": "tenor", "behavior": "develop", "velocity": 56, "motif": "M_piano",
+          "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  1,    1.5,  2,    2.5,  3,    3.5  ],
+          "durations":   [ 0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5  ],
+          "velocities":  [ 1.0,  0.7,  0.85, 0.7,  0.95, 0.7,  0.85, 0.7  ],
+          "length_beats": 4
+        } }
+      ]
+    }
+  }
+}

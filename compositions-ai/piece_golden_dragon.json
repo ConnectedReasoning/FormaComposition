@@ -1,0 +1,317 @@
+{
+  "title": "The Golden Dragon",
+  "name": "piece_golden_dragon",
+  "key": "D",
+  "mode": "pentatonic_major",
+  "tempo": { "min": 72, "max": 72 },
+  "seed": 18,
+  "form_type": "song",
+  "notes": "D gong (pentatonic_major = D E F# A B), the standard tuning of the 21-string guzheng and a comfortable gong-mode centre for the guqin and yangqin patches in Arturia Augmented YANGTZE, which ships guqin/yangqin/pipa rather than guzheng. Harmony is open fifths only (power chords), so there is no third-stacking and no functional pull. Modal rotation to yu is done by moving the drone centre to B (V5/ii5) in C_veil rather than by changing mode, because section mode is restricted to the seven church modes. Every section's rhythm_pattern has an onset count that is a multiple of its motif's note count, so each cycle lands one complete statement instead of a fragment. Voices are a fixed prefix list [guzheng, dizi, erhu, pipa] because peer voices map to MIDI channels by position.",
+  "motifs": [
+    { "name": "dragon",        "intervals": [0, 1, 1, -1, 2, -1, -2],                              "rhythm": [0.5, 0.25, 0.25, 1.0, 2.0, 1.0, 3.0],                                        "transform_pool": ["original", "sequence"] },
+    { "name": "dragon_flower", "intervals": [0, 1, -1, 1, 1, -1, 1, 1, 1, -1, -1, -1, 1, -2],      "rhythm": [0.5, 0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 2.0],     "transform_pool": ["original"] },
+    { "name": "coil",          "intervals": [0, 1, 2, -1, -1, 1, -2],                              "rhythm": [0.25, 0.25, 0.5, 0.5, 0.25, 0.25, 2.0],                                      "transform_pool": ["original"] }
+  ],
+  "form": ["A_mist", "A_stir", "B_theme", "B_answer", "C_ornament", "C_veil", "D_play", "D_dialogue", "E_return", "E_rest"],
+  "sections": {
+    "A_mist": {
+      "name": "A_mist",
+      "bars": 5,
+      "notes": "Sanban approximation. One complete, very slow statement of the dragon motif across 5 bars: 7 onsets in a 20-beat cell, asymmetric chord spans, no pulse established. Lead plucked zither alone.",
+      "progression": ["I5", "IV5"],
+      "chord_bars":  [3, 2],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.85,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 3, 3.5, 4, 8, 12, 15],
+        "durations":  [2.5, 0.5, 0.5, 3, 3, 2.5, 4],
+        "velocities": [0.6, 0.4, 0.45, 0.65, 0.55, 0.5, 0.45],
+        "length_beats": 20
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 30,
+      "bass_velocity": 40,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto", "behavior": "develop", "velocity": 84, "motif": "dragon" }
+      ]
+    },
+    "A_stir": {
+      "name": "A_stir",
+      "bars": 7,
+      "notes": "Two statements (14-beat cell, 7 onsets each). Grace-note pairs appear. Dizi enters once per cycle, in the lead's rest at beats 12-14.",
+      "progression": ["I5", "V5"],
+      "chord_bars":  [4, 3],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.8,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 0.5, 0.75, 1, 3, 6, 9],
+        "durations":  [0.5, 0.25, 0.25, 1.5, 2.5, 2.5, 3],
+        "velocities": [0.65, 0.45, 0.5, 0.7, 0.6, 0.6, 0.55],
+        "length_beats": 14
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 32,
+      "bass_velocity": 42,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 84, "motif": "dragon" },
+        { "register": "soprano", "behavior": "lyrical", "velocity": 68, "rhythm_pattern": { "onsets": [12, 12.5, 13], "durations": [0.5, 0.5, 1], "velocities": [0.45, 0.5, 0.55], "length_beats": 14 } }
+      ]
+    },
+    "B_theme": {
+      "name": "B_theme",
+      "bars": 8,
+      "notes": "The principal statement, and the clearest one in the piece. The lead states the motif in beats 0-7.5 using the motif's own rhythmic proportions, then rests; the dizi answers with the identical rhythmic shape in beats 8-15.5. Strict antiphony, twice. Both chords span 4 bars so that every chord contains pattern onsets - with a shorter third chord the engine fills the empty span with repeated notes and the antiphony collapses.",
+      "progression": ["I5", "IV5"],
+      "chord_bars":  [4, 4],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.8,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 0.5, 0.75, 1, 2, 4, 5],
+        "durations":  [0.5, 0.25, 0.25, 1, 2, 1, 2.5],
+        "velocities": [0.85, 0.5, 0.55, 0.7, 1.0, 0.8, 0.7],
+        "length_beats": 16
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 34,
+      "bass_velocity": 44,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 88, "motif": "dragon" },
+        { "register": "soprano", "behavior": "lyrical", "velocity": 74, "rhythm_pattern": { "onsets": [8, 8.5, 8.75, 9, 10, 12, 13], "durations": [0.5, 0.25, 0.25, 1, 2, 1, 2.5], "velocities": [0.7, 0.45, 0.5, 0.6, 0.85, 0.65, 0.6], "length_beats": 16 } }
+      ]
+    },
+    "B_answer": {
+      "name": "B_answer",
+      "bars": 8,
+      "notes": "Heterophony. The dizi states the motif literally (entry_role subject, folded into soprano) while the lead plays a developed version of the same motif underneath in longer values. Erhu enters as a slow third voice on its own sparse pattern.",
+      "progression": ["I5", "ii5", "I5"],
+      "chord_bars":  [2, 3, 3],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.8,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 2, 2.5, 3, 6, 9, 12],
+        "durations":  [1.5, 0.5, 0.5, 2.5, 2.5, 2.5, 3.5],
+        "velocities": [0.7, 0.5, 0.55, 0.75, 0.65, 0.6, 0.6],
+        "length_beats": 16
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 34,
+      "bass_velocity": 44,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 84, "motif": "dragon" },
+        { "register": "soprano", "behavior": "develop", "velocity": 72, "motif": "dragon", "entry_role": "subject" },
+        { "register": "tenor",   "behavior": "lyrical", "velocity": 58, "rhythm_pattern": { "onsets": [4, 10], "durations": [4, 4], "velocities": [0.5, 0.45], "length_beats": 16 } }
+      ]
+    },
+    "C_ornament": {
+      "name": "C_ornament",
+      "bars": 9,
+      "notes": "Variation by decoration - jiahua, 'adding flowers'. The lead switches to dragon_flower: the same arch with neighbour tones inserted between the structural pitches, so the skeleton is still audible under a denser surface. Dizi and erhu both move to sustained long tones over it, which is the Jiangnan sizhu layering.",
+      "progression": ["I5", "IV5", "I5"],
+      "chord_bars":  [3, 3, 3],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.85,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10],
+        "durations":  [0.5, 0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1, 1.5, 2],
+        "velocities": [0.75, 0.5, 0.55, 0.65, 0.6, 0.7, 0.6, 0.8, 0.7, 0.65, 0.75, 0.7, 0.8, 0.65],
+        "length_beats": 12
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 44,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 86, "motif": "dragon_flower" },
+        { "register": "soprano", "behavior": "lyrical", "velocity": 66, "rhythm_pattern": { "onsets": [2, 7], "durations": [4, 4], "velocities": [0.55, 0.6], "length_beats": 12 } },
+        { "register": "tenor",   "behavior": "lyrical", "velocity": 58, "rhythm_pattern": { "onsets": [0, 6], "durations": [5, 5], "velocities": [0.5, 0.5], "length_beats": 12 } }
+      ]
+    },
+    "C_veil": {
+      "name": "C_veil",
+      "bars": 9,
+      "notes": "Modal rotation and the mysterious centre of the piece. The drone moves to B (V5/ii5), so the same five pitches now read as B yu rather than D gong: the dragon motif itself is unchanged but is heard against a different tonal centre. Spacious - 7 onsets per 3 bars.",
+      "progression": ["V5", "ii5", "V5"],
+      "chord_bars":  [3, 3, 3],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.85,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 3.5, 4, 5, 7, 9, 10.5],
+        "durations":  [3, 0.5, 0.5, 1.5, 1.5, 1, 1.5],
+        "velocities": [0.55, 0.4, 0.45, 0.6, 0.5, 0.45, 0.45],
+        "length_beats": 12
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 32,
+      "bass_velocity": 42,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "soprano", "behavior": "develop", "velocity": 76, "motif": "dragon" },
+        { "register": "alto",    "behavior": "lyrical", "velocity": 62, "rhythm_pattern": { "onsets": [1, 7.5], "durations": [3, 3.5], "velocities": [0.45, 0.5], "length_beats": 12 } },
+        { "register": "tenor",   "behavior": "lyrical", "velocity": 60, "rhythm_pattern": { "onsets": [4], "durations": [5], "velocities": [0.5], "length_beats": 12 } }
+      ]
+    },
+    "D_play": {
+      "name": "D_play",
+      "bars": 10,
+      "notes": "Playful. The lead takes the coil motif twice per 2-bar cycle, but the two halves of the cell are rhythmically different, so the restatement is varied rather than a tiled ostinato; rest_probability thins it further. Dizi and pipa alternate filling the cell's two rests on a 16-beat cycle against the lead's 8-beat one, so the dialogue does not repeat identically. Percussion enters for the first and only time.",
+      "progression": ["I5", "V5", "IV5", "ii5", "I5"],
+      "chord_bars":  [2, 2, 2, 2, 2],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "bass_rest_probability": 0.7,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rest_probability": 0.1,
+      "rhythm_pattern": {
+        "onsets":     [0, 0.25, 0.5, 1, 1.5, 2, 2.5, 4, 4.5, 5, 5.5, 6, 6.25, 6.5],
+        "durations":  [0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 1],
+        "velocities": [0.85, 0.6, 0.7, 0.75, 0.6, 0.8, 0.9, 0.8, 0.65, 0.75, 0.6, 0.85, 0.6, 0.9],
+        "length_beats": 8
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 46,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "drums": { "pattern": "sideclick", "density": "sparse" },
+      "voices": [
+        { "register": "alto",     "behavior": "develop", "velocity": 92, "motif": "coil" },
+        { "register": "soprano",  "behavior": "lyrical", "velocity": 74, "rhythm_pattern": { "onsets": [3.5, 11.5], "durations": [0.5, 0.5], "velocities": [0.75, 0.75], "length_beats": 16 } },
+        { "register": "tenor",    "behavior": "lyrical", "velocity": 62, "rhythm_pattern": { "onsets": [0, 4, 8, 12], "durations": [3, 3, 3, 3], "velocities": [0.55, 0.55, 0.55, 0.55], "length_beats": 16 } },
+        { "register": "baritone", "behavior": "lyrical", "velocity": 70, "rhythm_pattern": { "onsets": [7.5, 7.75, 15.5, 15.75], "durations": [0.25, 0.25, 0.25, 0.25], "velocities": [0.8, 0.7, 0.8, 0.7], "length_beats": 16 } }
+      ]
+    },
+    "D_dialogue": {
+      "name": "D_dialogue",
+      "bars": 8,
+      "notes": "Full ensemble. The lead returns to dragon_flower at speed, leaving beats 8-10 open; the dizi answers there with the piece's loudest gesture. Pipa keeps light off-beat 16th punctuation, erhu sustains underneath.",
+      "progression": ["I5", "IV5", "V5", "I5"],
+      "chord_bars":  [2, 2, 2, 2],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "pedal",
+      "bass_rest_probability": 0.7,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 10, 11, 12, 13],
+        "durations":  [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 1, 1, 2, 1, 1, 1, 2],
+        "velocities": [0.9, 0.65, 0.8, 0.7, 0.75, 0.7, 0.85, 0.8, 0.75, 0.85, 0.8, 0.75, 0.8, 0.7],
+        "length_beats": 16
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 46,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "drums": { "pattern": "sideclick", "density": "sparse" },
+      "voices": [
+        { "register": "alto",     "behavior": "develop", "velocity": 92, "motif": "dragon_flower" },
+        { "register": "soprano",  "behavior": "lyrical", "velocity": 78, "rhythm_pattern": { "onsets": [8, 8.5, 9], "durations": [0.5, 0.5, 1], "velocities": [0.85, 0.75, 0.85], "length_beats": 16 } },
+        { "register": "tenor",    "behavior": "lyrical", "velocity": 62, "rhythm_pattern": { "onsets": [0, 8], "durations": [6, 6], "velocities": [0.6, 0.6], "length_beats": 16 } },
+        { "register": "baritone", "behavior": "lyrical", "velocity": 70, "rhythm_pattern": { "onsets": [1.75, 5.75, 9.75, 13.75], "durations": [0.25, 0.25, 0.25, 0.25], "velocities": [0.75, 0.75, 0.75, 0.75], "length_beats": 16 } }
+      ]
+    },
+    "E_return": {
+      "name": "E_return",
+      "bars": 9,
+      "notes": "The opening material returns: the dragon motif again, three statements, quieter and in longer values than B_theme. Percussion, pipa and erhu are gone; the dizi is reduced to two sustained tones per cycle.",
+      "progression": ["I5", "IV5", "I5"],
+      "chord_bars":  [3, 3, 3],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.85,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 1, 1.5, 2, 5, 8, 10],
+        "durations":  [1, 0.5, 0.5, 2.5, 2.5, 1.5, 2],
+        "velocities": [0.6, 0.4, 0.45, 0.55, 0.6, 0.5, 0.5],
+        "length_beats": 12
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 32,
+      "bass_velocity": 42,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 72, "motif": "dragon" },
+        { "register": "soprano", "behavior": "lyrical", "velocity": 60, "rhythm_pattern": { "onsets": [2, 8], "durations": [3, 3], "velocities": [0.5, 0.45], "length_beats": 12 } }
+      ]
+    },
+    "E_rest": {
+      "name": "E_rest",
+      "bars": 8,
+      "notes": "Dissolve. The drone resolves V5 to I5. Two last statements; the dizi plays once per cycle then stops, so the lead is left alone on the motif's closing tonic, held for the whole final bar (beats 28-32).",
+      "progression": ["V5", "I5"],
+      "chord_bars":  [4, 4],
+      "density": "sparse",
+      "melody": "develop",
+      "bass_style": "root_only",
+      "bass_rest_probability": 0.85,
+      "arc": "none",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+        "onsets":     [0, 3.5, 4, 6, 9, 11, 12],
+        "durations":  [3, 0.5, 1.5, 2.5, 1.5, 1, 4],
+        "velocities": [0.55, 0.4, 0.5, 0.45, 0.45, 0.4, 0.55],
+        "length_beats": 16
+      },
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 28,
+      "bass_velocity": 38,
+      "harmony_register": { "min": 45, "max": 69 },
+      "voicing": "drop2",
+      "bass_register":    { "min": 33, "max": 45 },
+      "voices": [
+        { "register": "alto",    "behavior": "develop", "velocity": 72, "motif": "dragon" },
+        { "register": "soprano", "behavior": "lyrical", "velocity": 58, "rhythm_pattern": { "onsets": [5], "durations": [2.5], "velocities": [0.4], "length_beats": 16 } }
+      ]
+    }
+  }
+}

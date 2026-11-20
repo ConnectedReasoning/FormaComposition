@@ -1,0 +1,167 @@
+{
+  "title": "Marmalade Prism v2",
+  "name": "marmalade_prism_v2",
+  "key": "Bb",
+  "mode": "lydian",
+  "tempo": { "min": 64, "max": 64 },
+  "seed": 1967,
+  "form_type": "song",
+  "form": [ "mist", "swirl", "bitone", "tritone", "swirl", "bitone", "tritone", "dissolve" ],
+  "notes": "AI-planned (Claude). v2 strategy: Bb drone under everything (every section keeps key Bb so the pedal never moves), chords planed over it for bitonal colour, odd section lengths (7/10/13/6/9 bars), three flute layers whose rhythm cells are 5, 7 and 9 bars long so they phase against each other, and an unresolved ending on C9 over the Bb drone. Suggested: arpeggiate the Harmony track in Logic and keep Bass as the drone; Mellotron flutes, reversed reverb swells, tape wobble, Valhalla Shimmer.",
+  "motifs": [
+    { "name": "M_flute_lead",
+      "intervals":  [ 0,     0,    0,     0,     0,     0,     0 ],
+      "rhythm":     [ 3,     0.5,  2.5,   4,     3.5,   3,     3.5 ],
+      "rests":      [ false, true, false, false, false, false, false ],
+      "velocities": [ 1.0,   0.5,  0.8,   0.9,   0.85,  0.8,   0.7 ] },
+    { "name": "M_flute_alto",
+      "intervals":  [ 0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0 ],
+      "rhythm":     [ 1.0,  3.5,   0.5,  4,     0.5,  4,     0.5,  4.5,   0.5,  3.5,   0.5,  4,     1 ],
+      "rests":      [ true, false, true, false, true, false, true, false, true, false, true, false, true ],
+      "velocities": [ 0.5,  0.9,   0.5,  0.8,   0.5,  0.9,   0.5,  0.8,   0.5,  0.85,  0.5,  0.7,   0.5 ] },
+    { "name": "M_flute_tenor",
+      "intervals":  [ 0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0 ],
+      "rhythm":     [ 2.0,  5,     1,    5,     1,    6,     1,    5,     1,    3.5,   0.5,  4.5,   0.5 ],
+      "rests":      [ true, false, true, false, true, false, true, false, true, false, true, false, true ],
+      "velocities": [ 0.5,  0.9,   0.5,  0.8,   0.5,  0.9,   0.5,  0.8,   0.5,  0.85,  0.5,  0.7,   0.5 ] },
+    { "name": "M_flute_dissolve",
+      "intervals":  [ 0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0 ],
+      "rhythm":     [ 3.5,   0.5,  3.5,   0.5,  3.5,   0.5,  4,     1,    5,     2,    5,     1,    6 ],
+      "rests":      [ false, true, false, true, false, true, false, true, false, true, false, true, false ],
+      "velocities": [ 0.9,   0.5,  0.8,   0.5,  0.8,   0.5,  0.7,   0.5,  0.65,  0.5,  0.55,  0.5,  0.45 ] }
+  ],
+  "sections": {
+
+    "mist": {
+      "name": "mist",
+      "bars": 7,
+      "harmony": [
+        { "chord": "Imaj7(#11)", "bars": 3 },
+        { "chord": "II9",        "bars": 2 },
+        { "chord": "iiim7",      "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 56,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 40, "max": 52 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 74, "melody_engine": "v2", "motif": "M_flute_lead" }
+      ],
+      "notes": "One flute only, drone and pad. Lydian haze."
+    },
+
+    "swirl": {
+      "name": "swirl",
+      "bars": 10,
+      "harmony": [
+        { "chord": "Imaj7(#11)", "bars": 3 },
+        { "chord": "bIIImaj7",   "bars": 2 },
+        { "chord": "#IVmaj7",    "bars": 3 },
+        { "chord": "VImaj7",     "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 40, "max": 52 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 76, "melody_engine": "v2", "motif": "M_flute_lead" },
+        { "register": "alto",    "behavior": "lyrical", "velocity": 58, "melody_engine": "v2", "motif": "M_flute_alto" }
+      ],
+      "notes": "Chords planed by minor thirds (Bb, Db, E, G maj7) over the fixed Bb drone. A second flute enters on a 7-bar cell against the 5-bar lead."
+    },
+
+    "bitone": {
+      "name": "bitone",
+      "bars": 13,
+      "harmony": [
+        { "chord": "IIImaj9",     "bars": 3 },
+        { "chord": "#IVmaj7(#11)","bars": 2 },
+        { "chord": "VImaj9",      "bars": 3 },
+        { "chord": "bVIImaj7(#11)","bars": 2 },
+        { "chord": "Vmaj9",       "bars": 3 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 40, "max": 52 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 76, "melody_engine": "v2", "motif": "M_flute_lead" },
+        { "register": "alto",    "behavior": "lyrical", "velocity": 58, "melody_engine": "v2", "motif": "M_flute_alto" },
+        { "register": "tenor",   "behavior": "lyrical", "velocity": 50, "melody_engine": "v2", "motif": "M_flute_tenor" }
+      ],
+      "notes": "D, E, G, Ab and F major colours stacked over the Bb drone. Three flutes on 5, 7 and 9 bar cells; they only realign every 315 bars, so every pass sounds new."
+    },
+
+    "tritone": {
+      "name": "tritone",
+      "bars": 6,
+      "harmony": [
+        { "chord": "bIImaj7(#11)", "bars": 2 },
+        { "chord": "bVImaj9",      "bars": 2 },
+        { "chord": "#IVmaj7(#11)", "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 46,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 40, "max": 52 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 78, "melody_engine": "v2", "motif": "M_flute_lead" },
+        { "register": "tenor",   "behavior": "lyrical", "velocity": 52, "melody_engine": "v2", "motif": "M_flute_tenor" }
+      ],
+      "notes": "Sudden drop: Cb, Gb and E major sevenths, the furthest colours from Bb. Short, strange, no pivot."
+    },
+
+    "dissolve": {
+      "name": "dissolve",
+      "bars": 9,
+      "harmony": [
+        { "chord": "Imaj7(#11)", "bars": 3 },
+        { "chord": "bIIImaj7",   "bars": 2 },
+        { "chord": "II9",        "bars": 4 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 50,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 40, "max": 52 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 62, "melody_engine": "v2", "motif": "M_flute_dissolve" }
+      ],
+      "notes": "Unresolved ending: C9 over the Bb drone, never landing on a tonic chord. Let the reverb tail finish it."
+    }
+  }
+}
