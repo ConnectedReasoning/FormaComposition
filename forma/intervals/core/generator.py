@@ -705,6 +705,14 @@ def generate_section(
     if lead_voice is not None and lead_voice.motif is not None:
         _lead_motif_obj = resolve_motif_value(lead_voice.motif, theme_pool=motif_pool)
         melody_motif_def = motif_to_dict(_lead_motif_obj) if _lead_motif_obj else None
+        # Motif has no .velocities, so motif_to_dict() drops them (same gap
+        # the bass_motif path below patches). Carry the declared accent
+        # shape across so rhythm="motif" keeps what a rhythm_pattern's
+        # velocities used to provide.
+        if melody_motif_def is not None:
+            _lead_vel = resolve_motif_velocities(lead_voice.motif, theme_pool=motif_pool)
+            if _lead_vel is not None:
+                melody_motif_def["velocities"] = list(_lead_vel)
         # An explicit per-voice motif replaces the theme's motif outright.
         # The theme's variety pool (motif_pool) is a theme-level mechanism
         # that doesn't make sense layered under a voice deliberately using
@@ -1257,9 +1265,14 @@ def generate_piece(
         motif_dict = motif_to_dict(motif_obj)
         if not motif_dict.get("rhythm"):
             return None
+        # to_dict() drops velocities (Motif has no such attribute); re-read
+        # them from the declared motif so a voice's accent shape survives.
+        _vel = resolve_motif_velocities(motif_value, theme_pool=_cp_motif_pool)
+        if _vel is None:
+            _vel = motif_dict.get("velocities")
         return _motif_rhythm_to_events(
             motif_dict["rhythm"], total_beats, "full",
-            velocities=motif_dict.get("velocities"),
+            velocities=_vel,
             rests=motif_dict.get("rests"),
         )
 
@@ -1525,6 +1538,20 @@ def generate_piece(
                             v.rhythm_pattern.model_dump(exclude_none=True),
                             total_beats,
                         )
+                    elif v.motif is not None:
+                        # Motif-as-rhythm for melody-path peers (2026-11):
+                        # the voice's own motif supplies its rhythm cell,
+                        # tiled across the FULL section (not reset per
+                        # chord), so cells of different lengths phase
+                        # against each other exactly like rhythm_pattern.
+                        # RHYTHM ONLY -- this call passes no motif to the
+                        # melody generator, so pitch stays with the
+                        # behavior/melody engine. A motif with rest slots
+                        # pads gaps and sets the cell length (cycle = sum
+                        # of the rhythm array). rhythm_pattern, when set,
+                        # still wins (explicit beats implicit).
+                        v_rhythm_override = _resolve_voice_motif_rhythm(
+                            v.motif, total_beats)
                     peer_notes = generate_melody_for_progression(
                         chords, _peer_key, _peer_mode,
                         behavior=v.behavior, density=density,

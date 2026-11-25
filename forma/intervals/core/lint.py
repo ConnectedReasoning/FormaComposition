@@ -259,7 +259,8 @@ def _check_voice_motif(section: SectionModel) -> Iterator[Contradiction]:
             where=f"section '{section.name or '?'}' → {_voice_label(i, v)}",
             setting=f"motif={motif_desc!r} is set",
             cause=f"behavior={v.behavior!r} ignores motifs",
-            effect="the motif's pitch shape will not sound",
+            effect="the motif's pitch shape will not sound (its rhythm "
+                   "still applies to a non-lead voice with no rhythm_pattern)",
             fix="set this voice's behavior to 'develop' to hear the motif, "
                 "or drop the motif field if the free line is intended.",
         )
