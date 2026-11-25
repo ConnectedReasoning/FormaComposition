@@ -1,0 +1,804 @@
+{
+  "title": "Marmalade Prism v5",
+  "name": "marmalade_prism_v5",
+  "key": "Bb",
+  "mode": "lydian",
+  "tempo": { "min": 72, "max": 72 },
+  "seed": 1967,
+  "form_type": "song",
+  "form": [ "mist_a", "mist_b", "mist_c", "swirl_a", "swirl_b", "swirl_c", "swirl_d", "bitone_a", "bitone_b", "bitone_c", "bitone_d", "bitone_e", "tritone_a", "tritone_b", "tritone_c", "swirl_a", "swirl_b", "swirl_c", "swirl_d", "bitone_a", "bitone_b", "bitone_c", "bitone_d", "bitone_e", "tritone_a", "tritone_b", "tritone_c", "dissolve_a", "dissolve_b", "dissolve_c" ],
+  "motifs": [
+    { "name": "M_sigh",
+      "intervals": [ 0,    2,    -1,   -2   ],
+      "rhythm":    [ 1.5,  0.5,  1,    1    ],
+      "transform_pool": [ "original", "original", "sequence", "inversion" ] },
+    { "name": "M_syl",
+      "intervals": [ 0,    0,    1,    0,    -1,   0,    2,    -1,   1,    0,    -1,   0,    -2,   1,    -1   ],
+      "rhythm":    [ 0.5,  0.25, 0.25, 0.5,  0.5,  0.5,  0.5,  1,    0.25, 0.25, 0.5,  1,    0.5,  0.5,  1    ],
+      "transform_pool": [ "original", "original", "sequence", "inversion" ] },
+    { "name": "M_echo",
+      "intervals": [ 0,    1,    -3,   2,    -1   ],
+      "rhythm":    [ 2,    1,    1,    2,    2    ],
+      "transform_pool": [ "original", "original", "sequence", "retrograde" ] },
+    { "name": "M_call",
+      "intervals": [ 0,    3,    -1,   0,    3,    -2   ],
+      "rhythm":    [ 1,    3,    2,    1,    3,    2    ],
+      "transform_pool": [ "original", "original", "sequence" ] },
+    { "name": "M_hold",
+      "intervals": [ 0,    -1,   -1   ],
+      "rhythm":    [ 4,    4,    4    ],
+      "transform_pool": [ "original", "original", "sequence" ] }
+  ],
+  "notes": "AI-planned (Claude). v5 keeps the v4 chords, sections and per-chord keys unchanged. Changes: (1) the soprano melody in swirl, bitone and tritone is now M_syl, a 2-bar syllabic patter (repeated notes, short staccato notes, accented pickups) so the line has consonants; M_sigh remains only in mist and dissolve as the long-vowel line. (2) M_hold adds a slow baritone voice of whole notes stepping down, one per bar. M_echo and M_call stay as the slower middle voices. The Bb drone is NOT in this JSON; hold a Bb2 in Logic. Bass in the stand-in MIDI is the McCartney-style line, not Forma output. Each chord section restarts its rhythm cells in Forma; the stand-in MIDI keeps them running.",
+  "sections": {
+    "mist_a": {
+      "name": "mist_a",
+      "bars": 3,
+      "key": "Bb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 56,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 72, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Bb lydian haze, soprano alone."
+    },
+
+    "mist_b": {
+      "name": "mist_b",
+      "bars": 2,
+      "key": "Bb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "II9", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 56,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 72, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "C9 inside Bb lydian: the lydian II colour."
+    },
+
+    "mist_c": {
+      "name": "mist_c",
+      "bars": 2,
+      "key": "Bb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "iiim7", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 56,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 72, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Dm7, still inside Bb lydian."
+    },
+
+    "swirl_a": {
+      "name": "swirl_a",
+      "bars": 3,
+      "key": "Bb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Minor-third planing: Bb."
+    },
+
+    "swirl_b": {
+      "name": "swirl_b",
+      "bars": 2,
+      "key": "Db",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Db."
+    },
+
+    "swirl_c": {
+      "name": "swirl_c",
+      "bars": 3,
+      "key": "E",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "E."
+    },
+
+    "swirl_d": {
+      "name": "swirl_d",
+      "bars": 2,
+      "key": "G",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 52, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "G."
+    },
+
+    "bitone_a": {
+      "name": "bitone_a",
+      "bars": 3,
+      "key": "D",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj9", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "tenor",    "behavior": "develop", "velocity": 52, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "D major colour over the Bb drone."
+    },
+
+    "bitone_b": {
+      "name": "bitone_b",
+      "bars": 2,
+      "key": "E",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "tenor",    "behavior": "develop", "velocity": 52, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "E."
+    },
+
+    "bitone_c": {
+      "name": "bitone_c",
+      "bars": 3,
+      "key": "G",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj9", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "tenor",    "behavior": "develop", "velocity": 52, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "G."
+    },
+
+    "bitone_d": {
+      "name": "bitone_d",
+      "bars": 2,
+      "key": "Ab",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "tenor",    "behavior": "develop", "velocity": 52, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Ab."
+    },
+
+    "bitone_e": {
+      "name": "bitone_e",
+      "bars": 3,
+      "key": "F",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj9", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 76, "motif": "M_syl" },
+        { "register": "alto",     "behavior": "develop", "velocity": 58, "motif": "M_echo",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    2,    3,    4,    6    ],
+            "durations":   [ 2,    1,    1,    2,    2    ],
+            "velocities":  [ 1.0,  0.8,  0.85, 0.9,  0.8  ],
+            "length_beats": 8
+          } },
+        { "register": "tenor",    "behavior": "develop", "velocity": 52, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "F."
+    },
+
+    "tritone_a": {
+      "name": "tritone_a",
+      "bars": 2,
+      "key": "B",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 46,
+      "bass_velocity": 62,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 78, "motif": "M_syl" },
+        { "register": "tenor",    "behavior": "develop", "velocity": 54, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "B (Cb): furthest from Bb."
+    },
+
+    "tritone_b": {
+      "name": "tritone_b",
+      "bars": 2,
+      "key": "Gb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj9", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 46,
+      "bass_velocity": 62,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 78, "motif": "M_syl" },
+        { "register": "tenor",    "behavior": "develop", "velocity": 54, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Gb."
+    },
+
+    "tritone_c": {
+      "name": "tritone_c",
+      "bars": 2,
+      "key": "E",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    0.5,  0.75, 1,    1.5,  2,    2.5,  3,    4,    4.25, 4.5,  5,    6,    6.5,  7    ],
+          "durations":   [ 0.4,  0.2,  0.2,  0.4,  0.4,  0.4,  0.4,  0.9,  0.2,  0.2,  0.4,  0.9,  0.4,  0.4,  0.9  ],
+          "velocities":  [ 1.0,  0.7,  0.8,  0.9,  0.7,  0.9,  0.7,  1.0,  0.9,  0.7,  0.8,  1.0,  0.7,  0.8,  1.0  ],
+          "length_beats": 8
+        },
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 46,
+      "bass_velocity": 62,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 78, "motif": "M_syl" },
+        { "register": "tenor",    "behavior": "develop", "velocity": 54, "motif": "M_call",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    1,    4,    6,    7,    10   ],
+            "durations":   [ 1,    3,    2,    1,    3,    2    ],
+            "velocities":  [ 0.9,  1.0,  0.8,  0.9,  1.0,  0.8  ],
+            "length_beats": 12
+          } },
+        { "register": "baritone", "behavior": "develop", "velocity": 50, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "E."
+    },
+
+    "dissolve_a": {
+      "name": "dissolve_a",
+      "bars": 3,
+      "key": "Bb",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7(#11)", "bars": 3 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "rest_probability": 0.4,
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 52,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 62, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 44, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Thin sigh over Bb."
+    },
+
+    "dissolve_b": {
+      "name": "dissolve_b",
+      "bars": 2,
+      "key": "Db",
+      "mode": "lydian",
+      "harmony": [ { "chord": "Imaj7", "bars": 2 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "rest_probability": 0.4,
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 52,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 62, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 44, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "Db."
+    },
+
+    "dissolve_c": {
+      "name": "dissolve_c",
+      "bars": 4,
+      "key": "C",
+      "mode": "mixolydian",
+      "harmony": [ { "chord": "I9", "bars": 4 } ],
+      "melody": "develop",
+      "rhythm": "pattern",
+      "rhythm_pattern": {
+          "onsets":      [ 0,    1.5,  2,    3    ],
+          "durations":   [ 1.5,  0.5,  1,    1    ],
+          "velocities":  [ 1.0,  0.8,  0.9,  0.85 ],
+          "length_beats": 4
+        },
+      "rest_probability": 0.4,
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 52,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano",  "behavior": "develop", "velocity": 62, "motif": "M_sigh" },
+        { "register": "baritone", "behavior": "develop", "velocity": 44, "motif": "M_hold",
+          "rhythm_pattern": {
+            "onsets":      [ 0,    4,    8    ],
+            "durations":   [ 4,    4,    4    ],
+            "velocities":  [ 0.9,  0.9,  0.9  ],
+            "length_beats": 12
+          } }
+      ],
+      "notes": "C9 over the Bb drone: the Bb is its flat seventh. Unresolved ending."
+    }
+  }
+}

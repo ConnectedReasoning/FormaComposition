@@ -1,0 +1,173 @@
+{
+  "title": "Marmalade Prism_v4",
+  "name": "marmalade_prism_v4",
+  "key": "Bb",
+  "mode": "ionian",
+  "tempo": { "min": 76, "max": 76 },
+  "seed": 1967,
+  "form_type": "song",
+  "form": [ "haze", "bloom", "prism", "kaleido", "bloom", "prism", "dissolve" ],
+  "notes": "AI-planned (Claude), seed chosen by plan only, not yet swept. Strawberry-Fields-style psychedelia with jazz harmonic colour. Key plan: Bb (lydian haze) -> Bb (bloom) -> D lydian (prism, chromatic mediant) -> F (kaleido, ii-bII-I tritone sub, ends on F13 = V of Bb) -> Bb bloom -> D prism -> Bb lydian dissolve. Suggested sounds: Mellotron V flutes for melody, Jupiter-8V pad for harmony, Juno-6V for bass; tape wobble, reverse reverb and Valhalla Shimmer in the DAW.",
+  "motifs": [
+    { "name": "M_dissolve",
+      "intervals":  [ 0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0,     0,    0 ],
+      "rhythm":     [ 2.5,   0.5,  2.5,   0.5,  2,     0.5,  3,     0.5,  3,     1,    2.5,   0.5,  2.5,   0.5,  4,     2,    4 ],
+      "rests":      [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ],
+      "velocities": [ 0.9,   0.5,  0.8,   0.5,  0.85,  0.5,  0.75,  0.5,  0.8,   0.5,  0.7,   0.5,  0.65,  0.5,  0.6,   0.5,  0.5 ] }
+  ],
+  "sections": {
+
+    "haze": {
+      "name": "haze",
+      "bars": 8,
+      "mode": "lydian",
+      "harmony": [
+        { "chord": "Imaj9",      "bars": 2 },
+        { "chord": "II9",        "bars": 2 },
+        { "chord": "iiim7",      "bars": 2 },
+        { "chord": "Imaj7(#11)", "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "free",
+      "note_length_range": { "min": 2, "max": 4, "quantum": 0.5 },
+      "rest_probability": 0.3,
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 40,
+      "bass_velocity": 54,
+      "harmony_register": { "min": 52, "max": 68 },
+      "bass_register": { "min": 38, "max": 54 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 66, "melody_engine": "v2" }
+      ],
+      "notes": "Lydian drift: the major II chord is the lydian signature. Flute enters alone, mostly air."
+    },
+
+    "bloom": {
+      "name": "bloom",
+      "bars": 16,
+      "harmony": [
+        { "chord": "Imaj9",       "bars": 3 },
+        { "chord": "V7/ii",       "bars": 1 },
+        { "chord": "iim9",        "bars": 2 },
+        { "chord": "V7(9,13)",    "bars": 2 },
+        { "chord": "bVIImaj7",    "bars": 2 },
+        { "chord": "IVmaj7(#11)", "bars": 2 },
+        { "chord": "bIIImaj7",    "bars": 2 },
+        { "chord": "Imaj9",       "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "free",
+      "note_length_range": { "min": 1, "max": 3, "quantum": 0.5 },
+      "rest_probability": 0.15,
+      "bass_style": "melodic",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 42,
+      "bass_velocity": 60,
+      "harmony_register": { "min": 52, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 80, "melody_engine": "v2", "phrase_form": "ab", "phrase_chords": 4, "leap_probability": 0.14 }
+      ],
+      "notes": "Phrase a = jazz turnaround with colour (Bb, G7, Cm9, F13). Phrase b = borrowed plagal drift (Ab, Eb#11, Db, Bb), the Beatles move."
+    },
+
+    "prism": {
+      "name": "prism",
+      "bars": 16,
+      "key": "D",
+      "mode": "lydian",
+      "harmony": [
+        { "chord": "Imaj9",       "bars": 2 },
+        { "chord": "II7(9,13)",   "bars": 2 },
+        { "chord": "Vmaj9",       "bars": 2 },
+        { "chord": "vim9",        "bars": 2 },
+        { "chord": "bIIImaj7",    "bars": 2 },
+        { "chord": "bVImaj7(#11)","bars": 2 },
+        { "chord": "bVIImaj9",    "bars": 2 },
+        { "chord": "Imaj7(#11)",  "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "free",
+      "note_length_range": { "min": 0.5, "max": 2, "quantum": 0.5 },
+      "rest_probability": 0.12,
+      "bass_style": "root_only",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 58,
+      "harmony_register": { "min": 54, "max": 70 },
+      "bass_register": { "min": 38, "max": 54 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 76, "melody_engine": "v2", "phrase_form": "ab", "phrase_chords": 4 },
+        { "register": "alto",    "behavior": "lyrical", "velocity": 54, "melody_engine": "v2", "canon_offset": 3 }
+      ],
+      "notes": "Chromatic-mediant colour shift: Bb to D. Second half plane through Fmaj7, Bbmaj7#11, Cmaj9 over D. Alto voice is a delayed echo (canon_offset 3 beats) for the tape-delay shimmer. Experimental: delete voices[1] if the engine rejects or the echo muddies."
+    },
+
+    "kaleido": {
+      "name": "kaleido",
+      "bars": 8,
+      "key": "F",
+      "mode": "ionian",
+      "harmony": [
+        { "chord": "Imaj9",       "bars": 2 },
+        { "chord": "iim9",        "bars": 2 },
+        { "chord": "bII7(9,#11)", "bars": 2 },
+        { "chord": "I7(9,13)",    "bars": 2 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "free",
+      "note_length_range": { "min": 0.5, "max": 1.5, "quantum": 0.5 },
+      "rest_probability": 0.2,
+      "bass_style": "walking",
+      "voicing": "drop2",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 44,
+      "bass_velocity": 62,
+      "harmony_register": { "min": 52, "max": 68 },
+      "bass_register": { "min": 38, "max": 56 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 72, "melody_engine": "v2", "leap_probability": 0.16 }
+      ],
+      "notes": "Jazz window: ii to tritone sub (Gb7#11) to I, then F13 turns into Bb as its dominant. Walking bass, drop-2 voicings, busier flute."
+    },
+
+    "dissolve": {
+      "name": "dissolve",
+      "bars": 8,
+      "mode": "lydian",
+      "harmony": [
+        { "chord": "Imaj9",  "bars": 2 },
+        { "chord": "II9",    "bars": 2 },
+        { "chord": "iiim7",  "bars": 1 },
+        { "chord": "Imaj9",  "bars": 3 }
+      ],
+      "melody": "lyrical",
+      "rhythm": "motif",
+      "bass_style": "pedal",
+      "voicing": "open",
+      "density": "full",
+      "arc": "none",
+      "harmony_rhythm": { "rhythm": "sustain" },
+      "harmony_velocity": 36,
+      "bass_velocity": 50,
+      "harmony_register": { "min": 52, "max": 68 },
+      "bass_register": { "min": 38, "max": 54 },
+      "voices": [
+        { "register": "soprano", "behavior": "lyrical", "velocity": 62, "melody_engine": "v2", "motif": "M_dissolve" }
+      ],
+      "notes": "Return of the haze. Written-out rhythm ends on a long tonic. Lines thin and quiet."
+    }
+  }
+}
